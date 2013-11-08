@@ -41,3 +41,24 @@ The python mode in modern emacs probably does the right thing by default, but we
 
 ```
 
+### putting it together
+Both emacs and vim file settings can coexist.  The following code should be used as a template for new _exectuable_ python files in this project:
+
+```
+#!/usr/bin/env python
+
+# vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4
+# -*- mode: python; indent-tabs-mode nil; tab-width 4; python-indent 4; -*-
+
+```
+
+Other python files which are _not_ executable, and do not need the interpreter's 'hashbang' line, should start like this:
+
+```
+# vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4
+# -*- mode: python; indent-tabs-mode nil; tab-width 4; python-indent 4; -*-
+
+```
+
+Happy coding!
+
