@@ -3,7 +3,7 @@
 
 """
 usage: gidget help
-       gidget help [subcommand-name]
+       gidget help [<subcommand-name>]
 
 """
 
