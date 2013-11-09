@@ -61,7 +61,7 @@ if __name__ == '__main__':
     subCommandArgs = [subCommandName] + subCommandArgs
 
     if subCommandName == 'help':
-        print docopt(gidget_help.__doc__, argv = subCommandArgs)
+        gidget_help.parse(subCommandArgs)
     elif subCommandName == 'list':
         print docopt(gidget_list.__doc__, argv = subCommandArgs)
     elif subCommandName == 'describe':
