@@ -2,8 +2,9 @@
 # -*- mode: python; indent-tabs-mode nil; tab-width 4; python-indent 4; -*-
 
 """
-usage: gidget add data <filename>
-       gidget add reference <filename>    
+usage: gidget list references
+       gidget list commands
+       gidget list pipelines
 
 """
 

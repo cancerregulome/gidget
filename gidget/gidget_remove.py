@@ -2,8 +2,8 @@
 # -*- mode: python; indent-tabs-mode nil; tab-width 4; python-indent 4; -*-
 
 """
-usage: gidget add data <filename>
-       gidget add reference <filename>    
+usage: gidget remove data <library-item>
+       gidget remove reference <library-item>    
 
 """
 

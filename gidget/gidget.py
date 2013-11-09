@@ -22,7 +22,12 @@ gidget commands are:
 import sys
 from docopt import docopt
 
+import gidget_help
+import gidget_list
+import gidget_describe
 import gidget_add
+import gidget_remove
+import gidget_run
 
 
 if __name__ == '__main__':
@@ -64,7 +69,7 @@ if __name__ == '__main__':
     elif subCommandName == 'add':
         print docopt(gidget_add.__doc__, argv = subCommandArgs)
     elif subCommandName == 'remove':
-        print docopt(gidget_remove._doc__, argv = subCommandArgs)
+        print docopt(gidget_remove.__doc__, argv = subCommandArgs)
     elif subCommandName == 'run':
         print docopt(gidget_run.__doc__, argv = subCommandArgs)
     else:
