@@ -62,13 +62,16 @@ Other python files which are _not_ executable, and do not need the interpreter's
 
 ### hints for using other editors
 
-## Sublime Text
+#### Sublime Text
+
 
 Add this to your Preferences -> Settings - Users
+```
 {
 	"tab_size": 4,
     "translate_tabs_to_spaces": true
 }
+```
 
 Happy coding!
 
