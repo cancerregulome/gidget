@@ -25,26 +25,33 @@ import sys
 
 __author__ = 'anorberg'
 
+
 class _IdentityRange(object):
+
     """
     A brief utility class that pretends to be a read-only sequence or map of keys mapped to themselves.
     All keys come out as themselves.
 
     Sets its range based on its largest observed key.
     """
+
     def __init__(self, max=0):
         self._max = max
+
     def __getitem__(self, key):
         if isinstance(key, int):
             if key > self.max:
                 self.max = key
         return key
+
     def __repr__(self):
         return "_Identity({0})".format(self._max)
+
     def __len__(self):
         return self._max
+
     def __iter__(self):
-        return range(0,self._max)
+        return range(0, self._max)
 
 
 def fixRaggedTable(inStream, outStream, dialect=csv.excel_tab):
@@ -87,7 +94,9 @@ def fixRaggedTable(inStream, outStream, dialect=csv.excel_tab):
 
     return tweaks
 
+
 class _ParsedRecord(object):
+
     """
     A single row of a TSV, aware of its context.
 
@@ -137,7 +146,8 @@ class _ParsedRecord(object):
         This yields a string of a constructor call including the real cell data, the schema, the header, and the delimiter.
         """
         return "_ParsedRecord({0},{1},{2},{3},{4})".format(
-            repr(self._cells), repr(self._schemaLut), repr(self._headerDict), repr(self.delim), repr(self.missingfill)
+            repr(self._cells), repr(self._schemaLut), repr(
+                self._headerDict), repr(self.delim), repr(self.missingfill)
         )
 
     def __len__(self):
@@ -192,7 +202,7 @@ class _ParsedRecord(object):
                 yield self._cells[idx]
             else:
                 yield None
-    
+
     def __iter__(self):
         """
         Provides iteration. Provides the fields in the schema, in schema order.
@@ -222,7 +232,7 @@ class _ParsedRecord(object):
                 return None
             return self._cells[cix]
         except TypeError:
-            #maaaybe it's a slice, and cells[cix] failed
+            # maaaybe it's a slice, and cells[cix] failed
             try:
                 cixes = self._schemaLut[idx.start:idx.stop:idx.step]
                 ret = []
@@ -233,12 +243,12 @@ class _ParsedRecord(object):
                         ret.append(self._cells[x])
                 return ret
             except (AttributeError, TypeError):
-                #a stringlike thing, then?
+                # a stringlike thing, then?
                 cix = self._headerDict[str(idx)]
                 if cix is None:
                     return None
                 return self._cells[cix]
-        #and if all those fail, throw it
+        # and if all those fail, throw it
 
     def __eq__(self, other):
         """
@@ -248,16 +258,22 @@ class _ParsedRecord(object):
             return False
         return (self._cells == other.cells) and (self._schemaLut == other.schemaLut) and (self.delim == other.delim)
 
+
 class AmbiguousSchemaError(Exception):
+
     def __init__(self, msg):
         super(AmbiguousSchemaError, self).__init__(msg)
         self.value = msg
+
     def __repr__(self):
-        return "AmbiguousSchemaError(" + repr(self.value) +")"
+        return "AmbiguousSchemaError(" + repr(self.value) + ")"
+
     def __str__(self):
         return "The schema was ambiguous: " + str(self.value)
-    
+
+
 class TsvReader:
+
     """
     An iterator class that reads a TSV file and yields expressive records set to fit an expected schema.
 
@@ -270,6 +286,7 @@ class TsvReader:
         _csvSrc - a csv.Reader we use as a backing parser
         missingfill - what to fill in missing columns with
     """
+
     def __init__(self, sourceFile, schema, overrideHeader=None, dialect=csv.excel_tab, missingfill=""):
         """
         Constructs a TsvReader.
@@ -302,9 +319,10 @@ class TsvReader:
         """
 
         mark = sourceFile.tell()
-        sample = sourceFile.read(32767) #some of our files have ludicrously long lines, and we need at least 3
+        # some of our files have ludicrously long lines, and we need at least 3
+        sample = sourceFile.read(32767)
         hasHeader = csv.Sniffer().has_header(sample)
-        sourceFile.seek(mark) #reset to original position
+        sourceFile.seek(mark)  # reset to original position
         self._csvSrc = csv.reader(sourceFile, dialect=dialect)
         self.missingfill = missingfill
 
@@ -314,8 +332,8 @@ class TsvReader:
             self.fileHeader = _IdentityRange()
 
         if overrideHeader:
-            self.fileHeader = overrideHeader #ha ha, never mind!
-            #we still had to pull the real header off, though
+            self.fileHeader = overrideHeader  # ha ha, never mind!
+            # we still had to pull the real header off, though
 
         self.header = {}
         self.schemaMap = []
@@ -324,15 +342,15 @@ class TsvReader:
 
         for schemite in schema:
             if isinstance(schemite, str):
-                #single-cast lookup
+                # single-cast lookup
                 try:
                     loc = self.header[schemite]
                 except KeyError:
                     loc = None
                 self.schemaMap.append(loc)
             else:
-                #multicast lookup
-                #TODO: fix this logic for headerless reordering
+                # multicast lookup
+                # TODO: fix this logic for headerless reordering
                 loc = None
                 for name in schemite:
                     if name in self.header:
@@ -340,14 +358,12 @@ class TsvReader:
                             loc = self.header[name]
                         else:
                             raise AmbiguousSchemaError("Two entries in a schema synonym list were both found." +
-                                    "The second one is \"" + name + "\".")
-                #now we know the location, or know it's not there
+                                                       "The second one is \"" + name + "\".")
+                # now we know the location, or know it's not there
                 for name in schemite:
-                    self.header[name] = loc #this will result in one redundant assignment
+                    # this will result in one redundant assignment
+                    self.header[name] = loc
                 self.schemaMap.append(loc)
-
-
-        
 
     def next(self):
         """
@@ -355,7 +371,7 @@ class TsvReader:
 
         Raises StopIteration once it is out of data.
         """
-        line = self._csvSrc.next() #if this throws a StopIteration, fantastic
+        line = self._csvSrc.next()  # if this throws a StopIteration, fantastic
         return _ParsedRecord(line, self.schemaMap, self.header, self._csvSrc.dialect.delimiter, self.missingfill)
 
     def __iter__(self):
@@ -397,20 +413,26 @@ This version of the code has no way to escape literal "," or ";" in header
 names desired for a schema. A later version may try to address this.
 """
 
+
 def main(argv):
     """
     Acts as an entry point if this module is run as a script from the CLI. Functions as a TSV rearranger.
     """
-    parser = optparse.OptionParser(usage="usage: %prog [options] inputFile outputFile",
-                                   epilog=usagenotes)
-    parser.add_option("-s", "--fixedschema", dest="schema", help="Create a table with a specific SCHEMA.",
-                      metavar="SCHEMA", default=None, action="store", type="string")
-    parser.add_option("-r", "--regex", dest="regex", help="Create a table from columns with names that fit a REGEX.",
-                      metavar="REGEX", default=None, action="store", type="string")
-    parser.add_option("-x", "--removeheader", dest="removeheader", help="Do not print a header line in the output.",
-                      default=False, action="store_true")
-    parser.add_option("-m", "--missingfill", dest="missingfill", help="Fill missing columns (in fixedschema mode) with STRING",
-                      metavar="STRING", default="", action="store", type="string")
+    parser = optparse.OptionParser(
+        usage="usage: %prog [options] inputFile outputFile",
+        epilog=usagenotes)
+    parser.add_option(
+        "-s", "--fixedschema", dest="schema", help="Create a table with a specific SCHEMA.",
+        metavar="SCHEMA", default=None, action="store", type="string")
+    parser.add_option(
+        "-r", "--regex", dest="regex", help="Create a table from columns with names that fit a REGEX.",
+        metavar="REGEX", default=None, action="store", type="string")
+    parser.add_option(
+        "-x", "--removeheader", dest="removeheader", help="Do not print a header line in the output.",
+        default=False, action="store_true")
+    parser.add_option(
+        "-m", "--missingfill", dest="missingfill", help="Fill missing columns (in fixedschema mode) with STRING",
+        metavar="STRING", default="", action="store", type="string")
 
     (flags, args) = parser.parse_args(argv[1:])
 
@@ -422,8 +444,8 @@ def main(argv):
     input = open(args[0], "r")
     output = open(args[1], "w")
 
-    schema=[]
-    header=[]
+    schema = []
+    header = []
 
     if flags.schema:
         things = flags.schema.split(";")
@@ -456,7 +478,6 @@ def main(argv):
     output.flush()
     output.close()
     return
-
 
 
 if __name__ == "__main__":

@@ -1,9 +1,11 @@
-import sys, traceback
+import sys
+import traceback
 
 __author__ = 'xshu'
 
 # global variables
 refseq2uniprotMapping = {}
+
 
 def showHelp():
     print\
@@ -77,4 +79,3 @@ def _mainFunc():
 
 if __name__ == "__main__":
     _mainFunc()
-

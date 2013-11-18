@@ -1,9 +1,11 @@
-import sys, traceback
+import sys
+import traceback
 
 __author__ = 'xshu'
 
 # global variables
 gene2uniprotMapping = {}
+
 
 def showHelp():
     print\
@@ -72,7 +74,8 @@ def update(output, gene2uniprot):
             for item in uniprotIDList:
                 if uniprotID.find(item) == -1:
                     uniprotID += ";" + item
-        gene2uniprotUpdateHandle.write("%s\t%s\t%s\t%s\t%s\n" % (geneID, geneSymbol, geneAliases, geneOld, uniprotID.rstrip(";")))
+        gene2uniprotUpdateHandle.write("%s\t%s\t%s\t%s\t%s\n" % (
+            geneID, geneSymbol, geneAliases, geneOld, uniprotID.rstrip(";")))
     gene2uniprotHandle.close()
 
     gene2uniprotUpdateHandle.close()
@@ -91,7 +94,8 @@ def _mainFunc():
         if gene2uniprot == "" or uniprot2gene == "" or output == "":
             raise Exception("All parameters are required!")
 
-        # todo: Memory is in an intensive use when the mappings are pre-loaded. Check if PyTables can offer an alternative whenever possible
+        # todo: Memory is in an intensive use when the mappings are pre-loaded.
+        # Check if PyTables can offer an alternative whenever possible
         loadUniprot2Gene(uniprot2gene)
         update(output, gene2uniprot)
 
@@ -104,4 +108,3 @@ def _mainFunc():
 
 if __name__ == "__main__":
     _mainFunc()
-

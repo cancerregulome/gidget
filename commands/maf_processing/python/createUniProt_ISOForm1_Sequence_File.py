@@ -1,10 +1,14 @@
-import sys, traceback, re, linecache
+import sys
+import traceback
+import re
+import linecache
 
 __author__ = 'xshu'
 
 # global variables
 unprocessedIDs = []
 iso12PosInFileMapping = {}
+
 
 def showHelp():
     print\
@@ -27,9 +31,11 @@ def showHelp():
                     -output_trembl         <<absolute trembl output file path>> )
     ''' % (sys.argv[0], sys.argv[0])
 
+
 class DataType:
     SPROT = 1
     TREMBL = 2
+
 
 def processUniprotDAT(uniprot_human, output):
     # get isoform1 sequences from uniprot_human dat files
@@ -68,8 +74,10 @@ def processUniprotDAT(uniprot_human, output):
                 if primAccession == "":
                     primAccession = accessions.split(";")[0]
 
-            #removed the condition of -1 primAccession.   Now all displayed sequences are shown        
-            iso1Matcher = re.match("^CC\s+IsoId=(" + primAccession + ");\s*Sequence=([^;]*);", line)
+            # removed the condition of -1 primAccession.   Now all displayed
+            # sequences are shown
+            iso1Matcher = re.match(
+                "^CC\s+IsoId=(" + primAccession + ");\s*Sequence=([^;]*);", line)
             if iso1Matcher:
                 iso1Id = iso1Matcher.group(1)
                 if iso1Matcher.group(2) != "Displayed":
@@ -91,6 +99,7 @@ def processUniprotDAT(uniprot_human, output):
         uniprot_humanHandle.close()
         outputHandle.close()
 
+
 def processUniprotIsoformFasta(uniprot_isoform, output):
     # get isoform1 sequences from uniprot_isoform file
     if output != "" and uniprot_isoform != "":
@@ -108,7 +117,8 @@ def processUniprotIsoformFasta(uniprot_isoform, output):
             if seqHeaderMatcher:
                 if getPreRecord:
                     # save the start and end line # for the previous record
-                    iso12PosInFileMapping[isoId] = (recordStartLineNo, preFileLineNo)
+                    iso12PosInFileMapping[isoId] = (
+                        recordStartLineNo, preFileLineNo)
 
                 isoId = seqHeaderMatcher.group(1)
                 iso1Matcher = re.match("^.*-1$", isoId)
@@ -118,11 +128,12 @@ def processUniprotIsoformFasta(uniprot_isoform, output):
                     getPreRecord = False
 
                 recordStartLineNo = preFileLineNo + 1
-                
+
             preFileLineNo += 1
         uniprot_isoformHandle.close()
 
-        # output the sequences for the proteins not displayed in uniprot human dat
+        # output the sequences for the proteins not displayed in uniprot human
+        # dat
         outputHandle = open(output, "a")
         for item in unprocessedIDs:
             if item in iso12PosInFileMapping:
@@ -130,9 +141,10 @@ def processUniprotIsoformFasta(uniprot_isoform, output):
                 startLine = linesRange[0]
                 endLine = linesRange[1]
                 for step in range(0, endLine - startLine):
-                    outputHandle.write(linecache.getline(uniprot_isoform, startLine + step))        
+                    outputHandle.write(
+                        linecache.getline(uniprot_isoform, startLine + step))
         outputHandle.close()
-        
+
 
 def _mainFunc():
     try:
@@ -157,7 +169,8 @@ def _mainFunc():
         if uniprot_sprot_human == "" or uniprot_trembl_human == "" or uniprot_isoform == "" or output_sprot == "" or output_trembl == "":
             raise Exception("All parameters are required!")
 
-        # todo: Memory is in an intensive use when the mappings are pre-loaded. Check if PyTables can offer an alternative whenever possible
+        # todo: Memory is in an intensive use when the mappings are pre-loaded.
+        # Check if PyTables can offer an alternative whenever possible
         processUniprotDAT(uniprot_sprot_human, output_sprot)
         processUniprotIsoformFasta(uniprot_isoform, output_sprot)
 
@@ -166,7 +179,8 @@ def _mainFunc():
         global unprocessedIDs
         unprocessedIDs = []
 
-        # todo: Memory is in an intensive use when the mappings are pre-loaded. Check if PyTables can offer an alternative whenever possible
+        # todo: Memory is in an intensive use when the mappings are pre-loaded.
+        # Check if PyTables can offer an alternative whenever possible
         processUniprotDAT(uniprot_trembl_human, output_trembl)
         processUniprotIsoformFasta(uniprot_isoform, output_trembl)
 
@@ -176,4 +190,3 @@ def _mainFunc():
 
 if __name__ == "__main__":
     _mainFunc()
-

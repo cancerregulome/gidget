@@ -13,13 +13,15 @@ Trivial script to reprocess a MAF file such that:
 2. All lines are the same length.
 """
 
+
 def noComment(fileLike, commentPattern):
     pattern = re.compile(commentPattern)
     for line in fileLike:
         if not pattern.match(line):
             yield line
 
-def main(argv = sys.argv):
+
+def main(argv=sys.argv):
     output = sys.stdout
     input = sys.stdin
     if len(argv) > 2:

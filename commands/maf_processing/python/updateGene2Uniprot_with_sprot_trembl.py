@@ -1,4 +1,6 @@
-import sys, traceback, re
+import sys
+import traceback
+import re
 
 __author__ = 'xshu'
 
@@ -8,6 +10,7 @@ primary2secondaryMapping = {}
 id2uniprotMapping = {}
 symbol2uniprotMapping = {}
 idsFound = []
+
 
 def showHelp():
     print\
@@ -32,9 +35,11 @@ def showHelp():
                     -output_trembl         <<absolute trembl output file path>> )
     ''' % (sys.argv[0], sys.argv[0])
 
+
 class DataType:
     SPROT = 1
     TREMBL = 2
+
 
 def isLong(str):
     try:
@@ -45,8 +50,10 @@ def isLong(str):
     except TypeError:
         return False
 
+
 def addItemsToMapping(key, value, mappingObj):
-    if key == "": return
+    if key == "":
+        return
     value = str(value)
 
     if key not in mappingObj:
@@ -55,6 +62,7 @@ def addItemsToMapping(key, value, mappingObj):
         oldValue = mappingObj[key]
         if oldValue.find(value) == -1:
             mappingObj[key] += ";" + value
+
 
 def loadUniprotHuman(uniprot_human):
     # load uniprot_human file and add items to gene 2 uniprot Mappings
@@ -77,15 +85,19 @@ def loadUniprotHuman(uniprot_human):
 
             if lastID != currentID:
                 if curGeneID != "" and isLong(curGeneID):
-                    addItemsToMapping(curGeneID, curPrimaryAccession, id2uniprotMapping)
+                    addItemsToMapping(
+                        curGeneID, curPrimaryAccession, id2uniprotMapping)
 
                 if curGeneName != "":
-                    addItemsToMapping(curGeneName, curPrimaryAccession, symbol2uniprotMapping)
+                    addItemsToMapping(
+                        curGeneName, curPrimaryAccession, symbol2uniprotMapping)
                     if curGeneID != "" and isLong(curGeneID):
-                        addItemsToMapping(curGeneID, curGeneName, id2symbolMapping)
+                        addItemsToMapping(
+                            curGeneID, curGeneName, id2symbolMapping)
 
                 if len(curSecondaryAccessions) > 0:
-                    primary2secondaryMapping[curPrimaryAccession] = curSecondaryAccessions
+                    primary2secondaryMapping[
+                        curPrimaryAccession] = curSecondaryAccessions
 
                 lastID = currentID
                 curPrimaryAccession = ""
@@ -101,7 +113,8 @@ def loadUniprotHuman(uniprot_human):
                 accessions = acMatcher.group(1)
                 if curPrimaryAccession == "":
                     curPrimaryAccession = accessions.split(";")[0]
-                    accessions = re.sub("\s*", "", accessions[accessions.find(";") + 1:])
+                    accessions = re.sub(
+                        "\s*", "", accessions[accessions.find(";") + 1:])
                 curSecondaryAccessions.extend(accessions.split(";"))
             elif nameMatcher:
                 curGeneName = nameMatcher.group(2)
@@ -109,6 +122,7 @@ def loadUniprotHuman(uniprot_human):
                 curGeneID = drMatcher.group(1)
 
         uniprot_humanHandle.close()
+
 
 def removeSecondaryAccessions(primaryAccessions, oldUniprotID):
     finalAccessions = []
@@ -124,7 +138,7 @@ def removeSecondaryAccessions(primaryAccessions, oldUniprotID):
                     secondaryAccessionFound = True
                     break
             if not secondaryAccessionFound:
-                updatedUniprotID += id +";"
+                updatedUniprotID += id + ";"
 
     # keep the primary accession
     for primAccession in primaryAccessions:
@@ -133,9 +147,11 @@ def removeSecondaryAccessions(primaryAccessions, oldUniprotID):
 
     return finalAccessions
 
+
 def update(datatype, output, gene2uniprot):
     gene2uniprotUpdateHandle = open(output, "w")
-    gene2uniprotUpdateHandle.write("geneID\tgeneSymbol\tgeneAliases\tgeneOld\tUniprotID\n")
+    gene2uniprotUpdateHandle.write(
+        "geneID\tgeneSymbol\tgeneAliases\tgeneOld\tUniprotID\n")
 
     gene2uniprotHandle = open(gene2uniprot, "r")
     for line in gene2uniprotHandle:
@@ -159,7 +175,8 @@ def update(datatype, output, gene2uniprot):
             idFound = True
             primaryAccessions = id2uniprotMapping[geneID]
             if primaryAccessions != "":
-                primAccessionList = removeSecondaryAccessions(primaryAccessions.split(";"), uniprotID)
+                primAccessionList = removeSecondaryAccessions(
+                    primaryAccessions.split(";"), uniprotID)
                 # Normally one gene maps to one uniprot swissprot id
                 if len(primAccessionList) > 1:
                     if geneID in id2symbolMapping and geneSymbol == id2symbolMapping[geneID]:
@@ -169,14 +186,16 @@ def update(datatype, output, gene2uniprot):
         if checkSymbol and geneSymbol in symbol2uniprotMapping:
             primaryAccessions = symbol2uniprotMapping[geneSymbol]
             if primaryAccessions != "":
-                primAccessionList = removeSecondaryAccessions(primaryAccessions.split(";"), uniprotID)
+                primAccessionList = removeSecondaryAccessions(
+                    primaryAccessions.split(";"), uniprotID)
 
         for accession in primAccessionList:
             if uniprotID == "":
                 uniprotID = accession
             else:
                 uniprotID += ";" + accession
-        gene2uniprotUpdateHandle.write("%s\t%s\t%s\t%s\t%s\n" % (geneID, geneSymbol, geneAliases, geneOld, uniprotID))
+        gene2uniprotUpdateHandle.write("%s\t%s\t%s\t%s\t%s\n" %
+                                       (geneID, geneSymbol, geneAliases, geneOld, uniprotID))
 
         # record the navigated gene id
         if idFound and geneID not in idsFound:
@@ -190,7 +209,8 @@ def update(datatype, output, gene2uniprot):
             if geneID in id2uniprotMapping:
                 uniprotID = id2uniprotMapping[geneID]
             if uniprotID != "":
-                gene2uniprotUpdateHandle.write("%s\t%s\t%s\t%s\t%s\n" % (geneID, symbols, "", "", uniprotID))
+                gene2uniprotUpdateHandle.write(
+                    "%s\t%s\t%s\t%s\t%s\n" % (geneID, symbols, "", "", uniprotID))
 
     gene2uniprotHandle.close()
     gene2uniprotUpdateHandle.close()
@@ -220,7 +240,8 @@ def _mainFunc():
             raise Exception("All parameters are required!")
 
         # process uniprot_sprot_human
-        # todo: Memory is in an intensive use when the mappings are pre-loaded. Check if PyTables can offer an alternative whenever possible
+        # todo: Memory is in an intensive use when the mappings are pre-loaded.
+        # Check if PyTables can offer an alternative whenever possible
         loadUniprotHuman(uniprot_sprot_human)
         update(DataType.SPROT, output_sprot, gene2uniprot)
 
@@ -238,7 +259,8 @@ def _mainFunc():
         idsFound = []
 
         # process uniprot_trembl_human
-        # todo: Memory is in an intensive use when the mappings are pre-loaded. Check if PyTables can offer an alternative whenever possible
+        # todo: Memory is in an intensive use when the mappings are pre-loaded.
+        # Check if PyTables can offer an alternative whenever possible
         loadUniprotHuman(uniprot_trembl_human)
         update(DataType.TREMBL, output_trembl, gene2uniprot)
 
@@ -248,4 +270,3 @@ def _mainFunc():
 
 if __name__ == "__main__":
     _mainFunc()
-

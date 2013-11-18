@@ -1,6 +1,13 @@
-import sys, traceback, linecache, shutil, re, updateMAF_addUniprotID, updateMAF_addUniprotISO1
+import sys
+import traceback
+import linecache
+import shutil
+import re
+import updateMAF_addUniprotID
+import updateMAF_addUniprotISO1
 
 __author__ = 'xshu'
+
 
 def showHelp():
     print\
@@ -28,6 +35,7 @@ def showHelp():
 
     ''' % (sys.argv[0], sys.argv[0])
 
+
 def depeditate(string, suffix):
     x = len(suffix)
     if not x:
@@ -36,6 +44,7 @@ def depeditate(string, suffix):
         return string[:-x]
     print >> sys.stderr, "failed depeditate:", string[-x:], "ain't", suffix
     return string
+
 
 def loadTranscript2Uniprot(transcript2protein):
     result = {}
@@ -50,8 +59,8 @@ def loadTranscript2Uniprot(transcript2protein):
         updateMAF_addUniprotID.addItemsToMapping(knownGene, protein, result)
     transcript2proteinHandle.close()
 
-    return  result
-        
+    return result
+
 
 def loadRefseq2Uniprot(refseq2uniprotFile):
     result = {}
@@ -87,7 +96,8 @@ def loadAnnovarExonicVariantOutput(annovarOutput):
 def loadUniprotPrim2Sec(uniprot_human):
     result = {}
 
-    # load uniprot_human file and build a map between primary and secondary protein accession
+    # load uniprot_human file and build a map between primary and secondary
+    # protein accession
     if uniprot_human != "":
         uniprot_humanHandle = open(uniprot_human, "r")
 
@@ -114,12 +124,14 @@ def loadUniprotPrim2Sec(uniprot_human):
                 accessions = acMatcher.group(1)
                 if curPrimaryAccession == "":
                     curPrimaryAccession = accessions.split(";")[0]
-                    accessions = re.sub("\s*", "", accessions[accessions.find(";") + 1:])
+                    accessions = re.sub(
+                        "\s*", "", accessions[accessions.find(";") + 1:])
                 curSecondaryAccessions.extend(accessions.split(";"))
 
         uniprot_humanHandle.close()
 
-    return  result
+    return result
+
 
 def loadReferencesForANNOVARExonicLevel(*refArgTup):
     knowngene2protein = refArgTup[0]
@@ -130,7 +142,8 @@ def loadReferencesForANNOVARExonicLevel(*refArgTup):
 
     knowngene2proteinMapping = loadTranscript2Uniprot(knowngene2protein)
     refseq2uniprotMapping = loadRefseq2Uniprot(refseq2uniprot)
-    mafLine2annovarOutputLine = loadAnnovarExonicVariantOutput(annovarExonicVariantOutput)
+    mafLine2annovarOutputLine = loadAnnovarExonicVariantOutput(
+        annovarExonicVariantOutput)
     uniprotPrim2Sec = loadUniprotPrim2Sec(uniprot_sprot_human)
     uniprotPrim2Sec.update(loadUniprotPrim2Sec(uniprot_trembl_human))
 
@@ -173,10 +186,12 @@ def retriveNewAnnoations(*arguments):
                         endLine = posTuple[1]
                         isoform1Seq = ""
                         for step in range(0, endLine - startLine + 1):
-                            isoform1Seq += linecache.getline(uniprot_isoform1, startLine + step).rstrip("\n")
+                            isoform1Seq += linecache.getline(uniprot_isoform1,
+                                                             startLine + step).rstrip("\n")
 
                         if len(isoform1Seq) >= proteinChangePos:
-                            changedAminoAcidInIsoform1 = isoform1Seq[proteinChangePos-1]
+                            changedAminoAcidInIsoform1 = isoform1Seq[
+                                proteinChangePos - 1]
 
                             if changedAminoAcidFromAnnovar == changedAminoAcidInIsoform1:
                                 resultMain += annotation + ","
@@ -186,11 +201,12 @@ def retriveNewAnnoations(*arguments):
                             annotationMatched = False
                     else:
                         annotationMatched = False
-                        
+
                     if not annotationMatched:
                         resultOthers += annotation + ","
 
     return resultMain, resultOthers
+
 
 def updateOnSpecialVariantLevel(mafWithUniprotID, updatedMAF, *refArgTup):
     newlyAnnotatedLinesInMAF = []
@@ -206,34 +222,41 @@ def updateOnSpecialVariantLevel(mafWithUniprotID, updatedMAF, *refArgTup):
         gene = fields[1]
         chr = fields[2]
         mafLineNo = long(fields[3].lstrip("line"))
-        
+
         if mafLineNo in unAnnotatedLinesInMAF:
             if mafLineNo not in newlyAnnotatedLinesInMAF:
                 newlyAnnotatedLinesInMAF.append(mafLineNo)
 
-            #mafWithUniprotID has a header line so need to account for this    
-            newmafLineNo = mafLineNo+1
-            originalMAFLine = linecache.getline(mafWithUniprotID, newmafLineNo).rstrip("\n")
-            annovarInfo = "variant_type=" + variantType + "|gene=" + gene + "|chromosome=" + chr 
-            updatedMAFHandle.write("%s\t%s\t%s\t%s\n" %(originalMAFLine, "", "", annovarInfo))
+            # mafWithUniprotID has a header line so need to account for this
+            newmafLineNo = mafLineNo + 1
+            originalMAFLine = linecache.getline(
+                mafWithUniprotID, newmafLineNo).rstrip("\n")
+            annovarInfo = "variant_type=" + variantType + \
+                "|gene=" + gene + "|chromosome=" + chr
+            updatedMAFHandle.write("%s\t%s\t%s\t%s\n" %
+                                   (originalMAFLine, "", "", annovarInfo))
     annovarVariantOutputHandle.close()
 
     # for lines in the MAF that are still not annotated:
     # 1. append them to MAF
     # 2. print out lines
-    lenFinalUnAnnotatedLines = len(unAnnotatedLinesInMAF) - len(newlyAnnotatedLinesInMAF)
-    print ("%s %s %s %s %s %s\n\n" %("Among", str(len(unAnnotatedLinesInMAF)), "records that are the \
-Non-coding exonic levels (ncRNA, splicing, UTR5, UTR3, downstream, upstream, intronic and intergenic) there are", \
-                                     str(lenFinalUnAnnotatedLines),"records ANNOVAR cannot annotate for", mafWithUniprotID))
+    lenFinalUnAnnotatedLines = len(
+        unAnnotatedLinesInMAF) - len(newlyAnnotatedLinesInMAF)
+    print ("%s %s %s %s %s %s\n\n" % ("Among", str(len(unAnnotatedLinesInMAF)), "records that are the \
+Non-coding exonic levels (ncRNA, splicing, UTR5, UTR3, downstream, upstream, intronic and intergenic) there are",
+                                      str(lenFinalUnAnnotatedLines), "records ANNOVAR cannot annotate for", mafWithUniprotID))
 
     if lenFinalUnAnnotatedLines > 0:
         for mafLineNo in unAnnotatedLinesInMAF:
             if mafLineNo not in newlyAnnotatedLinesInMAF:
-                #mafWithUniprotID has a header line so need to account for this    
-                newmafLineNo = mafLineNo+1
-                originalMAFLine = linecache.getline(mafWithUniprotID, newmafLineNo)
+                # mafWithUniprotID has a header line so need to account for
+                # this
+                newmafLineNo = mafLineNo + 1
+                originalMAFLine = linecache.getline(
+                    mafWithUniprotID, newmafLineNo)
                 updatedMAFHandle.write(originalMAFLine)
-                print ("%s%d\t%s" %("line", mafLineNo ,linecache.getline(mafWithUniprotID, newmafLineNo).rstrip("\n")))
+                print ("%s%d\t%s" %
+                       ("line", mafLineNo, linecache.getline(mafWithUniprotID, newmafLineNo).rstrip("\n")))
         print
 
     updatedMAFHandle.close()
@@ -241,8 +264,10 @@ Non-coding exonic levels (ncRNA, splicing, UTR5, UTR3, downstream, upstream, int
 
 
 def filterNonIsoform1Entries(updatedMAF, uniprot_sprot_isoform1, uniprot_trembl_isoform1):
-    unprotid2Isoform1Mapping = updateMAF_addUniprotISO1.loadID2ISOForm1(uniprot_sprot_isoform1)
-    unprotid2Isoform1Mapping.update(updateMAF_addUniprotISO1.loadID2ISOForm1(uniprot_trembl_isoform1))
+    unprotid2Isoform1Mapping = updateMAF_addUniprotISO1.loadID2ISOForm1(
+        uniprot_sprot_isoform1)
+    unprotid2Isoform1Mapping.update(
+        updateMAF_addUniprotISO1.loadID2ISOForm1(uniprot_trembl_isoform1))
 
     updatedMAFTemp = updatedMAF + "_isoform1"
     updatedMAFTempHandler = open(updatedMAFTemp, "w")
@@ -262,11 +287,11 @@ def filterNonIsoform1Entries(updatedMAF, uniprot_sprot_isoform1, uniprot_trembl_
         if sprotIDStr != "":
             uniprotIDList = sprotIDStr.split(";")
             uniprot_isoform1 = uniprot_sprot_isoform1
-        elif tremblIDStr!= "":
+        elif tremblIDStr != "":
             uniprotIDList = tremblIDStr.split(";")
             uniprot_isoform1 = uniprot_trembl_isoform1
 
-        if len(uniprotIDList) == 0 :
+        if len(uniprotIDList) == 0:
             updatedMAFTempHandler.write(line)
         else:
             newMainAnnotation = ""
@@ -275,14 +300,16 @@ def filterNonIsoform1Entries(updatedMAF, uniprot_sprot_isoform1, uniprot_trembl_
             mainAnnotationStr = fields[lenFields - 3]
             otherAnnotationStr = fields[lenFields - 2]
             annovarNote = fields[lenFields - 1]
-            
+
             for uniprotID in uniprotIDList:
-                arguments = (uniprotID, mainAnnotationStr, unprotid2Isoform1Mapping, uniprot_isoform1)
+                arguments = (uniprotID, mainAnnotationStr,
+                             unprotid2Isoform1Mapping, uniprot_isoform1)
                 resultMain, resultOthers = retriveNewAnnoations(*arguments)
                 newMainAnnotation += resultMain
                 newOtherAnnotation += resultOthers
-                
-                arguments = (uniprotID, otherAnnotationStr, unprotid2Isoform1Mapping, uniprot_isoform1)
+
+                arguments = (uniprotID, otherAnnotationStr,
+                             unprotid2Isoform1Mapping, uniprot_isoform1)
                 resultMain, resultOthers = retriveNewAnnoations(*arguments)
                 newMainAnnotation += resultMain
                 newOtherAnnotation += resultOthers
@@ -292,22 +319,24 @@ def filterNonIsoform1Entries(updatedMAF, uniprot_sprot_isoform1, uniprot_trembl_
                 if index < lenFields - 3:
                     linePrefix += fields[index] + "\t"
             linePrefix = linePrefix[0:len(linePrefix) - 1]
-            updatedMAFTempHandler.write("%s\t%s\t%s\t%s\n" %(linePrefix, newMainAnnotation, newOtherAnnotation, annovarNote))
-
+            updatedMAFTempHandler.write("%s\t%s\t%s\t%s\n" % (
+                linePrefix, newMainAnnotation, newOtherAnnotation, annovarNote))
 
     updatedMAFHandle.close()
     updatedMAFTempHandler.close()
     shutil.move(updatedMAFTemp, updatedMAF)
-    
-    return  updatedMAF
+
+    return updatedMAF
 
 
 def updateOnExonicLevel(mafWithUniprotID, output, *refArgTup):
     annovarExonicVariantOutput = refArgTup[4]
 
     # load references
-    # todo: Memory is in an intensive use when the mappings are pre-loaded. Check if PyTables can offer an alternative whenever possible
-    knowngene2proteinMapping, refseq2uniprotMapping, mafLine2annovarOutputLine, uniprotPrim2Sec = loadReferencesForANNOVARExonicLevel(*refArgTup)
+    # todo: Memory is in an intensive use when the mappings are pre-loaded.
+    # Check if PyTables can offer an alternative whenever possible
+    knowngene2proteinMapping, refseq2uniprotMapping, mafLine2annovarOutputLine, uniprotPrim2Sec = loadReferencesForANNOVARExonicLevel(
+        *refArgTup)
 
     # begin to update MAF
     mafWithUniprotIDHandle = open(mafWithUniprotID, "r")
@@ -316,9 +345,11 @@ def updateOnExonicLevel(mafWithUniprotID, output, *refArgTup):
 
     if output.rfind("/") != len(output) - 1:
         output += "/"
-    updatedMAF = output + mafWithUniprotID[mafWithUniprotID.rfind("/") + 1:] + "_exonic"
+    updatedMAF = output + \
+        mafWithUniprotID[mafWithUniprotID.rfind("/") + 1:] + "_exonic"
     updatedMAFHandle = open(updatedMAF, "w")
-    updatedMAFHandle.write("%s\t%s\t%s\t%s\n" %(header, "Mutation Annotation (uniprot isoform1)", "Mutation Annotation (Others)", "ANNOVAR"))
+    updatedMAFHandle.write("%s\t%s\t%s\t%s\n" % (
+        header, "Mutation Annotation (uniprot isoform1)", "Mutation Annotation (Others)", "ANNOVAR"))
 
     lineNoWithoutHeader = 1
     unAnnotatedLines = []
@@ -333,7 +364,7 @@ def updateOnExonicLevel(mafWithUniprotID, output, *refArgTup):
             uniprotIDList = sprotIDs.split(";")
         elif tremblIDs != "":
             uniprotIDList = tremblIDs.split(";")
-       
+
         # collect the records that ANNOVAR cannot annotate on coding-exon level
         if lineNoWithoutHeader not in mafLine2annovarOutputLine and lineNoWithoutHeader not in unAnnotatedLines:
             unAnnotatedLines.append(lineNoWithoutHeader)
@@ -341,15 +372,19 @@ def updateOnExonicLevel(mafWithUniprotID, output, *refArgTup):
             continue
 
         # example annovar output line:
-        # line1   nonsynonymous SNV       AMPD1:uc001efe.1:exon7:c.C787T:p.R263C,AMPD1:uc001eff.1:exon6:c.C775T:p.R259C,  1       115023833       115023833       G       A       SNP
-        annovarOutputLineNoList = mafLine2annovarOutputLine[lineNoWithoutHeader].split(";")
+        # line1   nonsynonymous SNV
+        # AMPD1:uc001efe.1:exon7:c.C787T:p.R263C,AMPD1:uc001eff.1:exon6:c.C775T:p.R259C,
+        # 1       115023833       115023833       G       A       SNP
+        annovarOutputLineNoList = mafLine2annovarOutputLine[
+            lineNoWithoutHeader].split(";")
         numAnnovarLinesMappedToCurMAFLine = len(annovarOutputLineNoList)
 
         # Loop through each ANNOVAR output that associates with the current MAF line
         # ANNOVAR can have several lines of output for one single MAF record. When this happens for each ANNOVAR output
         # we list the variant type found by ANNOVAR
         for annovarOutputLineNo in annovarOutputLineNoList:
-            annovarOutputLine = linecache.getline(annovarExonicVariantOutput, long(annovarOutputLineNo)).rstrip("\n")
+            annovarOutputLine = linecache.getline(
+                annovarExonicVariantOutput, long(annovarOutputLineNo)).rstrip("\n")
             annovarOutputFields = annovarOutputLine.split("\t")
             variantType = annovarOutputFields[1]
             geneAnnotation = annovarOutputFields[2]
@@ -359,39 +394,48 @@ def updateOnExonicLevel(mafWithUniprotID, output, *refArgTup):
             annotations = geneAnnotation.split(",")
             mainAnnotation = ""
             otherAnnotation = ""
-            curAnnotationMatched = False # a flag indicating if the current annotation matches any uniprot accession or not
+            # a flag indicating if the current annotation matches any uniprot
+            # accession or not
+            curAnnotationMatched = False
 
-            # look up and then save the mapping between a uniprot accession and the first transcript found that maps to the uniprot accession
+            # look up and then save the mapping between a uniprot accession and
+            # the first transcript found that maps to the uniprot accession
             for annotation in annotations:
-                if annotation == "": continue
+                if annotation == "":
+                    continue
 
                 # example single gene annotation from ANNOVAR:
                 # AMPD1:uc001efe.1:exon7:c.C787T:p.R263C
                 knowngene = annotation.split(":")[0]
                 if knowngene in knowngene2proteinMapping:
-                    proteinForCurKnowngene = knowngene2proteinMapping[knowngene]
+                    proteinForCurKnowngene = knowngene2proteinMapping[
+                        knowngene]
 
                     for uniprotID in uniprotIDList:
                         # knowgene2protein example: uc001jss.1  Q8N9N2-2
                         # refseq2uniprot example: NP_001185727  Q8N9N2
                         # NOTE:
                         # 1. One uniprot protein can map to multiple transcripts(knowngenes) here we catch the first one
-                        # 2. In knowngene table a transcript can map to a secondary, NOT the primary uniprot protein accession
+                        # 2. In knowngene table a transcript can map to a
+                        # secondary, NOT the primary uniprot protein accession
                         if proteinForCurKnowngene == uniprotID or \
                            (proteinForCurKnowngene in refseq2uniprotMapping and refseq2uniprotMapping[proteinForCurKnowngene].find(uniprotID) != -1) or \
                            (uniprotID in uniprotPrim2Sec and proteinForCurKnowngene in uniprotPrim2Sec[uniprotID]):
                             mainAnnotation += annotation + ","
                             curAnnotationMatched = True
 
-                # put aside any annotations that either do not match any uniprot accessions or are not used
+                # put aside any annotations that either do not match any
+                # uniprot accessions or are not used
                 if not curAnnotationMatched:
                     otherAnnotation += annotation + ","
                 else:
                     curAnnotationMatched = False
 
-            updatedMAFHandle.write("%s\t%s\t%s" %(line, mainAnnotation, otherAnnotation))
-            if numAnnovarLinesMappedToCurMAFLine > 1 :
-                updatedMAFHandle.write("\t%s%s" %("variant_type=", variantType))
+            updatedMAFHandle.write("%s\t%s\t%s" %
+                                   (line, mainAnnotation, otherAnnotation))
+            if numAnnovarLinesMappedToCurMAFLine > 1:
+                updatedMAFHandle.write("\t%s%s" %
+                                       ("variant_type=", variantType))
             else:
                 updatedMAFHandle.write("\t")
             updatedMAFHandle.write("\n")
@@ -401,11 +445,10 @@ def updateOnExonicLevel(mafWithUniprotID, output, *refArgTup):
     updatedMAFHandle.close()
     mafWithUniprotIDHandle.close()
 
-    print ("%s %s %s %s\n\n" %("There are", str(len(unAnnotatedLines)), "records that are on Non-coding exonic levels \
+    print ("%s %s %s %s\n\n" % ("There are", str(len(unAnnotatedLines)), "records that are on Non-coding exonic levels \
 (ncRNA, splicing, UTR5, UTR3, downstream, upstream, intronic and intergenic) in ", mafWithUniprotID))
-    
-    return updatedMAF, unAnnotatedLines
 
+    return updatedMAF, unAnnotatedLines
 
 
 def _mainFunc():
@@ -447,18 +490,23 @@ def _mainFunc():
         # update MAF with ANNOVAR exonic variant output
         # XXX Oh god it's a hidden second-degree sacred filename
         # XXX FFFFFFFFFFFFFFFFFFFUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUU
-        annovarExonicVariantOutput = depeditate(mafWithUniprotID, ".with_uniprot") + ".annovar_exonic_variant_function"
-        refArgTup = (knowngene2protein, refseq2uniprot, uniprot_sprot_human, uniprot_trembl_human, annovarExonicVariantOutput)
-        updatedMAF, unAnnotatedLinesInMAF = updateOnExonicLevel(mafWithUniprotID, output, *refArgTup)
+        annovarExonicVariantOutput = depeditate(
+            mafWithUniprotID, ".with_uniprot") + ".annovar_exonic_variant_function"
+        refArgTup = (knowngene2protein, refseq2uniprot, uniprot_sprot_human,
+                     uniprot_trembl_human, annovarExonicVariantOutput)
+        updatedMAF, unAnnotatedLinesInMAF = updateOnExonicLevel(
+            mafWithUniprotID, output, *refArgTup)
 
         # only keep the protein changes that correspond to isoform1 sequences
         #updatedMAF = filterNonIsoform1Entries(updatedMAF, uniprot_sprot_isoform1, uniprot_trembl_isoform1)
 
         # update MAF with ANNOVAR special events output
         if len(unAnnotatedLinesInMAF) > 0:
-            annovarVariantOutput = depeditate(mafWithUniprotID, ".with_uniprot") + ".annovar_variant_function"
+            annovarVariantOutput = depeditate(
+                mafWithUniprotID, ".with_uniprot") + ".annovar_variant_function"
             refArgTup = (unAnnotatedLinesInMAF, annovarVariantOutput)
-            updatedMAF = updateOnSpecialVariantLevel(mafWithUniprotID, updatedMAF, *refArgTup)
+            updatedMAF = updateOnSpecialVariantLevel(
+                mafWithUniprotID, updatedMAF, *refArgTup)
 
         shutil.move(updatedMAF, mafWithUniprotID)
 
@@ -466,7 +514,6 @@ def _mainFunc():
         traceback.print_exc()
         showHelp()
 
-        
+
 if __name__ == "__main__":
     _mainFunc()
-

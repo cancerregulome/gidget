@@ -1,12 +1,16 @@
 import os
 import shutil
-import sys, linecache, re, traceback
+import sys
+import linecache
+import re
+import traceback
 
 __author__ = 'xshu'
 
 # global variables
 id2ISOForm1Mapping = {}
 mafList = []
+
 
 def showHelp():
     print\
@@ -30,6 +34,7 @@ def showHelp():
 
     ''' % (sys.argv[0], sys.argv[0])
 
+
 def loadID2ISOForm1(id2isoform1):
     result = {}
     # load id2isoform1 mapping
@@ -50,6 +55,7 @@ def loadID2ISOForm1(id2isoform1):
             preFileLineNo += 1
         id2isoform1Handle.close()
     return result
+
 
 def update(mafWithUniprotIDList, uniprot_sprot_isoform1, uniprot_trembl_isoform1, output):
     if output.rfind("/") != len(output) - 1:
@@ -99,9 +105,13 @@ def update(mafWithUniprotIDList, uniprot_sprot_isoform1, uniprot_trembl_isoform1
                         line += id + ":"
                         for step in range(0, endLine - startLine + 1):
                             if IS_SPROT_RECORD:
-                                line += linecache.getline(uniprot_sprot_isoform1, startLine + step).rstrip("\n")
+                                line += linecache.getline(
+                                    uniprot_sprot_isoform1,
+                                    startLine + step).rstrip("\n")
                             elif IS_TREMBL_RECORD:
-                                line += linecache.getline(uniprot_trembl_isoform1, startLine + step).rstrip("\n")
+                                line += linecache.getline(
+                                    uniprot_trembl_isoform1,
+                                    startLine + step).rstrip("\n")
             updatedMAFHandle.write(line + "\n")
 
         updatedMAFHandle.close()
@@ -110,7 +120,8 @@ def update(mafWithUniprotIDList, uniprot_sprot_isoform1, uniprot_trembl_isoform1
         updatedMAFFinal = updatedMAF[:updatedMAF.find(".with_isoform1")]
         os.remove(maf)
         shutil.move(updatedMAF, updatedMAFFinal)
-   
+
+
 def _mainFunc():
     try:
         mafWithUniprotIDList = ""
@@ -133,13 +144,13 @@ def _mainFunc():
 
         id2ISOForm1Mapping = loadID2ISOForm1(uniprot_sprot_isoform1)
         id2ISOForm1Mapping.update(loadID2ISOForm1(uniprot_trembl_isoform1))
-        update(mafWithUniprotIDList, uniprot_sprot_isoform1, uniprot_trembl_isoform1, output)
+        update(mafWithUniprotIDList, uniprot_sprot_isoform1,
+               uniprot_trembl_isoform1, output)
 
     except Exception:
         traceback.print_exc()
         showHelp()
 
-        
+
 if __name__ == "__main__":
     _mainFunc()
-

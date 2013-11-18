@@ -21,17 +21,19 @@ TABLE_SCHEMA = [
     "Tumor_Seq_Allele1"
 ]
 
-LINENUM_INDEX = 5 #Must be aligned with LineNo, which has no real backing column
+# Must be aligned with LineNo, which has no real backing column
+LINENUM_INDEX = 5
+
 
 def main(argv):
     if len(argv) != 4:
-        raise Exception("Wrong number of arguments. Usage: input output buildID-file")
+        raise Exception(
+            "Wrong number of arguments. Usage: input output buildID-file")
     inPath = argv[1]
     outPath = argv[2]
     buildIdPath = argv[3]
 
     build_number = None
-
 
     inFile = open(inPath, "rb")
     try:
@@ -40,7 +42,7 @@ def main(argv):
         print "Warning: ragged table. Assuming excel_tab and correcting"
         inFile.close()
         inFile = open(inPath, "rb")
-        outPath = inPath + ".fixed_raggedness";
+        outPath = inPath + ".fixed_raggedness"
         outFile = open(outPath, "wb")
         tsv.fixRaggedTable(inFile, outFile, csv.excel_tab)
         outFile.flush()
@@ -52,7 +54,7 @@ def main(argv):
         except:
             print "Well, that didn't work"
             raise
-    #end handler for ragged table
+    # end handler for ragged table
 
     line = 0
     output = open(outPath, "w")
@@ -60,16 +62,17 @@ def main(argv):
         line += 1
         bNum = record["NCBI_Build"]
         if (build_number is not None) and (bNum != build_number):
-            raise Exception("Inconsistent NCBI_Build values; cleave table first")
+            raise Exception(
+                "Inconsistent NCBI_Build values; cleave table first")
         build_number = bNum
 
-        #TSV rows can't be written into, only read. thus...
+        # TSV rows can't be written into, only read. thus...
         writableRecord = [cell for cell in record]
-        writableRecord[LINENUM_INDEX] = "line"+str(line)
-        
+        writableRecord[LINENUM_INDEX] = "line" + str(line)
+
         output.write("\t".join(writableRecord))
         output.write("\n")
-        
+
     output.flush()
     output.close()
     del output
@@ -83,4 +86,3 @@ def main(argv):
 
 if __name__ == "__main__":
     main(sys.argv)
-    

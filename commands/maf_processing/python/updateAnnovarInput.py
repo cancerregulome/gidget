@@ -1,7 +1,9 @@
 import shutil
-import sys, traceback
+import sys
+import traceback
 
 __author__ = 'xshu'
+
 
 def showHelp():
     print\
@@ -19,6 +21,7 @@ def showHelp():
                     -output   <<absolute output folder path>> )
 
     ''' % (sys.argv[0], sys.argv[0])
+
 
 def update(input, output):
     if output.rfind("/") != len(output) - 1:
@@ -40,19 +43,21 @@ def update(input, output):
         variantType = fields[8]
         tumorAllele1 = fields[9]
         if variantType == "INS":
-            endPos = startPos  #this has been changed from original
+            endPos = startPos  # this has been changed from original
             if tumorAllele2 == "-":
-               tumorAllele2 = tumorAllele1
-        tempOutputHandle.write("%s\t%s\t%s\t%s\t%s\t%s\t%s\n" % (chr, startPos, endPos, refAllele, tumorAllele2, lineNo, variantType))
+                tumorAllele2 = tumorAllele1
+        tempOutputHandle.write("%s\t%s\t%s\t%s\t%s\t%s\t%s\n" %
+                               (chr, startPos, endPos, refAllele, tumorAllele2, lineNo, variantType))
     inputHandle.close()
 
     shutil.move(tempOutput, input)
-   
+
+
 def _mainFunc():
     try:
         input = ""
         output = ""
-        
+
         for index in range(len(sys.argv)):
             if sys.argv[index] == "-input":
                 input = sys.argv[index + 1].strip()
@@ -68,7 +73,6 @@ def _mainFunc():
         traceback.print_exc()
         showHelp()
 
-        
+
 if __name__ == "__main__":
     _mainFunc()
-
