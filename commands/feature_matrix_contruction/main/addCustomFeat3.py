@@ -1,4 +1,4 @@
-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
+# -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 
 import sys
 
@@ -6,7 +6,7 @@ import chrArms
 import miscTCGA
 import tsvIO
 
-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
+# -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 
 NA_VALUE = -999999
 
@@ -14,25 +14,26 @@ global armLabels
 armLabels = chrArms.arms_hg19.keys()
 armLabels.sort()
 
-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
+# -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 
-def getChrArmFromRowLabel ( iRow, rowLabels ):
 
-    ## example rowLabel : N:CNVR:PRDM16:chr1:3218000:3258999::
+def getChrArmFromRowLabel(iRow, rowLabels):
+
+    # example rowLabel : N:CNVR:PRDM16:chr1:3218000:3258999::
     tokenList = rowLabels[iRow].split(':')
     chrName = tokenList[3][3:]
-    segStart = int ( tokenList[4] )
-    segStop  = int ( tokenList[5] )
-    segLen = ( segStop - segStart )
+    segStart = int(tokenList[4])
+    segStop = int(tokenList[5])
+    segLen = (segStop - segStart)
     chrP = chrName + "p"
     chrQ = chrName + "q"
     inP = 0
     inQ = 0
-    iA  = -1
+    iA = -1
 
-    midSeg = ( segStart + segStop ) / 2
+    midSeg = (segStart + segStop) / 2
 
-    if ( 0 ):
+    if (0):
         print " "
         print " "
         print rowLabels[iRow]
@@ -43,42 +44,46 @@ def getChrArmFromRowLabel ( iRow, rowLabels ):
         print chrArms.arms_hg19[chrQ]
 
     try:
-        ## print " comparing %d to %d " % ( segStop, chrArms.arms_hg19[chrP][1] )
-        if ( segStop <= chrArms.arms_hg19[chrP][1] ): 
+        # print " comparing %d to %d " % ( segStop, chrArms.arms_hg19[chrP][1]
+        # )
+        if (segStop <= chrArms.arms_hg19[chrP][1]):
             inP = 1
             iA = armLabels.index(chrP)
-            ## print " --> got iA=%d " % iA
+            # print " --> got iA=%d " % iA
     except:
         doNothing = 1
 
     try:
-        ## print " comparing %d to %d " % ( segStart, chrArms.arms_hg19[chrQ][1] )
-        if ( segStart >= chrArms.arms_hg19[chrQ][0] ): 
+        # print " comparing %d to %d " % ( segStart, chrArms.arms_hg19[chrQ][1]
+        # )
+        if (segStart >= chrArms.arms_hg19[chrQ][0]):
             inQ = 1
             iA = armLabels.index(chrQ)
-            ## print " --> got iA=%d " % iA
+            # print " --> got iA=%d " % iA
     except:
         doNothing = 1
 
-    if ( iA < 0 ):
+    if (iA < 0):
         try:
-            ## print " comparing %d to %d " % ( midSeg, chrArms.arms_hg19[chrP][1] )
-            if ( midSeg <= chrArms.arms_hg19[chrP][1] ):
+            # print " comparing %d to %d " % ( midSeg,
+            # chrArms.arms_hg19[chrP][1] )
+            if (midSeg <= chrArms.arms_hg19[chrP][1]):
                 inP = 1
                 iA = armLabels.index(chrP)
-                ## print " --> got iA=%d " % iA
+                # print " --> got iA=%d " % iA
         except:
             doNothing = 1
         try:
-            ## print " comparing %d to %d " % ( midSeg, chrArms.arms_hg19[chrQ][1] )
-            if ( midSeg >= chrArms.arms_hg19[chrQ][0] ):
+            # print " comparing %d to %d " % ( midSeg,
+            # chrArms.arms_hg19[chrQ][1] )
+            if (midSeg >= chrArms.arms_hg19[chrQ][0]):
                 inQ = 1
                 iA = armLabels.index(chrQ)
-                ## print " --> got iA=%d " % iA
+                # print " --> got iA=%d " % iA
         except:
             doNothing = 1
 
-    if ( iA < 0 ):
+    if (iA < 0):
         print " still nothing ??? "
         print iRow, rowLabels[iRow]
         print segStart, segStop, segLen, midSeg
@@ -87,28 +92,29 @@ def getChrArmFromRowLabel ( iRow, rowLabels ):
         print chrArms.arms_hg19[chrQ]
         sys.exit(-1)
 
-    return ( iA, segLen )
-            
-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
+    return (iA, segLen)
 
-def addCINfeature ( dataD, fType ):
+# -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
+
+
+def addCINfeature(dataD, fType):
 
     print " "
     print " in addCINfeature ... "
 
-    ## the feature matrix has thousands of features x hundreds of patients
+    # the feature matrix has thousands of features x hundreds of patients
     rowLabels = dataD['rowLabels']
     colLabels = dataD['colLabels']
     numRow = len(rowLabels)
     numCol = len(colLabels)
     dataMatrix = dataD['dataMatrix']
-    print " %d rows x %d columns " % ( numRow, numCol )
-    ## print rowLabels[:5]
-    ## print rowLabels[-5:]
+    print " %d rows x %d columns " % (numRow, numCol)
+    # print rowLabels[:5]
+    # print rowLabels[-5:]
 
-    ## the custom features are assumed to be derived in some way
-    ## from existing features ...
-    exFNames = [ fType ]
+    # the custom features are assumed to be derived in some way
+    # from existing features ...
+    exFNames = [fType]
     numExF = len(exFNames)
     numExF2 = [0] * numExF
     exFRows = [-1] * numExF
@@ -116,29 +122,32 @@ def addCINfeature ( dataD, fType ):
     print " looking through labels for ", exFNames
 
     for iRow in range(numRow):
-        ## BUT ... we will exclude X or Y chromosome features entirely
-        if ( rowLabels[iRow].find("chrX") >= 0 ): continue
-        if ( rowLabels[iRow].find("chrY") >= 0 ): continue
+        # BUT ... we will exclude X or Y chromosome features entirely
+        if (rowLabels[iRow].find("chrX") >= 0):
+            continue
+        if (rowLabels[iRow].find("chrY") >= 0):
+            continue
 
-        ## AND we will also exclude the Gistic features ...
-        if ( rowLabels[iRow].find("Gistic") >= 0 ): continue
+        # AND we will also exclude the Gistic features ...
+        if (rowLabels[iRow].find("Gistic") >= 0):
+            continue
 
         for iEx in range(numExF):
-            if ( exFNames[iEx] in rowLabels[iRow] ):
-                ## print iRow, rowLabels[iRow], iEx, exFNames[iEx]
-                if ( numExF2[iEx] == 0 ):
-                    exFRows[iEx] = [ iRow ]
+            if (exFNames[iEx] in rowLabels[iRow]):
+                # print iRow, rowLabels[iRow], iEx, exFNames[iEx]
+                if (numExF2[iEx] == 0):
+                    exFRows[iEx] = [iRow]
                     numExF2[iEx] = 1
                 else:
-                    exFRows[iEx] += [ iRow ]
+                    exFRows[iEx] += [iRow]
                     numExF2[iEx] += 1
-                    ## print " already found a match ??? ", exFNames[iEx], rowLabels[exFRows[iEx]]
-                    ## sys.exit(-1)
+                    # print " already found a match ??? ", exFNames[iEx], rowLabels[exFRows[iEx]]
+                    # sys.exit(-1)
 
-    if ( min(numExF2) == 0 ):
+    if (min(numExF2) == 0):
         print " WARNING !!! failed to find one of the existing features ??? ", numExF2, exFNames
         print " --> no additional features will be added "
-        return ( dataD )
+        return (dataD)
 
     print " "
     print " feature names and rows: "
@@ -147,17 +156,17 @@ def addCINfeature ( dataD, fType ):
     print " C ", numExF2
     print " "
 
-    ## for stad.seq.test.TP.tsv, it finds 3008 CNVR features ...
+    # for stad.seq.test.TP.tsv, it finds 3008 CNVR features ...
 
-    ## first we want to compute arm-level values for each sample 
+    # first we want to compute arm-level values for each sample
     numArms = len(chrArms.arms_hg19)
 
-    ## now we have armLabels, eg '20q'
-    ## as well as coordinates, eg (27500000, 63025520)
+    # now we have armLabels, eg '20q'
+    # as well as coordinates, eg (27500000, 63025520)
     print numArms, armLabels[:5]
     print chrArms.arms_hg19[armLabels[0]]
 
-    ## we need a matrix to keep track of sample-specific arm-level stats
+    # we need a matrix to keep track of sample-specific arm-level stats
     print numArms, numCol
     s1Mat = [0] * numArms
     s2Mat = [0] * numArms
@@ -165,51 +174,55 @@ def addCINfeature ( dataD, fType ):
         s1Mat[iA] = [0] * numCol
         s2Mat[iA] = [0] * numCol
 
-    ## first let's loop over all of the features and accumulate arm-level stats ...
-    ## outer loop is over CNVR features ...
-    print " --> looping over %d features " % ( len(exFRows[0]) )
+    # first let's loop over all of the features and accumulate arm-level stats ...
+    # outer loop is over CNVR features ...
+    print " --> looping over %d features " % (len(exFRows[0]))
     for iF in range(len(exFRows[0])):
 
         iRow = exFRows[0][iF]
-        ( iA, segLen ) = getChrArmFromRowLabel ( iRow, rowLabels )
+        (iA, segLen) = getChrArmFromRowLabel(iRow, rowLabels)
 
-        if ( iF%100 == 0 ): 
+        if (iF % 100 == 0):
             print iF, iRow, segLen, iA, armLabels[iA]
 
-        ## inner loop is over samples ...
+        # inner loop is over samples ...
         for iC in range(numCol):
-            if ( dataMatrix[iRow][iC] == NA_VALUE ): continue
-            ## print " qqqq  %6d %6d %11.2f " % ( iRow, iC, dataMatrix[iRow][iC] )
-            s1Mat[iA][iC] += ( dataMatrix[iRow][iC] * segLen )
-            s2Mat[iA][iC] += ( segLen )
-            if ( iF%100 == 0 ):
-                if ( iC==261 ): 
+            if (dataMatrix[iRow][iC] == NA_VALUE):
+                continue
+            # print " qqqq  %6d %6d %11.2f " % ( iRow, iC, dataMatrix[iRow][iC]
+            # )
+            s1Mat[iA][iC] += (dataMatrix[iRow][iC] * segLen)
+            s2Mat[iA][iC] += (segLen)
+            if (iF % 100 == 0):
+                if (iC == 261):
                     print iF, iRow, iC, dataMatrix[iRow][iC], s1Mat[iA][iC], s2Mat[iA][iC]
 
     print " "
     print " "
     print " "
 
-    ## now we can compute a weighted average for each arm ...
+    # now we can compute a weighted average for each arm ...
     maxPos = [-1] * numArms
-    maxNeg = [ 1] * numArms
+    maxNeg = [1] * numArms
     for iA in range(numArms):
         for iC in range(numCol):
-            if ( s2Mat[iA][iC] > 0 ):
+            if (s2Mat[iA][iC] > 0):
                 s1Mat[iA][iC] /= s2Mat[iA][iC]
-                if ( s1Mat[iA][iC] > maxPos[iA] ): maxPos[iA] = s1Mat[iA][iC]
-                if ( s1Mat[iA][iC] < maxNeg[iA] ): maxNeg[iA] = s1Mat[iA][iC]
+                if (s1Mat[iA][iC] > maxPos[iA]):
+                    maxPos[iA] = s1Mat[iA][iC]
+                if (s1Mat[iA][iC] < maxNeg[iA]):
+                    maxNeg[iA] = s1Mat[iA][iC]
             else:
                 s1Mat[iA][iC] = NA_VALUE
-        if ( maxPos[iA] > maxNeg[iA] ):
+        if (maxPos[iA] > maxNeg[iA]):
             print " range of values for each arm : ", iA, armLabels[iA], maxNeg[iA], maxPos[iA]
 
     print " "
     print " "
     print " "
 
-    ## and based on these we compute an arm-level CIN feature for
-    ## each sample ...
+    # and based on these we compute an arm-level CIN feature for
+    # each sample ...
 
     numNewFeat = 6
     newNames = [''] * numNewFeat
@@ -222,31 +235,34 @@ def addCINfeature ( dataD, fType ):
 
     newVecs = [0] * numNewFeat
     for iNew in range(numNewFeat):
-        newVecs[iNew] = [ NA_VALUE ] * numCol
+        newVecs[iNew] = [NA_VALUE] * numCol
 
     dThresh = 0.0001
 
-    ## outer loop is over samples ...
+    # outer loop is over samples ...
     for iC in range(numCol):
-        ## inner loop is over chromosome arms ...
+        # inner loop is over chromosome arms ...
         for iA in range(numArms):
-            if ( s1Mat[iA][iC] == NA_VALUE ): continue
-            if ( s1Mat[iA][iC] < -dThresh ):
-                if ( newVecs[0][iC] == NA_VALUE ): newVecs[0][iC] = 0
-                newVecs[0][iC] += abs ( s1Mat[iA][iC] )
-            elif ( s1Mat[iA][iC] > dThresh ):
-                if ( newVecs[1][iC] == NA_VALUE ): newVecs[1][iC] = 0
-                newVecs[1][iC] += abs ( s1Mat[iA][iC] )
+            if (s1Mat[iA][iC] == NA_VALUE):
+                continue
+            if (s1Mat[iA][iC] < -dThresh):
+                if (newVecs[0][iC] == NA_VALUE):
+                    newVecs[0][iC] = 0
+                newVecs[0][iC] += abs(s1Mat[iA][iC])
+            elif (s1Mat[iA][iC] > dThresh):
+                if (newVecs[1][iC] == NA_VALUE):
+                    newVecs[1][iC] = 0
+                newVecs[1][iC] += abs(s1Mat[iA][iC])
 
-        if ( newVecs[0][iC] != NA_VALUE ):
+        if (newVecs[0][iC] != NA_VALUE):
             newVecs[2][iC] = newVecs[0][iC]
-        if ( newVecs[1][iC] != NA_VALUE ):
-            if ( newVecs[2][iC] == NA_VALUE ): 
+        if (newVecs[1][iC] != NA_VALUE):
+            if (newVecs[2][iC] == NA_VALUE):
                 newVecs[2][iC] = newVecs[1][iC]
             else:
                 newVecs[2][iC] += newVecs[1][iC]
 
-    if ( 0 ):
+    if (0):
         print " "
         print " newVecs values for two samples : "
         print newVecs[0][261], newVecs[1][261], newVecs[2][261]
@@ -256,45 +272,57 @@ def addCINfeature ( dataD, fType ):
     tmpVec = [0] * numCol
     dThresh = 0.7
 
-    ## now we loop over all of the features and accumulate focal statistics
+    # now we loop over all of the features and accumulate focal statistics
     print " now for focal stats ... "
     for iF in range(len(exFRows[0])):
         iRow = exFRows[0][iF]
-        ( iA, segLen ) = getChrArmFromRowLabel ( iRow, rowLabels )
+        (iA, segLen) = getChrArmFromRowLabel(iRow, rowLabels)
 
         for iC in range(numCol):
             dVal = dataMatrix[iRow][iC]
-            if ( dVal == NA_VALUE ): continue
+            if (dVal == NA_VALUE):
+                continue
 
-            if ( newVecs[3][iC] == NA_VALUE ): newVecs[3][iC] = 0
-            if ( newVecs[4][iC] == NA_VALUE ): newVecs[4][iC] = 0
-            if ( newVecs[5][iC] == NA_VALUE ): newVecs[5][iC] = 0
+            if (newVecs[3][iC] == NA_VALUE):
+                newVecs[3][iC] = 0
+            if (newVecs[4][iC] == NA_VALUE):
+                newVecs[4][iC] = 0
+            if (newVecs[5][iC] == NA_VALUE):
+                newVecs[5][iC] = 0
 
-            if ( iC==261 ): print "     one feature for iC=261 : ", iF, iRow, iA, segLen, dVal
-            if ( iC==265 ): print "     one feature for iC=265 : ", iF, iRow, iA, segLen, dVal
+            if (iC == 261):
+                print "     one feature for iC=261 : ", iF, iRow, iA, segLen, dVal
+            if (iC == 265):
+                print "     one feature for iC=265 : ", iF, iRow, iA, segLen, dVal
 
-            ## subtract the arm-level average ...
+            # subtract the arm-level average ...
             dVal -= s1Mat[iA][iC]
-            if ( iC==261 ): print "         261 after subtracting arm average : ", dVal
-            if ( iC==265 ): print "         265 after subtracting arm average : ", dVal
+            if (iC == 261):
+                print "         261 after subtracting arm average : ", dVal
+            if (iC == 265):
+                print "         265 after subtracting arm average : ", dVal
 
-            if ( dVal <= -dThresh ):
-                newVecs[3][iC] += ( segLen )
-                newVecs[5][iC] += ( segLen )
-                if ( iC==261 ): print "         261 exceeded neg threshold ... ", newVecs[3][iC]
-                if ( iC==265 ): print "         265 exceeded neg threshold ... ", newVecs[3][iC]
-            elif ( dVal >= dThresh ):
-                newVecs[4][iC] += ( segLen )
-                newVecs[5][iC] += ( segLen )
-                if ( iC==261 ): print "         261 exceeded pos threshold ... ", newVecs[4][iC]
-                if ( iC==265 ): print "         265 exceeded pos threshold ... ", newVecs[4][iC]
+            if (dVal <= -dThresh):
+                newVecs[3][iC] += (segLen)
+                newVecs[5][iC] += (segLen)
+                if (iC == 261):
+                    print "         261 exceeded neg threshold ... ", newVecs[3][iC]
+                if (iC == 265):
+                    print "         265 exceeded neg threshold ... ", newVecs[3][iC]
+            elif (dVal >= dThresh):
+                newVecs[4][iC] += (segLen)
+                newVecs[5][iC] += (segLen)
+                if (iC == 261):
+                    print "         261 exceeded pos threshold ... ", newVecs[4][iC]
+                if (iC == 265):
+                    print "         265 exceeded pos threshold ... ", newVecs[4][iC]
             tmpVec[iC] += segLen
 
     print " "
     print " "
     print " "
 
-    if ( 0 ):
+    if (0):
         print " newVecs values 3-5 for two samples : "
         print newVecs[3][261], newVecs[4][261], newVecs[5][261], tmpVec[261]
         print newVecs[3][265], newVecs[4][265], newVecs[5][265], tmpVec[265]
@@ -302,16 +330,16 @@ def addCINfeature ( dataD, fType ):
     print " "
     print " normalize by total segment length : "
 
-    ## and then normalize by the total segment length 
-    ## (the values are very small, so multiplying by 10000 ...)
+    # and then normalize by the total segment length
+    # (the values are very small, so multiplying by 10000 ...)
     for iC in range(numCol):
-        if ( tmpVec[iC] > 0 ):
-            tmpVec[iC] = float ( tmpVec[iC] ) / 10000.
-            newVecs[3][iC] /= float ( tmpVec[iC] )
-            newVecs[4][iC] /= float ( tmpVec[iC] )
-            newVecs[5][iC] /= float ( tmpVec[iC] )
+        if (tmpVec[iC] > 0):
+            tmpVec[iC] = float(tmpVec[iC]) / 10000.
+            newVecs[3][iC] /= float(tmpVec[iC])
+            newVecs[4][iC] /= float(tmpVec[iC])
+            newVecs[5][iC] /= float(tmpVec[iC])
 
-    if ( 0 ):
+    if (0):
         print " newVecs values 3-5 for two samples : "
         print newVecs[3][261], newVecs[4][261], newVecs[5][261]
         print newVecs[3][265], newVecs[4][265], newVecs[5][265]
@@ -322,10 +350,10 @@ def addCINfeature ( dataD, fType ):
 
     for iC in range(numCol):
         print " %4d \t %g \t %g \t %g \t %g \t %g \t %g " % \
-                ( iC, newVecs[0][iC], newVecs[1][iC], newVecs[2][iC],
-                      newVecs[3][iC], newVecs[4][iC], newVecs[5][iC] )
+            (iC, newVecs[0][iC], newVecs[1][iC], newVecs[2][iC],
+             newVecs[3][iC], newVecs[4][iC], newVecs[5][iC])
 
-    ## now we have the new data ...
+    # now we have the new data ...
     print " "
     print " adding these new features: ", newNames
     print " "
@@ -335,42 +363,41 @@ def addCINfeature ( dataD, fType ):
     newMatrix = dataMatrix + newVecs
     print len(dataMatrix), len(newMatrix)
 
-
     newD = {}
     newD['rowLabels'] = newRowLabels
     newD['colLabels'] = colLabels
     newD['dataType'] = dataD['dataType']
     newD['dataMatrix'] = newMatrix
 
-    return ( newD )
+    return (newD)
 
-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
+# -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
+# -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 
 if __name__ == "__main__":
 
-    if ( 1 ):
-        if ( len(sys.argv) == 3 ):
-	    inFile = sys.argv[1]
-	    outFile = sys.argv[2]
-	else:
-	    print " "
-	    print " Usage: %s <input TSV file> <output TSV file> "
-	    print " "
-	    sys.exit(-1)
+    if (1):
+        if (len(sys.argv) == 3):
+            inFile = sys.argv[1]
+            outFile = sys.argv[2]
+        else:
+            print " "
+            print " Usage: %s <input TSV file> <output TSV file> "
+            print " "
+            sys.exit(-1)
 
     print " "
-    print " Running : %s %s %s " % ( sys.argv[0], sys.argv[1], sys.argv[2] )
+    print " Running : %s %s %s " % (sys.argv[0], sys.argv[1], sys.argv[2])
     print " "
     print " "
 
-    ## now read in the input feature matrix ...
-    dataD = tsvIO.readTSV ( inFile )
+    # now read in the input feature matrix ...
+    dataD = tsvIO.readTSV(inFile)
 
-    ## add new custom features ...
-    dataD = addCINfeature ( dataD, "N:CNVR:" )
+    # add new custom features ...
+    dataD = addCINfeature(dataD, "N:CNVR:")
 
-    ## and write the matrix back out
-    tsvIO.writeTSV_dataMatrix ( dataD, 0, 0, outFile )
-    
-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
+    # and write the matrix back out
+    tsvIO.writeTSV_dataMatrix(dataD, 0, 0, outFile)
+
+# -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#

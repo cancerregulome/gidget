@@ -1,38 +1,42 @@
-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
+# -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 
-## these are system modules
+# these are system modules
 import commands
 import numpy
 import os
 import sys
 
-## these are my local modules
+# these are my local modules
 import miscIO
 import miscTCGA
 import path
 import tsvIO
 
-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
+# -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 
 NA_VALUE = -999999
 
 debugON = 0
 ## debugON = 1
 
-## NOTE: this is a modified script that handles ONLY the microRNAseq data from BCGSC
+# NOTE: this is a modified script that handles ONLY the microRNAseq data
+# from BCGSC
 platformStrings = [
-	'bcgsc.ca/illuminaga_mirnaseq/mirnaseq/',
-	'bcgsc.ca/illuminahiseq_mirnaseq/mirnaseq/' ]
+    'bcgsc.ca/illuminaga_mirnaseq/mirnaseq/',
+    'bcgsc.ca/illuminahiseq_mirnaseq/mirnaseq/']
 
 dataTypeDict = {}
-dataTypeDict["IlluminaGA_miRNASeq"]    = [ "N", "MIRN" ]
-dataTypeDict["IlluminaHiSeq_miRNASeq"] = [ "N", "MIRN" ]
+dataTypeDict["IlluminaGA_miRNASeq"] = ["N", "MIRN"]
+dataTypeDict["IlluminaHiSeq_miRNASeq"] = ["N", "MIRN"]
 
-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
+# -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 # from Timo's resegmentation code:
 
+
 class AutoVivification(dict):
+
     """Implementation of perl's autovivification feature."""
+
     def __getitem__(self, item):
         try:
             return dict.__getitem__(self, item)
@@ -40,37 +44,40 @@ class AutoVivification(dict):
             value = self[item] = type(self)()
             return value
 
-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
+# -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 
-def getLastBit ( aName ):
+
+def getLastBit(aName):
 
     ii = len(aName) - 1
-    while ( aName[ii] != '/' ):
+    while (aName[ii] != '/'):
         ii -= 1
 
-    ## print ' <%s>    <%s> ' % ( aName, aName[ii+1:] )
+    # print ' <%s>    <%s> ' % ( aName, aName[ii+1:] )
 
-    return ( aName[ii+1:] )
+    return (aName[ii + 1:])
 
-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
+# -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 
-def loadNameMap ( mapFilename ):
+
+def loadNameMap(mapFilename):
 
     metaData = {}
 
-    fh = file ( mapFilename )
+    fh = file(mapFilename)
     for aLine in fh:
         aLine = aLine.strip()
         tokenList = aLine.split('\t')
         metaData[tokenList[1]] = tokenList[0]
     fh.close()
 
-    return ( metaData )
+    return (metaData)
 
-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
-## hsa-let-7a-2 MIMAT0010195 N:MIRN:hsa-let-7a-2:::::MIMAT0010195
+# -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
+# hsa-let-7a-2 MIMAT0010195 N:MIRN:hsa-let-7a-2:::::MIMAT0010195
 
-def makeFeatureName ( tok0, tok1, metaData ):
+
+def makeFeatureName(tok0, tok1, metaData):
 
     try:
         featName = "N:MIRN:" + metaData[tok1] + ":::::" + tok1
@@ -79,116 +86,119 @@ def makeFeatureName ( tok0, tok1, metaData ):
         featName = "N:MIRN:" + tok0 + ":::::" + tok1
         print " BAD ??? ", tok0, tok1, featName
 
-    return ( featName )
+    return (featName)
 
-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
+# -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 
-def makeOutputFilename ( outDir, tumorList, zString, outSuffix ):
 
-    if ( len(tumorList) == 1 ):
+def makeOutputFilename(outDir, tumorList, zString, outSuffix):
+
+    if (len(tumorList) == 1):
         zCancer = tumorList[0]
     else:
-	tumorList.sort()
-	zCancer = tumorList[0]
-	for aCancer in tumorList[1:]:
-	    zCancer = zCancer + '_' + aCancer
-	print " --> combined multi-cancer name : <%s> " % zCancer
+        tumorList.sort()
+        zCancer = tumorList[0]
+        for aCancer in tumorList[1:]:
+            zCancer = zCancer + '_' + aCancer
+        print " --> combined multi-cancer name : <%s> " % zCancer
 
-    ## start by pasting together the outDir, cancer sub-dir, then '/'
-    ## and then the cancer name again, followed by a '.'
+    # start by pasting together the outDir, cancer sub-dir, then '/'
+    # and then the cancer name again, followed by a '.'
     outFilename = outDir + zCancer + "/" + zCancer + "."
-    ## now we are just going to assume that we are writing to the current working directory (21dec12)
+    # now we are just going to assume that we are writing to the current
+    # working directory (21dec12)
     outFilename = outDir + zCancer + "."
 
-    ## next we want to replace all '/' in the platform string with '__'
+    # next we want to replace all '/' in the platform string with '__'
     i1 = 0
-    while ( i1 >= 0 ):
+    while (i1 >= 0):
         i2 = zString.find('/', i1)
-	if ( i1>0 and i2>0 ):
-	    outFilename += "__"
-	if ( i2 > 0 ):
-	    outFilename += zString[i1:i2] 
-	    i1 = i2 + 1
-	else:
-	    i1 = i2
+        if (i1 > 0 and i2 > 0):
+            outFilename += "__"
+        if (i2 > 0):
+            outFilename += zString[i1:i2]
+            i1 = i2 + 1
+        else:
+            i1 = i2
 
-    ## and finally we add on the suffix (usually something like '25jun')
-    if ( not outSuffix.startswith(".") ):
+    # and finally we add on the suffix (usually something like '25jun')
+    if (not outSuffix.startswith(".")):
         outFilename += "."
     outFilename += outSuffix
 
-    return ( outFilename )
+    return (outFilename)
 
-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
+# -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 
 if __name__ == "__main__":
 
-    ## list of cancer directory names
-    cancerDirNames = [ 'blca', 'brca', 'cesc', 'cntl', 'coad', 'dlbc', 'esca', 'gbm', 'hnsc', 'kich', 'kirc', \
-                        'kirp', 'laml', 'lcll', 'lgg', 'lihc', 'lnnh', 'luad', 'lusc', 'meso', 'ov',  \
-                        'paad', 'prad', 'read', 'sarc', 'skcm', 'stad', 'thca', 'ucec', 'coadread', \
-                        'lcml', 'pcpg' ]
+    # list of cancer directory names
+    cancerDirNames = [
+        'blca', 'brca', 'cesc', 'cntl', 'coad', 'dlbc', 'esca', 'gbm', 'hnsc', 'kich', 'kirc',
+        'kirp', 'laml', 'lcll', 'lgg', 'lihc', 'lnnh', 'luad', 'lusc', 'meso', 'ov',
+        'paad', 'prad', 'read', 'sarc', 'skcm', 'stad', 'thca', 'ucec', 'coadread',
+        'lcml', 'pcpg']
 
-    if ( 1 ):
+    if (1):
 
-        if ( len(sys.argv)<4 ):
-	    print " Usage: %s <outSuffix> <platformID> <tumorType#1> [tumorType#2 ...] [snapshot-name]"
-	    print " currently supported platforms : ", platformStrings
-	    print " currently supported tumor types : ", cancerDirNames
-	    sys.exit(-1)
+        if (len(sys.argv) < 4):
+            print " Usage: %s <outSuffix> <platformID> <tumorType#1> [tumorType#2 ...] [snapshot-name]"
+            print " currently supported platforms : ", platformStrings
+            print " currently supported tumor types : ", cancerDirNames
+            sys.exit(-1)
 
-	else:
+        else:
 
-	    ## output suffix ...
-	    outSuffix = sys.argv[1]
+            # output suffix ...
+            outSuffix = sys.argv[1]
 
-	    ## specified platform ...
-	    platformID = sys.argv[2]
-	    if ( platformID[-1] != '/' ): platformID += '/'
-	    if ( platformID not in platformStrings ):
-	        print " platform <%s> is not supported " % platformID
-		print " currently supported platforms are: ", platformStrings
-		sys.exit(-1)
-	    platformStrings = [ platformID ]
+            # specified platform ...
+            platformID = sys.argv[2]
+            if (platformID[-1] != '/'):
+                platformID += '/'
+            if (platformID not in platformStrings):
+                print " platform <%s> is not supported " % platformID
+                print " currently supported platforms are: ", platformStrings
+                sys.exit(-1)
+            platformStrings = [platformID]
 
-	    ## assume that the default snapshotName is "dcc-snapshot"
-	    snapshotName = "dcc-snapshot"
+            # assume that the default snapshotName is "dcc-snapshot"
+            snapshotName = "dcc-snapshot"
 
-	    ## specified tumor type(s) ...
-	    argList = sys.argv[3:]
-	    ## print argList
-	    tumorList = []
-	    for aType in argList:
+            # specified tumor type(s) ...
+            argList = sys.argv[3:]
+            # print argList
+            tumorList = []
+            for aType in argList:
 
-		tumorType = aType.lower()
-		if ( tumorType in cancerDirNames ):
-		    tumorList += [ tumorType ]
-		elif ( tumorType.find("snap") >= 0 ):
-		    snapshotName = tumorType
-		    print " using this snapshot : <%s> " % snapshotName
-		else:
-		    print " ERROR ??? tumorType <%s> not in list of known tumors ??? " % tumorType
-		    print cancerDirNames
+                tumorType = aType.lower()
+                if (tumorType in cancerDirNames):
+                    tumorList += [tumorType]
+                elif (tumorType.find("snap") >= 0):
+                    snapshotName = tumorType
+                    print " using this snapshot : <%s> " % snapshotName
+                else:
+                    print " ERROR ??? tumorType <%s> not in list of known tumors ??? " % tumorType
+                    print cancerDirNames
 
-	    if ( len(tumorList) < 1 ):
-		print " ERROR ??? have no tumor types in list ??? ", tumorList
-		sys.exit(-1)
+            if (len(tumorList) < 1):
+                print " ERROR ??? have no tumor types in list ??? ", tumorList
+                sys.exit(-1)
 
-	    print " tumor type(s) list : ", tumorList
+            print " tumor type(s) list : ", tumorList
 
-	
-    ## --------------------------------------
-    ## HERE is where the real work starts ...
-
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## now we need to get set up for writing the output ...
-    ## NEW: 21dec12 ... assuming that we will write to current working directory
+    # --------------------------------------
+    # HERE is where the real work starts ...
+    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    # now we need to get set up for writing the output ...
+    # NEW: 21dec12 ... assuming that we will write to current working directory
     ## outDir = "/titan/cancerregulome3/TCGA/outputs/"
     outDir = "./"
-    outFilename = makeOutputFilename ( outDir, tumorList, platformID, outSuffix )
+    outFilename = makeOutputFilename(
+        outDir, tumorList, platformID, outSuffix)
 
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## initialize a bunch of things ...
+    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    # initialize a bunch of things ...
     sampleList = []
     gotFiles = []
     geneList = []
@@ -196,55 +206,56 @@ if __name__ == "__main__":
     numProc = 0
     iS = 0
 
-    ## and then loop over tumor types ...
+    # and then loop over tumor types ...
     for zCancer in tumorList:
         print ' '
-	print ' ********************************** '   
-	print ' LOOP over %d CANCER TYPES ... %s ' % ( len(tumorList), zCancer )
+        print ' ********************************** '
+        print ' LOOP over %d CANCER TYPES ... %s ' % (len(tumorList), zCancer)
 
-	## piece together the directory name ...
-	## topDir = "/titan/cancerregulome11/TCGA/repositories/dcc-snapshot/public/tumor/" + zCancer + "/cgcc/" + platformID
-	topDir = "/titan/cancerregulome11/TCGA/repositories/" + snapshotName + "/public/tumor/" + zCancer + "/cgcc/" + platformID
+        # piece together the directory name ...
+        ## topDir = "/titan/cancerregulome11/TCGA/repositories/dcc-snapshot/public/tumor/" + zCancer + "/cgcc/" + platformID
+        topDir = "/titan/cancerregulome11/TCGA/repositories/" + \
+            snapshotName + "/public/tumor/" + zCancer + "/cgcc/" + platformID
 
-	print ' starting from top-level directory ', topDir
+        print ' starting from top-level directory ', topDir
 
-	dMatch = "Level_3"
+        dMatch = "Level_3"
 
-        if ( not os.path.exists(topDir) ):
-	    print '     --> <%s> does not exist ' % topDir
-	    continue
+        if (not os.path.exists(topDir)):
+            print '     --> <%s> does not exist ' % topDir
+            continue
 
-	d1 = path.path ( topDir )
-	for dName in d1.dirs():
+        d1 = path.path(topDir)
+        for dName in d1.dirs():
 
-	    print dName
-	
-	    if ( dName.find(dMatch) >= 0 ):
-		print ' '
-		print '     found a <%s> directory : <%s> ' % ( dMatch, dName )
-		archiveName = getLastBit ( dName ) 
-		print '     archiveName : ', archiveName
+            print dName
+
+            if (dName.find(dMatch) >= 0):
+                print ' '
+                print '     found a <%s> directory : <%s> ' % (dMatch, dName)
+                archiveName = getLastBit(dName)
+                print '     archiveName : ', archiveName
 
                 cmdString = "/users/sreynold/to_be_checked_in/TCGAfmp/shscript/expression_matrix_mimat.pl "
                 cmdString += "-m /titan/cancerregulome11/TCGA/repositories/mirna_bcgsc/tcga_mirna_bcgsc_hg19.adf "
                 cmdString += "-p %s " % dName
 
                 print " "
-                print cmdString 
+                print cmdString
                 print " "
-                ( status, output ) = commands.getstatusoutput ( cmdString )
+                (status, output) = commands.getstatusoutput(cmdString)
 
                 normMatFilename = dName + "/expn_matrix_mimat_norm.txt"
                 print " normMatFilename = <%s> " % normMatFilename
 
-                ## make sure that we can open this file ...
+                # make sure that we can open this file ...
                 try:
-                    fh = file ( normMatFilename, 'r' )
-                    gotFiles += [ normMatFilename ]
+                    fh = file(normMatFilename, 'r')
+                    gotFiles += [normMatFilename]
                     fh.close()
-                    if ( normMatFilename.find("IlluminaHiSeq") > 0 ):
+                    if (normMatFilename.find("IlluminaHiSeq") > 0):
                         zPlat = "IlluminaHiSeq_miRNASeq"
-                    elif ( normMatFilename.find("IlluminaGA") > 0 ):
+                    elif (normMatFilename.find("IlluminaGA") > 0):
                         zPlat = "IlluminaGA_miRNASeq"
                     else:
                         print " not a valid platform ??? !!! "
@@ -257,27 +268,29 @@ if __name__ == "__main__":
 
     print " "
     print " "
-    if ( len(gotFiles) == 0 ):
+    if (len(gotFiles) == 0):
         print " ERROR in new_Level3_miRNAseq ... no data files found "
         sys.exit(-1)
-    if ( len(gotFiles) > 1 ):
+    if (len(gotFiles) > 1):
         print " ERROR ??? we should have only one file at this point "
         print gotFiles
         sys.exit(-1)
 
-    ## if we get this far, we should make sure that the output directory we want exists
+    # if we get this far, we should make sure that the output directory we
+    # want exists
     print " --> testing that we have an output directory ... <%s> " % outDir
-    tsvIO.createDir ( outDir )
+    tsvIO.createDir(outDir)
     print "     output file name will be called <%s> " % outFilename
 
-    ## we also need to read in the mapping file ...
-    metaData = loadNameMap ( "/titan/cancerregulome11/TCGA/repositories/mirna_bcgsc/mature.fa.flat.human.mirbase_v19.txt" )
+    # we also need to read in the mapping file ...
+    metaData = loadNameMap(
+        "/titan/cancerregulome11/TCGA/repositories/mirna_bcgsc/mature.fa.flat.human.mirbase_v19.txt")
 
-    if ( 1 ):
+    if (1):
 
-        fh = file ( gotFiles[0], 'r' )
-        numRow = miscIO.num_lines ( fh ) - 1
-        numCol = miscIO.num_cols ( fh, '\t' ) - 1
+        fh = file(gotFiles[0], 'r')
+        numRow = miscIO.num_lines(fh) - 1
+        numCol = miscIO.num_cols(fh, '\t') - 1
 
         rowLabels = []
         dataMatrix = [0] * numRow
@@ -287,56 +300,58 @@ if __name__ == "__main__":
         hdrLine = fh.readline()
         hdrLine = hdrLine.strip()
         hdrTokens = hdrLine.split('\t')
-        if ( len(hdrTokens) != (numCol+1) ):
+        if (len(hdrTokens) != (numCol + 1)):
             print " ERROR #1 ??? "
             sys.exit(-1)
 
         done = 0
         iR = 0
         numNA = 0
-        while ( not done ):
+        while (not done):
             aLine = fh.readline()
             aLine = aLine.strip()
             tokenList = aLine.split('\t')
-            if ( len(tokenList) != (numCol+1) ):
+            if (len(tokenList) != (numCol + 1)):
                 done = 1
             else:
                 aLabel = tokenList[0]
-                ## print " label = <%s> " % aLabel
+                # print " label = <%s> " % aLabel
                 labelTokens = aLabel.split('.')
-                ## print labelTokens
-                featName = makeFeatureName ( labelTokens[0], labelTokens[1], metaData )
-                ## print featName
-                rowLabels += [ featName ]
+                # print labelTokens
+                featName = makeFeatureName(
+                    labelTokens[0], labelTokens[1], metaData)
+                # print featName
+                rowLabels += [featName]
 
                 for iC in range(numCol):
                     try:
-                        fVal = float ( tokenList[iC+1] )
+                        fVal = float(tokenList[iC + 1])
                         dataMatrix[iR][iC] = fVal
                     except:
                         dataMatrix[iR][iC] = NA_VALUE
                         numNA += 1
                 iR += 1
-                print " iR=%d    numNA=%d " % ( iR, numNA )
+                print " iR=%d    numNA=%d " % (iR, numNA)
 
-	dataD = {}
-	dataD['rowLabels'] = rowLabels
-	dataD['colLabels'] = hdrTokens[1:]
-	dataD['dataMatrix'] = dataMatrix
-	dataD['dataType'] = "N:MIRN"
-	print ' writing out data matrix to ', outFilename
+        dataD = {}
+        dataD['rowLabels'] = rowLabels
+        dataD['colLabels'] = hdrTokens[1:]
+        dataD['dataMatrix'] = dataMatrix
+        dataD['dataType'] = "N:MIRN"
+        print ' writing out data matrix to ', outFilename
 
-	newFeatureName = "C:SAMP:mirnPlatform"
-	newFeatureValue = zPlat
-	dataD = tsvIO.addConstFeature ( dataD, newFeatureName, newFeatureValue )
+        newFeatureName = "C:SAMP:mirnPlatform"
+        newFeatureValue = zPlat
+        dataD = tsvIO.addConstFeature(dataD, newFeatureName, newFeatureValue)
 
-	sortRowFlag = 1
-	sortColFlag = 1
-	tsvIO.writeTSV_dataMatrix ( dataD, sortRowFlag, sortColFlag, outFilename )
+        sortRowFlag = 1
+        sortColFlag = 1
+        tsvIO.writeTSV_dataMatrix(
+            dataD, sortRowFlag, sortColFlag, outFilename)
 
     print ' '
     print ' DONE !!! '
     print ' '
 
-	
-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
+
+# -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#

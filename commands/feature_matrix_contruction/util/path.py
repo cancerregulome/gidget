@@ -34,7 +34,14 @@ Date:    7 Mar 2004
 
 from __future__ import generators
 
-import sys, warnings, os, fnmatch, glob, shutil, codecs, md5
+import sys
+import warnings
+import os
+import fnmatch
+import glob
+import shutil
+import codecs
+import md5
 
 __version__ = '2.1'
 __all__ = ['path']
@@ -82,7 +89,9 @@ if hasattr(file, 'newlines'):
 class TreeWalkWarning(Warning):
     pass
 
+
 class path(_base):
+
     """ Represents a filesystem path.
 
     For documentation on individual methods, consult their
@@ -98,7 +107,7 @@ class path(_base):
     def __add__(self, more):
         try:
             resultStr = _base.__add__(self, more)
-        except TypeError:  #Python bug
+        except TypeError:  # Python bug
             resultStr = NotImplemented
         if resultStr is NotImplemented:
             return resultStr
@@ -127,17 +136,29 @@ class path(_base):
         return cls(_getcwd())
     getcwd = classmethod(getcwd)
 
-
     # --- Operations on path strings.
-
     isabs = os.path.isabs
-    def abspath(self):       return self.__class__(os.path.abspath(self))
-    def normcase(self):      return self.__class__(os.path.normcase(self))
-    def normpath(self):      return self.__class__(os.path.normpath(self))
-    def realpath(self):      return self.__class__(os.path.realpath(self))
-    def expanduser(self):    return self.__class__(os.path.expanduser(self))
-    def expandvars(self):    return self.__class__(os.path.expandvars(self))
-    def dirname(self):       return self.__class__(os.path.dirname(self))
+
+    def abspath(self):
+        return self.__class__(os.path.abspath(self))
+
+    def normcase(self):
+        return self.__class__(os.path.normcase(self))
+
+    def normpath(self):
+        return self.__class__(os.path.normpath(self))
+
+    def realpath(self):
+        return self.__class__(os.path.realpath(self))
+
+    def expanduser(self):
+        return self.__class__(os.path.expanduser(self))
+
+    def expandvars(self):
+        return self.__class__(os.path.expandvars(self))
+
+    def dirname(self):
+        return self.__class__(os.path.dirname(self))
     basename = os.path.basename
 
     def expand(self):
@@ -331,11 +352,11 @@ class path(_base):
         items whose names match the given pattern.
         """
 
-	try:
+        try:
             names = os.listdir(self)
-	except:
-	    print " ERROR in path.listdir ... ", self
-	    sys.exit(-1)
+        except:
+            print " ERROR in path.listdir ... ", self
+            sys.exit(-1)
 
         if pattern is not None:
             names = fnmatch.filter(names, pattern)
@@ -364,7 +385,7 @@ class path(_base):
         whose names match the given pattern.  For example,
         d.files('*.pyc').
         """
-        
+
         return [p for p in self.listdir(pattern) if p.isfile()]
 
     def walk(self, pattern=None, errors='strict'):
@@ -519,9 +540,7 @@ class path(_base):
         cls = self.__class__
         return [cls(s) for s in glob.glob(_base(self / pattern))]
 
-
     # --- Reading or writing an entire file at once.
-
     def open(self, mode='r'):
         """ Open this file.  Return a file object. """
         return file(self, mode)
@@ -846,11 +865,13 @@ class path(_base):
             desc = win32security.GetFileSecurity(
                 self, win32security.OWNER_SECURITY_INFORMATION)
             sid = desc.GetSecurityDescriptorOwner()
-            account, domain, typecode = win32security.LookupAccountSid(None, sid)
+            account, domain, typecode = win32security.LookupAccountSid(
+                None, sid)
             return domain + u'\\' + account
         else:
             if pwd is None:
-                raise NotImplementedError("path.owner is not implemented on this platform.")
+                raise NotImplementedError(
+                    "path.owner is not implemented on this platform.")
             st = self.stat()
             return pwd.getpwuid(st.st_uid).pw_name
 
@@ -867,9 +888,7 @@ class path(_base):
         def pathconf(self, name):
             return os.pathconf(self, name)
 
-
     # --- Modifying operations on files and directories
-
     def utime(self, times):
         """ Set the access and modified times of this file. """
         os.utime(self, times)
@@ -887,9 +906,7 @@ class path(_base):
     def renames(self, new):
         os.renames(self, new)
 
-
     # --- Create/delete operations on directories
-
     def mkdir(self, mode=0777):
         os.mkdir(self, mode)
 
@@ -902,9 +919,7 @@ class path(_base):
     def removedirs(self):
         os.removedirs(self)
 
-
     # --- Modifying operations on files
-
     def touch(self):
         """ Set the access/modified times of this file to the current time.
         Create the file if it does not exist.
@@ -919,9 +934,7 @@ class path(_base):
     def unlink(self):
         os.unlink(self)
 
-
     # --- Links
-
     if hasattr(os, 'link'):
         def link(self, newpath):
             """ Create a hard link at 'newpath', pointing to this file. """
@@ -951,9 +964,7 @@ class path(_base):
             else:
                 return (self.parent / p).abspath()
 
-
     # --- High-level functions from shutil
-
     copyfile = shutil.copyfile
     copymode = shutil.copymode
     copystat = shutil.copystat
@@ -964,9 +975,7 @@ class path(_base):
         move = shutil.move
     rmtree = shutil.rmtree
 
-
     # --- Special stuff from os
-
     if hasattr(os, 'chroot'):
         def chroot(self):
             os.chroot(self)
@@ -974,4 +983,3 @@ class path(_base):
     if hasattr(os, 'startfile'):
         def startfile(self):
             os.startfile(self)
-

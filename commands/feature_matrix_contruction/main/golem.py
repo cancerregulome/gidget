@@ -37,7 +37,7 @@ import socket
 supporttls = True
 
 try:
-    import json  #python 2.6 included simplejson as json
+    import json  # python 2.6 included simplejson as json
 except ImportError:
     import simplejson as json
 try:
@@ -66,6 +66,7 @@ resizehost cname newmax             : change max tasks of a worker by cname
 restart                             : cycle all golem proccess on the cluster...use only for udating core components
 die                                 : kill everything ... rarelly used
 """
+
 
 def runOneLine(count, args, pwd, url, loud=True, label="", email=""):
     """
@@ -264,10 +265,12 @@ def resizeName(nodename, size, master, pwd):
         Any failure of the HTTP channel will go uncaught.
 
     """
-    nodes = json.JSONDecoder().decode(getNodesStatus(master, False)[1])["Items"]
+    nodes = json.JSONDecoder().decode(
+        getNodesStatus(master, False)[1])["Items"]
     for node in nodes:
         if(node["Hostname"].split(".")[0] == nodename):
-            print("Resizing %s from %i to %s") % (node["Hostname"], node["MaxJobs"], size)
+            print("Resizing %s from %i to %s") % (
+                node["Hostname"], node["MaxJobs"], size)
             return doPost(master + "/nodes/" + node["NodeId"] + "/resize/" + "%s" % (size), {}, "", pwd)
 
 
@@ -284,14 +287,18 @@ def resizeAll(size, master, pwd):
 
 
     """
-    nodes = json.JSONDecoder().decode(getNodesStatus(master, False)[1])["Items"]
+    nodes = json.JSONDecoder().decode(
+        getNodesStatus(master, False)[1])["Items"]
     for node in nodes:
-        if int(node["MaxJobs"])!=0:
-            print("Resizing %s from %i to %s") % (node["Hostname"], node["MaxJobs"], size)
-            doPost(master + "/nodes/" + node["NodeId"] + "/resize/" + "%s" % (size), {}, "", pwd)
+        if int(node["MaxJobs"]) != 0:
+            print("Resizing %s from %i to %s") % (
+                node["Hostname"], node["MaxJobs"], size)
+            doPost(master + "/nodes/" +
+                   node["NodeId"] + "/resize/" + "%s" % (size), {}, "", pwd)
 
 
 class HTTPSTLSv1Connection(httplib.HTTPConnection):
+
         """This class allows communication via TLS, it is version of httplib.HTTPSConnection that specifies TLSv1."""
 
         default_port = httplib.HTTPS_PORT
@@ -310,7 +317,8 @@ class HTTPSTLSv1Connection(httplib.HTTPConnection):
             if self._tunnel_host:
                 self.sock = sock
                 self._tunnel()
-            self.sock = ssl.wrap_socket(sock, self.key_file, self.cert_file, False, ssl.CERT_NONE, ssl.PROTOCOL_TLSv1)
+            self.sock = ssl.wrap_socket(
+                sock, self.key_file, self.cert_file, False, ssl.CERT_NONE, ssl.PROTOCOL_TLSv1)
 
 
 def encode_multipart_formdata(data, filebody):
@@ -326,7 +334,8 @@ def encode_multipart_formdata(data, filebody):
         L.append(value)
     if filebody != "":
         L.append('--' + BOUNDARY)
-        L.append('Content-Disposition: form-data; name="jsonfile"; filename="data.json"')
+        L.append(
+            'Content-Disposition: form-data; name="jsonfile"; filename="data.json"')
         L.append('Content-Type: text/plain')
         L.append('')
         L.append(filebody)
@@ -345,7 +354,8 @@ def doGet(url, loud=True):
     if u.scheme == "http":
         conn = httplib.HTTPConnection(u.hostname, u.port)
     else:
-        conn = HTTPSTLSv1Connection(u.hostname, u.port)  #privateKey=key,certChain=X509CertChain([cert]))
+        # privateKey=key,certChain=X509CertChain([cert]))
+        conn = HTTPSTLSv1Connection(u.hostname, u.port)
 
     try:
         conn.request("GET", u.path)
@@ -366,7 +376,7 @@ def doGet(url, loud=True):
         print resp.status, resp.reason
 
     return resp, output
-    #conn.close()
+    # conn.close()
 
 
 def doPost(url, paramMap, jsondata, password, loud=True, label="", email=""):
@@ -379,12 +389,12 @@ def doPost(url, paramMap, jsondata, password, loud=True, label="", email=""):
     u = urlparse.urlparse(url)
     content_type, body = encode_multipart_formdata(paramMap, jsondata)
     headers = {"Content-type": content_type,
-        'content-length': str(len(body)),
-        "Accept": "text/plain",
-        "x-golem-apikey": password,
-        "x-golem-job-label": label,
-        "x-golem-job-owner": email
-    }
+               'content-length': str(len(body)),
+               "Accept": "text/plain",
+               "x-golem-apikey": password,
+               "x-golem-job-label": label,
+               "x-golem-job-owner": email
+               }
 
     if loud:
         print "scheme: %s host: %s port: %s" % (u.scheme, u.hostname, u.port)
@@ -393,7 +403,8 @@ def doPost(url, paramMap, jsondata, password, loud=True, label="", email=""):
         conn = httplib.HTTPConnection(u.hostname, u.port)
     else:
 
-        conn = HTTPSTLSv1Connection(u.hostname, u.port)  #,privateKey=key,certChain=X509CertChain([cert]))
+        # ,privateKey=key,certChain=X509CertChain([cert]))
+        conn = HTTPSTLSv1Connection(u.hostname, u.port)
     try:
         conn.request("POST", u.path, body, headers)
     except ssl.SSLError:
@@ -413,7 +424,7 @@ def doPost(url, paramMap, jsondata, password, loud=True, label="", email=""):
         print resp.status, resp.reason
 
     return resp, output
-    #conn.close()
+    # conn.close()
 
 
 def canonizeMaster(master, loud=True):
@@ -429,7 +440,8 @@ def canonizeMaster(master, loud=True):
                 print "Using http (insecure)."
             master = "http://" + master
     if master[0:5] == "https" and supporttls == False:
-        raise ValueError("HTTPS specified, but the SSL package tlslite is not available. Install tlslite.")
+        raise ValueError(
+            "HTTPS specified, but the SSL package tlslite is not available. Install tlslite.")
     return master
 
 
@@ -439,9 +451,6 @@ def generateJobList(fo):
     for line in fo:
         values = line.split()
         yield {"Count": int(values[0]), "Args": values[1:]}
-
-
-
 
 
 def dieWithUssage():
@@ -468,7 +477,7 @@ def main():
     email = ""
     nonflags = []
     flags = True
-    #TODO: abstract and automate printing of ussage
+    # TODO: abstract and automate printing of ussage
     while commandIndex < len(sys.argv):
         if flags == True and sys.argv[commandIndex] == "-p":
             pwd = sys.argv[commandIndex + 1]
@@ -493,7 +502,8 @@ def main():
     try:
         cmd = nonflags[0].lower()
         if cmd == "run":
-            runOneLine(int(nonflags[1]), nonflags[2:], pwd, url, True, label, email)
+            runOneLine(int(nonflags[1]), nonflags[2:],
+                       pwd, url, True, label, email)
         elif cmd == "runlist":
             fo = open(nonflags[1])
             runList(fo, pwd, url, True, label, email)
@@ -521,13 +531,15 @@ def main():
         elif cmd == "resizeall":
             resizeAll(nonflags[1], master, pwd)
         elif cmd == "restart":
-            input = raw_input("This will kill all jobs on the cluster and is only used for updating golem version. Enter \"Y\" to continue.>")
+            input = raw_input(
+                "This will kill all jobs on the cluster and is only used for updating golem version. Enter \"Y\" to continue.>")
             if input == "Y":
                 doPost(master + "/nodes/restart", {}, "", pwd)
             else:
                 print "Canceled"
         elif cmd == "die":
-            input = raw_input("This brings the entire cluster down and is almost never used. Enter \"Y\" to continue.>")
+            input = raw_input(
+                "This brings the entire cluster down and is almost never used. Enter \"Y\" to continue.>")
             if input == "Y":
                 doPost(master + "/nodes/die", {}, "", pwd)
             else:

@@ -27,6 +27,7 @@ import uuid
 import traceback
 import time
 
+
 def _unpickleSequence(pickleFiles):
     """Generator function that unpickles results from job runs.
 
@@ -47,7 +48,7 @@ def _unpickleSequence(pickleFiles):
             seq = cPickle.load(picklefile)
             for errorflag, data in seq:
                 if errorflag:
-                    #data contains tuple: (exception, traceback string)
+                    # data contains tuple: (exception, traceback string)
                     print >> sys.stderr, data[1]
                     raise data[0]
                 else:
@@ -55,52 +56,65 @@ def _unpickleSequence(pickleFiles):
         finally:
             picklefile.close()
 
+
 class ExecutionFailure(Exception):
+
     """
     Exception class that represents any unknown failure preventing results from being generated on a node.
     """
+
     def __init__(self, message):
         """
         Constructs an ExecutionFailure exception with the given message.
         """
         self.message = message
+
     def __str__(self):
         """
         Returns the name of the exception class, and the message assigned to this exception.
         """
         return "ExecutionFailure: " + str(self.message)
+
     def __repr__(self):
         """
         Returns the constructor expression for this class.
         """
         return "ExecutionFailure(message=" + repr(self.message) + ")"
 
+
 class InfiniteRecursionError(Exception):
+
     """
     Exception class that represents the detection of goDoIt being called from a job that is already a Golem task,
     which almost guarantees an infinite hang, and usually represents a lack of __name__ == '__main__' guards.
     """
+
     def __init__(self, message):
         """
         Constructs an InfiniteRecursionError with the given message.
         """
         self.message = message
+
     def __str__(self):
         """
         Returns the name of the exception class, and the message assigned to this exception.
         """
         return "InfiniteRecursionError: " + str(self.message)
+
     def __repr__(self):
         """
         Returns the constructor expression for this class.
         """
         return "InfiniteRecursionError(message=" + repr(self.message) + ")"
 
+
 class Golemizer:
+
     """
     Class that represents connection/configuration information for a Golem server, and the logic to distribute a job.
     """
-    def __init__(self, serverUrl, serverPass, golemOutputPath, pickleScratch, thisLibraryPath, pyPath = "/tools/bin/python2.7", pickleOut = None, taskSize = 10):
+
+    def __init__(self, serverUrl, serverPass, golemOutputPath, pickleScratch, thisLibraryPath, pyPath="/tools/bin/python2.7", pickleOut=None, taskSize=10):
         """
         Constructor for a Golemizer.
         Parameters:
@@ -168,7 +182,7 @@ class Golemizer:
         nextPickle.flush()
         nextPickle.close()
 
-    def goDoIt(self, inputSeq, commonData, targetFunction, binplace = True, alternateSource = None, recursive = False, quiet = False, label="", email=""):
+    def goDoIt(self, inputSeq, commonData, targetFunction, binplace=True, alternateSource=None, recursive=False, quiet=False, label="", email=""):
         """
         Executes a function on the Golem cluster indicated by the settings for this object.
         Parameters:
@@ -201,18 +215,18 @@ class Golemizer:
             email - Informational field to identify the person running the job in case they need to be contacted. Optional.
         """
         if len(sys.argv) > 1 and sys.argv[1] == "--golemtask":
-            #uh-oh
+            # uh-oh
             raise InfiniteRecursionError("goDoIt called from something that was already a Golem task, " +
-                                        "without the 'recursive' flag indicating that this is intentional." +
-                                        "Make sure to test for __name__ == '__main__' in your main program," +
-                                        "or it will try to execute in its entirety when Golemizer tries to import.")
+                                         "without the 'recursive' flag indicating that this is intentional." +
+                                         "Make sure to test for __name__ == '__main__' in your main program," +
+                                         "or it will try to execute in its entirety when Golemizer tries to import.")
 
         restoreThisCwdOrPeopleWillHateMePassionately = os.getcwd()
         loud = not quiet
         try:
             outName = str(uuid.uuid1())
             os.chdir(self.pickleInputShare)
-            os.mkdir(outName) #insecure: mode 0777
+            os.mkdir(outName)  # insecure: mode 0777
             os.chdir(outName)
             picklePath = os.getcwd()
             pickleCount = 0
@@ -233,23 +247,24 @@ class Golemizer:
                 pickleCount += 1
 
             if not alternateSource:
-                #restore original path or getabsfile doesn't work correctly as of 2.7
+                # restore original path or getabsfile doesn't work correctly as
+                # of 2.7
                 os.chdir(restoreThisCwdOrPeopleWillHateMePassionately)
                 target = inspect.getabsfile(targetFunction)
                 os.chdir(self.pickleInputShare)
                 os.chdir(outName)
-                #print "===> Original file:", target
+                # print "===> Original file:", target
             else:
                 target = alternateSource
 
             if binplace:
-                #print "===> Original file:", target
+                # print "===> Original file:", target
                 newTarget = os.path.join(picklePath, os.path.basename(target))
-                #print "===> New file:", newTarget
+                # print "===> New file:", newTarget
                 shutil.copy2(target, newTarget)
                 target = newTarget
-            
-            time.sleep(2)    
+
+            time.sleep(2)
             commonFile = open("common.pkl", "wb")
             commonObjectPickler = cPickle.Pickler(commonFile, 2)
             commonObjectPickler.dump(commonData)
@@ -258,50 +273,58 @@ class Golemizer:
             commonFile.close()
 
             runlist = [
-                    {"Count":1, "Args":[self.pyPath,
-                                        self.thisLibraryPath,
-                                        "--golemtask",
-                                        os.path.join(picklePath, "common.pkl"),
-                                        os.path.join(picklePath, str(n)+".pkl"), #we are making certain filename assumptions on the client side
-                                        self.jobOutputPath,
-                                        target]
-                    }
+                {"Count": 1, "Args": [self.pyPath,
+                                      self.thisLibraryPath,
+                                      "--golemtask",
+                                      os.path.join(
+                                          picklePath, "common.pkl"),
+                                      # we are making certain filename
+                                      # assumptions on the client side
+                                      os.path.join(
+                                          picklePath, str(n) + ".pkl"),
+                                      self.jobOutputPath,
+                                      target]
+                 }
                 for n in range(0, pickleCount)]
 
-            response, content = golem.runBatch(runlist, self.serverPass, self.masterPath, loud, label, email)
+            response, content = golem.runBatch(
+                runlist, self.serverPass, self.masterPath, loud, label, email)
             jobId = golemBlocking.jobIdFromResponse(content)
             finalStatus = golemBlocking.stall(jobId, self.masterPath, loud)
             if loud and (finalStatus["Status"] != "SUCCESS"):
                 print "Uh-oh- job status is", finalStatus["Status"], "and we're probably going to crash soon"
 
-            #Note: We're choosing to ignore stdout/stderr. We can revisit this design decision later and decide to
-            #do something instead, if we really desperately want to
+            # Note: We're choosing to ignore stdout/stderr. We can revisit this design decision later and decide to
+            # do something instead, if we really desperately want to
 
-            #resultPathGenerator = (os.path.abspath(
+            # resultPathGenerator = (os.path.abspath(
             #    os.path.join(
             #        self.golemOutPath, "golem_" + x + os.sep, self.jobOutputPath,
             #    )
             #) for x in self.golemIds)
 
-            golemDirPattern =re.compile("golem_\\d+")
+            golemDirPattern = re.compile("golem_\\d+")
 
             resultPathGenerator = (os.path.abspath(
-                    os.path.join(self.golemOutPath, foo))\
-                    for foo in os.listdir(self.golemOutPath)\
-                    if golemDirPattern.match(foo))
+                os.path.join(self.golemOutPath, foo))
+                for foo in os.listdir(self.golemOutPath)
+                if golemDirPattern.match(foo))
 
             resultFilesNumbered = []
 
-            filenamePattern = re.compile("^{0}_(\\d+)\\.out\\.pkl$".format(jobId))
+            filenamePattern = re.compile(
+                "^{0}_(\\d+)\\.out\\.pkl$".format(jobId))
 
-            #because we're already performing the match, decorate-sort-undecorate is the best sort strategy here
+            # because we're already performing the match,
+            # decorate-sort-undecorate is the best sort strategy here
             for resultPath in resultPathGenerator:
-                #print "==>", resultPath
+                # print "==>", resultPath
                 for file in os.listdir(resultPath):
                     match = filenamePattern.match(file)
                     if match:
-                        #print "====>", file
-                        resultFilesNumbered.append((int(match.group(1)), os.path.join(resultPath, file)))
+                        # print "====>", file
+                        resultFilesNumbered.append(
+                            (int(match.group(1)), os.path.join(resultPath, file)))
 
             if len(resultFilesNumbered) != pickleCount:
                 raise ExecutionFailure(
@@ -314,26 +337,27 @@ class Golemizer:
             os.chdir(restoreThisCwdOrPeopleWillHateMePassionately)
 
     def _extract_job_results(self, jobId):
-      """
-      Internal method to pull in the result file list of a job with Golem ID jobId.
-      Does not check for completeness of results.
-      """
-      golemDirPattern = re.compile("golem_\\d+")
-      resultPathGenerator = (os.path.abspath(
-        os.path.join(self.golemOutPath, foo))\
-      for foo in os.listdir(self.golemOutPath)\
-      if golemDirPattern.match(foo))
-      resultFilesNumbered = []
-      filenamePattern = re.compile("^{0}_(\\d+)\\.out\\.pkl$".format(jobId))
-      for resultPath in resultPathGenerator:
-        #print "==>", resultPath
-        for file in os.listdir(resultPath):
-          match = filenamePattern.match(file)
-          if match:
-            #print "====>", file
-            resultFilesNumbered.append((int(match.group(1)), os.path.join(resultPath, file)))
-      resultFilesNumbered.sort();
-      return resultFilesNumbered
+        """
+        Internal method to pull in the result file list of a job with Golem ID jobId.
+        Does not check for completeness of results.
+        """
+        golemDirPattern = re.compile("golem_\\d+")
+        resultPathGenerator = (os.path.abspath(
+            os.path.join(self.golemOutPath, foo))
+            for foo in os.listdir(self.golemOutPath)
+            if golemDirPattern.match(foo))
+        resultFilesNumbered = []
+        filenamePattern = re.compile("^{0}_(\\d+)\\.out\\.pkl$".format(jobId))
+        for resultPath in resultPathGenerator:
+        # print "==>", resultPath
+            for file in os.listdir(resultPath):
+                match = filenamePattern.match(file)
+                if match:
+            # print "====>", file
+                    resultFilesNumbered.append(
+                        (int(match.group(1)), os.path.join(resultPath, file)))
+        resultFilesNumbered.sort()
+        return resultFilesNumbered
 
     def salvage(self, jobId):
         """
@@ -380,21 +404,23 @@ class Golemizer:
         """
 
         resultFilesNumbered = self._extract_job_results(jobId)
+
         def _unpickleSequenceWithExceptions(pickleFiles):
-          for filePath in pickleFiles:
-              picklefile = open(filePath, "rb")
-              try:
-                  seq = cPickle.load(picklefile)
-                  for errorflag, data in seq:
-                    if not errorflag:
-                      yield data
-                    else:
-                      print >> sys.stderr, data[1] #the traceback
-                      yield data[0] #the exception
-              finally:
-                  picklefile.close()
+            for filePath in pickleFiles:
+                picklefile = open(filePath, "rb")
+                try:
+                    seq = cPickle.load(picklefile)
+                    for errorflag, data in seq:
+                        if not errorflag:
+                            yield data
+                        else:
+                            print >> sys.stderr, data[1]  # the traceback
+                            yield data[0]  # the exception
+                finally:
+                    picklefile.close()
 
         return _unpickleSequenceWithExceptions((pair[1] for pair in resultFilesNumbered))
+
 
 def dictToGolemizer(config):
     """Constructs a Golemizer from a group of settings stored in  a dictionary, keyed by string.
@@ -431,7 +457,7 @@ def dictToGolemizer(config):
         config["serverURL"],
         config["serverPassword"],
         config["golemResultRoot"],
-        #range(
+        # range(
         #    int(config["lowGolemID"]),
         #    int(config["highGolemID"]),
         #    1
@@ -442,6 +468,7 @@ def dictToGolemizer(config):
         pickleOut,
         taskSize
     )
+
 
 def jsonToGolemizer(jsonfile):
     """
@@ -454,21 +481,23 @@ def jsonToGolemizer(jsonfile):
 
 
 def _abort_task(error):
-  """
-  Internal method used when golemize.py is invoked as a job execution script but something goes wrong
-  before calculation begins.
+    """
+    Internal method used when golemize.py is invoked as a job execution script but something goes wrong
+    before calculation begins.
 
-  Parameter:
-    error - exception to throw into the output stream
-  """
-  trunc = (os.path.basename(sys.argv[3]))[:-4] #truncates ".pkl"
-  outFileName = sys.argv[6] + "_" + trunc + ".out.pkl" #this name is sacred to finding the results, including the jobID
-  outFileName = os.path.join(sys.argv[4], outFileName)
-  outFile = open(outFileName, "wb")
-  cPickle.dump([(True, (error, "An internal error has occured, for which no stack trace is available, but the message should be sufficient."))], outFile, 2)
-  outFile.flush()
-  outFile.close()
-  raise error
+    Parameter:
+      error - exception to throw into the output stream
+    """
+    trunc = (os.path.basename(sys.argv[3]))[:-4]  # truncates ".pkl"
+    # this name is sacred to finding the results, including the jobID
+    outFileName = sys.argv[6] + "_" + trunc + ".out.pkl"
+    outFileName = os.path.join(sys.argv[4], outFileName)
+    outFile = open(outFileName, "wb")
+    cPickle.dump(
+        [(True, (error, "An internal error has occured, for which no stack trace is available, but the message should be sufficient."))], outFile, 2)
+    outFile.flush()
+    outFile.close()
+    raise error
 
 
 def _jumpToTask():
@@ -487,17 +516,19 @@ def _jumpToTask():
         7   row ID (automatically provided by golem, ignored)
         8   task ID (automatically provided by golem, ignored)
     """
-    #The traditionally "Right" thing to do is to use a ConfigParser or equivalent. However,
-    #the case-sensitive position-sensitive spot equality comparison for --golemtask is fine when we've forcibly
-    #constructed the relevant args ourselves. It minimizes delay, and minimizes chance of interfering
-    #with some legit command line that for some reason uses --golemtask (hopefully not in position 1).
+    # The traditionally "Right" thing to do is to use a ConfigParser or equivalent. However,
+    # the case-sensitive position-sensitive spot equality comparison for --golemtask is fine when we've forcibly
+    # constructed the relevant args ourselves. It minimizes delay, and minimizes chance of interfering
+    # with some legit command line that for some reason uses --golemtask
+    # (hopefully not in position 1).
     if len(sys.argv) < 9:
-        raise ValueError("Not a valid command line (wrong count)") #not one of our command lines
+        # not one of our command lines
+        raise ValueError("Not a valid command line (wrong count)")
 
     if sys.argv[1] != "--golemtask":
         raise ValueError("Not a valid command line (not a --golemtask)")
 
-    #argv standard:
+    # argv standard:
     # 1:    --golemtask
     # 2:    common data path (contains common data and function pointer)
     # 3:    task data path (contains sequence of Stuff that should be given to calculation function)
@@ -505,25 +536,28 @@ def _jumpToTask():
     # 5:    host script path
     # 6:    job ID (automatically added by golem, we use it)
     # 7:    row ID (automatically added by golem, we ignore it)
-    # 8:    task ID (automatically added, we ignore it, better be equal to 6 since we're only firing tasks once)
+    # 8:    task ID (automatically added, we ignore it, better be equal to 6
+    # since we're only firing tasks once)
 
     inScript = sys.argv[5]
 
-    sys.path.append(os.path.dirname(inScript))#puts the original script on the module search path for depickle
+    # puts the original script on the module search path for depickle
+    sys.path.append(os.path.dirname(inScript))
     modname = os.path.basename(inScript).split(".")[0]
     try:
         targetModule = __import__(modname)
     except InfiniteRecursionError as emergencyBrake:
-        #provide a useful explanation for the kill
+        # provide a useful explanation for the kill
         _abort_task(emergencyBrake)
     except ImportError as missingLib:
-        #provide a useful explanation
-        #this usually means a missing library, or a multi-file script that wasn't properly handled
+        # provide a useful explanation
+        # this usually means a missing library, or a multi-file script that
+        # wasn't properly handled
         missingLib.message = missingLib.message + "\n\t==> This error came from a worker node. \n" +\
-             "\t==> Either the workers don't have a library you're relying on (contact your cluster admin)," +\
-             "\n\t==> or your script spans multiple files and you tried to use the binplace feature." +\
-             "\n\t==> Please read GoDoIt's docstring on binplace (and set it to false after making sure" +\
-             "\n\t==> your script is in a right path) and try again."
+            "\t==> Either the workers don't have a library you're relying on (contact your cluster admin)," +\
+            "\n\t==> or your script spans multiple files and you tried to use the binplace feature." +\
+            "\n\t==> Please read GoDoIt's docstring on binplace (and set it to false after making sure" +\
+            "\n\t==> your script is in a right path) and try again."
         _abort_task(missingLib)
 
     # this is the nasty part
@@ -536,12 +570,12 @@ def _jumpToTask():
     for thingie in dir(targetModule):
         if thingie not in globalRef:
             globalRef[thingie] = targetModule.__dict__[thingie]
-    
+
     commonFile = open(sys.argv[2], "rb")
     commonUnpickle = cPickle.Unpickler(commonFile)
     commonData = commonUnpickle.load()
     doIt = commonUnpickle.load()
-    commonUnpickle = None #intentional dead store for safety reasons
+    commonUnpickle = None  # intentional dead store for safety reasons
     commonFile.close()
 
     taskFile = open(sys.argv[3], "rb")
@@ -561,18 +595,20 @@ def _jumpToTask():
             excType, excVal, excTrace = None, None, None
             trace = None
             try:
-              excType, excVal, excTrace = sys.exc_info()
-              traceList = traceback.format_exception(excType, excVal, excTrace)
-              trace = "".join(traceList)
+                excType, excVal, excTrace = sys.exc_info()
+                traceList = traceback.format_exception(
+                    excType, excVal, excTrace)
+                trace = "".join(traceList)
             finally:
-              del excType, excVal, excTrace #clean up circular reference
+                del excType, excVal, excTrace  # clean up circular reference
             failureCount += 1
             result = (result, trace)
         ret.append((errored, result))
 
-    trunc = (os.path.basename(sys.argv[3]))[:-4] #truncates ".pkl"
+    trunc = (os.path.basename(sys.argv[3]))[:-4]  # truncates ".pkl"
 
-    outFileName = sys.argv[6]+"_"+trunc+".out.pkl" #this name is sacred to finding the results, including the jobID
+    # this name is sacred to finding the results, including the jobID
+    outFileName = sys.argv[6] + "_" + trunc + ".out.pkl"
     outFileName = os.path.join(sys.argv[4], outFileName)
     outFile = open(outFileName, "wb")
 

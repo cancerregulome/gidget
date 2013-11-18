@@ -30,11 +30,12 @@ import optparse
 import time
 
 try:
-    import json #python 2.6 included simplejson as json
+    import json  # python 2.6 included simplejson as json
 except ImportError:
     import simplejson as json
 
-QUERY_INTERVAL = 3.0 #in seconds
+QUERY_INTERVAL = 3.0  # in seconds
+
 
 def stall(jobid, composedUrl, loud=True):
     """
@@ -47,7 +48,8 @@ def stall(jobid, composedUrl, loud=True):
     while True:
         response, content = golem.getJobStatus(jobid, composedUrl, loud)
         if response.status != 200:
-            raise IOError("Unsuccessful status when communicating with server: " + response)
+            raise IOError(
+                "Unsuccessful status when communicating with server: " + response)
         contentDict = decoder.decode(content)
         if contentDict["State"] == "COMPLETE":
             return contentDict
@@ -64,6 +66,7 @@ If interrupted at the keyboard, the remote job is stopped.
 golemBlocking produces a JOBID.DAT file containing only the ID of the job that the run of
 golemBlocking created, to aid in finding the output later.
 """
+
 
 def printUsage():
     """
@@ -100,10 +103,13 @@ def main(argv):
     Intended to be used interactively from the __name__ == "__main__" check.
     """
     parser = optparse.OptionParser()
-    parser.add_option("-p", "--password", dest="password", help="Specify the password for connecting to the server.",
-                      default="")
-    parser.add_option("-e", "--echo", dest="echo", action="store_true", default=False, help = "Not yet implemented")
-    flags, args = parser.parse_args(argv[1:4]) #because "late params" are actually arguments to the target script
+    parser.add_option(
+        "-p", "--password", dest="password", help="Specify the password for connecting to the server.",
+        default="")
+    parser.add_option("-e", "--echo", dest="echo", action="store_true",
+                      default=False, help="Not yet implemented")
+    # because "late params" are actually arguments to the target script
+    flags, args = parser.parse_args(argv[1:4])
 
     password = flags.password
     args = args + argv[4:]
@@ -116,19 +122,21 @@ def main(argv):
     master = args[0]
 
     master = golem.canonizeMaster(master)
-    url = master+"/jobs/"
+    url = master + "/jobs/"
 
     command = args[1]
     cmdArgs = args[2:]
 
-    if command=="run":
-        response, content = golem.runOneLine(int(cmdArgs[0]), cmdArgs[1:], password, url)
-    elif command=="runlist":
+    if command == "run":
+        response, content = golem.runOneLine(
+            int(cmdArgs[0]), cmdArgs[1:], password, url)
+    elif command == "runlist":
         response, content = golem.runList(open(cmdArgs[0]), password, url)
-    elif command=="runoneach":
-        response, content = golem.runOnEach([{"Args": cmdArgs}],password,url)
+    elif command == "runoneach":
+        response, content = golem.runOnEach([{"Args": cmdArgs}], password, url)
     else:
-        raise ValueError("golemBlocking can only handle the commands 'run', 'runlist', and 'runoneach'.")
+        raise ValueError(
+            "golemBlocking can only handle the commands 'run', 'runlist', and 'runoneach'.")
 
     id = jobIdFromResponse(content)
 
@@ -146,4 +154,3 @@ def main(argv):
 
 if __name__ == "__main__":
     main(sys.argv)
-    
