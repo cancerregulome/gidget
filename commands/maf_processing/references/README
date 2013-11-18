@@ -1,0 +1,13 @@
+This reference data was originally downloaded on August 19,2013.  Scripts were run to generate data files for the processing pipeline.
+Uniprot secondary accession data was downloaded on August 19,2013.
+HGNC data was downloaded August 19,2013.
+
+Steps to generate reference data:
+
+Step	Script					Function
+1	titan_env_update2.sh			defines MAF env variables
+2  	download_monthly_annovar_build_data.sh	Download ANNOVAR build data.
+3	No script - go to HUGO site  		www.genenames.org.  Custom Downloads.  Download HGNC data.  Need approved symbol, previous symbols, synonyms, and Uniprot ID.  Save file as hgnc_names_and_aliases_to_uniprot.txt  Remove text "(supplied by Uniprot)"
+4  	download_daily_gene_data.sh		Generates files for pipeline
+5  	No script 				Remove header information from uniprot_sec_ac.txt
+6	prepareEntrezGeneUniprotReferences.sh
