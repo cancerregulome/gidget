@@ -1,0 +1,95 @@
+# -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
+
+import sys
+
+import miscTCGA
+import tsvIO
+
+# -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
+
+NA_VALUE = -999999
+
+# -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
+# -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
+
+
+def addDiseaseCode(dataD):
+
+    print " "
+    print " in addDiseaseCode ... "
+
+    # the feature matrix has thousands of features x hundreds of patients
+    rowLabels = dataD['rowLabels']
+    colLabels = dataD['colLabels']
+    numRow = len(rowLabels)
+    numCol = len(colLabels)
+    dataMatrix = dataD['dataMatrix']
+    print " %d rows x %d columns " % (numRow, numCol)
+    # print rowLabels[:5]
+    # print rowLabels[-5:]
+
+    for iRow in range(numRow):
+        if (rowLabels[iRow].find("disease_code") >= 0):
+            print " ERROR in addDiseaseCode ... this matrix already seems to have this feature ", rowLabels[iRow]
+            print " --> will NOT add a new feature (output TSV == input TSV) "
+            return (dataD)
+
+    numRow += 1
+    rowLabels += ["C:CLIN:disease_code:::::"]
+
+    newM = [0] * numRow
+    for iR in range(numRow):
+        newM[iR] = [NA_VALUE] * numCol
+        if (iR != (numRow - 1)):
+            for iC in range(numCol):
+                newM[iR][iC] = dataMatrix[iR][iC]
+
+    # outer loop is over columns ...
+    print " "
+    print " starting loop over %d columns ... " % numCol
+
+    for iCol in range(numCol):
+        curSample = colLabels[iCol]
+        diseaseCode = miscTCGA.barcode_to_disease(curSample)
+        if (diseaseCode == "NA"):
+            print " got an unknown disease code ??? ", curSample, diseaseCode
+        newM[numRow - 1][iCol] = diseaseCode
+
+    newD = {}
+    newD['rowLabels'] = rowLabels
+    newD['colLabels'] = colLabels
+    newD['dataType'] = dataD['dataType']
+    newD['dataMatrix'] = newM
+
+    return (newD)
+
+# -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
+# -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
+
+if __name__ == "__main__":
+
+    if (1):
+        if (len(sys.argv) == 3):
+            inFile = sys.argv[1]
+            outFile = sys.argv[2]
+        else:
+            print " "
+            print " Usage: %s <input TSV file> <output TSV file> "
+            print " "
+            sys.exit(-1)
+
+    print " "
+    print " Running : %s %s %s " % (sys.argv[0], sys.argv[1], sys.argv[2])
+    print " "
+    print " "
+
+    # now read in the input feature matrix ...
+    dataD = tsvIO.readTSV(inFile)
+
+    # add a new feature called sampleType
+    dataD = addDiseaseCode(dataD)
+
+    # and write the matrix back out
+    tsvIO.writeTSV_dataMatrix(dataD, 0, 0, outFile)
+
+# -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
