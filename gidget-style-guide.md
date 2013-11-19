@@ -24,7 +24,7 @@ gidget-style-guide.md:25: tab in indent.
 
 These settings can't be checked into the repository, so you'll have to activate these for yourself, in one of two ways:
 
-1. For this project only, you can add a file in your local repository's top-lev `.git/config` file:
+1. For this project only, you can add (or edit) a line in your local repository's `.git/config` file, found under the local repository's top-level directory:
 
         [core]
         ...
