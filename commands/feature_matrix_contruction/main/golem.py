@@ -1,4 +1,4 @@
-#!/tools/bin/python
+#!/usr/bin/env python
 #
 #    Copyright (C) 2003-2010 Institute for Systems Biology
 #                            Seattle, Washington, USA.
@@ -276,7 +276,7 @@ def resizeName(nodename, size, master, pwd):
 
 def resizeAll(size, master, pwd):
     """
-    Resize all nodes that haven't been sized down to zero. 
+    Resize all nodes that haven't been sized down to zero.
 
     Paramaters:
         size - an int specifing the new size of the nodes
