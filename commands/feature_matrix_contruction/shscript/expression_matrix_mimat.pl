@@ -1,4 +1,4 @@
-#!/usr/bin/env perl
+#!/usr/bin/perl
 use strict;
 use Getopt::Std;
 use vars qw ($opt_m $opt_o $opt_p $opt_h);
