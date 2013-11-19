@@ -73,5 +73,10 @@ Add this to your Preferences -> Settings - Users
 }
 ```
 
+## line endings
+
+When working with developers who use different operating systems, line endings can be an issue. So, the github respository has been configured to 1) store files with unix-style normalized line endings and 2) check out files with your own OS's native line-ending style. In short, you shouldn't have to worry about this issue.
+
+
 Happy coding!
 
