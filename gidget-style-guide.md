@@ -12,7 +12,17 @@ Not all files need to start with a 'hashbang' (`#!`), but for those that do, use
 - indentation should use spaces, **not** tabs
 
 ### let git help you out
-You can have git perform checks on common whitespace issues, and it can prevent commmits with problems. These settings can't be checked into the repository, so you'll have to activate these for yourself, in one of two ways:
+You can have git perform checks on common whitespace issues, and it can prevent commmits with problems. When these settings are turned on, git will check your files when you try to commit something.  For example, with the following settings and an extraneous tab indentation in at the next paragraph, I'd see something like this:
+
+<pre>
+$ git commit -a
+<font color="red">Commit failed:</font>
+gidget-style-guide.md:25: tab in indent.
+<font style="color: darkgreen">+</font><font style="background-color: red">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font><font style="color: darkgreen">These settings &hellip; </font>
+</pre>
+
+
+These settings can't be checked into the repository, so you'll have to activate these for yourself, in one of two ways:
 
 1. For this project only, you can add a file in your local repository's top-lev `.git/config` file:
 
