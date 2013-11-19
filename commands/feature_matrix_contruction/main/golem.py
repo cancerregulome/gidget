@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 #
 #    Copyright (C) 2003-2010 Institute for Systems Biology
 #                            Seattle, Washington, USA.
