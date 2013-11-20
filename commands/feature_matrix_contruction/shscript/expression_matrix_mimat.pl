@@ -1,10 +1,18 @@
 #!/usr/bin/perl
+
+# originally from Andy Chu at BCGSC
+
+# generates "mature" microRNA expression values based on premature miRNA data
+# in DCC Level 3 data
+
 use strict;
 use Getopt::Std;
 use vars qw ($opt_m $opt_o $opt_p $opt_h);
 getopts('m:o:p:h:');
 use File::Find;
 use File::Basename;
+
+
 
 my $help_text = "
 ############## $0 ########################
