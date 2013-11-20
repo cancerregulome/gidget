@@ -1,5 +1,9 @@
 #!/usr/bin/perl
 
+# originally from Andy Chu at BCGSC
+
+# generates "mature" microRNA expression values based on premature miRNA data
+# in DCC Level 3 data
 
 use strict;
 use Getopt::Std;
