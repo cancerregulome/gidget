@@ -1,7 +1,7 @@
 #gidget style guide
 
 ## python
-gidget is primarily written in python.  python is whitespace senstive.  Here are some simple guidelines for friendly collaborative coding:
+gidget is primarily written in python.  python is whitespace sensitive.  Here are some simple guidelines for friendly collaborative coding:
 
 
 ### python interpreter
@@ -95,6 +95,17 @@ Add this to your Preferences -> Settings - Users
 {
 	"tab_size": 4,
     "translate_tabs_to_spaces": true
+}
+```
+
+#### Eclipse
+
+
+Add this to your Preferences -> PyDev -> Editor
+```
+{
+	set "Tab Length": 4,
+    check "Replace tabs with spaces when typing?"
 }
 ```
 
