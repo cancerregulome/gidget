@@ -2,7 +2,7 @@
 
 : ${LD_LIBRARY_PATH:?" environment variable must be set and non-empty"}
 : ${TCGAFMP_ROOT_DIR:?" environment variable must be set and non-empty"}
-: ${VT_UTIL:?" environment variable must be set and non-empty"}
+: ${VT_UTILS:?" environment variable must be set and non-empty"}
 : ${VT_SURVIVAL:?" environment variable must be set and non-empty"}
 
 if [[ "$PYTHONPATH" != *"gidget"* ]]; then
