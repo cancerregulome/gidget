@@ -3,6 +3,7 @@
 : ${LD_LIBRARY_PATH:?" environment variable must be set and non-empty"}
 : ${TCGAFMP_ROOT_DIR:?" environment variable must be set and non-empty"}
 : ${VT_UTIL:?" environment variable must be set and non-empty"}
+: ${VT_SURVIVAL:?" environment variable must be set and non-empty"}
 
 if [[ "$PYTHONPATH" != *"gidget"* ]]; then
     echo " "
@@ -68,7 +69,7 @@ for ((i=1; i<$#; i++))
                         head Survival.CVars.txt
                         echo " "
                 
-                        cd /users/sreynold/git_home/vt_cncreg/survival
+                        cd $VT_SURVIVAL
                         rm -fr $TCGAFMP_DATA_DIR/$tumor/$curDate/SurvivalPVal.$st.tmp
                         rm -fr $TCGAFMP_DATA_DIR/$tumor/$curDate/SurvivalPVal.$st.tsv
                         rm -fr $TCGAFMP_DATA_DIR/$tumor/scratch/SurvivalPVal.seq.$st.log
@@ -104,7 +105,7 @@ for ((i=1; i<$#; i++))
                 head Survival.CVars.txt
                 echo " "
         
-                cd /users/sreynold/git_home/vt_cncreg/survival
+                cd $VT_SURVIVAL
                 rm -fr $TCGAFMP_DATA_DIR/$tumor/$curDate/SurvivalPVal.tmp
                 rm -fr $TCGAFMP_DATA_DIR/$tumor/$curDate/SurvivalPVal.tsv 
                 rm -fr $TCGAFMP_DATA_DIR/$tumor/scratch/SurvivalPVal.seq.log
