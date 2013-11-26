@@ -27,7 +27,7 @@ def sampleLevelCode(barcode):
 
 def fixTCGAbarcode(barcode, zCancer=""):
 
-    print " in fixTCGAbarcode ... <%s> " % barcode
+    ## print " in fixTCGAbarcode ... <%s> " % barcode
 
     # make sure that the barcode doesn't start with the tumor type
     # abbreviation instead of TCGA ...
@@ -45,7 +45,7 @@ def fixTCGAbarcode(barcode, zCancer=""):
         # if it still has TCGA in it, but not at the beginning
         # something more will need to be done ... (not yet implemented)
         if (barcode.find("TCGA") > 0):
-            print " ERROR in fixTCGAbarcode ... <%s> " % barcode
+            print " FATAL ERROR in fixTCGAbarcode ... <%s> " % barcode
             sys.exit(-1)
 
     # this first part just makes sure that the delimiter is a '-'
@@ -59,7 +59,7 @@ def fixTCGAbarcode(barcode, zCancer=""):
                     newCode += barcode[kk]
                 else:
                     newCode += '-'
-            print barcode, newCode
+            ## print barcode, newCode
             barcode = newCode
 
     # here we wan to undo the things that the Broad likes to do where
@@ -91,7 +91,7 @@ def fixTCGAbarcode(barcode, zCancer=""):
             elif (barcode[12:].startswith("-TRBM")):
                 barcode = barcode[:12] + "-20"
 
-    print "         --> <%s> " % barcode
+    ## print "         --> <%s> " % barcode
     return (barcode)
 
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
