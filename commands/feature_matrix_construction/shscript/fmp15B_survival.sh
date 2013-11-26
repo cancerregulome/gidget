@@ -1,26 +1,31 @@
 #!/bin/bash
 
-export LD_LIBRARY_PATH=/tools/lib/
-export TCGAFMP_ROOT_DIR=/users/sreynold/to_be_checked_in/TCGAfmp
-export PYTHONPATH=$TCGAFMP_ROOT_DIR/pyclass:$TCGAFMP_ROOT_DIR/util:$PYTHONPATH
-export VT_UTIL=/users/sreynold/git_home/vt_foo
+: ${LD_LIBRARY_PATH:?" environment variable must be set and non-empty"}
+: ${TCGAFMP_ROOT_DIR:?" environment variable must be set and non-empty"}
+: ${VT_UTIL:?" environment variable must be set and non-empty"}
+: ${VT_SURVIVAL:?" environment variable must be set and non-empty"}
+
+if [[ "$PYTHONPATH" != *"gidget"* ]]; then
+    echo " "
+    echo " your PYTHONPATH should include paths to gidget/commands/... directories "
+    echo " "
+    exit 99
+fi
 
 ## this script should be called with the following parameters:
-##      date, eg '29jan13'
-##      one or more tumor types, eg: 'prad thca skcm stad'
+##      date, eg '12jul13' or 'test'
+##      one tumor type, eg 'ucec'
+
+WRONGARGS=1
+if [ $# != 2 ]
+    then
+        echo " Usage   : `basename $0` <curDate> <tumorType> "
+        echo " Example : `basename $0` 28oct13  brca "
+        exit $WRONGARGS
+fi
+
 curDate=$1
 tumor=$2
-
-if [ -z "$curDate" ]
-    then
-        echo " this script must be called with a date string of some kind, eg 28feb13 "
-        exit
-fi
-if [ -z "$tumor" ]
-    then
-        echo " this script must be called with at least one tumor type "
-        exit
-fi
 
 echo " "
 echo " "
@@ -64,7 +69,7 @@ for ((i=1; i<$#; i++))
                         head Survival.CVars.txt
                         echo " "
                 
-                        cd /users/sreynold/git_home/vt_cncreg/survival
+                        cd $VT_SURVIVAL
                         rm -fr $TCGAFMP_DATA_DIR/$tumor/$curDate/SurvivalPVal.$st.tmp
                         rm -fr $TCGAFMP_DATA_DIR/$tumor/$curDate/SurvivalPVal.$st.tsv
                         rm -fr $TCGAFMP_DATA_DIR/$tumor/scratch/SurvivalPVal.seq.$st.log
@@ -100,7 +105,7 @@ for ((i=1; i<$#; i++))
                 head Survival.CVars.txt
                 echo " "
         
-                cd /users/sreynold/git_home/vt_cncreg/survival
+                cd $VT_SURVIVAL
                 rm -fr $TCGAFMP_DATA_DIR/$tumor/$curDate/SurvivalPVal.tmp
                 rm -fr $TCGAFMP_DATA_DIR/$tumor/$curDate/SurvivalPVal.tsv 
                 rm -fr $TCGAFMP_DATA_DIR/$tumor/scratch/SurvivalPVal.seq.log

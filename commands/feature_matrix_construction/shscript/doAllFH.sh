@@ -1,30 +1,33 @@
 #!/bin/bash
 
-export LD_LIBRARY_PATH=/tools/lib/
-export TCGAFMP_ROOT_DIR=/users/sreynold/to_be_checked_in/TCGAfmp
-export TCGAFMP_DATA_DIR=/titan/cancerregulome14/TCGAfmp_outputs
-export PYTHONPATH=$TCGAFMP_ROOT_DIR/pyclass:$TCGAFMP_ROOT_DIR/util:$PYTHONPATH
+: ${LD_LIBRARY_PATH:?" environment variable must be set and non-empty"}
+: ${TCGAFMP_ROOT_DIR:?" environment variable must be set and non-empty"}
+: ${TCGAFMP_DATA_DIR:?" environment variable must be set and non-empty"}
+
+if [[ "$PYTHONPATH" != *"gidget"* ]]; then
+    echo " "
+    echo " your PYTHONPATH should include paths to gidget/commands/... directories "
+    echo " "
+    exit 99
+fi
 
 ## this script should be called with the following parameters:
 ##      date, eg '12jul13' or 'test'
+##      snapshot name, either 'dcc-snapshot' or 'dcc-snapshot-28jun13'
 ##      one tumor type, eg 'ucec'
+
+WRONGARGS=1
+if [ $# != 4 ]
+    then
+        echo " Usage   : `basename $0`  <curDate>  <tumorType>  <fhDir>  <fhSubset> "
+        echo " Example : `basename $0`  28oct13FH  skcm  /titan/cancerregulome9/TCGA/firehose/awg_skcm__2013_10_13  All_Samples "
+        exit $WRONGARGS
+fi
 
 curDate=$1
 oneTumor=$2
 fhDir=$3
 fhSubset=$4
-
-if [ -z "$curDate" ]
-    then
-        echo " this script must be called with a date string of some kind, eg 28feb13 "
-        exit
-fi
-if [ -z "$oneTumor" ]
-    then
-        echo " this script must be called with one tumor type "
-        exit
-fi
-
 
 rm -fr $TCGAFMP_DATA_DIR/$oneTumor/scratch/fmp*.$curDate.FH.$oneTumor.log
 rm -fr $TCGAFMP_DATA_DIR/$oneTumor/scratch/fmp*.$curDate.$oneTumor.log
