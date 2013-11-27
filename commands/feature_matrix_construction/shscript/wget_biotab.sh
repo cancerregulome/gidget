@@ -1,6 +1,5 @@
-cd ~/scratch/
 
-for d in acc blca brca cesc cntl coad dlbc esca gbm hnsc kich kirc kirp laml lgg lihc luad lusc meso ov paad pcpg prad read sarc skcm stad tgct thca ucs ucec
+for d in `cat $TCGAFMP_ROOT_DIR/shscript/tumor_list.txt`
     do
 
 	echo " "

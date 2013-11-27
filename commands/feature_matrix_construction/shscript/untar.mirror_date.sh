@@ -81,7 +81,7 @@ find . -type f -name "*expn_matrix_mimat*" -exec rm -f '{}' \;
 
 echo " "
 echo " running snapshot ... "
-python2.7 /titan/cancerregulome8/TCGA/scripts/dcc-snapshot-2.alt.py /titan/cancerregulome11/TCGA/repositories/dcc-mirror /titan/cancerregulome11/TCGA/repositories/dcc-snapshot-`echo "$(date +"%d%b%y")" | tr '[A-Z]' '[a-z]'`
+python2.7 $TCGAFMP_ROOT_DIR/shscript/make-dcc-snapshot.py /titan/cancerregulome11/TCGA/repositories/dcc-mirror /titan/cancerregulome11/TCGA/repositories/dcc-snapshot-`echo "$(date +"%d%b%y")" | tr '[A-Z]' '[a-z]'`
 
 echo " recreating symbolic link ... "
 rm /titan/cancerregulome11/TCGA/repositories/dcc-snapshot

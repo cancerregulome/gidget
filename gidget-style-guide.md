@@ -28,7 +28,7 @@ These settings can't be checked into the repository, so you'll have to activate 
 
         [core]
         ...
-                whitespace = space-before-tab,tab-in indent,trailing-space,tabwidth=4
+                whitespace = space-before-tab,tab-in-indent,trailing-space,tabwidth=4
 
 2. And if you really like these settings, you can turn them on for any repository on your local system:
 

@@ -104,7 +104,7 @@ def getNewClusterNumbers(cMetric):
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 
 
-def parseBestClusFiles(lastDir, outDir):
+def parseBestClusFiles(lastDir, outDir, zCancer):
 
     print " "
     print " "
@@ -197,7 +197,7 @@ def parseBestClusFiles(lastDir, outDir):
                             # sanity checking that these tokens look correct
                             # ...
                             goodData = 1
-                            aBarcode = tokenList[0]
+                            aBarcode = miscTCGA.fixTCGAbarcode (tokenList[0], zCancer)
 
                             if (aBarcode.startswith("TCGA")):
                                 try:
@@ -1486,7 +1486,7 @@ if __name__ == "__main__":
         lastDir = getCancerDir(topDir, zCancer)
 
         # now we handle the *.bestclus.txt files ...
-        parseBestClusFiles(lastDir, outDir)
+        parseBestClusFiles(lastDir, outDir, zCancer)
 
         # next we process files that come out of the MutSig module
         parseMutSigFiles(lastDir, outDir)

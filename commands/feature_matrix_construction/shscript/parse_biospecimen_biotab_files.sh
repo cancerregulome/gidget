@@ -1,5 +1,5 @@
 
-for tumor in acc blca brca cesc cntl coad dlbc esca gbm hnsc kich kirc kirp laml lgg lihc luad lusc meso ov paad pcpg prad read sarc skcm stad tgct thca ucs ucec
+for tumor in `cat $TCGAFMP_ROOT_DIR/shscript/tumor_list.txt`
     do
 
         echo " "
@@ -8,7 +8,7 @@ for tumor in acc blca brca cesc cntl coad dlbc esca gbm hnsc kich kirc kirp laml
         echo $tumor
         echo " "
 
-        rm -fr ~/scratch/t?
+        rm -fr /titan/cancerregulome11/TCGA/repositories/scratch/t?
 
         cd /titan/cancerregulome11/TCGA/repositories/dcc-mirror/public/tumor/$tumor/bcr/biotab/clin
 
@@ -78,18 +78,20 @@ for tumor in acc blca brca cesc cntl coad dlbc esca gbm hnsc kich kirc kirp laml
 	##	6       vial_number             :       1
 
 
-        ## cut -f 1- biospecimen_cqcf*.txt       | sort | sed -e '1,$s/\[Not Available\]/NA/g' | sed -e '1,$s/\[Not Reported\]/NA/g' | sed -e '1,$s/\[Not Applicable\]/NA/g' | sed -e '1,$s/null/NA/g' >& ~/scratch/t1
-        cut -f 1,4- biospecimen_slide*.txt       | sort | sed -e '1,$s/\[Not Available\]/NA/g' | sed -e '1,$s/\[Not Reported\]/NA/g' | sed -e '1,$s/\[Not Applicable\]/NA/g' | sed -e '1,$s/null/NA/g' >& ~/scratch/t2
-        cut -f 1,3- biospecimen_tumor_sample*.txt | sort | sed -e '1,$s/\[Not Available\]/NA/g' | sed -e '1,$s/\[Not Reported\]/NA/g' | sed -e '1,$s/\[Not Applicable\]/NA/g' | sed -e '1,$s/null/NA/g' >& ~/scratch/t3
+        ## cut -f 1- biospecimen_cqcf*.txt       | sort | sed -e '1,$s/\[Not Available\]/NA/g' | sed -e '1,$s/\[Not Reported\]/NA/g' | sed -e '1,$s/\[Not Applicable\]/NA/g' | sed -e '1,$s/null/NA/g' >& /titan/cancerregulome11/TCGA/repositories/scratch/t1
+        cut -f 1,4- biospecimen_slide*.txt       | sort | sed -e '1,$s/\[Not Available\]/NA/g' | sed -e '1,$s/\[Not Reported\]/NA/g' | sed -e '1,$s/\[Not Applicable\]/NA/g' | sed -e '1,$s/null/NA/g' >& /titan/cancerregulome11/TCGA/repositories/scratch/t2
+        cut -f 1,3- biospecimen_tumor_sample*.txt | sort | sed -e '1,$s/\[Not Available\]/NA/g' | sed -e '1,$s/\[Not Reported\]/NA/g' | sed -e '1,$s/\[Not Applicable\]/NA/g' | sed -e '1,$s/null/NA/g' >& /titan/cancerregulome11/TCGA/repositories/scratch/t3
 
-        ## python /users/sreynold/to_be_checked_in/TCGAfmp/main/massageTSV.py ~/scratch/t1 \
+        ## python $TCGAFMP_ROOT_DIR/main/massageTSV.py /titan/cancerregulome11/TCGA/repositories/scratch/t1 \
         ##         /titan/cancerregulome14/TCGAfmp_outputs/$tumor/aux/biospecimen_cqcf.forXmlMerge.tsv
 
-        python /users/sreynold/to_be_checked_in/TCGAfmp/main/massageTSV.py ~/scratch/t2 \
+        python $TCGAFMP_ROOT_DIR/main/massageTSV.py /titan/cancerregulome11/TCGA/repositories/scratch/t2 \
                 /titan/cancerregulome14/TCGAfmp_outputs/$tumor/aux/biospecimen_slide.forXmlMerge.tsv
 
-        python /users/sreynold/to_be_checked_in/TCGAfmp/main/massageTSV.py ~/scratch/t3 \
+        python $TCGAFMP_ROOT_DIR/main/massageTSV.py /titan/cancerregulome11/TCGA/repositories/scratch/t3 \
                 /titan/cancerregulome14/TCGAfmp_outputs/$tumor/aux/biospecimen_tumor_sample.forXmlMerge.tsv
+
+        chmod g+w /titan/cancerregulome11/TCGA/repositories/scratch/t?
 
     done
 
