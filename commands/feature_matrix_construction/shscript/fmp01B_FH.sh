@@ -25,7 +25,7 @@ if [ $# != 4 ]
 fi
 
 curDate=$1
-oneTumor=$2
+tumor=$2
 fhDir=$3
 fhSubset=$4
 
@@ -51,6 +51,7 @@ echo " *******************"
 	fi
 
 	cd $curDate
+        echo `pwd`
 
 	## ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
         ## parse the FH stddata (clinical and level3 all at once)
