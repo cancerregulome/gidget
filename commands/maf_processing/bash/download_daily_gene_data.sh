@@ -28,6 +28,11 @@ gunzip gene2refseq.gz
 gunzip Homo_sapiens.gene_info.gz
 gunzip gene_refseq_uniprotkb_collab.gz
 
+# remove the first header line from this file:
+cp Homo_sapiens.gene_info Homo_sapiens.gene_info.orig
+sed '1d' Homo_sapiens.gene_info > test
+mv test Homo_sapiens.gene_info
+
 rm -rf idmapping_selected.tab*
 rm -rf uniprot_sprot_human*
 rm -rf uniprot_trembl_human*
@@ -40,11 +45,6 @@ curl -O ftp://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebas
 curl -O ftp://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/complete/docs/sec_ac.txt
 mv sec_ac.txt uniprot_sec_ac.txt
 cp uniprot_sec_ac.txt uniprot_sec_ac.txt.orig
-
-#this file now has a header line
-cp Homo_sapiens.gene_info Homo_sapiens.gene_info.orig
-sed '1d' Homo_sapiens.gene_info > test
-mv test Homo_sapiens.gene_info
 
 gunzip idmapping_selected.tab.gz
 gunzip uniprot_sprot_human.dat.gz
