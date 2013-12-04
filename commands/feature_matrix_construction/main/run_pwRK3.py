@@ -550,8 +550,8 @@ if __name__ == "__main__":
         (status, output) = commands.getstatusoutput(cmdString)
         print status, output
 
-        cmdString = "sort -grk 5 --temporary-directory=/local/sreynold/scratch/ %s/post_proc_all.tsv >& %s/%d.all.pwpv.sort" % (
-            tmpDir, tmpDir, iOne)
+        ## cmdString = "sort -grk 5 --temporary-directory=/local/sreynold/scratch/ %s/post_proc_all.tsv >& %s/%d.all.pwpv.sort" % (tmpDir, tmpDir, iOne)
+        cmdString = "sort -grk 5 --temporary-directory=/titan/cancerregulome9/TCGA/pw_scratch/ %s/post_proc_all.tsv >& %s/%d.all.pwpv.sort" % (tmpDir, tmpDir, iOne)
         print " < %s > " % cmdString
         (status, output) = commands.getstatusoutput(cmdString)
         print status, output
