@@ -18,10 +18,10 @@ rm -rf gene2refseq*
 rm -rf Homo_sapiens.gene_info*
 rm -rf gene_refseq_uniprotkb_collab*
 
-curl -O ftp://ftp.ncbi.nlm.nih.gov/gene/DATA/gene2accession.gz
-curl -O ftp://ftp.ncbi.nlm.nih.gov/gene/DATA/gene2refseq.gz
-curl -O ftp://ftp.ncbi.nlm.nih.gov/gene/DATA/GENE_INFO/Mammalia/Homo_sapiens.gene_info.gz
-curl -O ftp://ftp.ncbi.nlm.nih.gov/gene/DATA/gene_refseq_uniprotkb_collab.gz
+curl -O --remote-time ftp://ftp.ncbi.nlm.nih.gov/gene/DATA/gene2accession.gz
+curl -O --remote-time ftp://ftp.ncbi.nlm.nih.gov/gene/DATA/gene2refseq.gz
+curl -O --remote-time ftp://ftp.ncbi.nlm.nih.gov/gene/DATA/GENE_INFO/Mammalia/Homo_sapiens.gene_info.gz
+curl -O --remote-time ftp://ftp.ncbi.nlm.nih.gov/gene/DATA/gene_refseq_uniprotkb_collab.gz
 
 gunzip gene2accession.gz
 gunzip gene2refseq.gz
