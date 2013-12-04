@@ -28,10 +28,14 @@ gunzip gene2refseq.gz
 gunzip Homo_sapiens.gene_info.gz
 gunzip gene_refseq_uniprotkb_collab.gz
 
-# remove the first header line from this file:
-cp Homo_sapiens.gene_info Homo_sapiens.gene_info.orig
-sed '1d' Homo_sapiens.gene_info > test
-mv test Homo_sapiens.gene_info
+# remove the first header line from this file;
+# leave the original with an ".orig" suffix per original script
+
+# TODO: for ease of maintaining archives (which could be downloaded again),
+# do not modify file and look into modifying downstream tools to ignore the header line,
+# instead.
+sed -iorig '1d' Homo_sapiens.gene_info
+
 
 rm -rf idmapping_selected.tab*
 rm -rf uniprot_sprot_human*
