@@ -67,6 +67,7 @@ for ((i=1; i<$#; i++))
 	rm -fr $tumor.newMerge.???.$curDate.tsv
         rm -fr $tumor.newMerge*.$curDate.*tsv
 
+        ## here we build the merged matrix using only sequencing-based data (if it exists)
 	if [ -f $tumor.gexp.seq.tmpData3.tsv ]
 	    then
 		python $TCGAFMP_ROOT_DIR/main/mergeTSV.py \
@@ -82,6 +83,7 @@ for ((i=1; i<$#; i++))
 			$tumor.newMerge.seq.$curDate.tsv >& $tumor.newMerge.seq.$curDate.log 
 	fi
 
+        ## here we build the merged matrix using only array-based data (if it exists)
 	if [ -f $tumor.gexp.ary.tmpData3.tsv ]
 	    then
 		python $TCGAFMP_ROOT_DIR/main/mergeTSV.py \
@@ -96,6 +98,20 @@ for ((i=1; i<$#; i++))
 			`ls ../aux/*.forTSVmerge.tsv` \
 			$tumor.newMerge.ary.$curDate.tsv >& $tumor.newMerge.ary.$curDate.log 
 	fi
+
+        ## here we build the merged matrix using both types of data (whatever exists)
+		python $TCGAFMP_ROOT_DIR/main/mergeTSV.py \
+			finalClin.$tumor.$curDate.tsv \
+			$tumor.mirn.tmpData3.tsv \
+			$tumor.cnvr.tmpData3.tsv \
+			$tumor.meth.tmpData3.tsv \
+			$tumor.rppa.tmpData3.tsv \
+			$tumor.msat.tmpData3.tsv \
+			$tumor.gexp.ary.tmpData3.tsv \
+			$tumor.gexp.seq.tmpData3.tsv \
+			../gnab/$tumor.gnab.tmpData4b.tsv \
+			`ls ../aux/*.forTSVmerge.tsv` \
+			$tumor.newMerge.all.$curDate.tsv >& $tumor.newMerge.all.$curDate.log 
 
     done
 
