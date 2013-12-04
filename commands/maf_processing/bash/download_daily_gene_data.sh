@@ -51,6 +51,8 @@ done
 sed -iorig '1d' Homo_sapiens.gene_info
 
 
+# TODO: move these into per-uniprot-release directories
+
 rm -rf idmapping_selected.tab*
 rm -rf uniprot_sprot_human*
 rm -rf uniprot_trembl_human*
@@ -64,10 +66,20 @@ curl -O ftp://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebas
 mv sec_ac.txt uniprot_sec_ac.txt
 cp uniprot_sec_ac.txt uniprot_sec_ac.txt.orig
 
-gunzip idmapping_selected.tab.gz
-gunzip uniprot_sprot_human.dat.gz
-gunzip uniprot_trembl_human.dat.gz 
-gunzip uniprot_sprot_varsplic.fasta.gz
+# get the uniprot release name
+curl -O ftp://ftp.uniprot.org/pub/databases/uniprot/current_release/relnotes.txt
+uniprotversion=`head -n 1 relnotes.txt | cut -d ' ' -f3`
+rm -f relnotes.txt
+
+# rename files with uniprot version and uncompress
+for uniprotfile in idmapping_selected.tab uniprot_sprot_human.dat uniprot_trembl_human.dat uniprot_sprot_varsplic.fasta
+do
+	newuniprotfilename=$file-$uniprotversion.gz
+	mv $uniprotfile.gz $newuniprotfilename
+	gunzip $newuniprotfilename
+done
+
+
 
 # Use the above resources to map genes to uniprot protein accessions
 #sh "$MAF_SCRIPTS_DIR/bash/prepareEntrezGeneUniprotReferences.sh"
