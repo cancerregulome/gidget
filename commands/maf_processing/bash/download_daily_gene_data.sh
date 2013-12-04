@@ -18,10 +18,10 @@ rm -rf gene2refseq*
 rm -rf Homo_sapiens.gene_info*
 rm -rf gene_refseq_uniprotkb_collab*
 
-wget ftp://ftp.ncbi.nlm.nih.gov/gene/DATA/gene2accession.gz
-wget ftp://ftp.ncbi.nlm.nih.gov/gene/DATA/gene2refseq.gz
-wget ftp://ftp.ncbi.nlm.nih.gov/gene/DATA/GENE_INFO/Mammalia/Homo_sapiens.gene_info.gz
-wget ftp://ftp.ncbi.nlm.nih.gov/gene/DATA/gene_refseq_uniprotkb_collab.gz
+curl -O ftp://ftp.ncbi.nlm.nih.gov/gene/DATA/gene2accession.gz
+curl -O ftp://ftp.ncbi.nlm.nih.gov/gene/DATA/gene2refseq.gz
+curl -O ftp://ftp.ncbi.nlm.nih.gov/gene/DATA/GENE_INFO/Mammalia/Homo_sapiens.gene_info.gz
+curl -O ftp://ftp.ncbi.nlm.nih.gov/gene/DATA/gene_refseq_uniprotkb_collab.gz
 
 gunzip gene2accession.gz
 gunzip gene2refseq.gz
@@ -33,11 +33,11 @@ rm -rf uniprot_sprot_human*
 rm -rf uniprot_trembl_human*
 rm -rf uniprot_sprot_varsplic.fasta*
 rm -rf uniprot_sec_ac.txt
-wget ftp://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/idmapping/idmapping_selected.tab.gz
-wget ftp://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/taxonomic_divisions/uniprot_sprot_human.dat.gz
-wget ftp://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/taxonomic_divisions/uniprot_trembl_human.dat.gz
-wget ftp://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/complete/uniprot_sprot_varsplic.fasta.gz
-wget ftp://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/complete/docs/sec_ac.txt
+curl -O ftp://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/idmapping/idmapping_selected.tab.gz
+curl -O ftp://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/taxonomic_divisions/uniprot_sprot_human.dat.gz
+curl -O ftp://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/taxonomic_divisions/uniprot_trembl_human.dat.gz
+curl -O ftp://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/complete/uniprot_sprot_varsplic.fasta.gz
+curl -O ftp://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/complete/docs/sec_ac.txt
 mv sec_ac.txt uniprot_sec_ac.txt
 cp uniprot_sec_ac.txt uniprot_sec_ac.txt.orig
 
