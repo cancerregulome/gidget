@@ -18,15 +18,29 @@ rm -rf gene2refseq*
 rm -rf Homo_sapiens.gene_info*
 rm -rf gene_refseq_uniprotkb_collab*
 
+# save files with original timestamps
+
 curl -O --remote-time ftp://ftp.ncbi.nlm.nih.gov/gene/DATA/gene2accession.gz
 curl -O --remote-time ftp://ftp.ncbi.nlm.nih.gov/gene/DATA/gene2refseq.gz
 curl -O --remote-time ftp://ftp.ncbi.nlm.nih.gov/gene/DATA/GENE_INFO/Mammalia/Homo_sapiens.gene_info.gz
 curl -O --remote-time ftp://ftp.ncbi.nlm.nih.gov/gene/DATA/gene_refseq_uniprotkb_collab.gz
 
-gunzip gene2accession.gz
-gunzip gene2refseq.gz
-gunzip Homo_sapiens.gene_info.gz
-gunzip gene_refseq_uniprotkb_collab.gz
+
+# Store original timestamps for NCBI's Gene for archival purposes.
+# NCBI's Gene database is potentially updated daily, so we use the file creation time
+# for bookkeeping.
+# see http://www.ncbi.nlm.nih.gov/books/NBK3841/#EntrezGene.How_Data_Are_Maintained
+
+for file in gene2accession gene2refseq Homo_sapiens.gene_info gene_refseq_uniprotkb_collab
+do
+
+	# add file's timestamp to the name as part of the string:
+	newfilename=$file-`stat -c %y $file.gz | cut -d ' ' -f1 | sed 's/-//g'`.gz
+	mv $file.gz $newfilename
+
+	gunzip $newfilename
+done
+
 
 # remove the first header line from this file;
 # leave the original with an ".orig" suffix per original script
