@@ -1444,7 +1444,7 @@ if __name__ == "__main__":
 
     # list of cancer directory names
     cancerDirNames = [
-        'blca', 'brca', 'cesc', 'cntl', 'coad', 'dlbc', 'esca', 'gbm', 'hnsc', 'kirc',
+        'acc', 'blca', 'brca', 'cesc', 'cntl', 'coad', 'dlbc', 'esca', 'gbm', 'hnsc', 'kirc',
         'kirp', 'laml', 'lcll', 'lgg', 'lihc', 'lnnh', 'luad', 'lusc', 'ov',
         'paad', 'prad', 'read', 'sarc', 'skcm', 'stad', 'thca', 'ucec', 'lcml', 'pcpg']
 
