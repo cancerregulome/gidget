@@ -80,7 +80,7 @@ do
 done
 
 
-
+# TODO: make sure that downstream scripts are okay with the versioned filenames.
 # Use the above resources to map genes to uniprot protein accessions
 #sh "$MAF_SCRIPTS_DIR/bash/prepareEntrezGeneUniprotReferences.sh"
 
