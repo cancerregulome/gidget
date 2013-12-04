@@ -48,22 +48,22 @@ platformStrings = [
 
 
 dataTypeDict = {}
-dataTypeDict["HT_HG-U133A"] = ["N", "GEXP"]
-dataTypeDict["AgilentG4502A_07_1"] = ["N", "GEXP"]
-dataTypeDict["AgilentG4502A_07_2"] = ["N", "GEXP"]
-dataTypeDict["AgilentG4502A_07_3"] = ["N", "GEXP"]
-dataTypeDict["H-miRNA_8x15K"] = ["N", "MIRN"]
-dataTypeDict["HumanMethylation27"] = ["N", "METH"]
-dataTypeDict["HumanMethylation450"] = ["N", "METH"]
-dataTypeDict["IlluminaGA_RNASeq"] = ["N", "GEXP"]
-dataTypeDict["IlluminaGA_RNASeqV2"] = ["N", "GEXP"]
-dataTypeDict["IlluminaHiSeq_RNASeq"] = ["N", "GEXP"]
-dataTypeDict["IlluminaHiSeq_RNASeqV2"] = ["N", "GEXP"]
-dataTypeDict["Genome_Wide_SNP_6"] = ["N", "CNVR"]
-dataTypeDict["IlluminaGA_miRNASeq"] = ["N", "MIRN"]
-dataTypeDict["IlluminaHiSeq_miRNASeq"] = ["N", "MIRN"]
-dataTypeDict["MDA_RPPA_Core"] = ["N", "RPPA"]
-dataTypeDict["microsat_i"] = ["C", "SAMP"]
+dataTypeDict["HT_HG-U133A"] = ["N", "GEXP", "array"]
+dataTypeDict["AgilentG4502A_07_1"] = ["N", "GEXP", "array"]
+dataTypeDict["AgilentG4502A_07_2"] = ["N", "GEXP", "array"]
+dataTypeDict["AgilentG4502A_07_3"] = ["N", "GEXP", "array"]
+dataTypeDict["H-miRNA_8x15K"] = ["N", "MIRN", "array"]
+dataTypeDict["HumanMethylation27"] = ["N", "METH", "beadchip"]
+dataTypeDict["HumanMethylation450"] = ["N", "METH", "beadchip"]
+dataTypeDict["IlluminaGA_RNASeq"] = ["N", "GEXP", "seq"]
+dataTypeDict["IlluminaGA_RNASeqV2"] = ["N", "GEXP", "seq"]
+dataTypeDict["IlluminaHiSeq_RNASeq"] = ["N", "GEXP", "seq"]
+dataTypeDict["IlluminaHiSeq_RNASeqV2"] = ["N", "GEXP", "seq"]
+dataTypeDict["Genome_Wide_SNP_6"] = ["N", "CNVR", "array"]
+dataTypeDict["IlluminaGA_miRNASeq"] = ["N", "MIRN", "seq"]
+dataTypeDict["IlluminaHiSeq_miRNASeq"] = ["N", "MIRN", "seq"]
+dataTypeDict["MDA_RPPA_Core"] = ["N", "RPPA", "array"]
+dataTypeDict["microsat_i"] = ["C", "SAMP", "pcr"]
 
 RPPAdict = {}
 
@@ -2491,7 +2491,7 @@ if __name__ == "__main__":
 
     # list of cancer directory names
     cancerDirNames = [
-        'blca', 'brca', 'cesc', 'cntl', 'coad', 'dlbc', 'esca', 'gbm', 'hnsc', 'kich', 'kirc',
+        'acc', 'blca', 'brca', 'cesc', 'cntl', 'coad', 'dlbc', 'esca', 'gbm', 'hnsc', 'kich', 'kirc',
         'kirp', 'laml', 'lcll', 'lgg', 'lihc', 'lnnh', 'luad', 'lusc', 'meso', 'ov',
         'paad', 'prad', 'read', 'sarc', 'skcm', 'stad', 'thca', 'ucec', 'coadread',
         'lcml', 'pcpg']
@@ -2902,7 +2902,8 @@ if __name__ == "__main__":
             dataD['dataType'] = getDataType(segList[0])
 
             newFeatureName = "C:SAMP:" + \
-                dataTypeDict[zPlat][1].lower() + "Platform"
+                dataTypeDict[zPlat][1].lower() + "Platform" + ":::::" + \
+                dataTypeDict[zPlat][2]
             newFeatureValue = zPlat
             dataD = tsvIO.addConstFeature(
                 dataD, newFeatureName, newFeatureValue)
@@ -2923,7 +2924,8 @@ if __name__ == "__main__":
         print ' writing out data matrix to ', outFilename
 
         newFeatureName = "C:SAMP:" + \
-            dataTypeDict[zPlat][1].lower() + "Platform"
+            dataTypeDict[zPlat][1].lower() + "Platform" + ":::::" + \
+            dataTypeDict[zPlat][2]
         newFeatureValue = zPlat
         dataD = tsvIO.addConstFeature(dataD, newFeatureName, newFeatureValue)
 
