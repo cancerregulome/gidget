@@ -620,9 +620,80 @@ def addFollowupInfo(allClinDict):
     return (allClinDict)
 
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
+# fields of interest:
+# days_to_birth
+# days_to_initial_pathologic_diagnosis	<-- this is always 0
+# days_to_submitted_specimen_dx
+# days_to_last_followup
+# days_to_last_known_alive
+# days_to_death
+# also:
+# new_tumor_event_after_initial_treatment
+# days_to_new_tumor_event_after_initial_treatment
+
+
+def checkFollowupInfo(allClinDict):
+
+    print " "
+    print " in checkFollowupInfo ... "
+
+    # FIRST: if there is a days_to_last_known_alive, then check that it is
+    # used consistently, otherwise create it
+
+    aKey = "days_to_last_known_alive"
+    bKey = "days_to_last_followup"
+    cKey = "days_to_death"
+    dKey = "vital_status"
+
+    haveA = (aKey in allClinDict.keys())
+    haveB = (bKey in allClinDict.keys())
+    haveC = (cKey in allClinDict.keys())
+    haveD = (dKey in allClinDict.keys())
+
+    print " have flags A, B, C and D : ", haveA, haveB, haveC, haveD
+
+    print " allClinDict.keys() : "
+    print allClinDict.keys()
+
+    numClin = len(allClinDict[aKey])
+
+    # range of days_to_last_known_alive is typically something like [0,3196]
+    for kk in range(numClin):
+        if (str(allClinDict[dKey][kk]).upper() == "DECEASED"):
+            if (str(allClinDict[cKey][kk]).upper() == "NA"):
+                print " ERROR !!! need to know when this person died !!! "
+                print kk
+                print aKey, allClinDict[aKey][kk]
+                print bKey, allClinDict[bKey][kk]
+                print cKey, allClinDict[cKey][kk]
+                print dKey, allClinDict[dKey][kk]
+                print " UPDATING vital_status to LIVING ... "
+                print " "
+                allClinDict[dKey][kk] = "LIVING"
+
+        if (str(allClinDict[dKey][kk]).upper() == "LIVING"):
+            if (str(allClinDict[aKey][kk]).upper() == "NA"):
+                if (str(allClinDict[bKey][kk]).upper() == "NA"):
+                    print " ERROR !!! no information about follow-up ??? "
+                    print kk
+                    print aKey, allClinDict[aKey][kk]
+                    print bKey, allClinDict[bKey][kk]
+                    print cKey, allClinDict[cKey][kk]
+                    print dKey, allClinDict[dKey][kk]
+                    print " UPDATING days_to_last_known_alive and days_to_last_followup to 0 "
+                    print " "
+                    allClinDict[aKey][kk] = 0
+                    allClinDict[bKey][kk] = 0
+                else:
+                    print " ERROR in checkFollowupInfo ... how did we get here ??? "
+                    sys.exit(-1)
+        
+
+    return (allClinDict)
+
+# -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 # derive the preferred stage tumor stage from the comparison of the
 # reported one with the derived one
-
 
 def PreferredStage(reported, computed):
     t = testTumorStage(reported, computed)
@@ -2206,6 +2277,11 @@ if __name__ == "__main__":
     # NEW: look at some of the "days_to_" fields and do some fix-ups ...
     if (1):
         allClinDict = addFollowupInfo(allClinDict)
+
+    # new as of 04dec13 ... checking that vital_status and various days_to_???
+    # features are consistent ...
+    if (1):
+        allClinDict = checkFollowupInfo(allClinDict)
 
     # total hack ...
     if (0):
