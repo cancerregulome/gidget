@@ -58,12 +58,12 @@ for ((i=1; i<$#; i++))
                 echo " "
                 echo "     looping over subset " $st
         
-                if [ -f $tumor.seq.$curDate.$st.tsv ]
+                if [ -f $tumor.all.$curDate.$st.tsv ]
                     then
         
-                        echo " --> running survival analysis on " $tumor.seq.$curDate.$st.tsv
+                        echo " --> running survival analysis on " $tumor.all.$curDate.$st.tsv
                         rm -fr Survival.CVars.txt
-                        cut -f1 $tumor.seq.$curDate.$st.tsv | grep -v "^N:" | grep -v "^M:" | grep -v "vital_status" | sort >& Survival.CVars.txt
+                        cut -f1 $tumor.all.$curDate.$st.tsv | grep -v "^N:" | grep -v "^M:" | grep -v "vital_status" | sort >& Survival.CVars.txt
                 
                         echo " "
                         head Survival.CVars.txt
@@ -72,16 +72,16 @@ for ((i=1; i<$#; i++))
                         cd $VT_SURVIVAL
                         rm -fr $TCGAFMP_DATA_DIR/$tumor/$curDate/SurvivalPVal.$st.tmp
                         rm -fr $TCGAFMP_DATA_DIR/$tumor/$curDate/SurvivalPVal.$st.tsv
-                        rm -fr $TCGAFMP_DATA_DIR/$tumor/scratch/SurvivalPVal.seq.$st.log
+                        rm -fr $TCGAFMP_DATA_DIR/$tumor/scratch/SurvivalPVal.all.$st.log
                         ./SurvivalPVal.sh \
-                                -f $TCGAFMP_DATA_DIR/$tumor/$curDate/$tumor.seq.$curDate.$st.tsv \
+                                -f $TCGAFMP_DATA_DIR/$tumor/$curDate/$tumor.all.$curDate.$st.tsv \
                                 -c $TCGAFMP_DATA_DIR/$tumor/$curDate/Survival.CVars.txt \
                                 -m $TCGAFMP_DATA_DIR/$tumor/aux/survival.feat.txt \
-                                -o $TCGAFMP_DATA_DIR/$tumor/$curDate/SurvivalPVal.$st.tmp >& $TCGAFMP_DATA_DIR/$tumor/scratch/SurvivalPVal.seq.$st.log
+                                -o $TCGAFMP_DATA_DIR/$tumor/$curDate/SurvivalPVal.$st.tmp >& $TCGAFMP_DATA_DIR/$tumor/scratch/SurvivalPVal.all.$st.log
                         grep -v "	NA" $TCGAFMP_DATA_DIR/$tumor/$curDate/SurvivalPVal.$st.tmp | sort -gk 2 | grep -v "vital" \
-                                >& $TCGAFMP_DATA_DIR/$tumor/$curDate/SurvivalPVal.seq.$st.tsv
+                                >& $TCGAFMP_DATA_DIR/$tumor/$curDate/SurvivalPVal.all.$st.tsv
         
-                        head -5 $TCGAFMP_DATA_DIR/$tumor/$curDate/SurvivalPVal.seq.$st.tsv
+                        head -5 $TCGAFMP_DATA_DIR/$tumor/$curDate/SurvivalPVal.all.$st.tsv
                         echo " "
                         echo " "
         
@@ -93,13 +93,13 @@ for ((i=1; i<$#; i++))
             done ## loop over st
 
         ## also do the non-split matrix ...
-        if [ -f $tumor.seq.$curDate.tsv ]
+        if [ -f $tumor.all.$curDate.tsv ]
             then
 
                 echo " "
-                echo " --> running survival analysis on " $tumor.seq.$curDate.tsv
+                echo " --> running survival analysis on " $tumor.all.$curDate.tsv
                 rm -fr Survival.CVars.txt
-                cut -f1 $tumor.seq.$curDate.tsv | grep -v "^N:" | grep -v "^M:" | grep -v "vital_status" | sort >& Survival.CVars.txt
+                cut -f1 $tumor.all.$curDate.tsv | grep -v "^N:" | grep -v "^M:" | grep -v "vital_status" | sort >& Survival.CVars.txt
         
                 echo " "
                 head Survival.CVars.txt
@@ -108,16 +108,16 @@ for ((i=1; i<$#; i++))
                 cd $VT_SURVIVAL
                 rm -fr $TCGAFMP_DATA_DIR/$tumor/$curDate/SurvivalPVal.tmp
                 rm -fr $TCGAFMP_DATA_DIR/$tumor/$curDate/SurvivalPVal.tsv 
-                rm -fr $TCGAFMP_DATA_DIR/$tumor/scratch/SurvivalPVal.seq.log
+                rm -fr $TCGAFMP_DATA_DIR/$tumor/scratch/SurvivalPVal.all.log
                 ./SurvivalPVal.sh \
-                        -f $TCGAFMP_DATA_DIR/$tumor/$curDate/$tumor.seq.$curDate.tsv \
+                        -f $TCGAFMP_DATA_DIR/$tumor/$curDate/$tumor.all.$curDate.tsv \
                         -c $TCGAFMP_DATA_DIR/$tumor/$curDate/Survival.CVars.txt \
                         -m $TCGAFMP_DATA_DIR/$tumor/aux/survival.feat.txt \
-                        -o $TCGAFMP_DATA_DIR/$tumor/$curDate/SurvivalPVal.tmp >& $TCGAFMP_DATA_DIR/$tumor/scratch/SurvivalPVal.seq.log
+                        -o $TCGAFMP_DATA_DIR/$tumor/$curDate/SurvivalPVal.tmp >& $TCGAFMP_DATA_DIR/$tumor/scratch/SurvivalPVal.all.log
                 grep -v "	NA" $TCGAFMP_DATA_DIR/$tumor/$curDate/SurvivalPVal.tmp | sort -gk 2 | grep -v "vital" \
-                        >& $TCGAFMP_DATA_DIR/$tumor/$curDate/SurvivalPVal.seq.tsv
+                        >& $TCGAFMP_DATA_DIR/$tumor/$curDate/SurvivalPVal.all.tsv
 
-                head -5 $TCGAFMP_DATA_DIR/$tumor/$curDate/SurvivalPVal.seq.tsv
+                head -5 $TCGAFMP_DATA_DIR/$tumor/$curDate/SurvivalPVal.all.tsv
                 echo " "
                 echo " "
 
