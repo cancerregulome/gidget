@@ -411,7 +411,7 @@ if __name__ == "__main__":
     # print " "
     # print " calling writeTSV_dataMatrix ... ", outFile
     sortRowFlag = 0
-    sortColFlag = 1
+    sortColFlag = 0
     tsvIO.writeTSV_dataMatrix(outD, sortRowFlag, sortColFlag, outFile)
 
     print " "
