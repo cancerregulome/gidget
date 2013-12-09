@@ -344,8 +344,8 @@ if __name__ == "__main__":
         newFeatureValue = zPlat
         dataD = tsvIO.addConstFeature(dataD, newFeatureName, newFeatureValue)
 
-        sortRowFlag = 1
-        sortColFlag = 1
+        sortRowFlag = 0
+        sortColFlag = 0
         tsvIO.writeTSV_dataMatrix(
             dataD, sortRowFlag, sortColFlag, outFilename)
 
