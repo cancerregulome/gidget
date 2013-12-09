@@ -10,6 +10,7 @@ import math
 import numpy
 import os
 import sys
+import time
 
 #------------------------------------------------------------------------------
 
@@ -1560,6 +1561,8 @@ def writeTSV_dataMatrix(dataD, sortRowFlag,  sortColFlag, outFilename):
         outFilename += ".tsv"
 
     print " in writeTSV_dataMatrix ... ", outFilename, len(rowLabels), len(colLabels)
+    print '     (a) TIME ', time.asctime(time.localtime(time.time()))
+
     try:
         fh = file(outFilename, 'w')
     except:
@@ -1572,6 +1575,7 @@ def writeTSV_dataMatrix(dataD, sortRowFlag,  sortColFlag, outFilename):
             sys.exit(-1)
 
     lookAtDataD(dataD)
+    print '     (b) TIME ', time.asctime(time.localtime(time.time()))
 
     dataMatrix = dataD['dataMatrix']
 
@@ -1619,6 +1623,7 @@ def writeTSV_dataMatrix(dataD, sortRowFlag,  sortColFlag, outFilename):
                 newRowOrder[ii] = jj
     # print " new row order   : ", newRowOrder[0:20]
 
+    print '     (c) TIME ', time.asctime(time.localtime(time.time()))
     # use the "type" in the top-left corner of the output data file
     tokenList = rowLabels[0].split(':')
     cornerString = dataD['dataType']
@@ -1651,6 +1656,8 @@ def writeTSV_dataMatrix(dataD, sortRowFlag,  sortColFlag, outFilename):
     fTypeDict = {}
     numNA = 0
     numNot = 0
+
+    print '     (d) TIME ', time.asctime(time.localtime(time.time()))
 
     for iG in range(numRow):
         jG = newRowOrder[iG]
@@ -1710,6 +1717,7 @@ def writeTSV_dataMatrix(dataD, sortRowFlag,  sortColFlag, outFilename):
     print " "
     print " --> finished in writeTSV_dataMatrix ... wrote out %d rows x %d columns %5.3f NA in %s " % (numGout, numSout, fracNA, outFilename)
     print "     ", fTypeDict
+    print '     (e) TIME ', time.asctime(time.localtime(time.time()))
     print " "
 
 #------------------------------------------------------------------------------
