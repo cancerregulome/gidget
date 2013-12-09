@@ -26,7 +26,7 @@ for d in acc blca brca cesc cntl coad dlbc esca gbm hnsc kich kirc kirp laml lgg
              -R "*images*" \
 	     --verbose \
 	     --recursive --level=1 \
-	     --user=ShmulevI --password=C@ncerReg22 \
+	     --user=USERNAME_HERE --password=PASSWD_HERE \
 	     https://tcga-data-secure.nci.nih.gov/tcgafiles/tcga4yeo/tumor/$d/cgcc/nationwidechildrens.org/microsat_i/fragment_analysis
 
     done

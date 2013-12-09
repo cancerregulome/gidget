@@ -388,7 +388,7 @@ if __name__ == "__main__":
         sys.exit(-1)
 
     pythonbin = "/tools/bin/python2.7"
-    golempwd = "g0l3mm45t3r"
+    golempwd = "PASSWD_HERE"
 
     numJobs = 0
     for index in indexList:
@@ -405,7 +405,7 @@ if __name__ == "__main__":
 
     # ok, now we want to actually launch the jobs ...
     cmdString = "python $TCGAFMP_ROOT_DIR/main/golem.py "
-    cmdString += "http://glados.systemsbiology.net:7083 -p g0l3mm45t3r "
+    cmdString += "http://glados.systemsbiology.net:7083 -p PASSWD_HERE "
     cmdString += "-L scoreCatFeat -u "
     cmdString += getpass.getuser() + " "
     cmdString += "runlist " + runFile
