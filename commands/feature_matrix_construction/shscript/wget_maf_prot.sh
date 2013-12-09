@@ -29,7 +29,7 @@ for d in acc blca brca cesc cntl coad dlbc esca gbm hnsc kich kirc kirp laml lgg
              -R "*images*" \
 	     --verbose \
 	     --recursive --level=1 \
-	     --user=ShmulevI --password=C@ncerReg22 \
+	     --user=USERNAME_HERE --password=PASSWD_HERE \
 	     https://tcga-data-secure.nci.nih.gov/tcgafiles/tcga4yeo/tumor/$d/gsc/broad.mit.edu/illuminaga_dnaseq_cont/mutations_protected
 
     done
@@ -59,7 +59,7 @@ for d in acc blca brca cesc cntl coad dlbc esca gbm hnsc kich kirc kirp laml lgg
              -R "*images*" \
 	     --verbose \
 	     --recursive --level=1 \
-	     --user=ShmulevI --password=C@ncerReg22 \
+	     --user=USERNAME_HERE --password=PASSWD_HERE \
 	     https://tcga-data-secure.nci.nih.gov/tcgafiles/tcga4yeo/tumor/$d/gsc/genome.wustl.edu/illuminaga_dnaseq_cont/mutations_protected
 
     done
@@ -89,7 +89,7 @@ for d in acc blca brca cesc cntl coad dlbc esca gbm hnsc kich kirc kirp laml lgg
              -R "*images*" \
 	     --verbose \
 	     --recursive --level=1 \
-	     --user=ShmulevI --password=C@ncerReg22 \
+	     --user=USERNAME_HERE --password=PASSWD_HERE \
 	     https://tcga-data-secure.nci.nih.gov/tcgafiles/tcga4yeo/tumor/$d/gsc/hgsc.bcm.edu/illuminaga_dnaseq_cont/mutations_protected
 
     done
