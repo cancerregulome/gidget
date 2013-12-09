@@ -17,9 +17,9 @@ def open_url(fName):
 
     if (fName.startswith("https://")):
         request = urllib2.Request(fName)
-        username = "ShmulevI"
+        username = "USERNAME_HERE"
         # this is the new password as of June 2nd 2010
-        password = "CancerReg1***"
+        password = "PASSWD_HERE"
         base64string = base64.encodestring('%s:%s' % (username, password))
         base64string = base64string[:-1]
         request.add_header("Authorization", "Basic %s" % base64string)
