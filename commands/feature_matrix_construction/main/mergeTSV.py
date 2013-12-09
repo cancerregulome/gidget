@@ -5,6 +5,7 @@ import tsvIO
 
 import os
 import sys
+import time
 
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 
@@ -396,6 +397,7 @@ if __name__ == "__main__":
     print "  input file list : ", len(inFileList), inFileList
     print " output file name : ", outFile
     print " "
+    print ' (a) TIME ', time.asctime(time.localtime(time.time()))
 
     inputData = []
     dTypeList = []
@@ -491,6 +493,8 @@ if __name__ == "__main__":
         print "     --> EXITING "
         sys.exit(-1)
 
+    print ' (b) TIME ', time.asctime(time.localtime(time.time()))
+
     # now we build up a union of the lists of features (row) and samples
     # (columns)
     print " preparing union label lists ... "
@@ -568,13 +572,15 @@ if __name__ == "__main__":
                 else:
                     outMatrix[iu][ju] = inputData[iD]['dataMatrix'][ii][jj]
 
+    print ' (c) TIME ', time.asctime(time.localtime(time.time()))
+
     outD = {}
     outD['rowLabels'] = unionRowLabels
     outD['colLabels'] = unionColLabels
     outD['dataMatrix'] = outMatrix
 
     sortRowFlag = 0  # seems best not to sort the rows
-    sortColFlag = 1
+    sortColFlag = 0
 
     if (sortRowFlag):
         fTypeList.sort()
@@ -590,11 +596,13 @@ if __name__ == "__main__":
         print " NOT doing any pruning of the merged dataMatrix "
 
     print " "
+    print ' (d) TIME ', time.asctime(time.localtime(time.time()))
     print " calling writeTSV_dataMatrix ... ", outFile
     tsvIO.writeTSV_dataMatrix(outD, sortRowFlag, sortColFlag, outFile)
 
     print " "
     print " DONE ", dTypeList, fTypeList
+    print ' (e) TIME ', time.asctime(time.localtime(time.time()))
     print " "
 
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
