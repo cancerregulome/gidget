@@ -42,3 +42,4 @@ python $TCGAFMP_ROOT_DIR/util/ExcludedItems.py ${tt}_Annotations.tsv  $2  > ${tt
 ## rm -f ${tt}_Annotations.json ${tt}_Annotations.tsv
 cut -f4 ${tt}_excluded_items.tsv | sort | uniq | sed -e '1,$s/"//g' | grep -v "Barcode" >& ${tt}.blacklist.samples.tsv
 echo "    --> number of blacklisted samples : " `wc -l ${tt}.blacklist.samples.tsv`
+

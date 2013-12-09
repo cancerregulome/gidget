@@ -236,7 +236,7 @@ if __name__ == "__main__":
                 archiveName = getLastBit(dName)
                 print '     archiveName : ', archiveName
 
-                cmdString = "/users/sreynold/to_be_checked_in/TCGAfmp/shscript/expression_matrix_mimat.pl "
+                cmdString = "$TCGAFMP_ROOT_DIR/shscript/expression_matrix_mimat.pl "
                 cmdString += "-m /titan/cancerregulome11/TCGA/repositories/mirna_bcgsc/tcga_mirna_bcgsc_hg19.adf "
                 cmdString += "-p %s " % dName
 
