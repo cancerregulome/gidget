@@ -208,12 +208,20 @@ def getSDRFinfo(sdrfFilename):
             # numTokens=%d " % ( lineNum, zPlat, numTokens )
 
             if (zPlat == "HT_HG-U133A"):
-                iLevel3 = 30
-                iBarcode = 0
-                iFilename = 27
-                iArchive = 28
-                iYes = 31
-                iOther = 26
+                if (numTokens == 34):
+                    iLevel3 = 31
+                    iBarcode = 1
+                    iFilename = 28
+                    iArchive = 29
+                    iYes = 32
+                    iOther = 27
+                else:
+                    iLevel3 = 30
+                    iBarcode = 0
+                    iFilename = 27
+                    iArchive = 28
+                    iYes = 31
+                    iOther = 26
 
             elif (zPlat == "AgilentG4502A_07_1"):
                 if (numTokens == 44):
@@ -283,12 +291,20 @@ def getSDRFinfo(sdrfFilename):
                     sys.exit(-1)
 
             elif (zPlat == "H-miRNA_8x15K"):
-                iLevel3 = 28
-                iBarcode = 25
-                iFilename = 26
-                iArchive = 30
-                iYes = 29
-                iOther = 27
+                if (numTokens == 32):
+                    iLevel3 = 29
+                    iBarcode = 26
+                    iFilename = 27
+                    iArchive = 31
+                    iYes = 30
+                    iOther = 28
+                else:
+                    iLevel3 = 28
+                    iBarcode = 25
+                    iFilename = 26
+                    iArchive = 30
+                    iYes = 29
+                    iOther = 27
 
             elif (zPlat == "HumanMethylation27"):
                 # looks like the new data has 33 tokens, and the indices should be 30, 1, 27, 28, 31, 29
