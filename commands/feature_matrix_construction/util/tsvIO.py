@@ -42,13 +42,16 @@ def replaceBlanks(aString, newChr):
     # HACK ... if this is a microRNA feature, then correct the case ...
     # N:MIRN:hsa-let-7a
     # N:MIRN:hsa-mir-99a
-    if (newString[2:6] == "MIRN"):
-        tmpString = newString[:6] + newString[6:].lower()
-        i1 = tmpString.find("mimat")
-        if (i1 > 0):
-            newString = tmpString[:i1] + "MIMAT" + tmpString[i1 + 5:]
-        else:
-            newString = tmpString
+    # 09dec13 ... hopefully this is not needed anymore ... ???
+    if ( 0 ):
+        if (newString[2:6] == "MIRN"):
+            ## hopefully this is not needed anymore ??? case fixes ... FIXME
+            tmpString = newString[:6] + newString[6:].lower()
+            i1 = tmpString.find("mimat")
+            if (i1 > 0):
+                newString = tmpString[:i1] + "MIMAT" + tmpString[i1 + 5:]
+            else:
+                newString = tmpString
 
     return (newString)
 
@@ -114,7 +117,6 @@ def writeAttributeHeader(dataD, bestKeyOrder, fh, sortRowFlag=0):
     else:
         # the bestKeyOrder is a list of dictionary keys / feature names
         # and it starts with 'bcr_patient_barcode'
-        # NOTE: these feature names do not yet start with "C:CLIN:" etc...
         aKey = bestKeyOrder[0]
         numKeys = len(bestKeyOrder)
         # for each key, there is a vector of values and the length of that
@@ -377,7 +379,7 @@ def writeTSV_clinicalFlipNumeric(allClinDict, bestKeyOrder, outName):
     numKey = len(bestKeyOrder)
 
     # get the barcodes ...
-    if (aKey != "bcr_patient_barcode"):
+    if (aKey.find("bcr_patient_barcode") < 0):
         print " why is the first key not the barcode ??? "
         print aKey
         print allClinDict[aKey]
@@ -461,7 +463,7 @@ def writeTSV_clinicalFlipNumeric(allClinDict, bestKeyOrder, outName):
                 outLine = "%s" % (replaceBlanks(featureName, '_'))
                 for jj in range(numClin):
                     curLabel = replaceBlanks(
-                        str(allClinDict[aKey][jj]).upper(), '_')
+                        str(allClinDict[aKey][jj]), '_')
                     outLine += "\t%s" % curLabel
                 fh.write("%s\n" % outLine)
 
@@ -471,7 +473,7 @@ def writeTSV_clinicalFlipNumeric(allClinDict, bestKeyOrder, outName):
                 outLine = "%s" % (replaceBlanks(featureName, '_'))
                 for jj in range(numClin):
                     curLabel = replaceBlanks(
-                        str(allClinDict[aKey][jj]).upper(), '_')
+                        str(allClinDict[aKey][jj]), '_')
                     outLine += "\t%s" % curLabel
                 fh.write("%s\n" % outLine)
 
@@ -490,7 +492,7 @@ def writeTSV_clinicalFlipNumeric(allClinDict, bestKeyOrder, outName):
                     print " remapping from labels to integers ... ", labelList, featureName
                     outLine = "%s" % (replaceBlanks(featureName, '_'))
                     for jj in range(numClin):
-                        curLabel = allClinDict[aKey][jj].upper()
+                        curLabel = allClinDict[aKey][jj]
                         try:
                             outLine += "\t%d" % labelList.index(curLabel)
                         except:
@@ -504,7 +506,7 @@ def writeTSV_clinicalFlipNumeric(allClinDict, bestKeyOrder, outName):
                     outLine = "%s" % (replaceBlanks(featureName, '_'))
                     for jj in range(numClin):
                         curLabel = replaceBlanks(
-                            allClinDict[aKey][jj].upper(), '_')
+                            allClinDict[aKey][jj], '_')
                         outLine += "\t%s" % curLabel
                     fh.write("%s\n" % outLine)
 
@@ -1553,8 +1555,8 @@ def writeTSV_dataMatrix(dataD, sortRowFlag,  sortColFlag, outFilename):
 
     for kk in range(len(colLabels)):
         colName = colLabels[kk]
-        if (colName.startswith("tcga-")):
-            newName = colName.upper()
+        if (colName.lower().startswith("tcga-")):
+            newName = colName
             colLabels[kk] = newName
 
     if (not outFilename.endswith(".tsv")):
@@ -1751,7 +1753,7 @@ def readTSV(inName):
     isClinical = 0
     firstColHdr = (hdrTokens[0]).lower()
     # print " in readTSV ... ", firstColHdr
-    if (firstColHdr == "bcr_patient_barcode"):
+    if (firstColHdr.find("bcr_patient_barcode") >= 0):
         isClinical = 1
     if (firstColHdr.find("barcode") >= 0):
         isClinical = 1
