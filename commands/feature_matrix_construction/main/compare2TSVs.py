@@ -20,9 +20,8 @@ def lookAtHeaderTokens(aTokens):
     typeDict = {}
 
     for a in aTokens:
-        a = a.lower()
-        if (a.startswith("tcga-")):
-            patientID = a[8:12]
+        if (a.upper().startswith("TCGA-")):
+            patientID = a[8:12].upper()
             if (patientID not in patientList):
                 patientList += [patientID]
             if (len(a) >= 15):
@@ -100,8 +99,30 @@ def lookAtLine(aLine):
 
 def findIndex(rowLabels, aLabel):
 
+    ## print " in findIndex ... ", aLabel
+    ## print rowLabels[:5]
+
+    if ( aLabel[1]==':' and aLabel[6]==':' ):
+        if ( aLabel[2:6].lower()=="clin"  or  aLabel[2:6].lower()=="samp" ):
+            aLabel2 = aLabel[6:].lower()
+        else:
+            aLabel2 = aLabel.lower()
+    else:
+        aLabel2 = aLabel.lower()
+
     for ii in range(len(rowLabels)):
-        if (rowLabels[ii].lower() == aLabel.lower()):
+
+        rLabel = rowLabels[ii]
+        if ( rLabel[1]==':' and rLabel[6]==':' ):
+            if ( rLabel[2:6].lower()=="clin"  or  rLabel[2:6].lower()=="samp" ):
+                rLabel2 = rLabel[6:].lower()
+            else:
+                rLabel2 = rLabel.lower()
+        else:
+            rLabel2 = rLabel.lower()
+
+        ## print "         comparing <%s> and <%s> " % ( rLabel2, aLabel2 )
+        if ( rLabel2 == aLabel2 ):
             return (ii)
 
     if (0):
@@ -155,10 +176,31 @@ if __name__ == "__main__":
 
     rowLabelsA = []
     for aLabel in dataA['rowLabels']:
-        rowLabelsA += [aLabel.lower()]
+        aTokens = aLabel.split(':')
+        if ( len(aTokens) > 3 ):
+            if ( aTokens[1].lower()=="clin"  or  aTokens[1].lower()=="samp" ):
+                rowLabelsA += [ aLabel[6:].lower() ]
+            else:
+                rowLabelsA += [ aLabel.lower() ]
+        else:
+            rowLabelsA += [ aLabel.lower() ]
+    rowLabelsA.sort()
+
     rowLabelsB = []
-    for aLabel in dataB['rowLabels']:
-        rowLabelsB += [aLabel.lower()]
+    for bLabel in dataB['rowLabels']:
+        bTokens = bLabel.split(':')
+        if ( len(bTokens) > 3 ):
+            if ( bTokens[1].lower()=="clin"  or  bTokens[1].lower()=="samp" ):
+                rowLabelsB += [ bLabel[6:].lower() ]
+            else:
+                rowLabelsB += [ bLabel.lower() ]
+        else:
+            rowLabelsB += [ bLabel.lower() ]
+    rowLabelsB.sort()
+
+    ## print len(rowLabelsA), len(rowLabelsB)
+    ## print rowLabelsA[:5], rowLabelsA[-5:]
+    ## print rowLabelsB[:5], rowLabelsB[-5:]
 
     numAinB = 0
     featLabelsAnotB = []
@@ -182,6 +224,9 @@ if __name__ == "__main__":
 
     featLabelsAnotB.sort()
     featLabelsBnotA.sort()
+
+    ## print len(featLabelsAnotB), featLabelsAnotB[:5]
+    ## print len(featLabelsBnotA), featLabelsBnotA[:5]
 
     print " "
     if (len(featLabelsAnotB) > 0):
@@ -214,10 +259,10 @@ if __name__ == "__main__":
 
     colLabelsA = []
     for aLabel in dataA['colLabels']:
-        colLabelsA += [aLabel.lower()[:minLen]]
+        colLabelsA += [aLabel[:minLen].upper()]
     colLabelsB = []
     for aLabel in dataB['colLabels']:
-        colLabelsB += [aLabel.lower()[:minLen]]
+        colLabelsB += [aLabel[:minLen].upper()]
 
     numAinB = 0
     samplesAnotB = []
@@ -244,26 +289,30 @@ if __name__ == "__main__":
 
     print " "
     if (len(samplesAnotB) > 0):
-        print " %d samples in A but not in B (string names have been arbitrarily forced to lower-case) : " % (len(samplesAnotB))
+        print " %d samples in A but not in B (string names have been arbitrarily forced to upper-case) : " % (len(samplesAnotB))
         for aLabel in samplesAnotB:
             print aLabel
     else:
-        print " NO samples in A but not in B (string names have been arbitrarily forced to lower-case) : "
+        print " NO samples in A but not in B (string names have been arbitrarily forced to upper-case) : "
 
     print " "
     if (len(samplesBnotA) > 0):
-        print " %d samples in B but not in A (string names have been arbitrarily forced to lower-case) : " % (len(samplesBnotA))
+        print " %d samples in B but not in A (string names have been arbitrarily forced to upper-case) : " % (len(samplesBnotA))
         for aLabel in samplesBnotA:
             print aLabel
     else:
-        print " NO samples in B but not in A (string names have been arbitrarily forced to lower-case) : "
+        print " NO samples in B but not in A (string names have been arbitrarily forced to upper-case) : "
 
     # now, for the features that exist in both, compare the *data* values ...
     print " "
     print " "
     print " "
     print " now checking data values, feature by feature ... "
-    print " (based on features in A only) "
+    print " (based on features in A that are also in B) "
+
+
+    ## print rowLabelsA[:5]
+    ## print featLabelsAnotB[:5]
 
     for aLabel in rowLabelsA:
 
@@ -279,7 +328,7 @@ if __name__ == "__main__":
         # get the feature index for each matrix ...
         iA = findIndex(dataA['rowLabels'], aLabel)
         iB = findIndex(dataB['rowLabels'], aLabel)
-        # print aLabel, iA, iB
+        ## print " (a) ", aLabel, iA, iB
 
         # grab the data vector from each matrix ...
         dataVecA = dataA['dataMatrix'][iA]
@@ -294,10 +343,13 @@ if __name__ == "__main__":
         sumN = 0
 
         # now loop over the individual data values for this feature
+        ## print " looping jA over %d " % len(dataVecA)
         for jA in range(len(dataVecA)):
             sampleA = dataA['colLabels'][jA]
+            ## print jA, sampleA, dataVecA[jA]
 
             if (str(dataVecA[jA]) == "NA" or str(dataVecA[jA]) == "-999999"):
+                ## print " (NA) "
                 continue
 
             else:
@@ -305,7 +357,7 @@ if __name__ == "__main__":
 
                 jB = findIndex(dataB['colLabels'], sampleA)
                 if (jB < 0):
-                    # print " sample <%s> not found in matrix B " % sampleA
+                    ## print " sample <%s> not found in matrix B " % sampleA
                     if (str(dataVecA[jA]) == "NA"):
                         doNothing = 1
                     elif (str(dataVecA[jA]) == "-999999"):
@@ -313,7 +365,8 @@ if __name__ == "__main__":
                     else:
                         numDiff += 1
                 else:
-                    # print jA, jB
+                    ## print jA, jB
+                    ## print dataVecA[jA], dataVecB[jB]
 
                     if (str(dataVecB[jB]) == "NA" or str(dataVecB[jB]) == "-999999"):
                         doNothing = 1
@@ -352,6 +405,7 @@ if __name__ == "__main__":
                          len(dataVecA), sumN, meanDiff, sigmDiff)
             else:
                 print " %4d out of %4d non-NA values are different <%s> (%d) " % (numDiff, numNotNA, aLabel, len(dataVecA))
+
 
     print " "
     print " FINISHED "
