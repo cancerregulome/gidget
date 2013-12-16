@@ -7,8 +7,8 @@
 
 use strict;
 use Getopt::Std;
-use vars qw ($opt_m $opt_o $opt_p $opt_h);
-getopts('m:o:p:h:');
+use vars qw ($opt_m $opt_o $opt_p $opt_h $opt_n);
+getopts('m:o:p:h:n:');
 use File::Find;
 use File::Basename;
 
@@ -20,16 +20,16 @@ my $help_text = "
 Using a list of genes and a set of expression files, creates an expression matrix.
 
 3 versions of the expression matrix are created.
-expn_matrix_mimat.txt: matrix with raw read counts
-expn_matrix_mimat_norm.txt: matrix with normalized counts (counts per million mature miRNA aligned tags)
-expn_matrix_mimat_norm_log.txt: as above, but values are taken to log2 (log(0) is written out as 0)
+expn_matrix_mimat_<modifier>.txt: matrix with raw read counts
+expn_matrix_mimat_norm_<modifier>.txt: matrix with normalized counts (counts per million mature miRNA aligned tags)
+expn_matrix_mimat_norm_log_<modifier>.txt: as above, but values are taken to log2 (log(0) is written out as 0)
 
-Usage: $0 -m miRNA_ADF -p Level_3_archive_directory
+Usage: $0 -m miRNA_ADF -o Output_directory -p Level_3_archive_directory -n <modifier>
 
 ########################################################
 ";
 
-if ($opt_h || !($opt_m && $opt_p)) { print $help_text; exit 1; }
+if ($opt_h || !($opt_o && $opt_m && $opt_p && $opt_n)) { print $help_text; exit 1; }
 
 my $norm_factor = 1000000; #Normalize to this number of tags
 my $log0 = "0"; #log(0) can be written out as other strings, eg. "NA"
@@ -83,9 +83,9 @@ foreach my $sample (sort keys %sample_names) {
 $header .= "\n";
 
 #Write expression matrix
-open RAW, ">$opt_p/expn_matrix_mimat.txt" or die "Can't write out expression matrix $opt_p/expn_matrix_mimat.txt: $!\n";
-open NORM, ">$opt_p/expn_matrix_mimat_norm.txt" or die "Can't write out expression matrix $opt_p/expn_matrix_mimat_norm.txt: $!\n";
-open LOG, ">$opt_p/expn_matrix_mimat_norm_log.txt" or die "Can't write out expression matrix $opt_p/expn_matrix_mimat_norm_log.txt: $!\n";
+open RAW, ">$opt_o/expn_matrix_mimat_$opt_n.txt" or die "Can't write out expression matrix $opt_p/expn_matrix_mimat_$opt_n.txt: $!\n";
+open NORM, ">$opt_o/expn_matrix_mimat_norm_$opt_n.txt" or die "Can't write out expression matrix $opt_p/expn_matrix_mimat_norm_$opt_n.txt: $!\n";
+open LOG, ">$opt_o/expn_matrix_mimat_norm_log_$opt_n.txt" or die "Can't write out expression matrix $opt_p/expn_matrix_mimat_norm_log_$opt_n.txt: $!\n";
 print RAW $header;
 print NORM $header;
 print LOG $header;

@@ -1,6 +1,7 @@
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 
 # these are system modules
+from datetime import datetime
 import numpy
 import os
 import sys
@@ -143,7 +144,7 @@ def sanityCheckSDRF(sdrfFilename):
 def getSDRFinfo(sdrfFilename):
 
     print ' '
-    print ' in getSDRFinfo ... <%s> ' % sdrfFilename
+    print datetime.now(), ' in getSDRFinfo ... <%s> ' % sdrfFilename
 
     okFlag = sanityCheckSDRF(sdrfFilename)
 
@@ -208,12 +209,20 @@ def getSDRFinfo(sdrfFilename):
             # numTokens=%d " % ( lineNum, zPlat, numTokens )
 
             if (zPlat == "HT_HG-U133A"):
-                iLevel3 = 30
-                iBarcode = 0
-                iFilename = 27
-                iArchive = 28
-                iYes = 31
-                iOther = 26
+                if (numTokens == 34):
+                    iLevel3 = 31
+                    iBarcode = 1
+                    iFilename = 28
+                    iArchive = 29
+                    iYes = 32
+                    iOther = 27
+                else:
+                    iLevel3 = 30
+                    iBarcode = 0
+                    iFilename = 27
+                    iArchive = 28
+                    iYes = 31
+                    iOther = 26
 
             elif (zPlat == "AgilentG4502A_07_1"):
                 if (numTokens == 44):
@@ -283,12 +292,20 @@ def getSDRFinfo(sdrfFilename):
                     sys.exit(-1)
 
             elif (zPlat == "H-miRNA_8x15K"):
-                iLevel3 = 28
-                iBarcode = 25
-                iFilename = 26
-                iArchive = 30
-                iYes = 29
-                iOther = 27
+                if (numTokens == 32):
+                    iLevel3 = 29
+                    iBarcode = 26
+                    iFilename = 27
+                    iArchive = 31
+                    iYes = 30
+                    iOther = 28
+                else:
+                    iLevel3 = 28
+                    iBarcode = 25
+                    iFilename = 26
+                    iArchive = 30
+                    iYes = 29
+                    iOther = 27
 
             elif (zPlat == "HumanMethylation27"):
                 # looks like the new data has 33 tokens, and the indices should be 30, 1, 27, 28, 31, 29
@@ -788,7 +805,7 @@ def getSDRFinfo(sdrfFilename):
         print ' list of files : (%d) ' % (len(fileList))
         # print fileList
         sys.exit(-1)
-
+    print datetime.now(), 'finished getSDRFinfo()'
     return (sdrfDict, archiveList, fileList, zPlat)
 
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
@@ -990,7 +1007,7 @@ def readOneDataFile(fName, geneList, zPlat, metaData):
 
     try:
         fh = file(fName)
-        print " in readOneDataFile ... ", zPlat, len(geneList)
+        print datetime.now(), " in readOneDataFile ... ", zPlat, len(geneList)
         print fName
     except:
         print " ERROR in readOneDataFile ... ", zPlat
@@ -1393,7 +1410,7 @@ def readOneDataFile(fName, geneList, zPlat, metaData):
 
     # print dataVec[:10]
 
-    print " --> returning ", len(geneList), len(dataVec)
+    print datetime.now(), " --> returning ", len(geneList), len(dataVec)
     print geneList[:5]
     print dataVec[:5]
 
@@ -2348,6 +2365,7 @@ def loadPlatformMetaData(zString):
             ## metaDataFilename = "/proj/ilyalab/sreynold/TCGA/HumanMethylation450/featNames.09jul12.hg19.txt"
             ## metaDataFilename = "/proj/ilyalab/sreynold/TCGA/HumanMethylation450/featNames.04oct13.hg19.txt"
             metaDataFilename = "/proj/ilyalab/sreynold/TCGA/HumanMethylation450/featNames.15oct13.hg19.txt"
+            ## metaDataFilename = "/proj/ilyalab/sreynold/TCGA/HumanMethylation450/featNames_all.16oct13.hg19.txt"
             fh = file(metaDataFilename)
             metaData = {}
             done = 0
@@ -2488,7 +2506,7 @@ def writeDataFreezeLog(fhLog, fName, barcode):
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 
 if __name__ == "__main__":
-
+    print datetime.now(), 'beginning new_Level3_matrix'
     # list of cancer directory names
     cancerDirNames = [
         'acc', 'blca', 'brca', 'cesc', 'cntl', 'coad', 'dlbc', 'esca', 'gbm', 'hnsc', 'kich', 'kirc',
@@ -2713,7 +2731,7 @@ if __name__ == "__main__":
 
             if (dName.find(dMatch) >= 0):
                 print ' '
-                print '     found a <%s> directory : <%s> ' % (dMatch, dName)
+                print datetime.now(), '     found a <%s> directory : <%s> ' % (dMatch, dName)
                 archiveName = getLastBit(dName)
                 print '     archiveName : ', archiveName
                 print '     archiveList : ', mergeArchiveList
@@ -2916,6 +2934,7 @@ if __name__ == "__main__":
             print " FATAL ERROR: failed to write out any resegmented copy-number data "
 
     else:
+        print datetime.now(), 'creating data matrix'
         dataD = {}
         dataD['rowLabels'] = geneList
         dataD['colLabels'] = sampleList
@@ -2929,13 +2948,13 @@ if __name__ == "__main__":
         newFeatureValue = zPlat
         dataD = tsvIO.addConstFeature(dataD, newFeatureName, newFeatureValue)
 
-        sortRowFlag = 0
-        sortColFlag = 0
+        sortRowFlag = 1
+        sortColFlag = 1
         tsvIO.writeTSV_dataMatrix(
             dataD, sortRowFlag, sortColFlag, outFilename)
 
     print ' '
-    print ' DONE !!! '
+    print datetime.now(), ' DONE !!! '
     print ' '
 
 
