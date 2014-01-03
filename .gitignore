@@ -1,3 +1,6 @@
+# gidget-specific files
+.gidgetconfig
+
 *.py[cod]
 
 # C extensions
