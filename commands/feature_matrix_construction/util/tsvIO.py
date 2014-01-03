@@ -10,6 +10,7 @@ import math
 import numpy
 import os
 import sys
+import time
 
 #------------------------------------------------------------------------------
 
@@ -41,13 +42,16 @@ def replaceBlanks(aString, newChr):
     # HACK ... if this is a microRNA feature, then correct the case ...
     # N:MIRN:hsa-let-7a
     # N:MIRN:hsa-mir-99a
-    if (newString[2:6] == "MIRN"):
-        tmpString = newString[:6] + newString[6:].lower()
-        i1 = tmpString.find("mimat")
-        if (i1 > 0):
-            newString = tmpString[:i1] + "MIMAT" + tmpString[i1 + 5:]
-        else:
-            newString = tmpString
+    # 09dec13 ... hopefully this is not needed anymore ... ???
+    if ( 0 ):
+        if (newString[2:6] == "MIRN"):
+            ## hopefully this is not needed anymore ??? case fixes ... FIXME
+            tmpString = newString[:6] + newString[6:].lower()
+            i1 = tmpString.find("mimat")
+            if (i1 > 0):
+                newString = tmpString[:i1] + "MIMAT" + tmpString[i1 + 5:]
+            else:
+                newString = tmpString
 
     return (newString)
 
@@ -113,7 +117,6 @@ def writeAttributeHeader(dataD, bestKeyOrder, fh, sortRowFlag=0):
     else:
         # the bestKeyOrder is a list of dictionary keys / feature names
         # and it starts with 'bcr_patient_barcode'
-        # NOTE: these feature names do not yet start with "C:CLIN:" etc...
         aKey = bestKeyOrder[0]
         numKeys = len(bestKeyOrder)
         # for each key, there is a vector of values and the length of that
@@ -376,7 +379,7 @@ def writeTSV_clinicalFlipNumeric(allClinDict, bestKeyOrder, outName):
     numKey = len(bestKeyOrder)
 
     # get the barcodes ...
-    if (aKey != "bcr_patient_barcode"):
+    if (aKey.find("bcr_patient_barcode") < 0):
         print " why is the first key not the barcode ??? "
         print aKey
         print allClinDict[aKey]
@@ -460,7 +463,7 @@ def writeTSV_clinicalFlipNumeric(allClinDict, bestKeyOrder, outName):
                 outLine = "%s" % (replaceBlanks(featureName, '_'))
                 for jj in range(numClin):
                     curLabel = replaceBlanks(
-                        str(allClinDict[aKey][jj]).upper(), '_')
+                        str(allClinDict[aKey][jj]), '_')
                     outLine += "\t%s" % curLabel
                 fh.write("%s\n" % outLine)
 
@@ -470,7 +473,7 @@ def writeTSV_clinicalFlipNumeric(allClinDict, bestKeyOrder, outName):
                 outLine = "%s" % (replaceBlanks(featureName, '_'))
                 for jj in range(numClin):
                     curLabel = replaceBlanks(
-                        str(allClinDict[aKey][jj]).upper(), '_')
+                        str(allClinDict[aKey][jj]), '_')
                     outLine += "\t%s" % curLabel
                 fh.write("%s\n" % outLine)
 
@@ -489,7 +492,7 @@ def writeTSV_clinicalFlipNumeric(allClinDict, bestKeyOrder, outName):
                     print " remapping from labels to integers ... ", labelList, featureName
                     outLine = "%s" % (replaceBlanks(featureName, '_'))
                     for jj in range(numClin):
-                        curLabel = allClinDict[aKey][jj].upper()
+                        curLabel = allClinDict[aKey][jj]
                         try:
                             outLine += "\t%d" % labelList.index(curLabel)
                         except:
@@ -503,7 +506,7 @@ def writeTSV_clinicalFlipNumeric(allClinDict, bestKeyOrder, outName):
                     outLine = "%s" % (replaceBlanks(featureName, '_'))
                     for jj in range(numClin):
                         curLabel = replaceBlanks(
-                            allClinDict[aKey][jj].upper(), '_')
+                            allClinDict[aKey][jj], '_')
                         outLine += "\t%s" % curLabel
                     fh.write("%s\n" % outLine)
 
@@ -1552,14 +1555,16 @@ def writeTSV_dataMatrix(dataD, sortRowFlag,  sortColFlag, outFilename):
 
     for kk in range(len(colLabels)):
         colName = colLabels[kk]
-        if (colName.startswith("tcga-")):
-            newName = colName.upper()
+        if (colName.lower().startswith("tcga-")):
+            newName = colName
             colLabels[kk] = newName
 
     if (not outFilename.endswith(".tsv")):
         outFilename += ".tsv"
 
     print " in writeTSV_dataMatrix ... ", outFilename, len(rowLabels), len(colLabels)
+    print '     (a) TIME ', time.asctime(time.localtime(time.time()))
+
     try:
         fh = file(outFilename, 'w')
     except:
@@ -1572,6 +1577,7 @@ def writeTSV_dataMatrix(dataD, sortRowFlag,  sortColFlag, outFilename):
             sys.exit(-1)
 
     lookAtDataD(dataD)
+    print '     (b) TIME ', time.asctime(time.localtime(time.time()))
 
     dataMatrix = dataD['dataMatrix']
 
@@ -1619,6 +1625,7 @@ def writeTSV_dataMatrix(dataD, sortRowFlag,  sortColFlag, outFilename):
                 newRowOrder[ii] = jj
     # print " new row order   : ", newRowOrder[0:20]
 
+    print '     (c) TIME ', time.asctime(time.localtime(time.time()))
     # use the "type" in the top-left corner of the output data file
     tokenList = rowLabels[0].split(':')
     cornerString = dataD['dataType']
@@ -1651,6 +1658,8 @@ def writeTSV_dataMatrix(dataD, sortRowFlag,  sortColFlag, outFilename):
     fTypeDict = {}
     numNA = 0
     numNot = 0
+
+    print '     (d) TIME ', time.asctime(time.localtime(time.time()))
 
     for iG in range(numRow):
         jG = newRowOrder[iG]
@@ -1710,6 +1719,7 @@ def writeTSV_dataMatrix(dataD, sortRowFlag,  sortColFlag, outFilename):
     print " "
     print " --> finished in writeTSV_dataMatrix ... wrote out %d rows x %d columns %5.3f NA in %s " % (numGout, numSout, fracNA, outFilename)
     print "     ", fTypeDict
+    print '     (e) TIME ', time.asctime(time.localtime(time.time()))
     print " "
 
 #------------------------------------------------------------------------------
@@ -1743,7 +1753,7 @@ def readTSV(inName):
     isClinical = 0
     firstColHdr = (hdrTokens[0]).lower()
     # print " in readTSV ... ", firstColHdr
-    if (firstColHdr == "bcr_patient_barcode"):
+    if (firstColHdr.find("bcr_patient_barcode") >= 0):
         isClinical = 1
     if (firstColHdr.find("barcode") >= 0):
         isClinical = 1

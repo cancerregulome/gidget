@@ -28,6 +28,17 @@ curDate=$1
 snapshotName=$2
 oneTumor=$3
 
+if [ ! -d $TCGAFMP_DATA_DIR/$oneTumor ]
+    then
+        echo " "
+        echo "     --> creating new directory " $TCGAFMP_DATA_DIR/$oneTumor
+        echo " "
+        mkdir $TCGAFMP_DATA_DIR/$oneTumor
+        mkdir $TCGAFMP_DATA_DIR/$oneTumor/aux
+        mkdir $TCGAFMP_DATA_DIR/$oneTumor/gnab
+        mkdir $TCGAFMP_DATA_DIR/$oneTumor/scratch
+fi
+
 rm -fr $TCGAFMP_DATA_DIR/$oneTumor/scratch/fmp*.$curDate.$snapshotName.$oneTumor.log
 rm -fr $TCGAFMP_DATA_DIR/$oneTumor/scratch/fmp*.$curDate.$oneTumor.log
 rm -fr $TCGAFMP_DATA_DIR/$oneTumor/$curDate/*.*

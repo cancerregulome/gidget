@@ -2000,7 +2000,8 @@ def loadPlatformMetaData(zString):
         if (1):
             ## metaDataFilename = "/proj/ilyalab/sreynold/TCGA/HumanMethylation27/featNames.txt"
             ## metaDataFilename = "/proj/ilyalab/sreynold/TCGA/HumanMethylation450/featNames.11apr12.txt"
-            metaDataFilename = "/proj/ilyalab/sreynold/TCGA/HumanMethylation450/featNames.09jul12.hg19.txt"
+            ## metaDataFilename = "/proj/ilyalab/sreynold/TCGA/HumanMethylation450/featNames.09jul12.hg19.txt"
+            metaDataFilename = "/titan/cancerregulome9/workspaces/bioinformatics_references/tcga_platform_genelists/featNames.09jul12.hg19.txt"
             fh = file(metaDataFilename)
             metaData = {}
             done = 0
@@ -2137,10 +2138,10 @@ if __name__ == "__main__":
 
     # list of cancer directory names
     cancerDirNames = [
-        'blca', 'brca', 'cesc', 'cntl', 'coad', 'dlbc', 'esca', 'gbm', 'hnsc', 'kich', 'kirc',
-        'kirp', 'laml', 'lcll', 'lgg', 'lihc', 'lnnh', 'luad', 'lusc', 'meso', 'ov',
-        'paad', 'prad', 'read', 'sarc', 'skcm', 'stad', 'thca', 'ucec', 'coadread',
-        'lcml', 'pcpg']
+        'acc',  'blca', 'brca', 'cesc', 'cntl', 'coad', 'dlbc', 'esca', 'gbm',
+        'hnsc', 'kich', 'kirc', 'kirp', 'laml', 'lcll', 'lgg',  'lihc', 'lnnh',
+        'luad', 'lusc', 'ov',   'paad', 'prad', 'read', 'sarc', 'skcm', 'stad',
+        'thca', 'ucec', 'lcml', 'pcpg']
 
     if (1):
 

@@ -35,49 +35,8 @@ def getNumSamples(featureMatrixFile):
     return (numSamples)
 
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
-# input file is assumed to end in .tsv
-# this function checks to see if the binFile exists and is up to date
-# with respect to the tsvFile ... if necessary, it will call prep4pairwise
-# to create the bin file
-
-
-def preProcessTSV(tsvFile):
-
-    tsvTime = os.path.getmtime(tsvFile)
-    # print tsvTime
-
-    binFile = tsvFile[:-4] + ".bin"
-    catFile = tsvFile[:-4] + ".cat"
-    try:
-        binTime = os.path.getmtime(binFile)
-        # print binTime
-    except:
-        binTime = 0
-
-    if (tsvTime > binTime):
-
-        # just to be sure, delete the *.bin and *.cat files ...
-        cmdString = "rm -fr %s" % binFile
-        (status, output) = commands.getstatusoutput(cmdString)
-        cmdString = "rm -fr %s" % catFile
-        (status, output) = commands.getstatusoutput(cmdString)
-
-        print " creating bin file "
-        cmdString = "/users/rkramer/bin/python3 /titan/cancerregulome8/TCGA/scripts/prep4pairwise.py %s" % tsvFile
-        (status, output) = commands.getstatusoutput(cmdString)
-        if (status != 0):
-            print " ERROR ??? failed to execute command ??? "
-            print cmdString
-            sys.exit(-1)
-    else:
-        print " bin file already up to date "
-
-    return (binFile)
-
-# -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 
 BIG_DISTANCE = 500000000
-
 
 def getGenomicDistance(aName, bName):
 

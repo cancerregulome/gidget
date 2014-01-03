@@ -16,7 +16,7 @@ toolsFolder="$MAF_TOOLS_DIR"
 echo
 echo update ANNOVAR 
 cd $toolsFolder
-wget http://bioinform.usc.edu/annovar/xmpVO9ISYx/annovar.tar.gz
+curl -O http://bioinform.usc.edu/annovar/xmpVO9ISYx/annovar.tar.gz
 tar -zxvf annovar.tar.gz
 cd $toolsFolder/annovar
 chmod 777 $toolsFolder/annovar

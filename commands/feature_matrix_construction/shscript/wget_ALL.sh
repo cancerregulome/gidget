@@ -1,3 +1,5 @@
+#!/bin/bash
+
 curDir=`pwd`
 
 cd $TCGAFMP_ROOT_DIR/shscript

@@ -270,15 +270,16 @@ for ((i=1; i<$#; i++))
 		$tumor.gexp.ary.tmpData2.tsv NO >& annotate.gexp.ary.$curDate.log
 
         ## NEW 03jul13 ... pathway-level expression features
-        rm -fr pathway.gexp.ary.$curDate.log
-        python $TCGAFMP_ROOT_DIR/main/addPathwayGEXPs.py \
-                $tumor.gexp.ary.tmpData2.tsv \
-                $tumor.gexp.ary.tmpData2b.tsv >& pathway.gexp.ary.$curDate.log
+####       --> removed for now ... 06dec13
+####        rm -fr pathway.gexp.ary.$curDate.log
+####        python $TCGAFMP_ROOT_DIR/main/addPathwayGEXPs.py \
+####                $tumor.gexp.ary.tmpData2.tsv \
+####                $tumor.gexp.ary.tmpData2b.tsv >& pathway.gexp.ary.$curDate.log
 
 	## c) highVar
 	rm -fr highVar.gexp.ary.$curDate.log
 	python $TCGAFMP_ROOT_DIR/main/highVarTSV.py \
-		$tumor.gexp.ary.tmpData2b.tsv \
+		$tumor.gexp.ary.tmpData2.tsv \
 		$tumor.gexp.ary.tmpData3.tsv \
 		0.75 IDR >& highVar.gexp.ary.$curDate.log 
 
@@ -368,15 +369,16 @@ for ((i=1; i<$#; i++))
 		$tumor.gexp.seq.tmpData2.tsv NO >& annotate.gexp.seq.$curDate.log
 
         ## NEW 03jul13 ... pathway-level expression features
-        rm -fr pathway.gexp.seq.$curDate.log
-        python $TCGAFMP_ROOT_DIR/main/addPathwayGEXPs.py \
-                $tumor.gexp.seq.tmpData2.tsv \
-                $tumor.gexp.seq.tmpData2b.tsv >& pathway.gexp.seq.$curDate.log
+####       --> removed for now ... 06dec13
+####        rm -fr pathway.gexp.seq.$curDate.log
+####        python $TCGAFMP_ROOT_DIR/main/addPathwayGEXPs.py \
+####                $tumor.gexp.seq.tmpData2.tsv \
+####                $tumor.gexp.seq.tmpData2b.tsv >& pathway.gexp.seq.$curDate.log
 
 	## c) highVar
 	rm -fr highVar.gexp.seq.$curDate.log
 	python $TCGAFMP_ROOT_DIR/main/highVarTSV.py \
-		$tumor.gexp.seq.tmpData2b.tsv \
+		$tumor.gexp.seq.tmpData2.tsv \
 		$tumor.gexp.seq.tmpData3.tsv \
 		0.75 IDR >& highVar.gexp.seq.$curDate.log 
 

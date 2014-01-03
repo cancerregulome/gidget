@@ -1,4 +1,7 @@
+#!/bin/bash
 
+# =============================================================================
+# broad.mit.edu/illuminaga_dnaseq_cont/mutations_protected
 for d in `cat $TCGAFMP_ROOT_DIR/shscript/tumor_list.txt`
 
     do
@@ -33,6 +36,8 @@ for d in `cat $TCGAFMP_ROOT_DIR/shscript/tumor_list.txt`
 
     done
 
+# =============================================================================
+# genome.wustl.edu/illuminaga_dnaseq_cont/mutations_protected
 for d in `cat $TCGAFMP_ROOT_DIR/shscript/tumor_list.txt`
 
     do
@@ -64,6 +69,9 @@ for d in `cat $TCGAFMP_ROOT_DIR/shscript/tumor_list.txt`
 
     done
 
+
+# =============================================================================
+# hgsc.bcm.edu/illuminaga_dnaseq_cont/mutations_protected
 for d in `cat $TCGAFMP_ROOT_DIR/shscript/tumor_list.txt`
 
     do
@@ -95,3 +103,37 @@ for d in `cat $TCGAFMP_ROOT_DIR/shscript/tumor_list.txt`
 
     done
 
+
+# =============================================================================
+# hgsc.bcm.edu/illuminaga_dnaseq_cont_curated/mutations/
+for d in `cat $TCGAFMP_ROOT_DIR/shscript/tumor_list.txt`
+
+    do
+
+	echo " "
+	echo " "
+	echo " ******************************************************************** "
+	echo $d
+
+	cd /titan/cancerregulome11/TCGA/repositories/dcc-mirror/public/tumor/$d/gsc/
+	mkdir hgsc.bcm.edu
+        chmod g+w hgsc.bcm.edu
+	cd hgsc.bcm.edu
+	mkdir illuminaga_dnaseq_cont_curated
+        chmod g+w illuminaga_dnaseq_cont_curated
+	cd illuminaga_dnaseq_cont_curated
+	mkdir mutations
+        chmod g+w mutations
+	cd mutations
+
+	rm -fr index.html
+	wget -e robots=off --wait 1 --debug --no-clobber --continue --server-response --no-directories \
+	     --accept "*Level_2*.tar.gz" --accept "*mage-tab*.tar.gz" --accept "*CHANGES*txt" \
+             -R "*images*" \
+	     --verbose \
+	     --recursive --level=1 \
+	     https://tcga-data.nci.nih.gov/tcgafiles/ftp_auth/distro_ftpusers/anonymous/tumor/$d/gsc/hgsc.bcm.edu/illuminaga_dnaseq_cont_curated/mutations
+
+    done
+
+# =============================================================================

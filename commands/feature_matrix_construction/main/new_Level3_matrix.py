@@ -48,22 +48,22 @@ platformStrings = [
 
 
 dataTypeDict = {}
-dataTypeDict["HT_HG-U133A"] = ["N", "GEXP"]
-dataTypeDict["AgilentG4502A_07_1"] = ["N", "GEXP"]
-dataTypeDict["AgilentG4502A_07_2"] = ["N", "GEXP"]
-dataTypeDict["AgilentG4502A_07_3"] = ["N", "GEXP"]
-dataTypeDict["H-miRNA_8x15K"] = ["N", "MIRN"]
-dataTypeDict["HumanMethylation27"] = ["N", "METH"]
-dataTypeDict["HumanMethylation450"] = ["N", "METH"]
-dataTypeDict["IlluminaGA_RNASeq"] = ["N", "GEXP"]
-dataTypeDict["IlluminaGA_RNASeqV2"] = ["N", "GEXP"]
-dataTypeDict["IlluminaHiSeq_RNASeq"] = ["N", "GEXP"]
-dataTypeDict["IlluminaHiSeq_RNASeqV2"] = ["N", "GEXP"]
-dataTypeDict["Genome_Wide_SNP_6"] = ["N", "CNVR"]
-dataTypeDict["IlluminaGA_miRNASeq"] = ["N", "MIRN"]
-dataTypeDict["IlluminaHiSeq_miRNASeq"] = ["N", "MIRN"]
-dataTypeDict["MDA_RPPA_Core"] = ["N", "RPPA"]
-dataTypeDict["microsat_i"] = ["C", "SAMP"]
+dataTypeDict["HT_HG-U133A"] = ["N", "GEXP", "array"]
+dataTypeDict["AgilentG4502A_07_1"] = ["N", "GEXP", "array"]
+dataTypeDict["AgilentG4502A_07_2"] = ["N", "GEXP", "array"]
+dataTypeDict["AgilentG4502A_07_3"] = ["N", "GEXP", "array"]
+dataTypeDict["H-miRNA_8x15K"] = ["N", "MIRN", "array"]
+dataTypeDict["HumanMethylation27"] = ["N", "METH", "beadchip"]
+dataTypeDict["HumanMethylation450"] = ["N", "METH", "beadchip"]
+dataTypeDict["IlluminaGA_RNASeq"] = ["N", "GEXP", "seq"]
+dataTypeDict["IlluminaGA_RNASeqV2"] = ["N", "GEXP", "seq"]
+dataTypeDict["IlluminaHiSeq_RNASeq"] = ["N", "GEXP", "seq"]
+dataTypeDict["IlluminaHiSeq_RNASeqV2"] = ["N", "GEXP", "seq"]
+dataTypeDict["Genome_Wide_SNP_6"] = ["N", "CNVR", "array"]
+dataTypeDict["IlluminaGA_miRNASeq"] = ["N", "MIRN", "seq"]
+dataTypeDict["IlluminaHiSeq_miRNASeq"] = ["N", "MIRN", "seq"]
+dataTypeDict["MDA_RPPA_Core"] = ["N", "RPPA", "array"]
+dataTypeDict["microsat_i"] = ["C", "SAMP", "pcr"]
 
 RPPAdict = {}
 
@@ -930,9 +930,7 @@ def makeFeatureName(dType, fType, fName, chr='', start=-1, stop=-1, strand='', x
     if (fType == "RPPA"):
         if (len(RPPAdict) == 0):
             print " reading in RPPA annotation file ... "
-            ## fh = file ( "/proj/ilyalab/sreynold/TCGA/MDA_RPPA_Core/MDA_antibody_annotation.txt" )
-            fh = file(
-                "/titan/cancerregulome11/TCGA/repositories/rppa/MDA_antibody_annotation.txt")
+            fh = file( "/titan/cancerregulome9/workspaces/bioinformatics_references/tcga_platform_genelists/MDA_antibody_annotation_2013_12_16.txt" )
             for aLine in fh:
                 aLine = aLine.strip()
                 aLine = aLine.split('\t')
@@ -2343,11 +2341,8 @@ def loadPlatformMetaData(zString):
             zString == "jhu-usc.edu/humanmethylation27/methylation/"):
 
         if (1):
-            ## metaDataFilename = "/proj/ilyalab/sreynold/TCGA/HumanMethylation27/featNames.txt"
-            ## metaDataFilename = "/proj/ilyalab/sreynold/TCGA/HumanMethylation450/featNames.11apr12.txt"
-            ## metaDataFilename = "/proj/ilyalab/sreynold/TCGA/HumanMethylation450/featNames.09jul12.hg19.txt"
-            ## metaDataFilename = "/proj/ilyalab/sreynold/TCGA/HumanMethylation450/featNames.04oct13.hg19.txt"
-            metaDataFilename = "/proj/ilyalab/sreynold/TCGA/HumanMethylation450/featNames.15oct13.hg19.txt"
+            ## metaDataFilename = "/proj/ilyalab/sreynold/TCGA/HumanMethylation450/featNames.15oct13.hg19.txt"
+            metaDataFilename = "/titan/cancerregulome9/workspaces/bioinformatics_references/tcga_platform_genelists/featNames.15oct13.hg19.txt"
             fh = file(metaDataFilename)
             metaData = {}
             done = 0
@@ -2491,10 +2486,10 @@ if __name__ == "__main__":
 
     # list of cancer directory names
     cancerDirNames = [
-        'blca', 'brca', 'cesc', 'cntl', 'coad', 'dlbc', 'esca', 'gbm', 'hnsc', 'kich', 'kirc',
-        'kirp', 'laml', 'lcll', 'lgg', 'lihc', 'lnnh', 'luad', 'lusc', 'meso', 'ov',
-        'paad', 'prad', 'read', 'sarc', 'skcm', 'stad', 'thca', 'ucec', 'coadread',
-        'lcml', 'pcpg']
+        'acc',  'blca', 'brca', 'cesc', 'cntl', 'coad', 'dlbc', 'esca', 'gbm',
+        'hnsc', 'kich', 'kirc', 'kirp', 'laml', 'lcll', 'lgg',  'lihc', 'lnnh',
+        'luad', 'lusc', 'ov',   'paad', 'prad', 'read', 'sarc', 'skcm', 'stad',
+        'thca', 'ucec', 'lcml', 'pcpg']
 
     if (1):
 
@@ -2902,13 +2897,14 @@ if __name__ == "__main__":
             dataD['dataType'] = getDataType(segList[0])
 
             newFeatureName = "C:SAMP:" + \
-                dataTypeDict[zPlat][1].lower() + "Platform"
+                dataTypeDict[zPlat][1].lower() + "Platform" + ":::::" + \
+                dataTypeDict[zPlat][2]
             newFeatureValue = zPlat
             dataD = tsvIO.addConstFeature(
                 dataD, newFeatureName, newFeatureValue)
 
             sortRowFlag = 0
-            sortColFlag = 1
+            sortColFlag = 0
             tsvIO.writeTSV_dataMatrix(
                 dataD, sortRowFlag, sortColFlag, outFilename)
         except:
@@ -2923,12 +2919,13 @@ if __name__ == "__main__":
         print ' writing out data matrix to ', outFilename
 
         newFeatureName = "C:SAMP:" + \
-            dataTypeDict[zPlat][1].lower() + "Platform"
+            dataTypeDict[zPlat][1].lower() + "Platform" + ":::::" + \
+            dataTypeDict[zPlat][2]
         newFeatureValue = zPlat
         dataD = tsvIO.addConstFeature(dataD, newFeatureName, newFeatureValue)
 
-        sortRowFlag = 1
-        sortColFlag = 1
+        sortRowFlag = 0
+        sortColFlag = 0
         tsvIO.writeTSV_dataMatrix(
             dataD, sortRowFlag, sortColFlag, outFilename)
 

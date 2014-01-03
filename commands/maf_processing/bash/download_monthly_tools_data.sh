@@ -16,7 +16,7 @@ toolsFolder="$MAF_TOOLS_DIR"
 echo
 echo update ANNOVAR 
 cd $toolsFolder
-wget http://www.openbioinformatics.org/annovar/download/annovar.latest.tar.gz
+curl -O http://www.openbioinformatics.org/annovar/download/annovar.latest.tar.gz
 tar -zxvf annovar.latest.tar.gz
 cd $toolsFolder/annovar
 chmod 777 $toolsFolder/annovar

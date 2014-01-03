@@ -13,8 +13,9 @@ fi
 
 ## this script should be called with the following parameters:
 ##      date, eg '12jul13' or 'test'
-##      snapshot name, either 'dcc-snapshot' or 'dcc-snapshot-28jun13'
 ##      one tumor type, eg 'ucec'
+##      path to Firehose data files
+##      name of Firehose subset
 
 WRONGARGS=1
 if [ $# != 4 ]
@@ -28,6 +29,17 @@ curDate=$1
 oneTumor=$2
 fhDir=$3
 fhSubset=$4
+
+if [ ! -d $TCGAFMP_DATA_DIR/$oneTumor ]
+    then
+        echo " "
+        echo "     --> creating new directory " $TCGAFMP_DATA_DIR/$oneTumor
+        echo " "
+        mkdir $TCGAFMP_DATA_DIR/$oneTumor
+        mkdir $TCGAFMP_DATA_DIR/$oneTumor/aux
+        mkdir $TCGAFMP_DATA_DIR/$oneTumor/gnab
+        mkdir $TCGAFMP_DATA_DIR/$oneTumor/scratch
+fi
 
 rm -fr $TCGAFMP_DATA_DIR/$oneTumor/scratch/fmp*.$curDate.FH.$oneTumor.log
 rm -fr $TCGAFMP_DATA_DIR/$oneTumor/scratch/fmp*.$curDate.$oneTumor.log

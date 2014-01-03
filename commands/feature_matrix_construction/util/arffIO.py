@@ -156,7 +156,15 @@ def writeARFF(allClinDict, bestKeyOrder, progName, outName):
             outLine = outLine[:-2]
 
         outLine += ("\t\t%% ")
-        outLine += ("%s" % allClinDict['bcr_patient_barcode'][kk])
+        try:
+            outLine += ("%s" % allClinDict['bcr_patient_barcode'][kk])
+        except:
+            try:
+                outLine += ("%s" % allClinDict['C:CLIN:bcr_patient_barcode:::::'][kk])
+            except:
+                print " ERROR in writeARFF "
+                print allClinDict.keys()
+                sys.exit(-1)
         fh.write("%s\n" % outLine)
 
     fh.write('\n')

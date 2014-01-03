@@ -1,3 +1,4 @@
+#!/bin/bash
 
 for d in `cat $TCGAFMP_ROOT_DIR/shscript/tumor_list.txt`
 

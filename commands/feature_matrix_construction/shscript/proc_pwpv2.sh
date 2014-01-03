@@ -18,7 +18,7 @@ echo " sorting the individual files ... "
 for t in $d/post_proc_all.*.*.tmp
    do
 	echo $t
-	sort -grk 5 --temporary-directory=/local/sreynold/scratch/ $t >& $t.sort
+        sort -grk 5 --temporary-directory=/titan/cancerregulome9/TCGA/pw_scratch/ $t >& $t.sort
    done
 
 echo " concatenating at most 1 million pairs of each type ... "
@@ -32,7 +32,7 @@ for t in $d/post_proc_all.*.*.tmp.sort
 
 echo " now sorting the short concatenation ... "
 rm -fr $d/post_proc_all.short.sort
-sort -grk 5 --temporary-directory=/local/sreynold/scratch/ $d/post_proc_all.short >& $d/post_proc_all.short.sort
+sort -grk 5 --temporary-directory=/titan/cancerregulome9/TCGA/pw_scratch/ $d/post_proc_all.short >& $d/post_proc_all.short.sort
 
 date
 

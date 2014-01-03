@@ -423,7 +423,14 @@ if __name__ == "__main__":
         sys.exit(-1)
 
     pythonbin = "/tools/bin/python2.7"
+
     golempwd = "PASSWD_HERE"
+    fhC = file ( "/titan/cancerregulome9/TCGA/pw_scratch/config", 'r' )
+    aLine = fhC.readline()
+    fhC.close()
+    aLine = aLine.strip()
+    golempwd = aLine
+    print " got this ... <%s> " % golempwd
 
     if (args.all):
         # handle the all by all option ...
@@ -501,8 +508,7 @@ if __name__ == "__main__":
 
     # ok, now we want to actually launch the jobs ...
     cmdString = "python $TCGAFMP_ROOT_DIR/main/golem.py "
-    #### cmdString += "http://glados.systemsbiology.net:8083 -p PASSWD_HERE "
-    cmdString += "http://glados.systemsbiology.net:7083 -p PASSWD_HERE "
+    cmdString += "http://glados.systemsbiology.net:7083 -p " + golempwd + " "
     cmdString += "-L pairwiseRK -u "
     cmdString += getpass.getuser() + " "
     cmdString += "runlist " + runFile
@@ -550,8 +556,8 @@ if __name__ == "__main__":
         (status, output) = commands.getstatusoutput(cmdString)
         print status, output
 
-        cmdString = "sort -grk 5 --temporary-directory=/local/sreynold/scratch/ %s/post_proc_all.tsv >& %s/%d.all.pwpv.sort" % (
-            tmpDir, tmpDir, iOne)
+        ## cmdString = "sort -grk 5 --temporary-directory=/local/sreynold/scratch/ %s/post_proc_all.tsv >& %s/%d.all.pwpv.sort" % (tmpDir, tmpDir, iOne)
+        cmdString = "sort -grk 5 --temporary-directory=/titan/cancerregulome9/TCGA/pw_scratch/ %s/post_proc_all.tsv >& %s/%d.all.pwpv.sort" % (tmpDir, tmpDir, iOne)
         print " < %s > " % cmdString
         (status, output) = commands.getstatusoutput(cmdString)
         print status, output

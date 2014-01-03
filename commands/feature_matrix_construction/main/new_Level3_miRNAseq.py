@@ -134,10 +134,10 @@ if __name__ == "__main__":
 
     # list of cancer directory names
     cancerDirNames = [
-        'blca', 'brca', 'cesc', 'cntl', 'coad', 'dlbc', 'esca', 'gbm', 'hnsc', 'kich', 'kirc',
-        'kirp', 'laml', 'lcll', 'lgg', 'lihc', 'lnnh', 'luad', 'lusc', 'meso', 'ov',
-        'paad', 'prad', 'read', 'sarc', 'skcm', 'stad', 'thca', 'ucec', 'coadread',
-        'lcml', 'pcpg']
+        'acc',  'blca', 'brca', 'cesc', 'cntl', 'coad', 'dlbc', 'esca', 'gbm',
+        'hnsc', 'kich', 'kirc', 'kirp', 'laml', 'lcll', 'lgg',  'lihc', 'lnnh',
+        'luad', 'lusc', 'ov',   'paad', 'prad', 'read', 'sarc', 'skcm', 'stad',
+        'thca', 'ucec', 'lcml', 'pcpg']
 
     if (1):
 
@@ -344,8 +344,8 @@ if __name__ == "__main__":
         newFeatureValue = zPlat
         dataD = tsvIO.addConstFeature(dataD, newFeatureName, newFeatureValue)
 
-        sortRowFlag = 1
-        sortColFlag = 1
+        sortRowFlag = 0
+        sortColFlag = 0
         tsvIO.writeTSV_dataMatrix(
             dataD, sortRowFlag, sortColFlag, outFilename)
 
