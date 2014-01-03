@@ -21,6 +21,7 @@ gidget commands are:
 
 import sys
 from docopt import docopt
+import ConfigParser
 
 import gidget_help
 import gidget_list
@@ -31,6 +32,30 @@ import gidget_run
 
 
 if __name__ == '__main__':
+
+
+    config = ConfigParser.ConfigParser()
+
+    # TODO: make config file location an optional command-line flag
+    # TODO: error checking on file existence
+    # TODO: error checking on sucessful config parsing
+    # TODO: check file permissions and warn or error if not private
+    
+    config.read('.gidgetconfig')
+    gidgetConfigDefaults = {}
+    gidgetConfigSections = config.sections()
+    for section in gidgetConfigSections:
+        sectionOptions = config.options(section)
+        for option in sectionOptions:
+            # TODO: for now, sections are disregarded and everything is thrown
+            # into one dictionary object; break this out per section?
+            gidgetConfigDefaults[option] = config.get(section, option)
+
+    # print "== gidget options =="
+    # for key,val in gidgetConfigDefaults.items():
+    #     print key + ": " + val
+
+
 
     # print detailed help by default
     if len(sys.argv) < 2:
@@ -75,6 +100,8 @@ if __name__ == '__main__':
     else:
         print "command " + subCommandName + " not recognized."
         print __doc__
-        sys.exit(-1)
+        #sys.exit(-1)
 
+
+ 
     sys.exit(0)
