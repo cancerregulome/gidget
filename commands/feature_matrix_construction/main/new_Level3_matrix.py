@@ -946,9 +946,7 @@ def makeFeatureName(dType, fType, fName, chr='', start=-1, stop=-1, strand='', x
     if (fType == "RPPA"):
         if (len(RPPAdict) == 0):
             print " reading in RPPA annotation file ... "
-            ## fh = file ( "/proj/ilyalab/sreynold/TCGA/MDA_RPPA_Core/MDA_antibody_annotation.txt" )
-            fh = file(
-                "/titan/cancerregulome11/TCGA/repositories/rppa/MDA_antibody_annotation.txt")
+            fh = file( "/titan/cancerregulome9/workspaces/bioinformatics_references/tcga_platform_genelists/MDA_antibody_annotation_2013_12_16.txt" )
             for aLine in fh:
                 aLine = aLine.strip()
                 aLine = aLine.split('\t')
@@ -2359,11 +2357,8 @@ def loadPlatformMetaData(zString):
             zString == "jhu-usc.edu/humanmethylation27/methylation/"):
 
         if (1):
-            ## metaDataFilename = "/proj/ilyalab/sreynold/TCGA/HumanMethylation27/featNames.txt"
-            ## metaDataFilename = "/proj/ilyalab/sreynold/TCGA/HumanMethylation450/featNames.11apr12.txt"
-            ## metaDataFilename = "/proj/ilyalab/sreynold/TCGA/HumanMethylation450/featNames.09jul12.hg19.txt"
-            ## metaDataFilename = "/proj/ilyalab/sreynold/TCGA/HumanMethylation450/featNames.04oct13.hg19.txt"
-            metaDataFilename = "/proj/ilyalab/sreynold/TCGA/HumanMethylation450/featNames.15oct13.hg19.txt"
+            ## metaDataFilename = "/proj/ilyalab/sreynold/TCGA/HumanMethylation450/featNames.15oct13.hg19.txt"
+            metaDataFilename = "/titan/cancerregulome9/workspaces/bioinformatics_references/tcga_platform_genelists/featNames.15oct13.hg19.txt"
             fh = file(metaDataFilename)
             metaData = {}
             done = 0
@@ -2507,10 +2502,10 @@ if __name__ == "__main__":
 
     # list of cancer directory names
     cancerDirNames = [
-        'acc', 'blca', 'brca', 'cesc', 'cntl', 'coad', 'dlbc', 'esca', 'gbm', 'hnsc', 'kich', 'kirc',
-        'kirp', 'laml', 'lcll', 'lgg', 'lihc', 'lnnh', 'luad', 'lusc', 'meso', 'ov',
-        'paad', 'prad', 'read', 'sarc', 'skcm', 'stad', 'thca', 'ucec', 'coadread',
-        'lcml', 'pcpg']
+        'acc',  'blca', 'brca', 'cesc', 'cntl', 'coad', 'dlbc', 'esca', 'gbm',
+        'hnsc', 'kich', 'kirc', 'kirp', 'laml', 'lcll', 'lgg',  'lihc', 'lnnh',
+        'luad', 'lusc', 'ov',   'paad', 'prad', 'read', 'sarc', 'skcm', 'stad',
+        'thca', 'ucec', 'lcml', 'pcpg']
 
     if (1):
 
@@ -2925,7 +2920,7 @@ if __name__ == "__main__":
                 dataD, newFeatureName, newFeatureValue)
 
             sortRowFlag = 0
-            sortColFlag = 1
+            sortColFlag = 0
             tsvIO.writeTSV_dataMatrix(
                 dataD, sortRowFlag, sortColFlag, outFilename)
         except:
@@ -2945,8 +2940,8 @@ if __name__ == "__main__":
         newFeatureValue = zPlat
         dataD = tsvIO.addConstFeature(dataD, newFeatureName, newFeatureValue)
 
-        sortRowFlag = 1
-        sortColFlag = 1
+        sortRowFlag = 0
+        sortColFlag = 0
         tsvIO.writeTSV_dataMatrix(
             dataD, sortRowFlag, sortColFlag, outFilename)
 

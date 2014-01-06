@@ -27,7 +27,7 @@ for d in `cat $TCGAFMP_ROOT_DIR/shscript/tumor_list.txt`
              -R "*images*" \
 	     --verbose \
 	     --recursive --level=1 \
-	     --user=ShmulevI --password=C@ncerReg22 \
+	     --user=USERNAME_HERE --password=PASSWD_HERE \
 	     https://tcga-data-secure.nci.nih.gov/tcgafiles/tcga4yeo/tumor/$d/cgcc/nationwidechildrens.org/microsat_i/fragment_analysis
 
     done

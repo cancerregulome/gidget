@@ -479,8 +479,9 @@ if __name__ == "__main__":
     fh.close()
 
     print " annotating output file ... "
-    cmdString = "python /users/sreynold/to_be_checked_in/TCGAfmp/main/annotateTSV.py %s hg19 %s" % (
+    cmdString = "python $TCGAFMP_ROOT_DIR/main/annotateTSV.py %s hg19 %s" % (
         tmpFilename, outFilename)
+    print cmdString
     (status, output) = commands.getstatusoutput(cmdString)
 
     print " "

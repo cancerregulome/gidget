@@ -361,7 +361,7 @@ if __name__ == "__main__":
     print " randomly generated job name : <%s> " % curJobName
     print " "
 
-    tmpDir = "/titan/cancerregulome9/TCGA/pw_scratch/%s" % curJobName
+    tmpDir = "/titan/cancerregulome13/TCGA/pw_scratch/%s" % curJobName
     cmdString = "mkdir %s" % tmpDir
     (status, output) = commands.getstatusoutput(cmdString)
     if (not os.path.exists(tmpDir)):
@@ -388,7 +388,14 @@ if __name__ == "__main__":
         sys.exit(-1)
 
     pythonbin = "/tools/bin/python2.7"
-    golempwd = "g0l3mm45t3r"
+
+    golempwd = "PASSWD_HERE"
+    fhC = file ( "/titan/cancerregulome13/TCGA/pw_scratch/config", 'r' )
+    aLine = fhC.readline()
+    fhC.close()
+    aLine = aLine.strip()
+    golempwd = aLine
+    print " got this ... <%s> " % golempwd
 
     numJobs = 0
     for index in indexList:
@@ -405,7 +412,7 @@ if __name__ == "__main__":
 
     # ok, now we want to actually launch the jobs ...
     cmdString = "python $TCGAFMP_ROOT_DIR/main/golem.py "
-    cmdString += "http://glados.systemsbiology.net:7083 -p g0l3mm45t3r "
+    cmdString += "http://glados.systemsbiology.net:7083 -p " + golempwd + " "
     cmdString += "-L scoreCatFeat -u "
     cmdString += getpass.getuser() + " "
     cmdString += "runlist " + runFile
