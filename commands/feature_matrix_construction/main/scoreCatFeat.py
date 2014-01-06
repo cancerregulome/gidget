@@ -361,7 +361,7 @@ if __name__ == "__main__":
     print " randomly generated job name : <%s> " % curJobName
     print " "
 
-    tmpDir = "/titan/cancerregulome9/TCGA/pw_scratch/%s" % curJobName
+    tmpDir = "/titan/cancerregulome13/TCGA/pw_scratch/%s" % curJobName
     cmdString = "mkdir %s" % tmpDir
     (status, output) = commands.getstatusoutput(cmdString)
     if (not os.path.exists(tmpDir)):
@@ -390,7 +390,7 @@ if __name__ == "__main__":
     pythonbin = "/tools/bin/python2.7"
 
     golempwd = "PASSWD_HERE"
-    fhC = file ( "/titan/cancerregulome9/TCGA/pw_scratch/config", 'r' )
+    fhC = file ( "/titan/cancerregulome13/TCGA/pw_scratch/config", 'r' )
     aLine = fhC.readline()
     fhC.close()
     aLine = aLine.strip()
