@@ -12,14 +12,24 @@ echo " "
 echo " "
 echo " processing temp files in $1 "
 
+uName=`whoami`
+tDir='/local/'$uName'/pw_scratch'
+if [ ! -d $tDir ]
+    then
+        tDir = '/titan/cancerregulome13/TCGA/pw_scratch/'
+    fi
+echo " using temp scratch directory " $tDir
+
 date
 
 echo " sorting the individual files ... "
 for t in $d/post_proc_all.*.*.tmp
    do
 	echo $t
-        sort -grk 5 --temporary-directory=/titan/cancerregulome9/TCGA/pw_scratch/ $t >& $t.sort
+        sort -grk 5 --temporary-directory=$tDir $t >& $t.sort
    done
+
+date
 
 echo " concatenating at most 1 million pairs of each type ... "
 rm -fr $d/post_proc_all.short
@@ -30,9 +40,11 @@ for t in $d/post_proc_all.*.*.tmp.sort
 	head -1000000 $t >> $d/post_proc_all.short
     done
 
+date
+
 echo " now sorting the short concatenation ... "
 rm -fr $d/post_proc_all.short.sort
-sort -grk 5 --temporary-directory=/titan/cancerregulome9/TCGA/pw_scratch/ $d/post_proc_all.short >& $d/post_proc_all.short.sort
+sort -grk 5 --temporary-directory=$tDir $d/post_proc_all.short >& $d/post_proc_all.short.sort
 
 date
 
