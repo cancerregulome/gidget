@@ -157,13 +157,13 @@ def cleanString(aString):
                 bString += aString[ii]
 
     # somewhat of a hack ;-)
-    if (bString == "stage_0"):
+    if (bString.lower() == "stage_0"):
         # print " Transforming <STAGE 0> to <TIS> "
-        bString = "tis"
+        bString = "Tis"
 
-    if (bString.startswith("stage_")):
+    if (bString.lower().startswith("stage_")):
         bString = bString[6:]
-    if (bString.startswith("grade_")):
+    if (bString.lower().startswith("grade_")):
         bString = bString[6:]
 
     try:
@@ -1277,9 +1277,10 @@ if __name__ == "__main__":
 
     # list of cancer directory names
     cancerDirNames = [
-        'blca', 'brca', 'cesc', 'cntl', 'coad', 'dlbc', 'esca', 'gbm', 'hnsc', 'kirc',
-        'kirp', 'laml', 'lcll', 'lgg', 'lihc', 'lnnh', 'luad', 'lusc', 'ov',
-        'paad', 'prad', 'read', 'sarc', 'skcm', 'stad', 'thca', 'ucec', 'lcml', 'pcpg']
+        'acc',  'blca', 'brca', 'cesc', 'cntl', 'coad', 'dlbc', 'esca', 'gbm',
+        'hnsc', 'kich', 'kirc', 'kirp', 'laml', 'lcll', 'lgg',  'lihc', 'lnnh',
+        'luad', 'lusc', 'ov',   'paad', 'prad', 'read', 'sarc', 'skcm', 'stad',
+        'thca', 'ucec', 'lcml', 'pcpg']
 
     if (1):
         if (len(sys.argv) < 3):

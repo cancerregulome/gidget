@@ -208,12 +208,20 @@ def getSDRFinfo(sdrfFilename):
             # numTokens=%d " % ( lineNum, zPlat, numTokens )
 
             if (zPlat == "HT_HG-U133A"):
-                iLevel3 = 30
-                iBarcode = 0
-                iFilename = 27
-                iArchive = 28
-                iYes = 31
-                iOther = 26
+                if (numTokens == 34):
+                    iLevel3 = 31
+                    iBarcode = 1
+                    iFilename = 28
+                    iArchive = 29
+                    iYes = 32
+                    iOther = 27
+                else:
+                    iLevel3 = 30
+                    iBarcode = 0
+                    iFilename = 27
+                    iArchive = 28
+                    iYes = 31
+                    iOther = 26
 
             elif (zPlat == "AgilentG4502A_07_1"):
                 if (numTokens == 44):
@@ -283,12 +291,20 @@ def getSDRFinfo(sdrfFilename):
                     sys.exit(-1)
 
             elif (zPlat == "H-miRNA_8x15K"):
-                iLevel3 = 28
-                iBarcode = 25
-                iFilename = 26
-                iArchive = 30
-                iYes = 29
-                iOther = 27
+                if (numTokens == 32):
+                    iLevel3 = 29
+                    iBarcode = 26
+                    iFilename = 27
+                    iArchive = 31
+                    iYes = 30
+                    iOther = 28
+                else:
+                    iLevel3 = 28
+                    iBarcode = 25
+                    iFilename = 26
+                    iArchive = 30
+                    iYes = 29
+                    iOther = 27
 
             elif (zPlat == "HumanMethylation27"):
                 # looks like the new data has 33 tokens, and the indices should be 30, 1, 27, 28, 31, 29
@@ -930,9 +946,7 @@ def makeFeatureName(dType, fType, fName, chr='', start=-1, stop=-1, strand='', x
     if (fType == "RPPA"):
         if (len(RPPAdict) == 0):
             print " reading in RPPA annotation file ... "
-            ## fh = file ( "/proj/ilyalab/sreynold/TCGA/MDA_RPPA_Core/MDA_antibody_annotation.txt" )
-            fh = file(
-                "/titan/cancerregulome11/TCGA/repositories/rppa/MDA_antibody_annotation.txt")
+            fh = file( "/titan/cancerregulome9/workspaces/bioinformatics_references/tcga_platform_genelists/MDA_antibody_annotation_2013_12_16.txt" )
             for aLine in fh:
                 aLine = aLine.strip()
                 aLine = aLine.split('\t')
@@ -2343,11 +2357,8 @@ def loadPlatformMetaData(zString):
             zString == "jhu-usc.edu/humanmethylation27/methylation/"):
 
         if (1):
-            ## metaDataFilename = "/proj/ilyalab/sreynold/TCGA/HumanMethylation27/featNames.txt"
-            ## metaDataFilename = "/proj/ilyalab/sreynold/TCGA/HumanMethylation450/featNames.11apr12.txt"
-            ## metaDataFilename = "/proj/ilyalab/sreynold/TCGA/HumanMethylation450/featNames.09jul12.hg19.txt"
-            ## metaDataFilename = "/proj/ilyalab/sreynold/TCGA/HumanMethylation450/featNames.04oct13.hg19.txt"
-            metaDataFilename = "/proj/ilyalab/sreynold/TCGA/HumanMethylation450/featNames.15oct13.hg19.txt"
+            ## metaDataFilename = "/proj/ilyalab/sreynold/TCGA/HumanMethylation450/featNames.15oct13.hg19.txt"
+            metaDataFilename = "/titan/cancerregulome9/workspaces/bioinformatics_references/tcga_platform_genelists/featNames.15oct13.hg19.txt"
             fh = file(metaDataFilename)
             metaData = {}
             done = 0
@@ -2491,10 +2502,10 @@ if __name__ == "__main__":
 
     # list of cancer directory names
     cancerDirNames = [
-        'acc', 'blca', 'brca', 'cesc', 'cntl', 'coad', 'dlbc', 'esca', 'gbm', 'hnsc', 'kich', 'kirc',
-        'kirp', 'laml', 'lcll', 'lgg', 'lihc', 'lnnh', 'luad', 'lusc', 'meso', 'ov',
-        'paad', 'prad', 'read', 'sarc', 'skcm', 'stad', 'thca', 'ucec', 'coadread',
-        'lcml', 'pcpg']
+        'acc',  'blca', 'brca', 'cesc', 'cntl', 'coad', 'dlbc', 'esca', 'gbm',
+        'hnsc', 'kich', 'kirc', 'kirp', 'laml', 'lcll', 'lgg',  'lihc', 'lnnh',
+        'luad', 'lusc', 'ov',   'paad', 'prad', 'read', 'sarc', 'skcm', 'stad',
+        'thca', 'ucec', 'lcml', 'pcpg']
 
     if (1):
 
