@@ -159,6 +159,10 @@ if __name__ == "__main__":
     featTypesCounts = getFeatTypesCounts(tsvFile)
     numFeat = getNumFeat(tsvFile)
     numSamp = getNumSamples(tsvFile)
+
+    print " "
+    print " <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><> "
+    print " "
     print " "
     print numFeat, numSamp
     print featTypesCounts
@@ -212,7 +216,7 @@ if __name__ == "__main__":
         # files ...
         inFile = sDir + "%d.pw" % iFeat
         try:
-            # print " opening input file <%s> " % inFile
+            print " opening input file <%s> " % inFile
             fhIn = file(inFile)
         except:
             print " --> FAILED to open input file <%s> " % inFile
