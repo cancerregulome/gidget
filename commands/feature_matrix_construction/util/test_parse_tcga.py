@@ -63,7 +63,8 @@ def _runTest(config, platformID, tumor, globalVars):
         reSuccess = 0
         diffSuccess = 0
         try:
-            print '\t\t', datetime.now(), 'starting current'
+            start_cur = datetime.now()
+            print '\t\t', start_cur, 'starting current'
             if 'clinical' in platformID.lower():
                 deleteFile(globalVars.curclinfilename.format(globalVars.tag, tumor))
                 oldCmdString = globalVars.curclincmd.format(globalVars.out_dir, tumor, globalVars.tag, 'clinical_', tumor, snapshot)
@@ -78,22 +79,29 @@ def _runTest(config, platformID, tumor, globalVars):
                 oldCmdString = globalVars.curcmd.format(globalVars.out_dir, platformID, tumor, globalVars.tag, platformID.replace('/', "_"), tumor, snapshot)
 
             status, output = commands.getstatusoutput(oldCmdString)
-            print '\t\t', datetime.now(), "result of running current script: %s %s\n" % (status, oldCmdString)
+            end_cur = datetime.now()
+            total_cur = end_cur - start_cur
+            print '\t\t', end_cur, "result of running current script: %s %s %s\n" % (status, total_cur, oldCmdString)
             if 0 == status:
                 curSuccess += 1
         except Exception as e:
+            total_cur = datetime.now() - start_cur
             traceback.print_exc()
             print 'problem executing current %s\n' % (output)
             raise e
         try:
-            print '\t\t', datetime.now(), 'starting refactor'
+            start_new = datetime.now()
+            print '\t\t', start_new, 'starting refactor'
             deleteFile(globalVars.newfilename.format(tumor, platformID[:-1].replace('/', "__"), globalVars.tag))
             newCmdString = globalVars.newcmd.format(globalVars.out_dir, platformID, tumor, globalVars.tag, platformID.replace('/', "_"), tumor, config.get('main', 'parse_config'))
             status, output = commands.getstatusoutput(newCmdString)
-            print '\t\t', datetime.now(), "result of running refactored script: %s %s\n" % (status, newCmdString)
+            end_new = datetime.now()
+            total_new = end_new - start_new
+            print '\t\t', end_new, "result of running refactored script: %s %s %s\n" % (status, total_new, newCmdString)
             if 0 == status:
                 reSuccess += 1
         except Exception as e:
+            total_new = datetime.now() - start_new
             traceback.print_exc()
             print 'problem executing refactor: %s' % (output)
             raise e
@@ -113,6 +121,8 @@ def _runTest(config, platformID, tumor, globalVars):
     except:
         traceback.print_exc()
     print '\t', datetime.now(), 'ending run for %s: %s' % (platformID, tumor)
+    print '\t', '%s: refactored code was %.2f times faster (%s secs for refactor, %s secs for current)' % \
+        (platformID + ':' + tumor, total_cur.total_seconds() / total_new.total_seconds(), total_new.total_seconds(), total_cur.total_seconds())
     return curSuccess, reSuccess, diffSuccess
 
 def _run(argv):

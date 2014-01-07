@@ -142,5 +142,5 @@ def main(latest, excbarcodes, platform2includes, platforms2platform):
     return includeexclude, platforms2samples, participant2sample2aliquot2ris
     
 if __name__ == '__main__':
-    # STAD.freeze.2013.301.txt
+    # STAD.freeze.2013.349.txt
     main(sys.argv[1])

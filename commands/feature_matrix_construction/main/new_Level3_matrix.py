@@ -948,8 +948,10 @@ def makeFeatureName(dType, fType, fName, chr='', start=-1, stop=-1, strand='', x
         if (len(RPPAdict) == 0):
             print " reading in RPPA annotation file ... "
             ## fh = file ( "/proj/ilyalab/sreynold/TCGA/MDA_RPPA_Core/MDA_antibody_annotation.txt" )
+#            fh = file(
+#                "/titan/cancerregulome11/TCGA/repositories/rppa/MDA_antibody_annotation.txt")
             fh = file(
-                "/titan/cancerregulome11/TCGA/repositories/rppa/MDA_antibody_annotation.txt")
+                "/titan/cancerregulome9/workspaces/bioinformatics_references/tcga_platform_genelists/MDA_antibody_annotation_2013_12_16.txt")
             for aLine in fh:
                 aLine = aLine.strip()
                 aLine = aLine.split('\t')
