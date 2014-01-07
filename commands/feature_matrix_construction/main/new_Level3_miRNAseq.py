@@ -235,17 +235,27 @@ if __name__ == "__main__":
                 print '     found a <%s> directory : <%s> ' % (dMatch, dName)
                 archiveName = getLastBit(dName)
                 print '     archiveName : ', archiveName
+                if (dName.find("IlluminaHiSeq") > 0):
+                    zPlat = "IlluminaHiSeq_miRNASeq"
+                elif (dName.find("IlluminaGA") > 0):
+                    zPlat = "IlluminaGA_miRNASeq"
+                else:
+                    print " not a valid platform: %s ??? !!! " % (dName)
+                    sys.exit(-1)
+
 
                 cmdString = "$TCGAFMP_ROOT_DIR/shscript/expression_matrix_mimat.pl "
                 cmdString += "-m /titan/cancerregulome11/TCGA/repositories/mirna_bcgsc/tcga_mirna_bcgsc_hg19.adf "
-                cmdString += "-p %s " % dName
+                cmdString += "-o %s " % outDir
+                cmdString += "-p %s " % topDir
+                cmdString += "-n %s " % zPlat
 
                 print " "
                 print cmdString
                 print " "
                 (status, output) = commands.getstatusoutput(cmdString)
 
-                normMatFilename = dName + "/expn_matrix_mimat_norm.txt"
+                normMatFilename = outDir + "/expn_matrix_mimat_norm_%s.txt" % (zPlat)
                 print " normMatFilename = <%s> " % normMatFilename
 
                 # make sure that we can open this file ...
@@ -253,13 +263,6 @@ if __name__ == "__main__":
                     fh = file(normMatFilename, 'r')
                     gotFiles += [normMatFilename]
                     fh.close()
-                    if (normMatFilename.find("IlluminaHiSeq") > 0):
-                        zPlat = "IlluminaHiSeq_miRNASeq"
-                    elif (normMatFilename.find("IlluminaGA") > 0):
-                        zPlat = "IlluminaGA_miRNASeq"
-                    else:
-                        print " not a valid platform ??? !!! "
-                        sys.exit(-1)
                 except:
                     print " "
                     print " Not able to open expn_matrix_mimat_norm file ??? "
@@ -340,7 +343,7 @@ if __name__ == "__main__":
         dataD['dataType'] = "N:MIRN"
         print ' writing out data matrix to ', outFilename
 
-        newFeatureName = "C:SAMP:mirnPlatform"
+        newFeatureName = "C:SAMP:mirnPlatform:::::seq"
         newFeatureValue = zPlat
         dataD = tsvIO.addConstFeature(dataD, newFeatureName, newFeatureValue)
 
