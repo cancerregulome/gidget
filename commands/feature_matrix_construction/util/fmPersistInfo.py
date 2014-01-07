@@ -41,22 +41,18 @@ def processLine(header, line, int_fields, bool_fields, map_fields):
         for index in range(len(fields)):
             if not fields[index]:
                 remove += [index]
-        
-        for index in int_fields:
-            if fields[index]:
+            elif index in int_fields:
                 fields[index] = int(fields[index])
-        for index in bool_fields:
-            if fields[index]:
+            elif index in bool_fields:
                 if fields[index].lower() == 'true':
                     fields[index] = True
                 elif fields[index].lower() == 'false':
                     fields[index] = False
                 else:
                     ValueError('unexpected value for boolean: %s' % (fields[index]))
-        for index in map_fields:
-            if fields[index]:
+            elif index in map_fields:
                 fields[index] = json.loads(fields[index])
-
+        
         remove.reverse()
         for index in remove:
             del copy[index]
