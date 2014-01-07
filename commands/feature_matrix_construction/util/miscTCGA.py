@@ -68,12 +68,14 @@ def fixTCGAbarcode(barcode, zCancer=""):
         if (len(barcode) >= 13):
             if (barcode[12:].startswith("-TP")):
                 barcode = barcode[:12] + "-01"
-            elif (barcode[12:].startswith("-TR")):
-                barcode = barcode[:12] + "-02"
-            elif (barcode[12:].startswith("-TB")):
-                barcode = barcode[:12] + "-03"
             elif (barcode[12:].startswith("-TRBM")):
                 barcode = barcode[:12] + "-04"
+            elif (barcode[12:].startswith("-TR")):
+                barcode = barcode[:12] + "-02"
+            elif (barcode[12:].startswith("-TBM")):
+                barcode = barcode[:12] + "-09"
+            elif (barcode[12:].startswith("-TB")):
+                barcode = barcode[:12] + "-03"
             elif (barcode[12:].startswith("-TAP")):
                 barcode = barcode[:12] + "-05"
             elif (barcode[12:].startswith("-TM")):
@@ -82,13 +84,11 @@ def fixTCGAbarcode(barcode, zCancer=""):
                 barcode = barcode[:12] + "-07"
             elif (barcode[12:].startswith("-THOC")):
                 barcode = barcode[:12] + "-08"
-            elif (barcode[12:].startswith("-TBM")):
-                barcode = barcode[:12] + "-09"
             elif (barcode[12:].startswith("-NB")):
                 barcode = barcode[:12] + "-10"
             elif (barcode[12:].startswith("-NT")):
                 barcode = barcode[:12] + "-11"
-            elif (barcode[12:].startswith("-TRBM")):
+            elif (barcode[12:].startswith("-CELLC")):
                 barcode = barcode[:12] + "-20"
 
     ## print "         --> <%s> " % barcode
@@ -465,9 +465,8 @@ def barcode_to_uuid(barcode):
     except:
 
         try:
-            # if that didn't work, maybe the barcode needs to be shifted
-            # to lower case?
-            return (barcode2uuid_dict[barcode.lower()])
+            # barcodes should be upper case ...
+            return (barcode2uuid_dict[barcode.upper()])
         except:
 
             # if that didn't work and we have already constructed
@@ -506,9 +505,8 @@ def barcode_to_disease(barcode):
     except:
 
         try:
-            # if that didn't work, maybe the barcode needs to be shifted
-            # to lower case?
-            return (barcode2disease_dict[shortBarcode.lower()])
+            # barcodes should be upper case
+            return (barcode2disease_dict[shortBarcode.upper()])
         except:
 
             # if that didn't work and we have already constructed

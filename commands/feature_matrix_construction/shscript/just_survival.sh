@@ -1,10 +1,5 @@
 #!/bin/bash
 
-export LD_LIBRARY_PATH=/tools/lib/
-export TCGAFMP_ROOT_DIR=/users/sreynold/to_be_checked_in/TCGAfmp
-export PYTHONPATH=$TCGAFMP_ROOT_DIR/pyclass:$TCGAFMP_ROOT_DIR/util:$PYTHONPATH
-export VT_UTIL=/users/sreynold/git_home/vt_foo
-
 ## this script should be called with the following parameters:
 ##      date, eg '29jan13'
 ##      tumor type, eg 'gbm'
@@ -68,7 +63,7 @@ echo " *******************"
 
                         g=${tsvFile/.tsv/.SurvivalPVal.tsv}
                 
-                        cd /users/sreynold/git_home/vt_cncreg/survival
+                        cd $VT_SURVIVAL
                         rm -fr $TCGAFMP_DATA_DIR/$tumor/$curDate/SurvivalPVal.$st.tmp
                         rm -fr $TCGAFMP_DATA_DIR/$tumor/scratch/SurvivalPVal.$st.log
 
