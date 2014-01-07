@@ -198,10 +198,10 @@ class clinical(technology_type):
     
                     strContent = string.join ( content )
                     strContent = strContent.strip()
-                    try:
-                        strContent = strContent.lower()
-                    except:
-                        strContent = strContent
+#                    try:
+#                        strContent = strContent.lower()
+#                    except:
+#                        strContent = strContent
     
                     if ( len(strContent) > 0 ):
                         ## element content is strContent
@@ -234,21 +234,21 @@ class clinical(technology_type):
                         ## ignore certain fields ...
                         toExclude = False
                         for exclude in self.excludePrefix:
-                            if strName.startswith(exclude):
+                            if strName.lower().startswith(exclude):
                                 toExclude = True
                                 break
                         if toExclude:
                             continue
 
                         for exclude in self.excludeSuffix:
-                            if strName.endswith(exclude):
+                            if strName.lower().endswith(exclude):
                                 toExclude = True
                                 break
                         if toExclude:
                             continue
 
                         for exclude in self.excludeStrings:
-                            if exclude in strName:
+                            if exclude in strName.lower():
                                 toExclude = True
                                 break
                         if toExclude:
@@ -258,8 +258,9 @@ class clinical(technology_type):
                             if ( attrValue.lower() == "not available" ):
                                 print " how can we have content if the procurement status is not available ??? !!! ", strName, strContent
     
+                        strName = strName.lower()
                         if ( strName in xmlDict.keys() ):
-                            if ( str(xmlDict[strName]) != self.removeSpecialChars(str(strContent)) ):
+                            if ( str(xmlDict[strName]).lower() != str(strContent).lower() ):
                                 print " "
                                 print "WARNING: <%s> is already in xmlDict keys and content is different ??? (%s vs %s) " % ( strName, xmlDict[strName], strContent )
                                 print type(xmlDict[strName]), type(strContent)
@@ -273,7 +274,7 @@ class clinical(technology_type):
                                     ## there are certain types of keys, includeStrings, that we want to keep no matter what ...
                                     dontUse = True
                                     for include in self.includeStrings:
-                                        if include in strName:
+                                        if include in strName.lower():
                                             dontUse = False
                                             break 
                                     if dontUse:
@@ -294,7 +295,7 @@ class clinical(technology_type):
                             except:
                                 ## is it a stage or grade string? (is already lowercase)
                                 for prefix in self.removePrefix:
-                                    if strContent.startswith(prefix[0]):
+                                    if strContent.lower().startswith(prefix[0]):
                                         print "\t\t\tstarts with", prefix[0]
                                         try:
                                             strContent = strContent[len(prefix[0]):]
@@ -311,7 +312,7 @@ class clinical(technology_type):
                                         break;
                                         
                                 try:
-                                    if ( (strName.find("barcode")<0) and (strName.find("uuid")<0) ):
+                                    if ( (strName.lower().find("barcode")<0) and (strName.lower().find("uuid")<0) ):
                                         fixContent = self.removeSpecialChars ( strContent )
                                         xmlDict[strName] = str ( fixContent )
                                     else:
@@ -384,6 +385,82 @@ class clinical(technology_type):
         return ( xmlDict )
 
     #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
+def getFeatNamesDict():
+    global featNamesLoaded
+    global featNamesDict
+
+    if ( featNamesLoaded ):
+        return
+    try:
+        fh = file ("/titan/cancerregulome11/TCGA/repositories/bio_clin/featNames.tsv")
+        for aLine in fh:
+            tokenList = aLine.split()
+            featName = tokenList[1]
+            featType = tokenList[0]
+            featNamesDict[featName] = featType
+        fh.close()
+        featNamesLoaded = 1
+
+    except:
+        featNamesLoaded = 2
+
+    return
+
+# -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
+
+def getFeatTypeByName ( aName ):
+    global featNamesDict
+    global featNamesLoaded
+    if ( featNamesLoaded == 0 ):
+        getFeatNamesDict()
+
+    try:
+        return ( featNamesDict[aName] )
+    except:
+        return ( "CLIN" )
+
+# -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
+
+def fixUpFeatureNames(allClinDict):
+
+    print " "
+    print " in fixUpFeatureNames ... "
+
+    keyList = allClinDict.keys()
+    newClinDict = {}
+
+    for aKey in keyList:
+
+        ## if the feature name already looks like B:SAMP:etc or N:CLIN:etc
+        ## then we don't do anything
+        if ( aKey[1]==":" and aKey[6]==":" ):
+            newName = aKey
+
+        else:
+            try:
+                featType = getFeatTypeByName ( aKey )
+                print featType
+                info = miscClin.lookAtKey ( allClinDict[aKey] )
+                print aKey
+                print info
+                if ( info[0] == "NOMINAL" ):
+                    if ( info[3] == 2 ):
+                        newName = "B:" + featType + ":" + aKey + ":::::"
+                    else:
+                        newName = "C:" + featType + ":" + aKey + ":::::"
+                elif ( info[0] == "NUMERIC" ):
+                    newName = "N:" + featType + ":" + aKey + ":::::"
+                else:
+                    sys.exit(-1)
+            except:
+                print " ERROR in fixUpFeatureNames ??? key not found <%s> " % aKey
+                newName = aKey
+
+            newClinDict[newName] = allClinDict[aKey]
+
+    return ( newClinDict )
+
+    #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
     def postprocess(self, dataMatrix, geneList, sampleList):
         ## now let's look at all of this ...
         miscClin.lookAtClinDict ( self.allClinDict )
@@ -392,10 +469,9 @@ class clinical(technology_type):
         ## (note this also abbreviates the key names)
         ( allClinDict ) = miscClin.removeDuplicateKeys ( self.allClinDict )
     
-        if ( 0 ):
-            ## and remove uninformative keys ...
-            ( allClinDict ) = miscClin.removeConstantKeys ( allClinDict )
-    
+        # add prefixes onto feature names and standardize ...
+        (allClinDict) = fixUpFeatureNames(allClinDict)
+
         ## take another look ...
         ( naCounts, _ ) = miscClin.lookAtClinDict ( allClinDict )
     
