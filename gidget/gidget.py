@@ -66,6 +66,8 @@ if __name__ == '__main__':
             gidgetConfigDefaults[option] = config.get(section, option)
             if section == 'MAF_PROCESSING':
                 # TODO: warn if this overwrites some existing envvars
+                # export env vars as uppercase, per convention;
+                # ConfigParser converts to lower.
                 subEnv[('gidget_'+option).upper()] = gidgetConfigDefaults[option]
 
 
