@@ -553,7 +553,8 @@ if __name__ == "__main__":
 
         # changing this 02Jan14 ... to limit the # of tasks being sent to the cluster
         maxJobs = 500
-        nFpJ = numFeat / maxJobs
+        nFpJ = max ( 100, (numFeat/maxJobs) )
+        print "     --> number of features per task : ", nFpJ
         iStart = 0
         numJobs = 0
         while iStart < numFeat:
