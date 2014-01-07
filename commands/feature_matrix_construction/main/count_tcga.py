@@ -49,21 +49,12 @@ def run(argv):
     for tumor in tumorTypes:
         platforms2barcodes = tumor2platforms2barcodes.setdefault(tumor, {})
         for platform in platforms:
-            # special case miRNA to not run normalizing script but look at SDRF instead to get accurate count
-            if 'mirna' in platform.lower():
-                config.set('bcgsc_ca_illuminaga_mirnaseq', 'false')
-                config.set('bcgsc_ca_illuminahiseq_mirnaseq', 'false')
-                
             techType = techTypeFactory.getTechnologyType(config, platform)
             numSamples, filename2sampleInfo, _, _ = parse_tcga.parseFileInfo(techType, tumor)
             if 0 == numSamples:
                 print 'did not find any samples for %s' % tumor
                 continue
             platforms2barcodes[platform] = set([info[0][0] for info in filename2sampleInfo.itervalues()])
-
-            if 'mirna' in platform.lower():
-                config.set('bcgsc_ca_illuminaga_mirnaseq', 'true')
-                config.set('bcgsc_ca_illuminahiseq_mirnaseq', 'true')
     # put together the return values
     platform2tumors = {}
     tumor2patient2header2counts = {}
