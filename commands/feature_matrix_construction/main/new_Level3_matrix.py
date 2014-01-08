@@ -1,7 +1,6 @@
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 
 # these are system modules
-from datetime import datetime
 import numpy
 import os
 import sys
@@ -144,7 +143,7 @@ def sanityCheckSDRF(sdrfFilename):
 def getSDRFinfo(sdrfFilename):
 
     print ' '
-    print datetime.now(), ' in getSDRFinfo ... <%s> ' % sdrfFilename
+    print ' in getSDRFinfo ... <%s> ' % sdrfFilename
 
     okFlag = sanityCheckSDRF(sdrfFilename)
 
@@ -805,7 +804,7 @@ def getSDRFinfo(sdrfFilename):
         print ' list of files : (%d) ' % (len(fileList))
         # print fileList
         sys.exit(-1)
-    print datetime.now(), 'finished getSDRFinfo()'
+
     return (sdrfDict, archiveList, fileList, zPlat)
 
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
@@ -947,15 +946,7 @@ def makeFeatureName(dType, fType, fName, chr='', start=-1, stop=-1, strand='', x
     if (fType == "RPPA"):
         if (len(RPPAdict) == 0):
             print " reading in RPPA annotation file ... "
-<<<<<<< HEAD
-            ## fh = file ( "/proj/ilyalab/sreynold/TCGA/MDA_RPPA_Core/MDA_antibody_annotation.txt" )
-#            fh = file(
-#                "/titan/cancerregulome11/TCGA/repositories/rppa/MDA_antibody_annotation.txt")
-            fh = file(
-                "/titan/cancerregulome9/workspaces/bioinformatics_references/tcga_platform_genelists/MDA_antibody_annotation_2013_12_16.txt")
-=======
             fh = file( "/titan/cancerregulome9/workspaces/bioinformatics_references/tcga_platform_genelists/MDA_antibody_annotation_2013_12_16.txt" )
->>>>>>> origin/develop
             for aLine in fh:
                 aLine = aLine.strip()
                 aLine = aLine.split('\t')
@@ -1013,7 +1004,7 @@ def readOneDataFile(fName, geneList, zPlat, metaData):
 
     try:
         fh = file(fName)
-        print datetime.now(), " in readOneDataFile ... ", zPlat, len(geneList)
+        print " in readOneDataFile ... ", zPlat, len(geneList)
         print fName
     except:
         print " ERROR in readOneDataFile ... ", zPlat
@@ -1416,7 +1407,7 @@ def readOneDataFile(fName, geneList, zPlat, metaData):
 
     # print dataVec[:10]
 
-    print datetime.now(), " --> returning ", len(geneList), len(dataVec)
+    print " --> returning ", len(geneList), len(dataVec)
     print geneList[:5]
     print dataVec[:5]
 
@@ -2366,17 +2357,8 @@ def loadPlatformMetaData(zString):
             zString == "jhu-usc.edu/humanmethylation27/methylation/"):
 
         if (1):
-<<<<<<< HEAD
-            ## metaDataFilename = "/proj/ilyalab/sreynold/TCGA/HumanMethylation27/featNames.txt"
-            ## metaDataFilename = "/proj/ilyalab/sreynold/TCGA/HumanMethylation450/featNames.11apr12.txt"
-            ## metaDataFilename = "/proj/ilyalab/sreynold/TCGA/HumanMethylation450/featNames.09jul12.hg19.txt"
-            ## metaDataFilename = "/proj/ilyalab/sreynold/TCGA/HumanMethylation450/featNames.04oct13.hg19.txt"
-            metaDataFilename = "/proj/ilyalab/sreynold/TCGA/HumanMethylation450/featNames.15oct13.hg19.txt"
-            ## metaDataFilename = "/proj/ilyalab/sreynold/TCGA/HumanMethylation450/featNames_all.16oct13.hg19.txt"
-=======
             ## metaDataFilename = "/proj/ilyalab/sreynold/TCGA/HumanMethylation450/featNames.15oct13.hg19.txt"
             metaDataFilename = "/titan/cancerregulome9/workspaces/bioinformatics_references/tcga_platform_genelists/featNames.15oct13.hg19.txt"
->>>>>>> origin/develop
             fh = file(metaDataFilename)
             metaData = {}
             done = 0
@@ -2517,7 +2499,7 @@ def writeDataFreezeLog(fhLog, fName, barcode):
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 
 if __name__ == "__main__":
-    print datetime.now(), 'beginning new_Level3_matrix'
+
     # list of cancer directory names
     cancerDirNames = [
         'acc',  'blca', 'brca', 'cesc', 'cntl', 'coad', 'dlbc', 'esca', 'gbm',
@@ -2742,7 +2724,7 @@ if __name__ == "__main__":
 
             if (dName.find(dMatch) >= 0):
                 print ' '
-                print datetime.now(), '     found a <%s> directory : <%s> ' % (dMatch, dName)
+                print '     found a <%s> directory : <%s> ' % (dMatch, dName)
                 archiveName = getLastBit(dName)
                 print '     archiveName : ', archiveName
                 print '     archiveList : ', mergeArchiveList
@@ -2945,7 +2927,6 @@ if __name__ == "__main__":
             print " FATAL ERROR: failed to write out any resegmented copy-number data "
 
     else:
-        print datetime.now(), 'creating data matrix'
         dataD = {}
         dataD['rowLabels'] = geneList
         dataD['colLabels'] = sampleList
@@ -2965,7 +2946,7 @@ if __name__ == "__main__":
             dataD, sortRowFlag, sortColFlag, outFilename)
 
     print ' '
-    print datetime.now(), ' DONE !!! '
+    print ' DONE !!! '
     print ' '
 
 
