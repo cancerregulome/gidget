@@ -488,7 +488,11 @@ def barcode_to_disease ( barcode ):
 
         try:
             # barcodes should be upper case
+<<<<<<< HEAD
             return ( barcode2disease_dict[shortBarcode.upper()] )
+=======
+            return (barcode2disease_dict[shortBarcode.upper()])
+>>>>>>> origin/develop
         except:
 
             # if that didn't work and we have already constructed

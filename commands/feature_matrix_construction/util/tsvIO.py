@@ -373,7 +373,11 @@ def writeTSV_clinicalFlipNumeric ( allClinDict, bestKeyOrder, outName ):
     numKey = len(bestKeyOrder)
 
     # get the barcodes ...
+<<<<<<< HEAD
     if ( aKey.find("bcr_patient_barcode") < 0 ):
+=======
+    if (aKey.find("bcr_patient_barcode") < 0):
+>>>>>>> origin/develop
         print " why is the first key not the barcode ??? "
         print aKey
         print allClinDict[aKey]
@@ -456,8 +460,13 @@ def writeTSV_clinicalFlipNumeric ( allClinDict, bestKeyOrder, outName ):
                 print " writing out categorical key ... ", labelList, featureName
                 outLine = "%s" % ( replaceBlanks ( featureName, '_' ) )
                 for jj in range(numClin):
+<<<<<<< HEAD
                     curLabel = replaceBlanks ( 
                         str(allClinDict[aKey][jj]), '_' )
+=======
+                    curLabel = replaceBlanks(
+                        str(allClinDict[aKey][jj]), '_')
+>>>>>>> origin/develop
                     outLine += "\t%s" % curLabel
                 fh.write ( "%s\n" % outLine )
 
@@ -466,8 +475,13 @@ def writeTSV_clinicalFlipNumeric ( allClinDict, bestKeyOrder, outName ):
                 print " writing out categorical key BUT only ONE category ??? ", labelList, featureName
                 outLine = "%s" % ( replaceBlanks ( featureName, '_' ) )
                 for jj in range(numClin):
+<<<<<<< HEAD
                     curLabel = replaceBlanks ( 
                         str(allClinDict[aKey][jj]), '_' )
+=======
+                    curLabel = replaceBlanks(
+                        str(allClinDict[aKey][jj]), '_')
+>>>>>>> origin/develop
                     outLine += "\t%s" % curLabel
                 fh.write ( "%s\n" % outLine )
 
@@ -499,8 +513,13 @@ def writeTSV_clinicalFlipNumeric ( allClinDict, bestKeyOrder, outName ):
                     print " NOT remapping from labels to integers ... ", labelList, featureName
                     outLine = "%s" % ( replaceBlanks ( featureName, '_' ) )
                     for jj in range(numClin):
+<<<<<<< HEAD
                         curLabel = replaceBlanks ( 
                             allClinDict[aKey][jj], '_' )
+=======
+                        curLabel = replaceBlanks(
+                            allClinDict[aKey][jj], '_')
+>>>>>>> origin/develop
                         outLine += "\t%s" % curLabel
                     fh.write ( "%s\n" % outLine )
 
@@ -1520,7 +1539,11 @@ def writeTSV_dataMatrix ( dataD, sortRowFlag,  sortColFlag, outFilename ):
 
     for kk in range(len(colLabels)):
         colName = colLabels[kk]
+<<<<<<< HEAD
         if ( colName.lower().startswith("tcga-") ):
+=======
+        if (colName.lower().startswith("tcga-")):
+>>>>>>> origin/develop
             newName = colName
             colLabels[kk] = newName
 
@@ -1722,7 +1745,11 @@ def readTSV ( inName ):
     isClinical = 0
     firstColHdr = (hdrTokens[0]).lower()
     # print " in readTSV ... ", firstColHdr
+<<<<<<< HEAD
     if ( firstColHdr.find("bcr_patient_barcode") >= 0 ): 
+=======
+    if (firstColHdr.find("bcr_patient_barcode") >= 0):
+>>>>>>> origin/develop
         isClinical = 1
     if ( firstColHdr.find("barcode") >= 0 ): 
         isClinical = 1

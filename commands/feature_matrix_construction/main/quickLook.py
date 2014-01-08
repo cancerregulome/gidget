@@ -16,9 +16,8 @@ def lookAtHeaderTokens(aTokens):
     typeDict = {}
 
     for a in aTokens:
-        a = a.lower()
-        if (a.startswith("tcga-")):
-            patientID = a[8:12]
+        if (a.upper().startswith("TCGA-")):
+            patientID = a[8:12].upper()
             if (patientID not in patientList):
                 patientList += [patientID]
             if (len(a) >= 15):
@@ -265,8 +264,8 @@ if __name__ == "__main__":
         maxCol = -1
         for iCol in range(1, numCol):
             numOn = 0
-            featName = hdrTokens[iCol].lower()
-            if (featName.find("unknown") >= 0):
+            featName = hdrTokens[iCol]
+            if (featName.lower().find("unknown") >= 0):
                 continue
             for iRow in range(numRow):
                 if (dataMatrix[iCol][iRow] == "1"):
