@@ -40,6 +40,8 @@ class clinical(technology_type):
         self.includeStrings = self.configuration['includestrings'].split(',')
         self.removePrefix = [pre.split(':') for pre in self.configuration['removeprefix'].split(',')]
         self.sharedBarcodeKey = self.configuration['sharedbarcode']
+        self.featNamesLoaded = 0
+        self.featNamesDict = {}
 
     #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
     def includeFile(self, tokens):
@@ -248,7 +250,10 @@ class clinical(technology_type):
                             continue
 
                         for exclude in self.excludeStrings:
-                            if exclude in strName.lower():
+                            excludeFields = exclude.split(':')
+                            if excludeFields[0] in strName.lower():
+                                if 2 == len(excludeFields):
+                                    print '%s :  %s %s' % (excludeFields[1], strName, strContent)
                                 toExclude = True
                                 break
                         if toExclude:
@@ -258,7 +263,6 @@ class clinical(technology_type):
                             if ( attrValue.lower() == "not available" ):
                                 print " how can we have content if the procurement status is not available ??? !!! ", strName, strContent
     
-                        strName = strName.lower()
                         if ( strName in xmlDict.keys() ):
                             if ( str(xmlDict[strName]).lower() != str(strContent).lower() ):
                                 print " "
@@ -385,80 +389,77 @@ class clinical(technology_type):
         return ( xmlDict )
 
     #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
-def getFeatNamesDict():
-    global featNamesLoaded
-    global featNamesDict
-
-    if ( featNamesLoaded ):
+    def getFeatNamesDict(self):
+        if ( self.featNamesLoaded ):
+            return
+        try:
+            fh = file ("/titan/cancerregulome11/TCGA/repositories/bio_clin/featNames.tsv")
+            for aLine in fh:
+                tokenList = aLine.split()
+                featName = tokenList[1]
+                featType = tokenList[0]
+                self.featNamesDict[featName] = featType
+            fh.close()
+            self.featNamesLoaded = 1
+    
+        except:
+            self.featNamesLoaded = 2
+    
         return
-    try:
-        fh = file ("/titan/cancerregulome11/TCGA/repositories/bio_clin/featNames.tsv")
-        for aLine in fh:
-            tokenList = aLine.split()
-            featName = tokenList[1]
-            featType = tokenList[0]
-            featNamesDict[featName] = featType
-        fh.close()
-        featNamesLoaded = 1
-
-    except:
-        featNamesLoaded = 2
-
-    return
-
-# -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
-
-def getFeatTypeByName ( aName ):
-    global featNamesDict
-    global featNamesLoaded
-    if ( featNamesLoaded == 0 ):
-        getFeatNamesDict()
-
-    try:
-        return ( featNamesDict[aName] )
-    except:
-        return ( "CLIN" )
-
-# -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
-
-def fixUpFeatureNames(allClinDict):
-
-    print " "
-    print " in fixUpFeatureNames ... "
-
-    keyList = allClinDict.keys()
-    newClinDict = {}
-
-    for aKey in keyList:
-
-        ## if the feature name already looks like B:SAMP:etc or N:CLIN:etc
-        ## then we don't do anything
-        if ( aKey[1]==":" and aKey[6]==":" ):
-            newName = aKey
-
-        else:
-            try:
-                featType = getFeatTypeByName ( aKey )
-                print featType
-                info = miscClin.lookAtKey ( allClinDict[aKey] )
-                print aKey
-                print info
-                if ( info[0] == "NOMINAL" ):
-                    if ( info[3] == 2 ):
-                        newName = "B:" + featType + ":" + aKey + ":::::"
-                    else:
-                        newName = "C:" + featType + ":" + aKey + ":::::"
-                elif ( info[0] == "NUMERIC" ):
-                    newName = "N:" + featType + ":" + aKey + ":::::"
-                else:
-                    sys.exit(-1)
-            except:
-                print " ERROR in fixUpFeatureNames ??? key not found <%s> " % aKey
+    
+    # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
+    
+    def getFeatTypeByName (self, aName ):
+        if ( self.featNamesLoaded == 0 ):
+            self.getFeatNamesDict()
+    
+        try:
+            print 'looking at featNamesDict[] for %s' % (aName)
+            return ( self.featNamesDict[aName] )
+        except:
+            return ( "CLIN" )
+    
+    # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
+    
+    def fixUpFeatureNames(self, allClinDict):
+    
+        print " "
+        print " in fixUpFeatureNames ... "
+    
+        keyList = allClinDict.keys()
+        newClinDict = {}
+    
+        for aKey in keyList:
+    
+            ## if the feature name already looks like B:SAMP:etc or N:CLIN:etc
+            ## then we don't do anything
+            if ( aKey[1]==":" and aKey[6]==":" ):
                 newName = aKey
-
-            newClinDict[newName] = allClinDict[aKey]
-
-    return ( newClinDict )
+    
+            else:
+                try:
+                    featType = self.getFeatTypeByName ( aKey )
+                    print featType
+                    info = miscClin.lookAtKey ( allClinDict[aKey] )
+                    print aKey
+                    print info
+                    if ( info[0] == "NOMINAL" ):
+                        if ( info[3] == 2 ):
+                            newName = "B:" + featType + ":" + aKey + ":::::"
+                        else:
+                            newName = "C:" + featType + ":" + aKey + ":::::"
+                    elif ( info[0] == "NUMERIC" ):
+                        newName = "N:" + featType + ":" + aKey + ":::::"
+                    else:
+                        sys.exit(-1)
+                except:
+                    traceback.print_exc(limit=5)
+                    print " ERROR in fixUpFeatureNames ??? key not found <%s> " % aKey
+                    newName = aKey
+    
+                newClinDict[newName] = allClinDict[aKey]
+    
+        return ( newClinDict )
 
     #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
     def postprocess(self, dataMatrix, geneList, sampleList):
@@ -467,13 +468,13 @@ def fixUpFeatureNames(allClinDict):
     
         ## now look for duplicate keys ...
         ## (note this also abbreviates the key names)
-        ( allClinDict ) = miscClin.removeDuplicateKeys ( self.allClinDict )
+        ( self.allClinDict ) = miscClin.removeDuplicateKeys ( self.allClinDict )
     
         # add prefixes onto feature names and standardize ...
-        (allClinDict) = fixUpFeatureNames(allClinDict)
+        (self.allClinDict) = self.fixUpFeatureNames(self.allClinDict)
 
         ## take another look ...
-        ( naCounts, _ ) = miscClin.lookAtClinDict ( allClinDict )
+        ( naCounts, _ ) = miscClin.lookAtClinDict ( self.allClinDict )
     
         ## now let's come up with a new ordering of the keys based on the naCounts ...
         ## --> actually, let's NOT change the ordering ... it makes it much harder
@@ -481,7 +482,7 @@ def fixUpFeatureNames(allClinDict):
         if ( 1 ):
             tmpCounts = [max(naCounts)] * len(naCounts)
             naCounts = tmpCounts
-        bestKeyOrder = miscClin.getBestKeyOrder ( allClinDict, naCounts )
+        bestKeyOrder = miscClin.getBestKeyOrder ( self.allClinDict, naCounts )
         dataD = {}
         dataD['clinDict'] = self.allClinDict
         dataD['bestKeyOrder'] = bestKeyOrder
@@ -552,7 +553,6 @@ def fixUpFeatureNames(allClinDict):
     def getTopDirectory(self, tumorType):
         return self.configuration["topdir"] % (self.configuration['snapshot'], self.configuration['basedirectorybranch'], tumorType)
         
-
     #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
     def getFilesFromArchives(self, topDir):
         print datetime.now(), "in getFilesFromArchives(): %s" % (topDir)
