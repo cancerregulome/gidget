@@ -302,7 +302,11 @@ def writeLog(logFile, filename2sampleInfo, tumorType, platformID, outSuffix, out
     
 #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 def parseFileInfo(techType, tumorType):
-    topDir = techType.getTopDirectory(tumorType);
+    try:
+        topDir = techType.getTopDirectory(tumorType);
+    except:
+        traceback.print_exc()
+        raise ValueError('problem reading top dir for %s:%s' % (techType, tumorType))
     print "topDir: %s" % topDir
     
     if techType.hasSDRFFile():
