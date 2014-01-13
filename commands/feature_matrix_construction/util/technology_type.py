@@ -578,6 +578,9 @@ class technology_type(object):
         return (geneList, sampleList)
     
     #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
+    # overidden by: 
+    #    bcgsc_ca_illuminahiseq_mirnaseq (illumina_rnaseq.py) 
+    #    bcgsc_ca_illuminaga_mirnaseq (illumina_rnaseq.py) 
     def processDirectories(self, topDirs, archiveList, filename2sampleInfo, numSamples):
         print datetime.now(), "processing directories"
         numGenes = self.getNumGenes()
