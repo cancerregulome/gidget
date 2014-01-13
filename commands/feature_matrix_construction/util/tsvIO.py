@@ -373,11 +373,7 @@ def writeTSV_clinicalFlipNumeric ( allClinDict, bestKeyOrder, outName ):
     numKey = len(bestKeyOrder)
 
     # get the barcodes ...
-<<<<<<< HEAD
-    if ( aKey.find("bcr_patient_barcode") < 0 ):
-=======
     if (aKey.find("bcr_patient_barcode") < 0):
->>>>>>> origin/develop
         print " why is the first key not the barcode ??? "
         print aKey
         print allClinDict[aKey]
@@ -460,13 +456,8 @@ def writeTSV_clinicalFlipNumeric ( allClinDict, bestKeyOrder, outName ):
                 print " writing out categorical key ... ", labelList, featureName
                 outLine = "%s" % ( replaceBlanks ( featureName, '_' ) )
                 for jj in range(numClin):
-<<<<<<< HEAD
-                    curLabel = replaceBlanks ( 
-                        str(allClinDict[aKey][jj]), '_' )
-=======
                     curLabel = replaceBlanks(
                         str(allClinDict[aKey][jj]), '_')
->>>>>>> origin/develop
                     outLine += "\t%s" % curLabel
                 fh.write ( "%s\n" % outLine )
 
@@ -475,13 +466,8 @@ def writeTSV_clinicalFlipNumeric ( allClinDict, bestKeyOrder, outName ):
                 print " writing out categorical key BUT only ONE category ??? ", labelList, featureName
                 outLine = "%s" % ( replaceBlanks ( featureName, '_' ) )
                 for jj in range(numClin):
-<<<<<<< HEAD
-                    curLabel = replaceBlanks ( 
-                        str(allClinDict[aKey][jj]), '_' )
-=======
                     curLabel = replaceBlanks(
                         str(allClinDict[aKey][jj]), '_')
->>>>>>> origin/develop
                     outLine += "\t%s" % curLabel
                 fh.write ( "%s\n" % outLine )
 
@@ -513,13 +499,8 @@ def writeTSV_clinicalFlipNumeric ( allClinDict, bestKeyOrder, outName ):
                     print " NOT remapping from labels to integers ... ", labelList, featureName
                     outLine = "%s" % ( replaceBlanks ( featureName, '_' ) )
                     for jj in range(numClin):
-<<<<<<< HEAD
-                        curLabel = replaceBlanks ( 
-                            allClinDict[aKey][jj], '_' )
-=======
                         curLabel = replaceBlanks(
                             allClinDict[aKey][jj], '_')
->>>>>>> origin/develop
                         outLine += "\t%s" % curLabel
                     fh.write ( "%s\n" % outLine )
 
@@ -1483,6 +1464,8 @@ def uniqueFeatureLabels ( fLabels, dataMatrix ):
         indices.add(index)
         
     for fLabel, indices in label2indices.iteritems():
+        if 1 == len(indices):
+            continue
         for ii in range(len(indices)):
             if ( ii in rmRowList ): 
                 continue
@@ -1501,7 +1484,7 @@ def uniqueFeatureLabels ( fLabels, dataMatrix ):
         indices = indices.difference(rmRowList)
         for ii in indices:
             try:
-                newA = fLabel + str(ii)
+                newA = fLabel + '_' + str(ii)
             except:
                 print fLabel
                 sys.exit(-1)
@@ -1539,11 +1522,7 @@ def writeTSV_dataMatrix ( dataD, sortRowFlag,  sortColFlag, outFilename ):
 
     for kk in range(len(colLabels)):
         colName = colLabels[kk]
-<<<<<<< HEAD
-        if ( colName.lower().startswith("tcga-") ):
-=======
         if (colName.lower().startswith("tcga-")):
->>>>>>> origin/develop
             newName = colName
             colLabels[kk] = newName
 
@@ -1596,7 +1575,7 @@ def writeTSV_dataMatrix ( dataD, sortRowFlag,  sortColFlag, outFilename ):
                 
     # make sure that the rowLabels are unique!
     # this takes WAY TOOOOO looooong ...
-    if ( 0 ):
+    if ( 1 ):
         print " calling uniqueFeatureLabels ... ", len(rowLabels), rowLabels[0], rowLabels[-1]
         rowLabels = uniqueFeatureLabels ( rowLabels, dataMatrix )
 
@@ -1745,11 +1724,7 @@ def readTSV ( inName ):
     isClinical = 0
     firstColHdr = (hdrTokens[0]).lower()
     # print " in readTSV ... ", firstColHdr
-<<<<<<< HEAD
-    if ( firstColHdr.find("bcr_patient_barcode") >= 0 ): 
-=======
     if (firstColHdr.find("bcr_patient_barcode") >= 0):
->>>>>>> origin/develop
         isClinical = 1
     if ( firstColHdr.find("barcode") >= 0 ): 
         isClinical = 1
