@@ -977,6 +977,10 @@ def annotateFeatures(dataD, geneInfoDict, synMapDict, geneCoordDict_bySymbol,
         if (curType == "CLIN" or curType == "SAMP"):
             newRowLabels += [newLabel]
             continue
+        # or platform features ...
+        if (curLabel.lower().find("platform") >= 0 ):
+            newRowLabels += [newLabel]
+            continue
 
         haveName = 0
         haveCoord = 0

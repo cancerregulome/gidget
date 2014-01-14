@@ -84,13 +84,13 @@ for ((i=1; i<$#; i++))
 				tmp1.tsv >& $tumor.$sub.$curDate.jct.log
 	
 	                rm -fr tmp2.tsv $tumor.$sub.$curDate.customFeat.log
-                        echo "     adding custom features (a) ... "
-	                python $TCGAFMP_ROOT_DIR/main/addCustomFeat2.py \
-				tmp1.tsv \
-	                        tmp2.tsv >> $tumor.$sub.$curDate.customFeat.log
+                        ## echo "     adding custom features (a) ... "
+	                ## python $TCGAFMP_ROOT_DIR/main/addCustomFeat2.py \
+			##	  tmp1.tsv \
+	                ##        tmp2.tsv >> $tumor.$sub.$curDate.customFeat.log
                         echo "     adding custom features (b) ... "
 	                python $TCGAFMP_ROOT_DIR/main/addCustomFeat3.py \
-				tmp2.tsv \
+				tmp1.tsv \
 	                        $tumor.newMerge.$sub.$curDate.jct.tsv >> $tumor.$sub.$curDate.customFeat.log
 	
 		fi

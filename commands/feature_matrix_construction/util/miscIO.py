@@ -9,32 +9,6 @@ import time
 import urllib2
 
 #------------------------------------------------------------------------------
-
-
-def open_url(fName):
-
-    print " in openURL : ", fName
-
-    if (fName.startswith("https://")):
-        request = urllib2.Request(fName)
-        username = "USERNAME_HERE"
-        # this is the new password as of June 2nd 2010
-        password = "PASSWD_HERE"
-        base64string = base64.encodestring('%s:%s' % (username, password))
-        base64string = base64string[:-1]
-        request.add_header("Authorization", "Basic %s" % base64string)
-    else:
-        request = urllib2.Request(fName)
-
-    try:
-        htmlFile = urllib2.urlopen(request)
-    except:
-        print " ERROR ??? failed to open URL ... "
-        print fName
-        sys.exit(-1)
-
-    return (htmlFile)
-
 #------------------------------------------------------------------------------
 
 
