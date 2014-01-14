@@ -5,6 +5,7 @@ import miscMath
 import miscTCGA
 
 import numpy
+import os
 import path
 import sys
 
@@ -481,7 +482,7 @@ def parseMutSig_CountsRatesFile(inName, outName):
 
             try:
                 if (numTokens == 8):
-                    print " WARNING : no dbSNP rate column "
+                    ## print " WARNING : no dbSNP rate column "
                     rateDbSnp = 0.
                     rateSil = float(tokenList[6])
                     rateNon = float(tokenList[7])
@@ -498,7 +499,7 @@ def parseMutSig_CountsRatesFile(inName, outName):
                     rateSil = float(tokenList[10])
                     rateNon = float(tokenList[11])
                 elif (numTokens == 13):
-                    print " WARNING : no dbSNP rate column "
+                    ## print " WARNING : no dbSNP rate column "
                     rateDbSnp = 0.
                     rateSil = float(tokenList[11])
                     rateNon = float(tokenList[12])
@@ -795,10 +796,10 @@ def parseMutSig_SigGenesFile(inName, outName):
 # this is the top-level driver for parsing the MutSig files -- it calls
 # other function to handle each individual file
 
-def parseMutSigFiles(lastDir, outDir):
+def parseMutSigFiles(lastDir, outDir, MSverString):
 
     print " "
-    print " START: parsing MutSig files from firehose outputs "
+    print " START: parsing MutSig files from firehose outputs ", MSverString
     print " "
     numGot = 0
 
@@ -809,10 +810,8 @@ def parseMutSigFiles(lastDir, outDir):
     d2 = path.path(lastDir)
     for d2Name in d2.dirs():
 
-        # if ( d2Name.find("Mutation_Significance.Level_4")>0  or  d2Name.find("MutSigNozzleReport2.0.Level_4")>0 ):
-        # if ( d2Name.find("Mutation_Significance.Level_4")>0  or
-        # d2Name.find("MutSigNozzleReportCV.Level_4")>0 ):
-        if (d2Name.find("Mutation_Significance.Level_4") > 0 or d2Name.find("MutSigNozzleReport1.5.Level_4") > 0):
+        ## if (d2Name.find("Mutation_Significance.Level_4") > 0 or d2Name.find("MutSigNozzleReport1.5.Level_4") > 0):
+        if ( d2Name.find(MSverString) >= 0  and  d2Name.find("Level_4") >= 0 ):
 
             d3 = path.path(d2Name)
             for fName in d3.files():
@@ -1421,6 +1420,33 @@ def buildSampleWhiteList(lastDir, outDir):
 
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 
+def getMutSigVersionString ( zCancer ):
+
+    defaultString = "MutSigNozzleReportCV"
+
+    try:
+        rootString = os.environ['TCGAFMP_OUTPUTS']
+    except:
+        MSverString = defaultString
+        print "     --> defaulting to %s " % defaultString
+
+    fName = rootString + "/" + zCancer.lower() + "/aux/MutSigversion.txt"
+    try:
+        fh = file ( fName, 'r' )
+        print "     checking file %s for MutSig version specification " % fName
+        for aLine in fh:
+            if ( aLine.startswith("#") ): continue
+            if ( aLine.find("MutSig") >= 0 ):
+                MSverString = aLine.strip()
+                print "     --> will look for %s outputs " % defaultString
+    except:
+        MSverString = defaultString
+        print "     --> defaulting to %s " % defaultString
+
+    return ( MSverString )
+
+# -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
+
 
 def getLastBit(aName):
 
@@ -1490,7 +1516,10 @@ if __name__ == "__main__":
         parseBestClusFiles(lastDir, outDir, zCancer)
 
         # next we process files that come out of the MutSig module
-        parseMutSigFiles(lastDir, outDir)
+        # ( but first we ask which version of MutSig is supposed to be 
+        #   used for this tumor type )
+        MSverString = getMutSigVersionString ( zCancer )
+        parseMutSigFiles(lastDir, outDir, MSverString)
 
         # next we process the files that come out of Gistic
         ## lastDir = "/users/sreynold/scratch/"
