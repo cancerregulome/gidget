@@ -289,7 +289,10 @@ def get_uuid2barcode_dict():
         print " "
         print " UPDATING METADATA !!! "
         print "     current time   : ", tNow
-        print "     last update at : ", tMet
+        try:
+            print "     last update at : ", tMet
+        except:
+            print "     no UUID mapping file available ??? "
         ( status, output ) = commands.getstatusoutput ( cmdString )
         print " ... should be done ... "
         print " "
