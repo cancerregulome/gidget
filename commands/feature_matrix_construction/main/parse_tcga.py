@@ -18,6 +18,18 @@ import path
 from technology_type_factory import technology_type_factory
 
 #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
+class NoSamplesException(Exception):
+    '''
+    classdocs
+    '''
+
+    def __init__(self, msg):
+        '''
+        Constructor
+        '''
+        Exception.__init__(self, msg)
+    
+#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 def makeOutputFilename ( tumorList, platformID, outSuffix ):
     outDir = config.get('main', 'out_directory')
     if ( len(tumorList) == 1 ):
@@ -312,7 +324,6 @@ def parseFileInfo(techType, tumorType):
     if techType.hasSDRFFile():
         sdrfFilename = getSDRFilename(topDir)
         if (sdrfFilename == "NA"):
-            print 'did not find any samples for %s' % tumorType
             return 0, None, None, None
         else:
             numSamples, filename2sampleInfo, archiveList = getSDRFinfo(sdrfFilename, techType)
@@ -358,7 +369,7 @@ def parseCancers(platformID, tumorTypes, outSuffix):
     
     techType = technology_type_factory(config).getTechnologyType(config, platformID)
     outFilename = makeOutputFilename(tumorTypes, platformID, outSuffix)
-    logFile = openDataFreezeLogFile(tumorTypes, outFilename, outSuffix, [platformID])
+    logFile = None
     totalSamples = 0
     mergedFilename2sampleInfo = {}
     mergedArchiveList = []
@@ -379,6 +390,8 @@ def parseCancers(platformID, tumorTypes, outSuffix):
                 mergedArchiveList = mergeArchiveList(mergedArchiveList, archiveList)
                 
                 ## write out what we are using to the log file ...
+                if not logFile:
+                    logFile = openDataFreezeLogFile(tumorTypes, outFilename, outSuffix, [platformID])
                 writeLog(logFile, filename2sampleInfo, tumorType, platformID, outSuffix, outFilename)
                 topDirs += localTopDirs
                 totalSamples += numSamples
@@ -391,12 +404,13 @@ def parseCancers(platformID, tumorTypes, outSuffix):
             # raise the exception and stop processing
             raise e
         
-        if 0 == totalSamples:
-            ## print 'did not find any samples for tumor types %s for platform \'%s\'' % (tumorTypes, platformID)
-            ## return
-            raise ValueError('ERROR ??? did not find any samples for tumor types %s for platform \'%s\'' % (tumorTypes, platformID))
-    logFile.flush()
-    logFile.close()
+    if logFile:
+        logFile.flush()
+        logFile.close()
+    if 0 == totalSamples:
+        ## print 'did not find any samples for tumor types %s for platform \'%s\'' % (tumorTypes, platformID)
+        ## return
+        raise NoSamplesException('ERROR ??? did not find any samples for tumor types %s for platform \'%s\'' % (tumorTypes, platformID))
     
     print "--> setting numSamples ... samples: %i files: %i mappings: %i" % (totalSamples, len(mergedFilename2sampleInfo), len(mergedFilename2sampleInfo))
     try:
@@ -481,8 +495,11 @@ def initialize(argv):
 #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 if __name__ == '__main__':
     print datetime.now(), "starting..."
-    platformID, tumorTypes, outSuffix = initialize(sys.argv)
-    parseCancers(platformID, tumorTypes, outSuffix)
+    try:
+        platformID, tumorTypes, outSuffix = initialize(sys.argv)
+        parseCancers(platformID, tumorTypes, outSuffix)
+    except Exception as e:
+        print e
     print datetime.now(), "finished"
     sys.exit(0)
 
