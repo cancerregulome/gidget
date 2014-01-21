@@ -1,5 +1,7 @@
 #!/usr/bin/perl
 
+# version 6.1
+
 $maf_file = $ARGV[0] || die "usage: $0 MAF_FILE\n";
 
 @elements = split ('\.', $maf_file);
