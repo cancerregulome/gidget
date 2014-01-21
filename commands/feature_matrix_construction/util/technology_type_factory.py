@@ -13,6 +13,7 @@ from illumina_rnaseq import bcgsc_ca_illuminaga_mirnaseq
 from illumina_rnaseq import bcgsc_ca_illuminahiseq_rnaseq
 from illumina_rnaseq import bcgsc_ca_illuminahiseq_mirnaseq
 from illumina_rnaseq import unc_edu_illuminaga_rnaseq
+from illumina_rnaseq import unc_edu_illuminaga_rnaseqv2
 from illumina_rnaseq import unc_edu_illuminahiseq_rnaseq
 from illumina_rnaseq import unc_edu_illuminahiseq_rnaseqv2
 from microsat_i import nationwidechildrens_org_microsat_i
@@ -38,6 +39,7 @@ class technology_type_factory(object):
                   'bcgsc_ca_illuminahiseq_rnaseq': bcgsc_ca_illuminahiseq_rnaseq, \
                   'bcgsc_ca_illuminahiseq_mirnaseq': bcgsc_ca_illuminahiseq_mirnaseq, \
                   'unc_edu_illuminaga_rnaseq': unc_edu_illuminaga_rnaseq, \
+                  'unc_edu_illuminaga_rnaseqv2': unc_edu_illuminaga_rnaseqv2, \
                   'unc_edu_illuminahiseq_rnaseq': unc_edu_illuminahiseq_rnaseq, \
                   'unc_edu_illuminahiseq_rnaseqv2': unc_edu_illuminahiseq_rnaseqv2, \
                   'mdanderson_org_mda_rppa_core': mdanderson_org_mda_rppa_core, \
