@@ -174,6 +174,7 @@ class technology_type(object):
     #    clinical (clinical.py)
     #    humanmethylation (humanmethylation.py)
     #    unc_edu_illuminaga_rnaseq (illumina_rnaseq.py)
+    #    unc_edu_illuminaga_rnaseqv2 (illumina_rnaseq.py)
     #    unc_edu_illuminahiseq_rnaseq (illumina_rnaseq.py)
     #    unc_edu_illuminahiseq_rnaseqv2 (illumina_rnaseq.py)
     #    mdanderson_org_mda_rppa_core (mda_rppa_core.py)
@@ -193,6 +194,7 @@ class technology_type(object):
     #    unc_edu_agilentg4502a_07 (agilentg4502a_07.py)
     #    humanmethylation (humanmethylation.py)
     #    unc_edu_illuminaga_rnaseq (illumina_rnaseq.py)
+    #    unc_edu_illuminaga_rnaseqv2 (illumina_rnaseq.py)
     #    unc_edu_illuminahiseq_rnaseq (illumina_rnaseq.py)
     #    unc_edu_illuminahiseq_rnaseqv2 (illumina_rnaseq.py)
     #    mdanderson_org_mda_rppa_core (mda_rppa_core.py)
@@ -435,6 +437,7 @@ class technology_type(object):
     #    broad_mit_edu_genome_wide_snp_6 (genome_wide_snp_6.py)
     #    bcgsc_ca_illuminaga_rnaseq (illumina_rnaseq.py)
     #    unc_edu_illuminaga_rnaseq (illumina_rnaseq.py)
+    #    unc_edu_illuminaga_rnaseqv2 (illumina_rnaseq.py)
     #    unc_edu_illuminahiseq_rnaseq (illumina_rnaseq.py)
     #    unc_edu_illuminahiseq_rnaseqv2 (illumina_rnaseq.py)
     def _readGeneDetails(self, tokens, geneList):
