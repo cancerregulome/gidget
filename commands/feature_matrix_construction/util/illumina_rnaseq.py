@@ -404,6 +404,26 @@ class unc_edu_illuminaga_rnaseq(illumina_rnaseq):
     def _addGeneName(self, tokens):
         self._addGeneNameForRNA(tokens)
 
+class unc_edu_illuminaga_rnaseqv2(illumina_rnaseq):
+    '''
+    the illumina ga v2 platform for ngs for mRNA
+    '''
+    def __init__(self, config, platformID):
+        '''
+        Constructor
+        '''
+        illumina_rnaseq.__init__(self, config, platformID)
+        self.configuration.update(config.items('unc_edu_illuminaga_rnaseqv2'))
+
+    def includeFile(self, tokens):
+        if tokens[self.iOther] != "RSEM_genes_normalized":
+            mess = '(e) NOT including this file ... ', self.iFilename, tokens[self.iFilename], self.iBarcode, tokens[self.iBarcode], self.iOther, tokens[self.iOther]
+            return (None, None, None, None, False, mess)
+        return illumina_rnaseq.includeFile(self, tokens)
+
+    def _addGeneName(self, tokens):
+        self._addGeneNameForRNA(tokens)
+
 class unc_edu_illuminahiseq_rnaseq(illumina_rnaseq):
     '''
     the illumina hiseq platform for ngs for mRNA
