@@ -289,10 +289,11 @@ def mergeClinDict(aDict, bDict):
             taKey = bKey
             print "         defaulting taKey to : ", taKey
 
-        print " making sure we have some values in bDict ... ", bKey
-        print bDict[bKey][0:5]
-        print " making sure we have some values in aDict ... ", taKey
-        print aDict[taKey][0:5]
+        if ( 0 ):
+            print " making sure we have some values in bDict ... ", bKey
+            print bDict[bKey][0:5]
+            print " making sure we have some values in aDict ... ", taKey
+            print aDict[taKey][0:5]
 
         for ii in range(len(bDict[keepKey])):
             bCode = bDict[keepKey][ii]
@@ -301,7 +302,7 @@ def mergeClinDict(aDict, bDict):
             if (jj >= 0):
                 try:
                     aDict[taKey][jj] = bDict[bKey][ii]
-                    print " setting aDict[%s][%d] = bDict[%s][%d] = " % ( taKey, jj, bKey, ii ), bDict[bKey][ii]
+                    ## print " setting aDict[%s][%d] = bDict[%s][%d] = " % ( taKey, jj, bKey, ii ), bDict[bKey][ii]
                 except:
                     print " this did not work ", ii, jj, taKey, bKey
                     print len(bDict[bKey]), bDict[bKey]
