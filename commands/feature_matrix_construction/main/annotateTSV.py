@@ -35,27 +35,25 @@ def readGeneInfoFile(geneInfoFilename):
             continue
 
         geneID = int(tokenList[1])
-        symbol = tokenList[2].upper()
+        symbol = tokenList[2]
         locusTag = tokenList[3]
-        synonyms = tokenList[4].upper()
+        synonyms = tokenList[4]
 
         if (synonyms == "-"):
             continue
 
-        symbol = symbol.upper()
-        if (symbol not in geneInfoDict.keys()):
-            geneInfoDict[symbol] = []
+        if (symbol.upper() not in geneInfoDict):
+            geneInfoDict[symbol.upper()] = []
 
         synList = synonyms.split('|')
         for aSyn in synList:
-            aSyn = aSyn.upper()
-            if (aSyn not in geneInfoDict[symbol]):
-                geneInfoDict[symbol] += [aSyn]
+            if (aSyn.upper() not in geneInfoDict[symbol.upper()]):
+                geneInfoDict[symbol.upper()] += [aSyn.upper()]
 
-            if (aSyn not in synMapDict.keys()):
-                synMapDict[aSyn] = [(symbol, geneID)]
+            if (aSyn.upper() not in synMapDict):
+                synMapDict[aSyn.upper()] = [(symbol, geneID)]
             else:
-                synMapDict[aSyn] += [(symbol, geneID)]
+                synMapDict[aSyn.upper()] += [(symbol, geneID)]
 
         # number of symbols with synonyms was 22558
 
@@ -67,7 +65,7 @@ def readGeneInfoFile(geneInfoFilename):
     if (0):
         print " "
         print " synonyms with more than one assigned symbol ... ??? "
-        for aSyn in synMapDict.keys():
+        for aSyn in synMapDict:
             if (len(synMapDict[aSyn]) > 1):
                 print aSyn, synMapDict[aSyn]
         print " "
@@ -96,13 +94,15 @@ def readCytobandFile(cybFilename):
         iStart = int(tokenList[1])
         iStop = int(tokenList[2])
 
-        if (chrName not in cytoDict.keys()):
+        if (chrName not in cytoDict):
             cytoDict[chrName] = []
         cytoDict[chrName] += [(bndName, iStart, iStop)]
 
     fh.close()
 
     if (0):
+        ## this is just a block that will print stuff out and
+        ## exit in case we need/want that briefly
         allNames = cytoDict.keys()
         allNames.sort()
         for aName in allNames:
@@ -159,21 +159,20 @@ def readRefGeneFile(refGeneFilename):
 
         geneName = tokenList[12]
 
-        # CHR17:7565097-7590863:-
-        coordString = tokenList[
-            2].upper() + ':' + tokenList[4] + '-' + tokenList[5] + ':' + tokenList[3]
+        # chr17:7565097-7590863:-
+        coordString = tokenList[2] + ':' + tokenList[4] + '-' + tokenList[5] + ':' + tokenList[3]
 
         # if we already have this geneName, just make sure that the
         # coordinates cover the largest possible extent ...
-        if (geneName in refGeneDict.keys()):
+        if (geneName.upper() in refGeneDict):
 
-            oldString = refGeneDict[geneName]
+            oldString = refGeneDict[geneName.upper()]
             if (oldString == coordString):
                 continue
 
             oldTokens = oldString.split(':')
 
-            if (oldTokens[0] != tokenList[2].upper()):
+            if (oldTokens[0] != tokenList[2]):
                 continue
 
             ii = oldTokens[1].find('-')
@@ -196,29 +195,140 @@ def readRefGeneFile(refGeneFilename):
 
             coordString = oldTokens[0] + ':' + \
                 str(newStart) + '-' + str(newStop) + ':' + oldTokens[2]
-            refGeneDict[geneName] = coordString
+            refGeneDict[geneName.upper()] = coordString
 
             # print "     --> updated <%s> to <%s> " % ( oldString, coordString
             # )
 
         else:
-            refGeneDict[geneName] = coordString
+            refGeneDict[geneName.upper()] = coordString
 
     fh.close()
 
     print " in readRefGeneFile ... "
-    print "     length of refGeneDict w/ coords ..... ", len(refGeneDict), len(refGeneDict.keys())
+    print "     length of refGeneDict w/ coords ..... ", len(refGeneDict), len(refGeneDict)
 
     return (refGeneDict)
+
+# -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
+
+def makeAttributeDict ( aToken ):
+
+    attrDict = {}
+    if ( len(aToken) == 0 ): return ( attrDict )
+
+    attrList = aToken.split(';')
+    for a in attrList:
+        b = a.strip()
+        c = b.split(' ')
+        try:
+            if ( c[1][ 0] == '"' ): c[1] = c[1][1:]
+            if ( c[1][-1] == '"' ): c[1] = c[1][:-1]
+            attrDict[c[0]] = c[1]
+        except:
+            doNothing = 1
+
+    return ( attrDict )
+
+# -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
+# this function is based on the readGAF function below, with edits made
+# as needed to parse the Gencode GTF format
+
+
+def readGencode(gencodeFilename):
+
+    Gencode_geneCoordDict_bySymbol = {}
+    Gencode_geneCoordDict_byID = {}
+    Gencode_geneSymbol_byID = {}
+
+    try:
+        fh = file(gencodeFilename, 'r')
+    except:
+        print " ERROR opening GENCODE file <%s> " % gencodeFilename
+        sys.exit(-1)
+
+    for aLine in fh:
+        aLine = aLine.strip()
+
+        if (aLine.startswith("#")):
+            continue
+        tokenList = aLine.split('\t')
+
+        if (len(tokenList) < 9):
+            continue
+
+        ## tokenList[0] 'chr17'
+        ## tokenList[1] 'HAVANA'
+        ## tokenList[2] 'gene'
+        ## tokenList[3] '7565097'
+        ## tokenList[4] '7590856'
+        ## tokenList[5] '.'
+        ## tokenList[6] '-'
+        ## tokenList[7] '.'
+        ## tokenList[8] 'gene_id "ENSG00000141510.11"; transcript_id "ENSG00000141510.11"; gene_type "protein_coding"; gene_status "KNOWN"; gene_name "TP53"; transcript_type "protein_coding"; transcript_status "KNOWN"; transcript_name "TP53"; level 2; havana_gene "OTTHUMG00000162125.4";'
+
+        attrDict = makeAttributeDict ( tokenList[8] )
+
+        try:
+            geneName = attrDict['gene_name']
+            geneID = attrDict['gene_id']
+            ## create the coordToken, eg: chr17:7565097-7590856:-
+            coordToken = tokenList[0] + ':' + tokenList[3] + '-' + tokenList[4] + ':' + tokenList[6]
+        except:
+            continue
+
+        # print " ready to add : ", geneName, geneID, coordToken
+
+        if (len(geneName) > 1):
+            if (geneName.upper() in Gencode_geneCoordDict_bySymbol):
+                doNothing = 1
+            else:
+                Gencode_geneCoordDict_bySymbol[geneName] = coordToken
+
+        if (geneID != '?'):
+            if (geneID.upper() in Gencode_geneCoordDict_byID):
+                doNothing = 1
+            else:
+                Gencode_geneCoordDict_byID[geneID.upper()] = coordToken
+
+        # also create the Gencode_geneSymbol_byID dict ...
+        if (geneID != '?'):
+            if (geneID.upper() in Gencode_geneSymbol_byID):
+                if (geneName not in Gencode_geneSymbol_byID[geneID]):
+                    print " this should never happen should it ??? ", geneID, geneName, Gencode_geneSymbol_byID[geneID]
+                    Gencode_geneSymbol_byID[geneID] += [geneName]
+
+                    # HACK
+                    if (geneID == "378108"):
+                        Gencode_geneSymbol_byID[geneID] = ["TRIM74"]
+            else:
+                Gencode_geneSymbol_byID[geneID] = [geneName]
+
+    fh.close()
+
+    print " in readGencode ... "
+    print "     length of Gencode_geneCoordDict_bySymbol w/ coords ..... ", len(Gencode_geneCoordDict_bySymbol), len(Gencode_geneCoordDict_bySymbol)
+    print "     length of Gencode_geneCoordDict_byID     w/ coords ..... ", len(Gencode_geneCoordDict_byID), len(Gencode_geneCoordDict_byID)
+    print "     length of Gencode_geneSymbol_byID  ..................... ", len(Gencode_geneSymbol_byID)
+
+    print " "
+    print " sanity-checking Gencode_geneSymbol_byID dictionary ... "
+    for geneID in Gencode_geneSymbol_byID:
+        if (len(Gencode_geneSymbol_byID[geneID]) > 1):
+            print geneID, Gencode_geneSymbol_byID[geneID]
+    print " "
+    print " "
+
+    return (Gencode_geneCoordDict_bySymbol, Gencode_geneCoordDict_byID, Gencode_geneSymbol_byID)
 
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 
 
 def readGAF(gafFilename):
 
-    geneCoordDict_bySymbol = {}
-    geneCoordDict_byID = {}
-    geneSymbol_byID = {}
+    GAF_geneCoordDict_bySymbol = {}
+    GAF_geneCoordDict_byID = {}
+    GAF_geneSymbol_byID = {}
 
     try:
         fh = file(gafFilename, 'r')
@@ -228,7 +338,6 @@ def readGAF(gafFilename):
 
     for aLine in fh:
         aLine = aLine.strip()
-        aLine = aLine.upper()
 
         if (aLine.startswith("#")):
             continue
@@ -237,11 +346,15 @@ def readGAF(gafFilename):
         if (len(tokenList) < 17):
             continue
 
-        if (not tokenList[16].startswith("CHR")):
-            # print " f17 does not start with CHR ??? "
+        ## print " "
+        ## print tokenList
+
+        ## print tokenList[16]
+        if (not tokenList[16].startswith("chr")):
+            # print " f17 does not start with chr ??? "
             # print tokenList[16]
-            if (tokenList[16].find("CHR") >= 0):
-                # print "     but there is some CHR info somewhere ??? "
+            if (tokenList[16].find("chr") >= 0):
+                # print "     but there is some chr info somewhere ??? "
                 # print tokenList[16]
                 doNothing = 1
             else:
@@ -250,26 +363,23 @@ def readGAF(gafFilename):
 
         # column 3 contains one of the following strings:
         ##	AffySNP, componentExon, compositeExon, gene, junction, MAprobe, miRNA, pre-miRNA, transcript
-        if (tokenList[2] == "AFFYSNP"):
-            continue
-        if (tokenList[2] == "COMPONENTEXON"):
-            continue
-        if (tokenList[2] == "COMPOSITEEXON"):
-            continue
-        if (tokenList[2] == "JUNCTION"):
-            continue
-        if (tokenList[2] == "MAPROBE"):
-            continue
-        if (tokenList[2] == "TRANSCRIPT"):
-            continue
+        ## print tokenList[2]
+        if (tokenList[2].upper() == "AFFYSNP"): continue
+        if (tokenList[2].upper() == "COMPONENTEXON"): continue
+        if (tokenList[2].upper() == "COMPOSITEEXON"): continue
+        if (tokenList[2].upper() == "JUNCTION"): continue
+        if (tokenList[2].upper() == "MAPROBE"): continue
+        if (tokenList[2].upper() == "TRANSCRIPT"): continue
 
         geneToken = tokenList[1]
         geneTokenList = geneToken.split('|')
-        geneName = geneTokenList[0].upper()
+        geneName = geneTokenList[0]
         if (len(geneTokenList) == 2):
             geneID = geneTokenList[1]
         else:
             geneID = '?'
+
+        ## print geneToken, geneTokenList, geneName, geneID
 
         if (0):
             # we're skipping entries of the form ?|791120 or T|6862
@@ -281,6 +391,7 @@ def readGAF(gafFilename):
         # what if there are multiple coordinates???
         coordToken = tokenList[16]
         coordTokenList = coordToken.split(';')
+        ## print coordToken, coordTokenList
         if (len(coordTokenList) > 1):
             # print " need to do something about this ... "
             # print coordTokenList
@@ -294,46 +405,46 @@ def readGAF(gafFilename):
         # print " ready to add : ", geneName, geneID, coordToken
 
         if (len(geneName) > 1):
-            if (geneName in geneCoordDict_bySymbol.keys()):
+            if (geneName.upper() in GAF_geneCoordDict_bySymbol):
                 doNothing = 1
             else:
-                geneCoordDict_bySymbol[geneName] = coordToken
+                GAF_geneCoordDict_bySymbol[geneName.upper()] = coordToken
 
         if (geneID != '?'):
-            if (geneID in geneCoordDict_byID.keys()):
+            if (geneID.upper() in GAF_geneCoordDict_byID):
                 doNothing = 1
             else:
-                geneCoordDict_byID[geneID] = coordToken
+                GAF_geneCoordDict_byID[geneID.upper()] = coordToken
 
-        # 19dec12 : now also creating the geneSymbol_byID dict ...
+        # 19dec12 : now also creating the GAF_geneSymbol_byID dict ...
         if (geneID != '?'):
-            if (geneID in geneSymbol_byID.keys()):
-                if (geneName not in geneSymbol_byID[geneID]):
-                    print " this should never happen should it ??? ", geneID, geneName, geneSymbol_byID[geneID]
-                    geneSymbol_byID[geneID] += [geneName]
+            if (geneID.upper() in GAF_geneSymbol_byID):
+                if (geneName not in GAF_geneSymbol_byID[geneID]):
+                    print " this should never happen should it ??? ", geneID, geneName, GAF_geneSymbol_byID[geneID]
+                    GAF_geneSymbol_byID[geneID] += [geneName]
 
                     # HACK
                     if (geneID == "378108"):
-                        geneSymbol_byID[geneID] = ["TRIM74"]
+                        GAF_geneSymbol_byID[geneID] = ["TRIM74"]
             else:
-                geneSymbol_byID[geneID] = [geneName]
+                GAF_geneSymbol_byID[geneID] = [geneName]
 
     fh.close()
 
     print " in readGAF ... "
-    print "     length of geneCoordDict_bySymbol w/ coords ..... ", len(geneCoordDict_bySymbol), len(geneCoordDict_bySymbol.keys())
-    print "     length of geneCoordDict_byID     w/ coords ..... ", len(geneCoordDict_byID), len(geneCoordDict_byID.keys())
-    print "     length of geneSymbol_byID  ..................... ", len(geneSymbol_byID)
+    print "     length of GAF_geneCoordDict_bySymbol w/ coords ..... ", len(GAF_geneCoordDict_bySymbol), len(GAF_geneCoordDict_bySymbol)
+    print "     length of GAF_geneCoordDict_byID     w/ coords ..... ", len(GAF_geneCoordDict_byID), len(GAF_geneCoordDict_byID)
+    print "     length of GAF_geneSymbol_byID  ..................... ", len(GAF_geneSymbol_byID)
 
     print " "
-    print " sanity-checking geneSymbol_byID dictionary ... "
-    for geneID in geneSymbol_byID.keys():
-        if (len(geneSymbol_byID[geneID]) > 1):
-            print geneID, geneSymbol_byID[geneID]
+    print " sanity-checking GAF_geneSymbol_byID dictionary ... "
+    for geneID in GAF_geneSymbol_byID:
+        if (len(GAF_geneSymbol_byID[geneID]) > 1):
+            print geneID, GAF_geneSymbol_byID[geneID]
     print " "
     print " "
 
-    return (geneCoordDict_bySymbol, geneCoordDict_byID, geneSymbol_byID)
+    return (GAF_geneCoordDict_bySymbol, GAF_geneCoordDict_byID, GAF_geneSymbol_byID)
 
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 
@@ -347,7 +458,7 @@ def mergeCoordinates(coordTokenList):
     # so get rid of that if it shows up ...
     tmpList = []
     for ii in range(len(coordTokenList)):
-        if (coordTokenList[ii].startswith("CHR")):
+        if (coordTokenList[ii].startswith("chr")):
             tmpList += [coordTokenList[ii]]
     coordTokenList = tmpList
     # print coordTokenList
@@ -422,7 +533,7 @@ def parseCoordinates(coordInfo):
 # by the input 'curRowLabel' coordinates
 
 
-def overlap(curRowLabel, geneCoordDict_bySymbol):
+def overlap(curRowLabel, GAF_geneCoordDict_bySymbol):
 
     tokenList = curRowLabel.split(':')
     geneList = []
@@ -433,7 +544,7 @@ def overlap(curRowLabel, geneCoordDict_bySymbol):
         # the current row label ... it is possible that
         # the row label does not have coordinates
         try:
-            chrName = tokenList[3].upper()
+            chrName = tokenList[3]
             chrStart = int(tokenList[4])
             chrStop = int(tokenList[5])
             # print chrName, chrStart, chrStop
@@ -441,16 +552,16 @@ def overlap(curRowLabel, geneCoordDict_bySymbol):
             return ([])
 
         # if we get here, then we have coordinates so we now
-        # loop over the genes in our geneCoordDict_bySymbol and look for
+        # loop over the genes in our GAF_geneCoordDict_bySymbol and look for
         # any that overlap ...
-        for aGene in geneCoordDict_bySymbol.keys():
+        for aGene in GAF_geneCoordDict_bySymbol:
 
             # if this gene is not even on the same chromosome we're done ...
-            if (not geneCoordDict_bySymbol[aGene].startswith(chrName + ':')):
+            if (not GAF_geneCoordDict_bySymbol[aGene].startswith(chrName + ':')):
                 continue
 
             # but if it is, then we need to check start/stop
-            posInfo = parseCoordinates(geneCoordDict_bySymbol[aGene])
+            posInfo = parseCoordinates(GAF_geneCoordDict_bySymbol[aGene])
             if (chrStop < posInfo[1]):
                 continue
             if (chrStart > posInfo[2]):
@@ -463,7 +574,7 @@ def overlap(curRowLabel, geneCoordDict_bySymbol):
 
             if (len(aGene) == 1):
                 print " how is this happening ??? "
-                print curRowLabel, aGene, geneCoordDict_bySymbol[aGene]
+                print curRowLabel, aGene, GAF_geneCoordDict_bySymbol[aGene]
                 sys.exit(-1)
 
             geneList += [aGene]
@@ -497,7 +608,6 @@ def read_pairs_from_file(SLpairsFile):
     fh = file(SLpairsFile)
     for aLine in fh:
         aLine = aLine.strip()
-        aLine = aLine.upper()
         tokenList = aLine.split()
         if (len(tokenList) != 2):
             continue
@@ -538,7 +648,7 @@ def lookAtDict(pairAssocDict):
         typeCounts = {}
         for aTuple in pairAssocDict[aKey]:
             aType = (aTuple[0], aTuple[1])
-            if (aType not in typeCounts.keys()):
+            if (aType not in typeCounts):
                 typeCounts[aType] = 0
             typeCounts[aType] += 1
         curCount = len(pairAssocDict[aKey])
@@ -569,7 +679,7 @@ def lookAtDict(pairAssocDict):
             typeCounts = {}
             for aTuple in pairAssocDict[aKey]:
                 aType = (aTuple[0], aTuple[1])
-                if (aType not in typeCounts.keys()):
+                if (aType not in typeCounts):
                     typeCounts[aType] = 0
                 typeCounts[aType] += 1
             curCount = len(pairAssocDict[aKey])
@@ -582,7 +692,7 @@ def lookAtDict(pairAssocDict):
             typeCounts = {}
             for aTuple in pairAssocDict[aKey]:
                 aType = (aTuple[0], aTuple[1])
-                if (aType not in typeCounts.keys()):
+                if (aType not in typeCounts):
                     typeCounts[aType] = 0
                 typeCounts[aType] += 1
             curCount = len(pairAssocDict[aKey])
@@ -612,7 +722,7 @@ def hasSpecialChar(aName):
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 # curLabel : N:RPPA:ACACA:::::ACC1-R-C
 # curGene  : ACACA
-# posInfo  : CHR17:32516040-32841015:-
+# posInfo  : chr17:32516040-32841015:-
 
 
 def annotateLabel(curLabel, curGene, posString):
@@ -724,7 +834,7 @@ def getCytobandLabel(curLabel, cytoDict):
         cbName = tList[0]
         if (chrName.startswith("chr")):
             # tack on the chromosome # before returning ...
-            cbName = chrName[3:].upper() + cbName
+            cbName = chrName[3:] + cbName
             return (cbName)
         else:
             print " ERROR ??? ", chrName, cbName
@@ -769,7 +879,7 @@ def getCytobandLabel(curLabel, cytoDict):
 
     if (chrName.startswith("chr")):
         # tack on the chromosome # before returning ...
-        cbName = chrName[3:].upper() + cbName
+        cbName = chrName[3:] + cbName
         return (cbName)
     else:
         print " ERROR ??? ", chrName, cbName
@@ -803,14 +913,14 @@ def hackMicroRNAname(oldName):
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 
 
-def chooseBestName(curGene, curID, curType, geneInfoDict, synMapDict, geneCoordDict_bySymbol, geneCoordDict_byID):
+def chooseBestName(curGene, curID, curType, geneInfoDict, synMapDict, GAF_geneCoordDict_bySymbol, GAF_geneCoordDict_byID):
 
     # we are missing a few dozen microRNAs ...
     if (curType == "MIRN"):
-        if (curGene not in geneCoordDict_bySymbol.keys()):
+        if (curGene.upper() not in GAF_geneCoordDict_bySymbol):
             print " MIRN <%s> not found " % curGene
             tstGene = hackMicroRNAname(curGene)
-            if (tstGene in geneCoordDict_bySymbol.keys()):
+            if (tstGene.upper() in GAF_geneCoordDict_bySymbol):
                 print "     --> returning <%s> " % tstGene
                 return (tstGene)
             else:
@@ -835,23 +945,23 @@ def chooseBestName(curGene, curID, curType, geneInfoDict, synMapDict, geneCoordD
         return (newGene)
 
     # if this gene appears to be an "official" gene symbol, then keep it ...
-    if (curGene in geneInfoDict.keys()):
+    if (curGene.upper() in geneInfoDict):
         return (curGene)
 
     # otherwise go looking in the synonyms ...
-    if (curGene in synMapDict.keys()):
+    if (curGene.upper() in synMapDict):
         print " QQ  this gene name appears to be a synonym ??? ", curGene, curID
-        print curGene, synMapDict[curGene]
-        if (len(synMapDict[curGene]) == 1):
-            aTuple = synMapDict[curGene][0]
+        print curGene, synMapDict[curGene.upper()]
+        if (len(synMapDict[curGene.upper()]) == 1):
+            aTuple = synMapDict[curGene.upper()][0]
             aGene = aTuple[0]
             aID = aTuple[1]
             if (str(aID) == str(curID)):
-                print " QQ  --> changing name to <%s> " % synMapDict[curGene][0][0]
-                newGene = synMapDict[curGene][0][0]
-                if (newGene not in geneCoordDict_bySymbol.keys()):
+                print " QQ  --> changing name to <%s> " % synMapDict[curGene.upper()][0][0]
+                newGene = synMapDict[curGene.upper()][0][0]
+                if (newGene.upper() not in GAF_geneCoordDict_bySymbol):
                     print " QQ  BUT the new name is not in the GAF file ??? "
-                    if (curGene in geneCoordDict_bySymbol.keys()):
+                    if (curGene.upper() in GAF_geneCoordDict_bySymbol):
                         print " QQ  --> so changing back ... "
                         newGene = curGene
                     else:
@@ -867,7 +977,7 @@ def chooseBestName(curGene, curID, curType, geneInfoDict, synMapDict, geneCoordD
 
             # first see if we can find a matching ID ...
             foundMatchingID = 0
-            for aTuple in synMapDict[curGene]:
+            for aTuple in synMapDict[curGene.upper()]:
                 aGene = aTuple[0]
                 aID = aTuple[1]
                 if (str(aID) == str(curID)):
@@ -876,12 +986,12 @@ def chooseBestName(curGene, curID, curType, geneInfoDict, synMapDict, geneCoordD
                     foundMatchingID = 1
 
             if (not foundMatchingID):
-                print " QQ  now what ??? ", synMapDict[curGene]
+                print " QQ  now what ??? ", synMapDict[curGene.upper()]
                 lowNum = 999999999
                 lowGene = ''
-                for aTuple in synMapDict[curGene]:
+                for aTuple in synMapDict[curGene.upper()]:
                     aGene = aTuple[0]
-                    if (aGene in geneCoordDict_bySymbol.keys()):
+                    if (aGene in GAF_geneCoordDict_bySymbol):
                         print " QQ  this one is in the GAF file ... ", aTuple
                         if (aTuple[1] < lowNum):
                             lowNum = aTuple[1]
@@ -895,22 +1005,25 @@ def chooseBestName(curGene, curID, curType, geneInfoDict, synMapDict, geneCoordD
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 
 
-def annotateFeatures(dataD, geneInfoDict, synMapDict, geneCoordDict_bySymbol,
-                     geneCoordDict_byID, geneSymbol_byID, refGeneDict, cytoDict,
-                     nameChangeFlag):
+def annotateFeatures ( dataD, geneInfoDict, synMapDict, \
+        Gencode_geneCoordDict_bySymbol, Gencode_geneCoordDict_byID, Gencode_geneSymbol_byID, \
+        GAF_geneCoordDict_bySymbol, GAF_geneCoordDict_byID, GAF_geneSymbol_byID, \
+        refGeneDict, cytoDict, nameChangeFlag ):
 
     print " "
     print " in annotateFeatures ... "
 
-    # the geneCoordDict_bySymbol has keys that are gene names, eg 'AAGAB', 'TP53', etc
+    # the GAF_geneCoordDict_bySymbol has keys that are gene names, eg 'AAGAB', 'TP53', etc
     # and the contents are the coordinates
-    # print len(geneCoordDict_bySymbol)
+    # print len(GAF_geneCoordDict_bySymbol)
 
-    # similarly, the geneCoordDict_byID has keys that are gene IDs, eg '7157' or '8225',
+    # similarly, the GAF_geneCoordDict_byID has keys that are gene IDs, eg '7157' or '8225',
     # etc and the contents are the coordinates
 
-    # the new addition here (19dec12) is the geneSymbol_byID which may be used to
+    # the new addition here (19dec12) is the GAF_geneSymbol_byID which may be used to
     # 'update' the gene symbol if it appears to be out of date ...
+
+    # and as of now (17jan14) the same dictionaries exist based on the Gencode database
 
     # and the feature matrix has thousands of features x hundreds of patients
     try:
@@ -932,7 +1045,6 @@ def annotateFeatures(dataD, geneInfoDict, synMapDict, geneCoordDict_bySymbol,
         curLabel = rowLabels[iRow]
         curType = curLabel[2:6]
         if (curType == "GEXP"):
-            curLabel = curLabel.upper()
             tokenList = curLabel.split(':')
             curGene = tokenList[2]
             if (curGene not in curGeneSymbols):
@@ -971,7 +1083,7 @@ def annotateFeatures(dataD, geneInfoDict, synMapDict, geneCoordDict_bySymbol,
         # we'll start by setting the newLabel to the curLabel ...
         newLabel = curLabel
 
-        curType = curLabel[2:6].upper()
+        curType = curLabel[2:6]
 
         # don't make any attempts at annotating CLIN or SAMP features ...
         if (curType == "CLIN" or curType == "SAMP"):
@@ -1028,11 +1140,12 @@ def annotateFeatures(dataD, geneInfoDict, synMapDict, geneCoordDict_bySymbol,
         # ------------
         # IF haveName
         if (haveName):
-            curGene = tokenList[2].upper()
-            curID = tokenList[7].upper()
+            curGene = tokenList[2]
+            curID = tokenList[7]
 
-            newGene = chooseBestName(curGene, curID, curType, geneInfoDict,
-                                     synMapDict, geneCoordDict_bySymbol, geneCoordDict_byID)
+            newGene = chooseBestName ( curGene, curID, curType, \
+                                       geneInfoDict, synMapDict, \
+                                       GAF_geneCoordDict_bySymbol, GAF_geneCoordDict_byID )
 
             if (nameChangeFlag == "YES"):
                 if (newGene != curGene):
@@ -1054,48 +1167,63 @@ def annotateFeatures(dataD, geneInfoDict, synMapDict, geneCoordDict_bySymbol,
         # IF haveName=TRUE and haveCoord=FALSE
         if (haveName and not haveCoord):
 
-            # here we want to add coordinates based on a gene name
-            if (curGene in geneCoordDict_bySymbol.keys()):
-                print " found a gene ... ", curLabel, curGene, geneCoordDict_bySymbol[curGene]
+            # here we want to add coordinates based on a gene name ... 
+            # --> first we try Gencode, and then we try GAF ...
+
+            if (curGene.upper() in Gencode_geneCoordDict_bySymbol):
+                print " found a gene in Gencode ... ", curLabel, curGene, Gencode_geneCoordDict_bySymbol[curGene.upper()]
                 newLabel = annotateLabel(
-                    curLabel, curGene, geneCoordDict_bySymbol[curGene])
+                    curLabel, curGene, Gencode_geneCoordDict_bySymbol[curGene.upper()])
                 print " addGene : ", tokenList, " --> ", newLabel
                 gotItFlag = 1
                 # keep track of how often we add a gene label ...
-                if (curType not in addGene.keys()):
-                    addGene[curType] = 1
+                if (curType.upper() not in addGene):
+                    addGene[curType.upper()] = 1
                 else:
-                    addGene[curType] += 1
+                    addGene[curType.upper()] += 1
+
+            elif (curGene.upper() in GAF_geneCoordDict_bySymbol):
+                print " found a gene in GAF ... ", curLabel, curGene, GAF_geneCoordDict_bySymbol[curGene.upper()]
+                newLabel = annotateLabel(
+                    curLabel, curGene, GAF_geneCoordDict_bySymbol[curGene.upper()])
+                print " addGene : ", tokenList, " --> ", newLabel
+                gotItFlag = 1
+                # keep track of how often we add a gene label ...
+                if (curType.upper() not in addGene):
+                    addGene[curType.upper()] = 1
+                else:
+                    addGene[curType.upper()] += 1
 
             if (not gotItFlag):
-                print "     this gene is not in GAF by gene symbol ??? ", curGene
+                print "     this gene is not in Gencode or GAF by gene symbol ??? ", curGene
                 if (haveExtraName):
                     geneID = tokenList[7]
-                    if (geneID in geneCoordDict_byID.keys()):
-                        print " found by ID ... ", curLabel, curGene, geneID, geneCoordDict_byID[geneID]
-                        newGene = geneSymbol_byID[geneID][0]
+                    print "         --> now looking again using <%s> " % geneID
+                    if (geneID.upper() in GAF_geneCoordDict_byID):
+                        print " found by ID ... ", curLabel, curGene, geneID, GAF_geneCoordDict_byID[geneID.upper()]
+                        newGene = GAF_geneSymbol_byID[geneID][0]
                         if (newGene != curGene):
                             print " --> changing name from <%s> to <%s> " % (curGene, newGene)
                             curGene = newGene
                             # sys.exit(-1)
                         newLabel = annotateLabel(
-                            curLabel, curGene, geneCoordDict_byID[geneID])
+                            curLabel, curGene, GAF_geneCoordDict_byID[geneID.upper()])
                         print " addGene : ", tokenList, " --> ", newLabel
                         gotItFlag = 1
-                        if (curType not in addGene.keys()):
+                        if (curType.upper() not in addGene):
                             addGene[curType] = 1
                         else:
                             addGene[curType] += 1
 
             if (not gotItFlag):
                 print "     this gene is not in GAF by gene ID (or no gene ID available) ??? ", tokenList
-                if (curGene in refGeneDict.keys()):
-                    print "         finally, found in refGene ... ", curLabel, curGene, refGeneDict[curGene]
+                if (curGene.upper() in refGeneDict):
+                    print "         finally, found in refGene ... ", curLabel, curGene, refGeneDict[curGene.upper()]
                     newLabel = annotateLabel(
-                        curLabel, curGene, refGeneDict[curGene])
+                        curLabel, curGene, refGeneDict[curGene.upper()])
                     print " addGene : ", tokenList, " --> ", newLabel
                     # keep track of how often we add a gene label ...
-                    if (curType not in addGene.keys()):
+                    if (curType.upper() not in addGene):
                         addGene[curType] = 1
                     else:
                         addGene[curType] += 1
@@ -1109,7 +1237,7 @@ def annotateFeatures(dataD, geneInfoDict, synMapDict, geneCoordDict_bySymbol,
             # here we want to add either a single gene name based on valid
             # coordinates, or else we add a cytoband label ...
             # print tokenList
-            geneList = overlap(curLabel, geneCoordDict_bySymbol)
+            geneList = overlap(curLabel, GAF_geneCoordDict_bySymbol)
             # print geneList
 
             if (len(geneList) != 1):
@@ -1123,10 +1251,10 @@ def annotateFeatures(dataD, geneInfoDict, synMapDict, geneCoordDict_bySymbol,
                 print " addCyto : ", tokenList, " --> ", newLabel
                 # print newLabel
                 # keep track of how often we add a gene label ...
-                if (curType not in addCyto.keys()):
-                    addCyto[curType] = 1
+                if (curType.upper() not in addCyto):
+                    addCyto[curType.upper()] = 1
                 else:
-                    addCyto[curType] += 1
+                    addCyto[curType.upper()] += 1
 
             else:
 
@@ -1138,10 +1266,10 @@ def annotateFeatures(dataD, geneInfoDict, synMapDict, geneCoordDict_bySymbol,
                 print " addGene : ", tokenList, " --> ", newLabel
                 # print newLabel
                 # keep track of how often we add a gene label ...
-                if (curType not in addGene.keys()):
-                    addGene[curType] = 1
+                if (curType.upper() not in addGene):
+                    addGene[curType.upper()] = 1
                 else:
-                    addGene[curType] += 1
+                    addGene[curType.upper()] += 1
 
         newRowLabels += [newLabel]
 
@@ -1201,16 +1329,15 @@ if __name__ == "__main__":
             if (len(sys.argv) >= 5):
                 nameChangeFlag = sys.argv[4].upper()
             else:
-                nameChangeFlag = "YES"
+                nameChangeFlag = "NO"
         else:
             print " "
             print " Usage: %s <input TSV file> <hg18 or hg19> <output TSV file> [nameChangeFlag=NO/YES] "
-            print "        note that nameChangeFlag will default to YES "
+            print "        note that nameChangeFlag will default to NO "
             print " "
             sys.exit(-1)
             tumorType = 'gbm'
 
-    # default the nameChangeFlag to YES ...
     if (nameChangeFlag == "Y"):
         nameChangeFlag = "YES"
     if (nameChangeFlag != "YES"):
@@ -1219,9 +1346,11 @@ if __name__ == "__main__":
     # and get the coordinates for these genes ...
     if (build == 'hg18'):
         gafFilename = "/titan/cancerregulome3/TCGA/GAF/Feb2011/GAF.hg18.Feb2011/GAF_bundle/outputs/TCGA.hg18.Feb2011.gaf"
+        gencodeFilename = ""
         cybFilename = "/titan/cancerregulome3/TCGA/hg18/cytoBand.hg18.txt"
     elif (build == 'hg19'):
         gafFilename = "/titan/cancerregulome3/TCGA/GAF/GAF3.0/all.gaf"
+        gencodeFilename = "/titan/cancerregulome9/workspaces/bioinformatics_references/gencode/gencode.v19.gene.gtf"
         refGeneFilename = "/titan/cancerregulome3/TCGA/hg19/refGene.txt"
         cybFilename = "/titan/cancerregulome3/TCGA/hg19/cytoBand.hg19.txt"
     else:
@@ -1232,6 +1361,7 @@ if __name__ == "__main__":
     print " "
     print " Running : %s %s %s %s " % (sys.argv[0], sys.argv[1], sys.argv[2], sys.argv[3])
     print "           %s " % gafFilename
+    print "           %s " % gencodeFilename
     print "           %s " % refGeneFilename
     print "           %s " % cybFilename
     print "           %s " % infFilename
@@ -1253,21 +1383,28 @@ if __name__ == "__main__":
 
     # read in the gene_info file ...
     # this was turned off ... looking into turning it back on (1/7/13)
-    if (1):
+    # turning it back off (1/17/14)
+    if (0):
         print " --> calling readGeneInfoFile ... "
         (geneInfoDict, synMapDict) = readGeneInfoFile(infFilename)
     else:
         geneInfoDict = {}
         synMapDict = {}
 
-    # then read in the GAF file ...
+    # then read in the GAF file ... or GENCODE ...
     print " --> calling readGAF ... "
-    (geneCoordDict_bySymbol, geneCoordDict_byID,
-     geneSymbol_byID) = readGAF(gafFilename)
+    (GAF_geneCoordDict_bySymbol, GAF_geneCoordDict_byID, GAF_geneSymbol_byID) = readGAF(gafFilename)
+
+    print " --> and Gencode ... "
+    (Gencode_geneCoordDict_bySymbol, Gencode_geneCoordDict_byID, Gencode_geneSymbol_byID) = readGencode(gencodeFilename)
 
     # also the refGene file ...
-    print " --> calling readRefGeneFile ... "
-    refGeneDict = readRefGeneFile(refGeneFilename)
+    # looking in to turning this off too (1/17/14)
+    if ( 0 ):
+        print " --> calling readRefGeneFile ... "
+        refGeneDict = readRefGeneFile(refGeneFilename)
+    else:
+        refGeneDict = {}
 
     # then read in the cytoband file ...
     print " --> calling readCytobandFile ... "
@@ -1275,9 +1412,10 @@ if __name__ == "__main__":
 
     # and annotate the features
     print " --> calling annotateFeatures ... "
-    annotD = annotateFeatures(
-        testD, geneInfoDict, synMapDict, geneCoordDict_bySymbol,
-        geneCoordDict_byID, geneSymbol_byID, refGeneDict, cytoDict, nameChangeFlag)
+    annotD = annotateFeatures ( testD, geneInfoDict, synMapDict, \
+        Gencode_geneCoordDict_bySymbol, Gencode_geneCoordDict_byID, Gencode_geneSymbol_byID, \
+        GAF_geneCoordDict_bySymbol, GAF_geneCoordDict_byID, GAF_geneSymbol_byID, \
+        refGeneDict, cytoDict, nameChangeFlag )
 
     # check that the feature names are still unique ...
     print " --> verify that the feature names are unique ... "
