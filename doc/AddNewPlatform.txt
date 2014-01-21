@@ -18,7 +18,9 @@ for parse_tcga.py:
     b) add a line to the [technology_type_factory] section whose key will be
        the command line argument used to process this platform and the value is 
        the name of the class
-3) edit technology_type_platform.py
+3) edit technology_type_factory.py
     a) import the new class for the new platform
     b) add to the name2instance map, the key will be the name of the class and
        the value will be the class itself
+4) edit technology_type.py (somewhat optional)
+    a) indicate in the comments which functions will be overriden where
