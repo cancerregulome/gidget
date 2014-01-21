@@ -291,28 +291,22 @@ for ((i=1; i<$#; i++))
         rm -fr $tumor.gexp.seq.tmpData?.tsv
         rm -fr $tumor.gexp.seq.tmp?.tsv
 
-	if [ -f $tumor.unc.edu__illuminaga_rnaseqv2__rnaseqv2.$curDate.tsv ]
-	    then
-		python $TCGAFMP_ROOT_DIR/main/filterTSVbySampList.py \
-			$tumor.unc.edu__illuminaga_rnaseqv2__rnaseqv2.$curDate.tsv \
-			$tumor.gexp.seq.tmpA.tsv \
-			$tumor.blacklist.samples.tsv black loose \
-                        ../aux/$tumor.blacklist.loose.tsv black loose \
-                        ../aux/$tumor.whitelist.loose.tsv white loose \
-                        ../aux/$tumor.whitelist.strict.tsv white strict \
-                        >& filterSamp.gexp.seq.tmpA.log
-	    fi
-        if [ -f $tumor.unc.edu__illuminahiseq_rnaseqv2__rnaseqv2.$curDate.tsv ]
-	    then
-		python $TCGAFMP_ROOT_DIR/main/filterTSVbySampList.py \
-			$tumor.unc.edu__illuminahiseq_rnaseqv2__rnaseqv2.$curDate.tsv \
-			$tumor.gexp.seq.tmpA.tsv \
-			$tumor.blacklist.samples.tsv black loose \
-                        ../aux/$tumor.blacklist.loose.tsv black loose \
-                        ../aux/$tumor.whitelist.loose.tsv white loose \
-                        ../aux/$tumor.whitelist.strict.tsv white strict \
-                        >& filterSamp.gexp.seq.tmpA.log
-	    fi
+	python $TCGAFMP_ROOT_DIR/main/filterTSVbySampList.py \
+		$tumor.unc.edu__illuminaga_rnaseqv2__rnaseqv2.$curDate.tsv \
+		$tumor.gexp.seq.tmpF.tsv \
+		$tumor.blacklist.samples.tsv black loose \
+                ../aux/$tumor.blacklist.loose.tsv black loose \
+                ../aux/$tumor.whitelist.loose.tsv white loose \
+                ../aux/$tumor.whitelist.strict.tsv white strict \
+                >& filterSamp.gexp.seq.tmpF.log
+	python $TCGAFMP_ROOT_DIR/main/filterTSVbySampList.py \
+		$tumor.unc.edu__illuminahiseq_rnaseqv2__rnaseqv2.$curDate.tsv \
+		$tumor.gexp.seq.tmpA.tsv \
+		$tumor.blacklist.samples.tsv black loose \
+                ../aux/$tumor.blacklist.loose.tsv black loose \
+                ../aux/$tumor.whitelist.loose.tsv white loose \
+                ../aux/$tumor.whitelist.strict.tsv white strict \
+                >& filterSamp.gexp.seq.tmpA.log
 	python $TCGAFMP_ROOT_DIR/main/filterTSVbySampList.py \
 		$tumor.unc.edu__illuminahiseq_rnaseq__rnaseq.$curDate.tsv \
 		$tumor.gexp.seq.tmpB.tsv \
@@ -347,16 +341,17 @@ for ((i=1; i<$#; i++))
                 >& filterSamp.gexp.seq.tmpE.log
 
 	## a) merge 
-	if [[ -f $tumor.gexp.seq.tmpA.tsv || -f $tumor.gexp.seq.tmpB.tsv || -f $tumor.gexp.seq.tmpC.tsv ]]
+	if [[ -f $tumor.gexp.seq.tmpA.tsv || -f $tumor.gexp.seq.tmpF.tsv || -f $tumor.gexp.seq.tmpB.tsv || -f $tumor.gexp.seq.tmpC.tsv ]]
 	    then
-		echo "         merging seq A B C "
+		echo "         merging seq A F B C (UNC RNAseq data) "
 		python $TCGAFMP_ROOT_DIR/main/mergeTSV.py \
 			$tumor.gexp.seq.tmpA.tsv \
+			$tumor.gexp.seq.tmpF.tsv \
 			$tumor.gexp.seq.tmpB.tsv \
 			$tumor.gexp.seq.tmpC.tsv \
 			$tumor.gexp.seq.tmpData1.tsv >& merge.gexp.seq.$curDate.log
 	    else
-		echo "         merging seq D E "
+		echo "         merging seq D E (BCGSC RNAseq data) "
 		python $TCGAFMP_ROOT_DIR/main/mergeTSV.py \
 			$tumor.gexp.seq.tmpD.tsv \
 			$tumor.gexp.seq.tmpE.tsv \
