@@ -47,14 +47,6 @@ for ((i=1; i<$#; i++))
 
 	cd $curDate
 
-        ## 06nov13 NEW: if the file $tumor.meth.filt.annot.forTSVmerge.tsv
-        ## exists in the $tumor/aux/ directory, then we will NOT use
-        ## the methylation file created by the pipeline as is ...
-        if [ -f ../aux/$tumor.meth.filt.annot.forTSVmerge.tsv ]
-            then
-                mv $tumor.meth.tmpData3.tsv $tumor.meth.tmpData3.tsv_obsolete
-        fi
-
 	## NOTE: within data types (eg mRNA expression, methylation, microRNA),
 	## if there are duplicate samples/values between separate input data
 	## matrices, the first value will take precedence ... so these files

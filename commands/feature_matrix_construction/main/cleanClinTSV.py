@@ -619,6 +619,7 @@ def checkFollowupInfo(allClinDict):
     # FIRST: if there is a days_to_last_known_alive, then check that it is
     # used consistently, otherwise create it
 
+    zKey = findProperKey (allClinDict, "bcr_patient_barcode")
     aKey = findProperKey (allClinDict, "days_to_last_known_alive")
     bKey = findProperKey (allClinDict, "days_to_last_followup")
     cKey = findProperKey (allClinDict, "days_to_death")
@@ -635,8 +636,8 @@ def checkFollowupInfo(allClinDict):
         print " skipping this function ... requires vital_status "
         return (allClinDict)
 
-    print " allClinDict.keys() : "
-    print allClinDict.keys()
+    ## print " allClinDict.keys() : "
+    ## print allClinDict.keys()
 
     numClin = getNumPatients(allClinDict)
 
@@ -644,7 +645,7 @@ def checkFollowupInfo(allClinDict):
     for kk in range(numClin):
         if (str(allClinDict[dKey][kk]).upper() == "DECEASED"):
             if (str(allClinDict[cKey][kk]).upper() == "NA"):
-                print " ERROR !!! need to know when this person died !!! "
+                print " ERROR !!! need to know when this person died !!! ", allClinDict[zKey][kk]
                 print kk
                 print aKey, allClinDict[aKey][kk]
                 print bKey, allClinDict[bKey][kk]
@@ -657,7 +658,7 @@ def checkFollowupInfo(allClinDict):
         if (str(allClinDict[dKey][kk]).upper() == "LIVING"):
             if (str(allClinDict[aKey][kk]).upper() == "NA"):
                 if (str(allClinDict[bKey][kk]).upper() == "NA"):
-                    print " ERROR !!! no information about follow-up ??? "
+                    print " ERROR !!! no information about follow-up ??? ", allClinDict[zKey][kk]
                     print kk
                     print aKey, allClinDict[aKey][kk]
                     print bKey, allClinDict[bKey][kk]

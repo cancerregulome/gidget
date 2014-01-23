@@ -1,0 +1,26 @@
+This describes how to add a new platform to the existing platforms
+for parse_tcga.py:
+
+1) 
+    a) if it is an existing technology, like RNAseq, create a new subclass
+       similar to the existing subtypes in the existing file.  It will likely 
+       need to define the same or similar methods
+    b) if it is a new technology, create a new file similar to 'h_mirna_8x15k.py'
+       and decide what, if any, methods need to be overridden
+2) in parse_tcga.config, 
+    a) add a new section for this platform
+        i) if similar to other platforms, the sections for those platforms
+           will be similar to what's needed.  remember that the parent classes
+           key/values are inherited unless overridden 
+        ii) if new, create a section for the parent class and for the actual,
+           child class.  use the other sections as a guide to what types of
+           key values need to be set
+    b) add a line to the [technology_type_factory] section whose key will be
+       the command line argument used to process this platform and the value is 
+       the name of the class
+3) edit technology_type_factory.py
+    a) import the new class for the new platform
+    b) add to the name2instance map, the key will be the name of the class and
+       the value will be the class itself
+4) edit technology_type.py (somewhat optional)
+    a) indicate in the comments which functions will be overriden where

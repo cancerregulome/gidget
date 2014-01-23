@@ -2549,13 +2549,13 @@ if __name__ == "__main__":
             dataD['dataType'] = getDataType(segList[0])
 
             newFeatureName = "C:SAMP:" + \
-                dataTypeDict[zPlat][1].lower() + "Platform"
+                dataTypeDict[zPlat][1].lower() + "Platform:::::array"
             newFeatureValue = zPlat
             dataD = tsvIO.addConstFeature(
                 dataD, newFeatureName, newFeatureValue)
 
             sortRowFlag = 0
-            sortColFlag = 1
+            sortColFlag = 0
             tsvIO.writeTSV_dataMatrix(
                 dataD, sortRowFlag, sortColFlag, outFilename)
         except:
@@ -2574,8 +2574,8 @@ if __name__ == "__main__":
         newFeatureValue = zPlat
         dataD = tsvIO.addConstFeature(dataD, newFeatureName, newFeatureValue)
 
-        sortRowFlag = 1
-        sortColFlag = 1
+        sortRowFlag = 0
+        sortColFlag = 0
         tsvIO.writeTSV_dataMatrix(
             dataD, sortRowFlag, sortColFlag, outFilename)
 

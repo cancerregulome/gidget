@@ -156,22 +156,14 @@ for ((i=1; i<$#; i++))
         rm -fr $tumor.meth.tmpData?.tsv
         rm -fr $tumor.meth.tmp?.tsv
 
-	python $TCGAFMP_ROOT_DIR/main/filterTSVbySampList.py \
-                $tumor.jhu-usc.edu__humanmethylation450__methylation.$curDate.tsv \
-		$tumor.meth.tmpA.tsv \
-		$tumor.blacklist.samples.tsv black loose \
+        python $TCGAFMP_ROOT_DIR/main/filterTSVbySampList.py \
+                ../meth450k/$tumor.meth_gexp_mirn.plus.annot.tsv \
+                $tumor.meth.tmpData3.tsv \
+                $tumor.blacklist.samples.tsv black loose \
                 ../aux/$tumor.blacklist.loose.tsv black loose \
                 ../aux/$tumor.whitelist.loose.tsv white loose \
                 ../aux/$tumor.whitelist.strict.tsv white strict \
                 >& filterSamp.meth.tmpA.log
-	python $TCGAFMP_ROOT_DIR/main/filterTSVbySampList.py \
-		$tumor.jhu-usc.edu__humanmethylation27__methylation.$curDate.tsv \
-		$tumor.meth.tmpB.tsv \
-		$tumor.blacklist.samples.tsv black loose \
-                ../aux/$tumor.blacklist.loose.tsv black loose \
-                ../aux/$tumor.whitelist.loose.tsv white loose \
-                ../aux/$tumor.whitelist.strict.tsv white strict \
-                >& filterSamp.meth.tmpB.log
 
 	## a) merge 
 	python $TCGAFMP_ROOT_DIR/main/mergeTSV.py \
