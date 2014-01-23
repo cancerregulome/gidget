@@ -20,7 +20,7 @@ WRONGARGS=1
 if [ $# != 4 ]
     then
         echo " Usage   : `basename $0` <curDate> <snapshotName> <tumorType> <config>"
-        echo " Example : `basename $0` 28oct13 dcc-snapshot-28oct13 brca parse_tcga.config"
+        echo " Example : `basename $0` 28oct13 dcc-snapshot-28oct13 brca parse_tcga.all450k.config"
         exit $WRONGARGS
 fi
 
