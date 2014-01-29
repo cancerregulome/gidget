@@ -514,6 +514,7 @@ if __name__ == "__main__":
             index = int(args.one)
         except:
             index = getFeatureIndex(args.one, args.tsvFile)
+        print " --> got this index : ", index
         fh.write("one = %d\n" % index)
     if (args.useBC < 1.):
         fh.write("useBC = %g\n" % args.useBC)
@@ -544,6 +545,8 @@ if __name__ == "__main__":
     golempwd = aLine
     print " got this p ... <%s> " % golempwd
     print " "
+
+    one_vs_all_flag = 0
 
     if (args.all):
         print " --> handling the all by all option ... "
@@ -609,7 +612,8 @@ if __name__ == "__main__":
 
     else:
 
-        print " --> handling the one vs all option ... "
+        one_vs_all_flag = 1
+        print " --> handling the one vs all option ... ", index
 
         # handle the single index vs all option ...
         # ( note that the single-index vs a specified "type" is handled above )
@@ -685,7 +689,7 @@ if __name__ == "__main__":
     print " "
 
     # if there was only one job, then we're done now ...
-    if (numJobs == 1 and (not args.byType)):
+    if ((numJobs == 1) and (not args.byType) and (one_vs_all_flag==1)):
         print " handling a one-by-all run ... "
         if (args.useBC < 1.):
             print "     --> will filter on Bonferonni-corrected p-value with threshold of ", args.useBC
