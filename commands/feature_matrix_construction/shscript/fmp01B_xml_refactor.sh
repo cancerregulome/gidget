@@ -17,10 +17,10 @@ fi
 ##	config, eg 'parse_tcga.config', relative to $TCGAFMP_ROOT_DIR/config
 
 WRONGARGS=1
-if [ $# != 4 ]
+if [ $# != 5 ]
     then
-        echo " Usage   : `basename $0` <curDate> <snapshotName> <tumorType> <config> "
-        echo " Example : `basename $0` 28oct13 dcc-snapshot-28oct13 brca parse_tcga.config "
+        echo " Usage   : `basename $0` <curDate> <snapshotName> <tumorType> <config> <public/private> "
+        echo " Example : `basename $0` 28oct13  dcc-snapshot-28oct13  brca  parse_tcga.27_450k.config  private "
         exit $WRONGARGS
 fi
 
@@ -28,6 +28,7 @@ curDate=$1
 snapshotName=$2
 tumors=$(echo $3 | tr "," "\n")
 config=$4
+ppString=$5
 
 echo " "
 echo " "
@@ -56,9 +57,11 @@ for tumor in $tumors
 	fi
 
 	cd $curDate
+        pwd
 
 	## ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 	## first we parse the clinical XML files ...
+        echo " parsing clinical XML files ... "
 	rm -fr parse_all_xml.$curDate.log
 	python $TCGAFMP_ROOT_DIR/main/parse_tcga.py $TCGAFMP_ROOT_DIR/config/$config clinical/ $tumor $curDate $snapshotName >& parse_all_xml.$curDate.log
 
@@ -75,10 +78,11 @@ for tumor in $tumors
 
 	## ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 	## then we parse the Firehose analyses output files ...
+        echo " parsing Firehose analyses outputs ... "
 	rm -fr parseFirehose.$curDate.log
 	rm -fr gdac.broadinstitute.org_*.tsv
         rm -fr gdac.broadinstitute.org_*.txt
-	python $TCGAFMP_ROOT_DIR/main/parseFirehose.py $tumor >& parseFirehose.$curDate.log
+	python $TCGAFMP_ROOT_DIR/main/parseFirehose.py $tumor $ppString >& parseFirehose.$curDate.log
 
         ## the patients.counts_and_rates files do not differ across multiple subsets
         ## so we can concatenate all of these ...
@@ -134,29 +138,33 @@ for tumor in $tumors
 	## now we're going to merge in any 'extra' files that contain 'forXmlMerge' in the 
 	## filename ...
 	rm -fr forXmlMerge.log
-	for f in `ls ../aux/*.forXmlMerge.tsv`
-	    do
-		echo "    " $f 
-		echo "    " >> forXmlMerge.log
-		echo "    " >> forXmlMerge.log
-                echo $f >> forXmlMerge.log
-		rm -fr merge_temp?.???
-		cp clinical.temp.tsv merge_temp1.tsv
-		python $TCGAFMP_ROOT_DIR/main/add2clinTSV.py merge_temp1.tsv $f merge_temp2.tsv >> forXmlMerge.log
-		if [ -f merge_temp2.tsv ]
-		    then
-                        echo " SUCCESSFUL merge " >> forXmlMerge.log
-			cp -f merge_temp2.tsv clinical.temp.tsv
-			python $TCGAFMP_ROOT_DIR/main/quickLook.py clinical.temp.tsv | grep "Summary"
-		    else
-                        echo " ERROR in merge ??? " >> forXmlMerge.log
-		        echo " "
-			echo $f
-			echo " "
-			tail forXmlMerge.log
-			echo " "
-		fi
-	    done
+        if [ "$ppString" = 'private' ]
+            then
+                echo " incorporating forXmlMerge files from aux directory ... "
+        	for f in `ls ../aux/*.forXmlMerge.tsv`
+        	    do
+        		echo "    " $f 
+        		echo "    " >> forXmlMerge.log
+        		echo "    " >> forXmlMerge.log
+                        echo $f >> forXmlMerge.log
+        		rm -fr merge_temp?.???
+        		cp clinical.temp.tsv merge_temp1.tsv
+        		python $TCGAFMP_ROOT_DIR/main/add2clinTSV.py merge_temp1.tsv $f merge_temp2.tsv >> forXmlMerge.log
+        		if [ -f merge_temp2.tsv ]
+        		    then
+                                echo " SUCCESSFUL merge " >> forXmlMerge.log
+        			cp -f merge_temp2.tsv clinical.temp.tsv
+        			python $TCGAFMP_ROOT_DIR/main/quickLook.py clinical.temp.tsv | grep "Summary"
+        		    else
+                                echo " ERROR in merge ??? " >> forXmlMerge.log
+        		        echo " "
+        			echo $f
+        			echo " "
+        			tail forXmlMerge.log
+        			echo " "
+        		fi
+        	    done
+            fi
 
 	rm -fr merge_temp?.tsv
 	rm -fr merge_temp?.log
@@ -249,7 +257,7 @@ for tumor in $tumors
 	done
 
 echo " "
-echo " fmp01B_xml script is FINISHED !!! "
+echo " fmp01B_xml_refactor script is FINISHED !!! "
 echo `date`
 echo " "
 

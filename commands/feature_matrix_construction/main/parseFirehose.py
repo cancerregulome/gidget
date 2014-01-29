@@ -23,11 +23,11 @@ def getDate(dName):
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 
 
-def getMostRecentDir(topDir, cancerList):
+def getMostRecentDir(topDir, cancerList, awgFlag):
 
     print " in getMostRecentDir ... "
     print topDir
-    print cancerList
+    print cancerList, awgFlag
 
     d1 = path.path(topDir)
     iDates = []
@@ -37,9 +37,10 @@ def getMostRecentDir(topDir, cancerList):
             iDates += [getDate(d1Name)]
 
         if (len(cancerList) == 1):
-            if (d1Name.find("awg_") >= 0):
-                if (d1Name.find(cancerList[0]) >= 0):
-                    iDates += [getDate(d1Name)]
+            if ( awgFlag == "YES" ):
+                if (d1Name.find("awg_") >= 0):
+                    if (d1Name.find(cancerList[0]) >= 0):
+                        iDates += [getDate(d1Name)]
 
     iDates.sort()
     print iDates
@@ -52,10 +53,11 @@ def getMostRecentDir(topDir, cancerList):
     for d1Name in d1.dirs():
         # give first priority to awg specific run ...
         if (len(cancerList) == 1):
-            if (d1Name.find("awg_") >= 0):
-                if (d1Name.find(cancerList[0]) >= 0):
-                    if (d1Name.find(lastDate) >= 0):
-                        lastDir = d1Name
+            if ( awgFlag == "YES" ):
+                if (d1Name.find("awg_") >= 0):
+                    if (d1Name.find(cancerList[0]) >= 0):
+                        if (d1Name.find(lastDate) >= 0):
+                            lastDir = d1Name
 
     if (lastDir == "NA"):
         for d1Name in d1.dirs():
@@ -1476,8 +1478,11 @@ if __name__ == "__main__":
         'thca', 'ucec', 'lcml', 'pcpg']
 
     if (1):
-        if (len(sys.argv) != 2):
-            print " Usage: %s <tumorType> " % sys.argv[0]
+        if (len(sys.argv) != 3):
+            print " Usage: %s <tumorType> <public/private> " % sys.argv[0]
+            print " Notes: a single tumor type can be specified, eg brca "
+            print "        the public/private option indicates whether an awg-specific "
+            print "        firehose run should be used if available "
             sys.exit(-1)
         else:
             tumorType = sys.argv[1].lower()
@@ -1493,6 +1498,17 @@ if __name__ == "__main__":
                 print cancerDirNames
                 sys.exit(-1)
 
+            ppString = sys.argv[2].lower()
+            if ( ppString.find("pub") >= 0 ):
+                awgFlag = "NO"
+                print " --> will NOT use awg-specific firehose analyses even if available "
+            elif ( ppString.find("priv") >= 0 ):
+                awgFlag = "YES"
+                print " --> WILL use awg-specific firehose anlaysese IF available "
+            else:
+                print " invalid public/private string ", ppString
+                sys.exit(-1)
+
     # 22jun : switching to new firehose analyses that were downloaded using
     # firehose_get -b analyses latest
     firehoseTopDir = "/titan/cancerregulome9/TCGA/firehose/"
@@ -1502,7 +1518,7 @@ if __name__ == "__main__":
     # first thing we have to do is find the most recent top-level directory
     # which should have a name of the form
     # analyses__2012_04_25
-    topDir = getMostRecentDir(firehoseTopDir, cancerDirNames)
+    topDir = getMostRecentDir(firehoseTopDir, cancerDirNames, awgFlag)
     print " here now : ", topDir
 
     # outer loop over tumor types

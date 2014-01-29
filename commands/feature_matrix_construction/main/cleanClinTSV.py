@@ -433,6 +433,30 @@ def computeLymphnodesFraction(allClinDict):
     return (allClinDict)
 
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
+
+def addTag2Key ( aKey, aTag ):
+
+    aTokens = aKey.split(':')
+
+    if ( len(aTokens) >= 7 ):
+        newKey = aTokens[0] + ':' + aTokens[1] + ':' + aTokens[2]
+        if ( aTag[0] == "_" ):
+            newKey += aTag
+        else:
+            newKey += "_" + aTag
+        for ii in range(3,len(aTokens)):
+            newKey += ":" + aTokens[ii]
+
+    else:
+        newKey = aKey
+        if ( aTag[0] == "_" ):
+            newKey += aTag
+        else:
+            newKey += "_" + aTag
+        
+    return ( newKey )
+
+# -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 # fields of interest:
 # days_to_birth
 # days_to_initial_pathologic_diagnosis	<-- this is always 0
@@ -461,10 +485,12 @@ def addFollowupInfo(allClinDict):
     haveB = (bKey in allClinDict.keys())
     haveC = (cKey in allClinDict.keys())
 
+    print " "
+    print " STEP #1 "
     print " have flags A, B, and C : ", haveA, haveB, haveC
 
-    print " allClinDict.keys() : "
-    print allClinDict.keys()
+    ## print " allClinDict.keys() : "
+    ## print allClinDict.keys()
 
     if (haveA):
 
@@ -521,6 +547,8 @@ def addFollowupInfo(allClinDict):
     # a set of "days_to_" features that instead of being relative
     # to "initial_pathologic_diagnosis" are relative to "submitted_specimen"
 
+    print " "
+    print " STEP #2 "
     aKey = findProperKey (allClinDict, "days_to_submitted_specimen_dx")
     tKey = findProperKey (allClinDict, "days_to_initial_pathologic_diagnosis")
 
@@ -537,64 +565,195 @@ def addFollowupInfo(allClinDict):
     try:
         numClin = getNumPatients(allClinDict)
         for bKey in allClinDict.keys():
-            if (bKey == aKey):
-                continue
+            if (bKey == aKey): continue
 
             if (bKey.find("days_to_") >= 0):
-                newKey = bKey + "_relSS"
+                newKey = addTag2Key ( bKey, "relSS" )
                 print " --> making newKey <%s> from bKey <%s> " % (newKey, bKey)
                 newVec = [0] * numClin
                 numNotNA = 0
                 for kk in range(numClin):
+
+                    ## initialize to NA
                     newVec[kk] = "NA"
-                    if (str(allClinDict[aKey][kk]).upper() == "NA"):
-                        continue
+
+                    ## skip if an important value is NA
+                    if (str(allClinDict[aKey][kk]).upper() == "NA"): continue
+                    if (str(allClinDict[bKey][kk]).upper() == "NA"): continue
                     if (haveT):
-                        if (str(allClinDict[tKey][kk]).upper() == "NA"):
-                            continue
-                    if (haveT):
-                        deltaDays = allClinDict[aKey][kk] - \
-                            allClinDict[tKey][kk]
+                        if (str(allClinDict[tKey][kk]).upper() == "NA"): continue
+
+                    ## deltaDays is either (days_to_submitted_specimen_dx) - (days_to_initial_pathologic_diagnosis)
+                    ##             or just (days_to_submitted_specimen_dx)
+                    if (haveT): 
+                        deltaDays = allClinDict[aKey][kk] - allClinDict[tKey][kk]
                     else:
                         deltaDays = allClinDict[aKey][kk]
-                    if (str(allClinDict[bKey][kk]).upper() == "NA"):
-                        continue
+
+                    ## and then we subtract 'delta days' from the original key to make the new relative key
                     newVec[kk] = allClinDict[bKey][kk] - deltaDays
+
                     numNotNA += 1
-                print " adding new key (%d) : " % numNotNA, newKey
-                print newVec
-                allClinDict[newKey] = newVec
+
+                if ( numNotNA > 30 ):
+                    print " adding new key (%d) : " % numNotNA, newKey
+                    print newVec[:5]
+                    print newVec[-5:]
+                    allClinDict[newKey] = newVec
+                else:
+                    print " NOT adding new key (%d) : ", numNotNA, newKey
 
             if (bKey.find("age_at_") >= 0):
-                ## newKey = bKey + "_relSS"
-                newKey = findProperKey (allClinDict, "age_at_submitted_specimen_dx")
-                print " --> making newKy <%s> from bKey <%s> " % (newKey, bKey)
+                ## make sure that this is not a "stage_at_" feature !!!
+                if ( bKey.find("stage_at_") >= 0 ): continue
+
+                newKey = addTag2Key ( bKey, "relSS" )
+                print " --> making newKey <%s> from bKey <%s> " % (newKey, bKey)
                 newVec = [0] * numClin
                 numNotNA = 0
                 for kk in range(numClin):
+
+                    ## initialize to NA
                     newVec[kk] = "NA"
-                    if (str(allClinDict[aKey][kk]).upper() == "NA"):
-                        continue
+
+                    ## skip if an important value is NA
+                    if (str(allClinDict[aKey][kk]).upper() == "NA"): continue
+                    if (str(allClinDict[bKey][kk]).upper() == "NA"): continue
                     if (haveT):
-                        if (str(allClinDict[tKey][kk]).upper() == "NA"):
-                            continue
-                    if (haveT):
-                        deltaDays = allClinDict[aKey][kk] - \
-                            allClinDict[tKey][kk]
+                        if (str(allClinDict[tKey][kk]).upper() == "NA"): continue
+
+                    ## deltaDays is either (days_to_submitted_specimen_dx) - (days_to_initial_pathologic_diagnosis)
+                    ##             or just (days_to_submitted_specimen_dx)
+                    if (haveT): 
+                        deltaDays = allClinDict[aKey][kk] - allClinDict[tKey][kk]
                     else:
                         deltaDays = allClinDict[aKey][kk]
-                    if (str(allClinDict[bKey][kk]).upper() == "NA"):
-                        continue
-                    newVec[kk] = allClinDict[bKey][kk] + \
-                        (float(deltaDays) / DAYS_PER_YEAR)
+
+                    ## and then we subtract 'delta days' from the original key to make the new relative key
+                    newVec[kk] = allClinDict[bKey][kk] - ( float(deltaDays) / DAYS_PER_YEAR )
+
                     numNotNA += 1
-                print " adding new key (%d) : " % numNotNA, newKey
-                print newVec
-                allClinDict[newKey] = newVec
+
+                if ( numNotNA > 30 ):
+                    print " adding new key (%d) : " % numNotNA, newKey
+                    print newVec[:5]
+                    print newVec[-5:]
+                    allClinDict[newKey] = newVec
+                else:
+                    print " NOT adding new key (%d) : ", numNotNA, newKey
 
     except:
         print " --> failed in this try (x) "
         doNothing = 1
+
+    # THIRD: if there is a "days_to_sample_procurement", then create
+    # a set of "days_to_" features that instead of being relative
+    # to "initial_pathologic_diagnosis" are relative to "sample_procurement
+
+    print " "
+    print " STEP #3 "
+    aKey = findProperKey (allClinDict, "days_to_sample_procurement")
+    tKey = findProperKey (allClinDict, "days_to_initial_pathologic_diagnosis")
+
+    try:
+        print aKey, allClinDict[aKey][:3]
+    except:
+        print " do not have <%s> in allClinDict " % aKey
+
+    if (tKey in allClinDict.keys()):
+        haveT = 1
+    else:
+        haveT = 0
+
+    try:
+        numClin = getNumPatients(allClinDict)
+        for bKey in allClinDict.keys():
+            if (bKey == aKey): continue
+
+            if (bKey.find("days_to_") >= 0):
+                ## make sure that this is not one of the relSS features just added !!!
+                if ( bKey.find("relSS") >= 0 ): continue
+
+                newKey = addTag2Key ( bKey, "relSP" )
+                print " --> making newKey <%s> from bKey <%s> " % (newKey, bKey)
+                newVec = [0] * numClin
+                numNotNA = 0
+                for kk in range(numClin):
+
+                    ## initialize to NA
+                    newVec[kk] = "NA"
+
+                    ## skip if an important value is NA
+                    if (str(allClinDict[aKey][kk]).upper() == "NA"): continue
+                    if (str(allClinDict[bKey][kk]).upper() == "NA"): continue
+                    if (haveT):
+                        if (str(allClinDict[tKey][kk]).upper() == "NA"): continue
+
+                    ## deltaDays is either (days_to_sample_procurement) - (days_to_initial_pathologic_diagnosis)
+                    ##             or just (days_to_sample_procurement)
+                    if (haveT): 
+                        deltaDays = allClinDict[aKey][kk] - allClinDict[tKey][kk]
+                    else:
+                        deltaDays = allClinDict[aKey][kk]
+
+                    ## and then we subtract 'delta days' from the original key to make the new relative key
+                    newVec[kk] = allClinDict[bKey][kk] - deltaDays
+
+                    numNotNA += 1
+
+                if ( numNotNA > 30 ):
+                    print " adding new key (%d) : " % numNotNA, newKey
+                    print newVec[:5]
+                    print newVec[-5:]
+                    allClinDict[newKey] = newVec
+                else:
+                    print " NOT adding new key (%d) : ", numNotNA, newKey
+
+            if (bKey.find("age_at_") >= 0):
+                ## make sure that this is not one of the relSS features just added !!!
+                if ( bKey.find("relSS") >= 0 ): continue
+                ## make sure that this is not a "stage_at_" feature !!!
+                if ( bKey.find("stage_at_") >= 0 ): continue
+
+                newKey = addTag2Key ( bKey, "relSP" )
+                print " --> making newKey <%s> from bKey <%s> " % (newKey, bKey)
+                newVec = [0] * numClin
+                numNotNA = 0
+                for kk in range(numClin):
+
+                    ## initialize to NA
+                    newVec[kk] = "NA"
+
+                    ## skip if an important value is NA
+                    if (str(allClinDict[aKey][kk]).upper() == "NA"): continue
+                    if (str(allClinDict[bKey][kk]).upper() == "NA"): continue
+                    if (haveT):
+                        if (str(allClinDict[tKey][kk]).upper() == "NA"): continue
+
+                    ## deltaDays is either (days_to_sample_procurement) - (days_to_initial_pathologic_diagnosis)
+                    ##             or just (days_to_sample_procurement)
+                    if (haveT): 
+                        deltaDays = allClinDict[aKey][kk] - allClinDict[tKey][kk]
+                    else:
+                        deltaDays = allClinDict[aKey][kk]
+
+                    ## and then we subtract 'delta days', scaled to years ...
+                    newVec[kk] = allClinDict[bKey][kk] - ( float(deltaDays) / DAYS_PER_YEAR )
+
+                    numNotNA += 1
+
+                if ( numNotNA > 30 ):
+                    print " adding new key (%d) : " % numNotNA, newKey
+                    print newVec[:5]
+                    print newVec[-5:]
+                    allClinDict[newKey] = newVec
+                else:
+                    print " NOT adding new key (%d) : ", numNotNA, newKey
+
+    except:
+        print " --> failed in this try (y) "
+        doNothing = 1
+
 
     return (allClinDict)
 
