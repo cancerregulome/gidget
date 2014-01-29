@@ -150,10 +150,10 @@ if __name__ == "__main__":
             sys.exit(-1)
         for ii in range(numA):
             if (bTokens[ii] == ''):
-                print "     blank token ??? ", ii
+                print "     WARNING ... blank token ", ii
                 print bTokens
                 print bLine
-                sys.exit(-1)
+                ## sys.exit(-1)
     fh.close()
     # sys.exit(-1)
 
@@ -201,6 +201,7 @@ if __name__ == "__main__":
         print numCol, hdrTokens
 
     # now we make a data matrix, the first dimension will be the column #
+    print " --> first dimension of dataMatrix is %d " % numCol
     dataMatrix = [0] * numCol
     for iCol in range(numCol):
         dataMatrix[iCol] = []
@@ -210,22 +211,33 @@ if __name__ == "__main__":
     numNotB = 0
     while not done:
         bLine = fh.readline()
-        bLine = bLine.strip()
+        try:
+            if ( bLine[-1] == '\n' ): bLine = bLine[:-1]
+        except:
+            doNothing = 1
+        ## bLine = bLine.strip()
         # each bTokens will have a feature name, followed by a list of feature
         # values
         bTokens = bLine.split('\t')
         if (len(bTokens) != numCol):
             done = 1
+            print " DONE ", numCol, len(bTokens)
+            print bTokens
+            print " "
         else:
             # dataMatrix[0]
             for iCol in range(numCol):
-                dataMatrix[iCol] += [bTokens[iCol]]
+                if ( bTokens[iCol] == "" ):
+                    dataMatrix[iCol] += ["NA"]
+                else:
+                    dataMatrix[iCol] += [bTokens[iCol]]
                 if (iCol > 0):
-                    if (bTokens[iCol] != "NA"):
+                    if (bTokens[iCol]!="NA" and bTokens[iCol]!=""):
                         if (bTokens[iCol] == "0" or bTokens[iCol] == "1"):
                             numBinary += 1
                         else:
                             numNotB += 1
+                ## print "         dataMatrix[%d] has %d values " % ( iCol, len(dataMatrix[iCol]) )
     # print numBinary, numNotB
     if (numBinary > numNotB * 1000):
         isBinary = 1
