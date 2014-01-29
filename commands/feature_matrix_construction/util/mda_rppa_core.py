@@ -21,14 +21,16 @@ class mdanderson_org_mda_rppa_core(technology_type):
 
     def includeFile(self, tokens):
         if ( miscTCGA.looks_like_uuid(tokens[self.iBarcode]) ):
-            tokens[self.iBarcode] = miscTCGA.uuid_to_barcode(tokens[self.iBarcode])
+            barcode = miscTCGA.uuid_to_barcode(tokens[self.iBarcode])
         elif ( not tokens[self.iBarcode].startswith("Control") ):
             print " ERROR in handling RPPA data ??? this field in the SDRF should be a UUID ??? <%s> " % tokens[self.iBarcode]
             mess = '(f) NOT including this file ... ', self.iFilename, tokens[self.iFilename], self.iBarcode, tokens[self.iBarcode], self.iOther, tokens[self.iOther]
             return (None, None, None, None, False, mess)
+        else:
+            barcode = tokens[self.iBarcode]
 
-        if not tokens[self.iBarcode].startswith("TCGA-"):
-            mess = '(e) NOT including this file ... ', self.iFilename, tokens[self.iFilename], self.iBarcode, tokens[self.iBarcode], self.iOther, tokens[self.iOther]
+        if not barcode.startswith("TCGA-"):
+            mess = '(e) NOT including this file ... ', self.iFilename, tokens[self.iFilename], self.iBarcode, tokens[self.iBarcode], barcode, self.iOther, tokens[self.iOther]
             return (None, None, None, None, False, mess)
         return technology_type.includeFile(self, tokens)
 

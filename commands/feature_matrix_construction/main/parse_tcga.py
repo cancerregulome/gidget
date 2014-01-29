@@ -117,66 +117,66 @@ def sanityCheckSDRF ( sdrfFilename ):
 
 #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 def getSDRFinfo(sdrfFilename, techType):
-    print '\n', datetime.now(), 'in getSDRFinfo ... <%s> ' % sdrfFilename
-    ## figure out which platform it is based on the SDRF file ...
-    print "\tPlatform : ", techType
-        
-    sanityCheckSDRF(sdrfFilename)
-    techType.preprocessSDRFFile(sdrfFilename)
-
-    filename2sampleID = {}
-    reader = open(sdrfFilename)
-    hdrTokens = reader.readline().strip().split('\t')
-
-    # set the column indices
     try:
+        print '\n', datetime.now(), 'in getSDRFinfo ... <%s> ' % sdrfFilename
+        ## figure out which platform it is based on the SDRF file ...
+        print "\tPlatform : ", techType
+            
+        sanityCheckSDRF(sdrfFilename)
+        techType.preprocessSDRFFile(sdrfFilename)
+    
+        filename2sampleID = {}
+        reader = open(sdrfFilename)
+        hdrTokens = reader.readline().strip().split('\t')
+    
+        # set the column indices
         techType.setConfiguration(hdrTokens)
+
+        archives = set()
+        barcodes = set()
+        numTokens = len(hdrTokens)
+        lineNum = 0
+        while True:
+            tokens = reader.readline().strip().split('\t')
+            if ( len(tokens) < numTokens ):
+                break
+            lineNum += 1
+    
+            (barcode, filename, archive, otherInfo, includeFlag, message) = techType.includeFile(tokens)
+            
+            ## also sanity check that we don't have duplicate barcodes ...
+            if (includeFlag and not barcode in barcodes):
+                archives.add(archive)
+                barcodes.add(barcode)
+                # TODO: check if barcode is a UUID and in hackBarcode look up barcode from UUID
+                fileBarcodes = filename2sampleID.get(filename, [])
+                ## need to take this out (21feb13) because we need to keep
+                ## the barcodes that the DCC reports in the UUID-to-barcode
+                ## mapping metadata file ...
+                # fileBarcodes.append((hackBarcode(barcode), otherInfo, archive))
+                fileBarcodes.append((barcode, otherInfo, archive))
+                filename2sampleID[filename] = fileBarcodes
+                print '\tYES including this file ... ', techType.iFilename, tokens[techType.iFilename], techType.iBarcode, tokens[techType.iBarcode], techType.iYes, tokens[techType.iYes]
+            else:
+                if not message:
+                    message = '\t(-) NOT including this file ... ', techType.iFilename, tokens[techType.iFilename], techType.iBarcode, tokens[techType.iBarcode], techType.iYes, tokens[techType.iYes]
+                print '\t', str(message)[1:-1].replace(',', ' '), 'line #: ', lineNum
+    
+        if 0 == len(filename2sampleID):
+            raise ValueError('no files were found: tokens[barcode=%i]' % (techType.iBarcode))
+        keyList = filename2sampleID.keys()
+        keyList.sort()
+        print '\tfirst file in filename2sampleID dictionary: ', keyList[0], filename2sampleID[keyList[0]]
+    
+        ## now sort ...
+        archives = list(archives)
+        archives.sort()
+        print '\tfound %d archives and %d data files ' % ( len(archives), len(filename2sampleID) )
+    
+        print datetime.now(), 'completed getSDRFinfo ... <%s> %d\n' % (sdrfFilename, len(filename2sampleID) )
     except ValueError as ve:
         print ve
         return 0, {}, []
-
-    archives = set()
-    barcodes = set()
-    numTokens = len(hdrTokens)
-    lineNum = 0
-    while True:
-        tokens = reader.readline().strip().split('\t')
-        if ( len(tokens) < numTokens ):
-            break
-        lineNum += 1
-
-        (barcode, filename, archive, otherInfo, includeFlag, message) = techType.includeFile(tokens)
-        
-        ## also sanity check that we don't have duplicate barcodes ...
-        if (includeFlag and not barcode in barcodes):
-            archives.add(archive)
-            barcodes.add(barcode)
-            # TODO: check if barcode is a UUID and in hackBarcode look up barcode from UUID
-            fileBarcodes = filename2sampleID.get(filename, [])
-            ## need to take this out (21feb13) because we need to keep
-            ## the barcodes that the DCC reports in the UUID-to-barcode
-            ## mapping metadata file ...
-            # fileBarcodes.append((hackBarcode(barcode), otherInfo, archive))
-            fileBarcodes.append((barcode, otherInfo, archive))
-            filename2sampleID[filename] = fileBarcodes
-            print '\tYES including this file ... ', techType.iFilename, tokens[techType.iFilename], techType.iBarcode, tokens[techType.iBarcode], techType.iYes, tokens[techType.iYes]
-        else:
-            if not message:
-                message = '\t(-) NOT including this file ... ', techType.iFilename, tokens[techType.iFilename], techType.iBarcode, tokens[techType.iBarcode], techType.iYes, tokens[techType.iYes]
-            print '\t', str(message)[1:-1].replace(',', ' '), 'line #: ', lineNum
-
-    if 0 == len(filename2sampleID):
-        raise ValueError('no files were found: tokens[barcode=%i]' % (techType.iBarcode))
-    keyList = filename2sampleID.keys()
-    keyList.sort()
-    print '\tfirst file in filename2sampleID dictionary: ', keyList[0], filename2sampleID[keyList[0]]
-
-    ## now sort ...
-    archives = list(archives)
-    archives.sort()
-    print '\tfound %d archives and %d data files ' % ( len(archives), len(filename2sampleID) )
-
-    print datetime.now(), 'completed getSDRFinfo ... <%s> %d\n' % (sdrfFilename, len(filename2sampleID) )
     return (len(barcodes), filename2sampleID, archives)
 
 #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
