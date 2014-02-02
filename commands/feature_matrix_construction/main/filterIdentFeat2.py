@@ -191,6 +191,10 @@ def removeIdenticalFeatures(inD, featType):
             iRow += 1
             continue
 
+        if (iFeatname.find(":ja_") > 0 ):
+            iRow += 1
+            continue
+
         curTokens = iFeatname.split(':')
         iGeneName = curTokens[2]
 
@@ -215,7 +219,11 @@ def removeIdenticalFeatures(inD, featType):
 
             jFeatname = rowLabels[jRow]
             if (jFeatname.find(featType) < 0):
-                done = 1
+                jRow += 1
+                continue
+
+            if (jFeatname.find(":ja_") > 0):
+                jRow += 1
                 continue
 
             curTokens = jFeatname.split(':')
