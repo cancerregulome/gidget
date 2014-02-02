@@ -1179,16 +1179,19 @@ def parseGistic_BroadArmValuesFile(inName, outName):
             # create two features per arm ... a 'continuous' feature and a
             # 'discrete' feature
 
-            # first the continuous or "_r" feature:
-            featName = "N:CNVR:" + armName + ":chr" + chrName + \
-                ":%d:%d::%s_GisticArm_r" % (startPos, stopPos, namePrefix)
-            armDict[featName] = numpy.zeros(numSamples)
-            armList += [featName]
-            for ii in range(numSamples):
-                armDict[featName][ii] = float(tokenList[1 + ii])
+            # 30jan14 : commenting this out (SMR)
+            if ( 0 ):
+                # first the continuous or "_r" feature:
+                featName = "N:CNVR:" + armName + ":chr" + chrName + \
+                    ":%d:%d::%s_GisticArm_r" % (startPos, stopPos, namePrefix)
+                armDict[featName] = numpy.zeros(numSamples)
+                armList += [featName]
+                for ii in range(numSamples):
+                    armDict[featName][ii] = float(tokenList[1 + ii])
 
             # then the discrete or "_d" feature:
-            featName = "C:CNVR:" + armName + ":chr" + chrName + \
+            # 30jan14 : and changing this to a Numerical feature (SMR)
+            featName = "N:CNVR:" + armName + ":chr" + chrName + \
                 ":%d:%d::%s_GisticArm_d" % (startPos, stopPos, namePrefix)
             armDict[featName] = numpy.zeros(numSamples)
             armList += [featName]
