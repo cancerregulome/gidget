@@ -300,7 +300,7 @@ def watchDir ( aDir ):
 
     nLoop = 0
 
-    sleepTime = 60
+    sleepTime = 10
 
     time.sleep(sleepTime)
     t2 = lastModTime ( aDir )
@@ -313,9 +313,11 @@ def watchDir ( aDir ):
         nLoop += 1
         print " watchDir ", t1, t2, nLoop
         if ( nLoop > 100 ):
+            print " BAILING out of watchDir ... ERROR ... EXITING "
             sys.exit(-1)
 
     time.sleep(sleepTime)
+    print " leaving watchDir "
 
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 #
@@ -662,7 +664,8 @@ if __name__ == "__main__":
         if (numOutFiles == numJobs):
             done = 1
         else:
-            tSleep = max(10, int((numJobs - numOutFiles) / 2))
+            tSleep = max(10, int((numJobs - numOutFiles) / 20))
+            if (args.byType): tSleep = 20
             print " ( sleeping for %.0f seconds ) " % float(tSleep)
             time.sleep(tSleep)
 
@@ -810,6 +813,11 @@ if __name__ == "__main__":
         print " < %s > " % cmdString
         (status, output) = commands.getstatusoutput(cmdString)
         print " (i) TIME ", time.asctime(time.localtime(time.time()))
+
+    else:
+        print " ************************************************** "
+        print " *** NO POST-PROCESSING ??? OUTPUTS MAY BE LOST *** "
+        print " ************************************************** "
 
     cmdString = "rm -fr %s" % tmpDir13
     print " final command : <%s> " % cmdString
