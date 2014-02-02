@@ -26,7 +26,7 @@ echo " sorting the individual files ... "
 for t in $d/post_proc_all.*.*.tmp
    do
 	echo $t
-        sort -grk 5 --temporary-directory=$tDir $t >& $t.sort
+        sort -grk 5,5 -k 1,2 --temporary-directory=$tDir $t | uniq >& $t.sort
    done
 
 date
@@ -44,7 +44,7 @@ date
 
 echo " now sorting the short concatenation ... "
 rm -fr $d/post_proc_all.short.sort
-sort -grk 5 --temporary-directory=$tDir $d/post_proc_all.short >& $d/post_proc_all.short.sort
+sort -grk 5,5 -k1,2 --temporary-directory=$tDir $d/post_proc_all.short | uniq >& $d/post_proc_all.short.sort
 
 date
 
