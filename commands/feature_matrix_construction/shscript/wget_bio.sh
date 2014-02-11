@@ -22,9 +22,12 @@ for d in `cat $TCGAFMP_ROOT_DIR/shscript/tumor_list.txt`
         chmod g+w clin
         cd clin
 
+        ## NEW 22jan14 : grabbing the bio.Level_2 files as well
+
 	rm -fr index.html
 	wget -e robots=off --wait 1 --debug --no-clobber --continue --server-response --no-directories \
-	     --accept "*bio.Level_1*.tar.gz" --accept "*mage-tab*.tar.gz" --accept "*CHANGES*txt" -R "*images*" \
+	     --accept "*bio.Level_1*.tar.gz" --accept "*bio.Level_2*.tar.gz" \
+             --accept "*mage-tab*.tar.gz" --accept "*CHANGES*txt" -R "*images*" \
 	     --verbose \
 	     --recursive --level=1 \
 	     https://tcga-data.nci.nih.gov/tcgafiles/ftp_auth/distro_ftpusers/anonymous/tumor/$d/bcr/nationwidechildrens.org/bio/clin
