@@ -80,6 +80,11 @@ python $TCGAFMP_ROOT_DIR/main/parse_tcga.py \
 # and here we should have an output file with ~1200 rows
 grep "finished in writeTSV_dataMatrix" level3.mirn.log
 
+for f in *.tsv
+    do
+        echo $TCGAFMP_ROOT_DIR/shscript/fmp00B_hackBarcodes.sh $f
+    done
+
 ## then we annotate the GEXP and MIRN data ... because we need
 ## to have the genomic coordinates for these features ...
 ## the size of these matrices should not change

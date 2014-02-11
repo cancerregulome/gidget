@@ -69,6 +69,11 @@ for tumor in $tumors
 	## MICRO-RNA (both GA and HiSeq)
 	python $TCGAFMP_ROOT_DIR/main/parse_tcga.py $TCGAFMP_ROOT_DIR/config/$config bcgsc.ca/illuminaga_mirnaseq/mirnaseq/ $tumor $curDate $snapshotName                >& level3.bcgsc.ga_mirn.$curDate.log 
 	python $TCGAFMP_ROOT_DIR/main/parse_tcga.py $TCGAFMP_ROOT_DIR/config/$config bcgsc.ca/illuminahiseq_mirnaseq/mirnaseq/ $tumor $curDate $snapshotName             >& level3.bcgsc.hiseq_mirn.$curDate.log 
+        for f in *__mirnaseq*tsv
+            do
+                $TCGAFMP_ROOT_DIR/shscript/fmp00B_hackBarcodes.sh $f
+            done
+
 
 	## MESSENGER-RNA (many different platforms)
 	python $TCGAFMP_ROOT_DIR/main/parse_tcga.py $TCGAFMP_ROOT_DIR/config/$config bcgsc.ca/illuminaga_rnaseq/rnaseq/ $tumor $curDate $snapshotName                    >& level3.bcgsc.ga_rnaseq.$curDate.log 
