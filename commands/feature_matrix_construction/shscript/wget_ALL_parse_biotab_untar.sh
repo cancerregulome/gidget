@@ -15,7 +15,7 @@ date
 echo "===untar==="
 ./untar.mirror_date.sh
 
-cd firstDir
+cd $firstDir
 
 date
 echo DONE!!!
