@@ -425,16 +425,28 @@ if __name__ == "__main__":
     print " --------------- "
 
     done = 0
+    lastCheck = -1
+    noChange = 0
     while not done:
 
+        ## count up the number of output files ...
         numOutFiles = 0
         for aName in os.listdir(tmpDir):
             if (aName.endswith(".pw")):
                 numOutFiles += 1
         print numOutFiles
 
-        if (numOutFiles == numJobs):
-            done = 1
+        ## if the number of output files matches the
+        ## number of jobs, we're good to go
+        if (numOutFiles == numJobs): done = 1
+
+        ## if this count has not changed in a while,
+        ## they we probably want to bail ...
+        if ( lastCheck == numOutFiles ):
+            noChange += 1
+        if ( noChange > 5 ): done = 1
+        lastCheck = numOutFiles
+
         time.sleep(10)
 
     print " should be done !!! ", numOutFiles, numJobs
@@ -454,8 +466,7 @@ if __name__ == "__main__":
 
         outNames = []
 
-        (outNames, typeScores, typeRanks, pTmp) = getTypeRanks(
-            aType, tmpDir, indexList, featList)
+        (outNames, typeScores, typeRanks, pTmp) = getTypeRanks (aType, tmpDir, indexList, featList)
 
         # at this point we have:
         # names : vector of feature names
