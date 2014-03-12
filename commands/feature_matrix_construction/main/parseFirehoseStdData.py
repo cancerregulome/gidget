@@ -831,8 +831,7 @@ def getGeneAntibodyMap():
 
     geneAntibodyMap = {}
 
-    fh = file(
-        "/titan/cancerregulome11/TCGA/repositories/rppa/MDA_antibody_annotation.txt")
+    fh = file( "/titan/cancerregulome9/workspaces/bioinformatics_references/tcga_platform_genelists/MDA_antibody_annotation_2014_03_04.txt" )
     for aLine in fh:
         aLine = aLine.strip()
         tokenList = aLine.split('\t')
@@ -1312,7 +1311,9 @@ if __name__ == "__main__":
 
             if (len(sys.argv) == 5):
                 subsetName = sys.argv[4]
-                if (not subsetName.endswith(".")):
+                if (subsetName == "NA"):
+                    subsetName = ""
+                elif (not subsetName.endswith(".")):
                     subsetName += "."
             else:
                 subsetName = ""
