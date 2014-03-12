@@ -1,3 +1,5 @@
+#!/bin/bash
+
 cd ~/scratch/
 
 for d in skcm
