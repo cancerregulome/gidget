@@ -1,3 +1,5 @@
+#!/bin/bash
+
 curDir=`pwd`
 
 cd /titan/cancerregulome11/TCGA/repositories/dcc-mirror/public/tumor
