@@ -1,8 +1,27 @@
 #!/bin/bash
 
+if [ $# -ne 1 ]
+then
+  echo "Usage: `basename $0` local-TCGA-directory"
+  echo "   eg: for disk structure as"
+  echo "         <path to TCGA data>/TCGA/repostiories,"
+  echo "         <path to TCGA data>/TCGA/repostiories/dcc-mirror,"
+  echo "         etc,"
+  echo "       use"
+  echo "         `basename $0` <path to TCGA data>/TCGA"
+  exit -1
+fi
+
+TCGA_DATA_TOP_DIR=$1
+echo "using local TCGA top-level data directory $TCGA_DATA_TOP_DIR"
+echo
+
+# TODO: validate that TCGA_DATA_TOP_DIR is a valid directory
+
+
 curDir=`pwd`
 
-cd /titan/cancerregulome11/TCGA/repositories/dcc-mirror/public/tumor
+cd $TCGA_DATA_TOP_DIR/repositories/dcc-mirror/public/tumor
 
 ## note that the assumption below is that all <name>.tar.gz files un-tar
 ## to create a directory called <name>, but this is not true for the
@@ -38,11 +57,11 @@ for arg in `find . -type d`
 			    fi
 		    fi
 	    done
-	cd /titan/cancerregulome11/TCGA/repositories/dcc-mirror/public/tumor
+	cd $TCGA_DATA_TOP_DIR/repositories/dcc-mirror/public/tumor
     done
 
 ## now same for secure side ...
-cd /titan/cancerregulome11/TCGA/repositories/dcc-mirror/secure/tumor
+cd $TCGA_DATA_TOP_DIR/repositories/dcc-mirror/secure/tumor
 
 for arg in `find . -type d`
     do
@@ -73,17 +92,17 @@ for arg in `find . -type d`
 			    fi
 		    fi
 	    done
-	cd /titan/cancerregulome11/TCGA/repositories/dcc-mirror/secure/tumor
+	cd $TCGA_DATA_TOP_DIR/repositories/dcc-mirror/secure/tumor
     done
 
 echo " "
 echo " removing temporary mimat files ... "
-cd /titan/cancerregulome11/TCGA/repositories/dcc-snapshot/public/tumor/
+cd $TCGA_DATA_TOP_DIR/repositories/dcc-snapshot/public/tumor/
 find . -type f -name "*expn_matrix_mimat*" -exec rm -f '{}' \;
 
 echo " "
 echo " running snapshot ... "
-python2.7 /titan/cancerregulome8/TCGA/scripts/dcc-snapshot-2.alt.py /titan/cancerregulome11/TCGA/repositories/dcc-mirror /titan/cancerregulome11/TCGA/repositories/dcc-snapshot
+python2.7 /titan/cancerregulome8/TCGA/scripts/dcc-snapshot-2.alt.py $TCGA_DATA_TOP_DIR/repositories/dcc-mirror $TCGA_DATA_TOP_DIR/repositories/dcc-snapshot
 
 echo " "
 echo " DONE "

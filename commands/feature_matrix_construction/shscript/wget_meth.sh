@@ -1,5 +1,21 @@
 #!/bin/bash
 
+if [ $# -ne 1 ]
+then
+  echo "Usage: `basename $0` local-TCGA-directory"
+  echo "   eg: for disk structure as"
+  echo "         <path to TCGA data>/TCGA/repostiories,"
+  echo "         <path to TCGA data>/TCGA/repostiories/dcc-mirror,"
+  echo "         etc,"
+  echo "       use"
+  echo "         `basename $0` <path to TCGA data>/TCGA"
+  exit -1
+fi
+
+TCGA_DATA_TOP_DIR=$1
+# TODO: validate that TCGA_DATA_TOP_DIR is a valid directory
+
+
 for d in `cat $TCGAFMP_ROOT_DIR/shscript/tumor_list.txt`
 
     do
@@ -9,7 +25,7 @@ for d in `cat $TCGAFMP_ROOT_DIR/shscript/tumor_list.txt`
 	echo " ******************************************************************** "
 	echo $d
 
-	cd /titan/cancerregulome11/TCGA/repositories/dcc-mirror/public/tumor/$d/
+	cd $TCGA_DATA_TOP_DIR/repositories/dcc-mirror/public/tumor/$d/
         mkdir cgcc
         chmod g+w cgcc
         cd cgcc
@@ -32,7 +48,7 @@ for d in `cat $TCGAFMP_ROOT_DIR/shscript/tumor_list.txt`
 	     --recursive --level=1 \
 	     https://tcga-data.nci.nih.gov/tcgafiles/ftp_auth/distro_ftpusers/anonymous/tumor/$d/cgcc/jhu-usc.edu/humanmethylation450/methylation
 
-	cd /titan/cancerregulome11/TCGA/repositories/dcc-mirror/public/tumor/$d/cgcc/jhu-usc.edu/
+	cd $TCGA_DATA_TOP_DIR/repositories/dcc-mirror/public/tumor/$d/cgcc/jhu-usc.edu/
 
         mkdir humanmethylation27
         chmog g+w humanmethylation27
