@@ -11,7 +11,8 @@ for tumor in `cat $TCGAFMP_ROOT_DIR/shscript/tumor_list.txt`
         rm -fr /titan/cancerregulome11/TCGA/repositories/scratch/t?
 
         ## cd /titan/cancerregulome11/TCGA/repositories/dcc-mirror/public/tumor/$tumor/bcr/biotab/clin
-        cd /titan/cancerregulome11/TCGA/repositories/dcc-mirror/public/tumor/$tumor/bcr/nationwidechildrens.org/bio/clin
+        ## cd /titan/cancerregulome11/TCGA/repositories/dcc-mirror/public/tumor/$tumor/bcr/nationwidechildrens.org/bio/clin
+        cd /titan/cancerregulome11/TCGA/repositories/dcc-snapshot/public/tumor/$tumor/bcr/nationwidechildrens.org/bio/clin
 
         ## 07mar14 ... looking at files for LGG ...
 
