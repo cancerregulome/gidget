@@ -577,6 +577,14 @@ if __name__ == "__main__":
 
     elif (args.byType):
         print " --> handling the byType option ... "
+        try:
+            print "         ", args.type1
+        except:
+            doNothing=1
+        try:
+            print "         ", args.type2
+        except:
+            doNothing=1
         numJobs = 0
         # print " index ranges: "
         # print iRanges1
