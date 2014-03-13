@@ -16,31 +16,34 @@ fi
 ##      (if the snapshotName is not provided, it will default to the most recent)
 
 WRONGARGS=1
-if [[ $# != 2 ]] && [[ $# != 1 ]]
+if [[ $# != 3 ]] && [[ $# != 2 ]]
     then
-        echo " Usage   : `basename $0` <tumorType> <snapshotName> "
-        echo " Example : `basename $0` skcm dcc-snapshot-06jan14 "
+        echo " Usage   : `basename $0` <tgca FMP output directory> <tumorType> <snapshotName> "
+        echo " Example : `basename $0` <path-to-tgca-fmp> skcm dcc-snapshot-06jan14 "
         echo "           the snapshotName is optional and defaults to dcc-snapshot "
+        echo "           <path-to-tgca-fmp> should contain a subdir named as the given tumorType"
         exit $WRONGARGS
 fi
 
-tumor=$1
-if [ $# == 1 ]
+TCGA_FMP_OUTPUT_DIR=$1
+tumor=$2
+if [ $# == 2 ]
     then
         snapshotName=dcc-snapshot
     else
-        snapshotName=$2
+        snapshotName=$3
 fi
 
 echo " "
 echo " "
 echo " *******************"
 echo `date`
+echo " *" output directory: $TCGA_FMP_OUTPUT_DIR
 echo " *" $tumor
 echo " *" $snapshotName
 echo " *******************"
 
-cd /titan/cancerregulome14/TCGAfmp_outputs/$tumor
+cd $TCGA_FMP_OUTPUT_DIR/$tumor
 mkdir meth450k
 cd meth450k
 
