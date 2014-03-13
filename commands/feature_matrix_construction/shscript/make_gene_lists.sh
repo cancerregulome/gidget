@@ -1,12 +1,27 @@
 #!/bin/bash
 
+if [ $# -ne 1 ]
+then
+  echo "Usage:   `basename $0` TCGA-fmp-output-directory"
+  echo "         TCGA-fmp-output-directory must contain subdirectories named as the tumor types"
+  echo "example: for disk structure as"
+  echo "           <path to TCGA outputs>/TCGAfmp_outputs"
+  echo "           etc,"
+  echo "         use"
+  echo "           `basename $0` <path to TCGA outputs>/TCGAfmp_outputs"
+  exit -1
+fi
+
+TCGA_FMP_OUTPUT_DIR=$1
+
+
 echo " "
 date
 echo " "
 
 curDate=$1
 
-cd /titan/cancerregulome14/TCGAfmp_outputs/
+cd $TCGA_FMP_OUTPUT_DIR/
 
 for f in */$curDate/*.gexp.???.tmpData2.tsv
     do
