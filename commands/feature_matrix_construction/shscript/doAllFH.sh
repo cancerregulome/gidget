@@ -21,7 +21,7 @@ WRONGARGS=1
 if [ $# != 4 ]
     then
         echo " Usage   : `basename $0`  <curDate>  <tumorType>  <fhDir>  <fhSubset> "
-        echo " Example : `basename $0`  28oct13FH  skcm  /titan/cancerregulome9/TCGA/firehose/awg_skcm__2013_10_13  All_Samples "
+        echo " Example : `basename $0`  28oct13FH  skcm  <path to>/TCGA/firehose/awg_skcm__2013_10_13  All_Samples "
         exit $WRONGARGS
 fi
 
