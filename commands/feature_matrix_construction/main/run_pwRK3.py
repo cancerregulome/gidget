@@ -63,7 +63,7 @@ def getFeatureIndex(indexString, featureMatrixFile):
 
 def getIndexRanges(tsvFile, aType):
 
-    # print " in getIndexRanges ... ", tsvFile, aType
+    print " in getIndexRanges ... ", tsvFile, aType
 
     typeList = ["CLIN", "CNVR", "GEXP", "GNAB",
                 "METH", "MIRN", "RPPA", "SAMP"]
@@ -84,15 +84,19 @@ def getIndexRanges(tsvFile, aType):
             done = 1
         else:
             tokenList = aLine.split('\t')
-            if (tokenList[0].find(aType) >= 0):
+            if (aType=="ANY"):
+                iList += [ii]
+            elif (tokenList[0].find(aType) >= 0):
                 iList += [ii]
         ii += 1
         # if ( ii%10000 == 0 ): print ii, len(tokenList)
 
     fh.close()
 
-    # print iList
     numI = len(iList)
+    print " numI = ", numI
+    print iList[:5]
+    print iList[-5:]
 
     iStart = iList[0]
     for ii in range(1, numI):
@@ -101,10 +105,13 @@ def getIndexRanges(tsvFile, aType):
             iStart = iList[ii]
 
     iRanges += [(iStart, iList[-1])]
-    # print iRanges
+    print " len(iRanges) = ", len(iRanges)
+    print iRanges[:5]
+    print iRanges[-5:]
 
     # now make sure that none of the ranges are too big ...
-    maxRngSize = 100
+    maxRngSize = max ( 100, (numI/20) )
+    print " --> maxRngSize = ", maxRngSize
     newRanges = []
     for aTuple in iRanges:
         iStart = aTuple[0]
@@ -477,6 +484,7 @@ if __name__ == "__main__":
     if (args.adjP):
         args.pvalue = (1. / 100000.) / float(10. ** (int(numSamples / 100)))
         print " --> setting pvalue threshold to : ", args.pvalue
+
 
     # we need to pre-process the tsv file (unless it appears to have already
     # been done)
