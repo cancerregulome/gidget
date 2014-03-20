@@ -164,7 +164,8 @@ def parseBestClusFiles(lastDir, outDir, zCancer):
                         clusType = "RPPA_CC"
                     elif (fName.find("CopyNumber_Clustering_CNMF_arm") >= 0):
                         clusType = "cnvr_CNMF_arm"
-                    elif (fName.find("CopyNumber_Clustering_CNMF") >= 0):
+                    ## elif (fName.find("CopyNumber_Clustering_CNMF.Level_4") >= 0):
+                    elif (fName.find("CopyNumber_Clustering_CNMF_thresholded.Level_4") >= 0):
                         clusType = "cnvr_CNMF"
                     else:
                         print " ERROR in parseBestClusFiles ... failed to find magic string ??? "
