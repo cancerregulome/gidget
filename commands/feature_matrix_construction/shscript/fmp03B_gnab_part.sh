@@ -76,15 +76,15 @@ for ((i=0; i<$#; i++))
 		sed -e '1s/Native-//g' | sed -e '1s/-Tumor//g' >& gnab.tmp.3
 	
 	## change the iarc_freq feature(s) to "N" from "B"
-	grep    "iarc_freq" gnab.tmp.3 | sed -e '1,$s/B:GNAB/N:GNAB/' >& gnab.tmp.3a
+	grep "iarc_freq" gnab.tmp.3 | sed -e '1,$s/B:GNAB/N:GNAB/' >& gnab.tmp.3a
+        grep "ja_lhood_" gnab.tmp.3 | sed -e '1,$s/B:GNAB/N:GNAB/' >& gnab.tmp.3b
+        grep "ja_ddG_"   gnab.tmp.3 | sed -e '1,$s/B:GNAB/N:GNAB/' >& gnab.tmp.3c
+        grep "ja_PP_"    gnab.tmp.3 | sed -e '1,$s/B:GNAB/N:GNAB/' >& gnab.tmp.3d
 	
 	## grab all the rest, then divide into features with decimals and features w/o
-	grep -v "iarc_freq" gnab.tmp.3 >& gnab.tmp.3b
-	grep -v "\." gnab.tmp.3b >& gnab.tmp.3c
-	grep    "\." gnab.tmp.3b >& gnab.tmp.3d
-	sed -e '1,$s/B:GNAB/N:GNAB/' gnab.tmp.3d >& gnab.tmp.3e
+	grep -v "iarc_freq" gnab.tmp.3 | grep -v "ja_lhood_" | grep -v "ja_ddG_" | grep -v "ja_PP_" >& gnab.tmp.3e
 	
-	cat gnab.tmp.3c gnab.tmp.3a gnab.tmp.3e >& gnab.tmp.4
+        cat gnab.tmp.3e gnab.tmp.3a gnab.tmp.3b gnab.tmp.3c gnab.tmp.3d >& gnab.tmp.4
 	
 	## NEW: put in a step here that checks/fixes the feature names (B: vs N:)
 	## and also removes any features that are *uniform*
