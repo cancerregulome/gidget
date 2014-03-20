@@ -50,7 +50,7 @@ $TCGAFMP_ROOT_DIR/shscript/fmp01B_FH.sh $curDate $oneTumor $fhDir $fhSubset >& $
 ## $TCGAFMP_ROOT_DIR/shscript/fmp02B_L3_FH.sh  $curDate $oneTumor >& $TCGAFMP_DATA_DIR/$oneTumor/scratch/fmp02B.$curDate.FH.$oneTumor.log
 
 $TCGAFMP_ROOT_DIR/shscript/fmp05B_filter.sh        $curDate $oneTumor >& $TCGAFMP_DATA_DIR/$oneTumor/scratch/fmp05B.$curDate.$oneTumor.log
-$TCGAFMP_ROOT_DIR/shscript/fmp06B_merge.sh         $curDate $oneTumor >& $TCGAFMP_DATA_DIR/$oneTumor/scratch/fmp06B.$curDate.$oneTumor.log
+$TCGAFMP_ROOT_DIR/shscript/fmp06B_merge.sh         $curDate $oneTumor private >& $TCGAFMP_DATA_DIR/$oneTumor/scratch/fmp06B.$curDate.$oneTumor.log
 $TCGAFMP_ROOT_DIR/shscript/fmp07B_misc.sh          $curDate $oneTumor >& $TCGAFMP_DATA_DIR/$oneTumor/scratch/fmp07B.$curDate.$oneTumor.log
 $TCGAFMP_ROOT_DIR/shscript/fmp08B_checkMeth.sh     $curDate $oneTumor >& $TCGAFMP_DATA_DIR/$oneTumor/scratch/fmp08B.$curDate.$oneTumor.log
 $TCGAFMP_ROOT_DIR/shscript/fmp09B_addGnab.sh       $curDate $oneTumor >& $TCGAFMP_DATA_DIR/$oneTumor/scratch/fmp09B.$curDate.$oneTumor.log
