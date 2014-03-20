@@ -1,15 +1,9 @@
 #!/bin/bash
 
-: ${LD_LIBRARY_PATH:?" environment variable must be set and non-empty"}
-: ${TCGAFMP_ROOT_DIR:?" environment variable must be set and non-empty"}
-: ${TCGAFMP_DATA_DIR:?" environment variable must be set and non-empty"}
+# every TCGA FMP script should start with these lines:
+: ${TCGAFMP_ROOT_DIR:?" environment variable must be set and non-empty; defines the path to the TCGA FMP scripts directory"}
+source ${TCGAFMP_ROOT_DIR}/tcga_fmp_util.sh
 
-if [[ "$PYTHONPATH" != *"gidget"* ]]; then
-    echo " "
-    echo " your PYTHONPATH should include paths to gidget/commands/... directories "
-    echo " "
-    exit 99
-fi
 
 ## this script should be called with the following parameters:
 ##      date, eg '12jul13' or 'test'
