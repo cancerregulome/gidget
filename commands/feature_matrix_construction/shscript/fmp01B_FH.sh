@@ -84,7 +84,7 @@ echo " *******************"
 	rm -fr parseFirehose.$curDate.log
 	rm -fr gdac.broadinstitute.org_*.tsv
         rm -fr gdac.broadinstitute.org_*.txt
-	python $TCGAFMP_ROOT_DIR/main/parseFirehose.py $tumor >& parseFirehose.$curDate.log
+	python $TCGAFMP_ROOT_DIR/main/parseFirehose.py $tumor private >& parseFirehose.$curDate.log
 
         ## the patients.counts_and_rates files do not differ across multiple subsets
         ## so we can concatenate all of these ...
