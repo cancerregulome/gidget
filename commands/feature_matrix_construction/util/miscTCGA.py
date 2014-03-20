@@ -358,7 +358,7 @@ def get_uuid2barcode_dict():
     print datetime.now(), " done reading UUID to barcode mapping file (%d UUIDs and %d patients) " % ( len(uuid2barcode_dict), len(patient_dict) )
 
     if ( len(uuid2barcode_dict) < 50000 ):
-        print " ERROR in get_uuid2barcode_dict ??? "
+        print " ERROR in get_uuid2barcode_dict ??? it should be much longer than: "
         print len(uuid2barcode_dict)
         sys.exit(-1)
 
