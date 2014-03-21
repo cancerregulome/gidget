@@ -36,7 +36,7 @@ for ((i=2; i<$#; i++))
 	tumor=${args[$i]}
 
 	## cd /titan/cancerregulome3/TCGA/outputs/$tumor
-	cd /titan/cancerregulome14/TCGAfmp_outputs/$tumor
+	cd $TCGAFMP_DATA_DIR/$tumor
 
 	echo " "
 	echo " "
@@ -196,7 +196,7 @@ for ((i=2; i<$#; i++))
         ## NOTE that this gets run in the background !!!
         nohup python $TCGAFMP_ROOT_DIR/main/run_pwRK3.py \
                 --pvalue 2. --all --forRE \
-                --tsvFile /titan/cancerregulome14/TCGAfmp_outputs/$tumor/$curDate/finalClin.$tumor.$curDate.tsv &
+                --tsvFile $TCGAFMP_DATA_DIR/$tumor/$curDate/finalClin.$tumor.$curDate.tsv &
 
 	## ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 	## here we are building a subset of the clinical data based on the 'finalClin' file

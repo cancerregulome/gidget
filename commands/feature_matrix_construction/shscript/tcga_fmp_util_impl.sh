@@ -42,6 +42,15 @@ verifyRequiredVariables () {
 
     # top level data directory, also containing FMP outputs
     : ${TCGAFMP_DATA_DIR:?" environment variable must be set and non-empty"}
+
+    # path to dcc mirror
+    : ${TCGAFMP_DCC_MIRROR:?" environment variable must be set and non-empty"}
+
+    # path to dcc snapshot
+    : ${TCGAFMP_DCC_SNAPSHOT:?" environment variable must be set and non-empty"}
+
+    # path to firehose
+    : ${TCGAFMP_FIREHOUSE_MIRROR:?" environment variable must be set and non-empty"}
 }
 
 

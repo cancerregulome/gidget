@@ -35,7 +35,7 @@ for ((i=1; i<$#; i++))
         tumor=${args[$i]}
 
 	## cd /titan/cancerregulome3/TCGA/outputs/$tumor
-	cd /titan/cancerregulome14/TCGAfmp_outputs/$tumor
+	cd $TCGAFMP_DATA_DIR/$tumor
 
 	echo " "
 	echo " "

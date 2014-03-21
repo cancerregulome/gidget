@@ -35,7 +35,7 @@ for ((i=1; i<$#; i++))
         tumor=${args[$i]}
 
 	## cd /titan/cancerregulome3/TCGA/outputs/$tumor
-	cd /titan/cancerregulome14/TCGAfmp_outputs/$tumor
+	cd $TCGAFMP_DATA_DIR/$tumor
 
 	echo " "
 	echo " "
@@ -55,7 +55,7 @@ for ((i=1; i<$#; i++))
 
                         echo $f
                         python $TCGAFMP_ROOT_DIR/main/run_pwRK3.py --pvalue 1.e-06 --forLisa \
-                                --tsvFile /titan/cancerregulome14/TCGAfmp_outputs/$tumor/$curDate/$f
+                                --tsvFile $TCGAFMP_DATA_DIR/$tumor/$curDate/$f
 
 		fi
 	    done

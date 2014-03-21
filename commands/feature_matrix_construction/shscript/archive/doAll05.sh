@@ -2,7 +2,7 @@
 
 export LD_LIBRARY_PATH=/tools/lib/
 export TCGAFMP_ROOT_DIR=/users/sreynold/to_be_checked_in/TCGAfmp
-export TCGAFMP_DATA_DIR=/titan/cancerregulome14/TCGAfmp_outputs
+export TCGAFMP_DATA_DIR=$TCGAFMP_DATA_DIR
 export PYTHONPATH=$TCGAFMP_ROOT_DIR/pyclass:$TCGAFMP_ROOT_DIR/util:$PYTHONPATH
 
 curDate=22mar13

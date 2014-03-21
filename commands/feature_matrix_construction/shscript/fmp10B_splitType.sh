@@ -32,7 +32,7 @@ for ((i=1; i<$#; i++))
     do
         tumor=${args[$i]}
 
-	cd /titan/cancerregulome14/TCGAfmp_outputs/$tumor
+	cd $TCGAFMP_DATA_DIR/$tumor
 
 	echo " "
 	echo " "
@@ -112,7 +112,7 @@ for ((i=1; i<$#; i++))
 
 			h=${f/.tsv/.score.log}
 			python $TCGAFMP_ROOT_DIR/main/scoreCatFeat.py \
-			    --tsvFile /titan/cancerregulome14/TCGAfmp_outputs/$tumor/$curDate/$f >& $h
+			    --tsvFile $TCGAFMP_DATA_DIR/$tumor/$curDate/$f >& $h
 	
 			h=${f/.tsv/.split.log}
 	

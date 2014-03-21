@@ -14,7 +14,7 @@ WRONGARGS=1
 if [ $# != 4 ]
     then
         echo " Usage   : `basename $0`  <curDate>  <tumorType>  <fhDir>  <fhSubset> "
-        echo " Example : `basename $0`  28oct13FH  skcm  /titan/cancerregulome9/TCGA/firehose/awg_skcm__2013_10_13  All_Samples "
+        echo " Example : `basename $0`  28oct13FH  skcm  $TCGAFMP_FIREHOSE_MIRROR/awg_skcm__2013_10_13  All_Samples "
         exit $WRONGARGS
 fi
 
@@ -32,7 +32,7 @@ echo " *******************"
 
 
 	## cd /titan/cancerregulome3/TCGA/outputs/$tumor
-	cd /titan/cancerregulome14/TCGAfmp_outputs/$tumor
+	cd $TCGAFMP_DATA_DIR/$tumor
 
 	echo " "
 	echo " "
@@ -57,7 +57,7 @@ echo " *******************"
         ## now we need to make the clinical output of the above look like the 'old' output
         ## of the parse_all_xml script ...
         rm -fr t?
-        ~/scripts/transpose $tumor.firehose__clin_merged.$curDate.tsv >& t1
+        $TCGA_ROOT_DIR/shscript/tcga_fmp_transpose.sh $tumor.firehose__clin_merged.$curDate.tsv >& t1
         sed -e '1s/M:CLIN/bcr_patient_barcode/' t1 >& t2
         mv t2 $tumor.clinical.$curDate.tsv
         rm -fr t1
@@ -203,7 +203,7 @@ echo " *******************"
         ## NOTE that this gets run in the background !!!
         nohup python $TCGAFMP_ROOT_DIR/main/run_pwRK3.py \
                 --pvalue 2. --all --forRE \
-                --tsvFile /titan/cancerregulome14/TCGAfmp_outputs/$tumor/$curDate/finalClin.$tumor.$curDate.tsv &
+                --tsvFile $TCGAFMP_DATA_DIR/$tumor/$curDate/finalClin.$tumor.$curDate.tsv &
 
 	## ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 	## here we are building a subset of the clinical data based on the 'finalClin' file

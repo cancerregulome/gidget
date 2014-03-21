@@ -6,7 +6,7 @@ source ${TCGAFMP_ROOT_DIR}/shscript/tcga_fmp_util.sh
 
 # TODO: replace /titan/cancerregulome11/TCGA with environmental variable!
 
-cd /titan/cancerregulome11/TCGA/repositories/dcc-mirror/public/tumor
+cd $TCGAFMP_DCC_MIRROR/public/tumor
 
 ## note that the assumption below is that all <name>.tar.gz files un-tar
 ## to create a directory called <name>, but this is not true for the
@@ -41,7 +41,7 @@ for arg in `find . -type d`
 			    fi
 		    fi
 	    done
-	cd /titan/cancerregulome11/TCGA/repositories/dcc-mirror/public/tumor
+	cd $TCGAFMP_DCC_MIRROR/public/tumor
     done
 
 date

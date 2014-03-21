@@ -27,7 +27,7 @@ for ((i=0; i<$#; i++))
         tumor=${args[$i]}
 
 	## cd /titan/cancerregulome3/TCGA/outputs/$tumor
-	cd /titan/cancerregulome14/TCGAfmp_outputs/$tumor
+	cd $TCGAFMP_DATA_DIR/$tumor
 
 	echo " "
 	echo " "
@@ -63,7 +63,7 @@ for ((i=0; i<$#; i++))
 		sed -e '2,$s/-06C	/-06	/' | \
 		sed -e '2,$s/-06D	/-06	/' >& gnab.tmp.1
 
-	/users/sreynold/scripts/transpose gnab.tmp.1 >& gnab.tmp.2
+	$TCGA_ROOT_DIR/shscript/tcga_fmp_transpose.sh gnab.tmp.1 >& gnab.tmp.2
 
 	## now for some ugly processing ...
 	sed -e '1s/	/B:GNAB	/' gnab.tmp.2 | sed -e '2,$s/^/B:GNAB:/g' | sed -e '2,$s/_/:::::/' | \
