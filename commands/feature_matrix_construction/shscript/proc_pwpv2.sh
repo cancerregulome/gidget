@@ -19,10 +19,10 @@ echo " "
 echo " processing temp files in $1 "
 
 uName=`whoami`
-tDir='/local/'$uName'/pw_scratch'
+tDir='/tmp/'$uName'/pw_scratch'
 if [ ! -d $tDir ]
     then
-        tDir = '/titan/cancerregulome13/TCGA/pw_scratch/'
+        mkdir -p $tDir
     fi
 echo " using temp scratch directory " $tDir
 

@@ -4,8 +4,6 @@
 : ${TCGAFMP_ROOT_DIR:?" environment variable must be set and non-empty; defines the path to the TCGA FMP scripts directory"}
 source ${TCGAFMP_ROOT_DIR}/shscript/tcga_fmp_util.sh
 
-# TODO: replace /titan/cancerregulome11/TCGA with environmental variable!
-
 cd $TCGAFMP_DCC_MIRROR/public/tumor
 
 ## note that the assumption below is that all <name>.tar.gz files un-tar
