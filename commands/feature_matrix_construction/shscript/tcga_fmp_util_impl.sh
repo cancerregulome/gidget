@@ -40,11 +40,8 @@ verifyRequiredVariables () {
     # path to top of this project's code
     : ${TCGAFMP_ROOT_DIR:?" environment variable must be set and non-empty"}
 
-    # top level data directory
+    # top level data directory, also containing FMP outputs
     : ${TCGAFMP_DATA_DIR:?" environment variable must be set and non-empty"}
-
-    # top level outputs directory
-    : ${TCGAFMP_OUTPUTS_DIR:?" environment variable must be set and non-empty"}
 }
 
 
