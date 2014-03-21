@@ -21,7 +21,7 @@ TCGA_DATA_TOP_DIR=$1
 # TODO: validate that TCGA_DATA_TOP_DIR is a valid directory
 
 
-cd ~/scratch/
+cd /tmp/
 
 for d in brca
     do
