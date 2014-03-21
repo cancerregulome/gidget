@@ -29,7 +29,6 @@ echo " *" $curDate
 echo " *******************"
 
 
-	## cd /titan/cancerregulome3/TCGA/outputs/$tumor
 	cd $TCGAFMP_DATA_DIR/$tumor
 
 	echo " "

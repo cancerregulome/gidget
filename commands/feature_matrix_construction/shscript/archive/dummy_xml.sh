@@ -41,7 +41,6 @@ for ((i=2; i<$#; i++))
     do
 	tumor=${args[$i]}
 
-	## cd /titan/cancerregulome3/TCGA/outputs/$tumor
 	cd $TCGAFMP_DATA_DIR/$tumor
 
 	echo " "

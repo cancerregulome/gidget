@@ -37,7 +37,6 @@ echo " *******************"
 args=("$@")
 for tumor in $tumors
 	do 
-	## cd /titan/cancerregulome3/TCGA/outputs/$tumor
 	## cd $TCGAFMP_DATA_DIR/$tumor
 	cd $TCGAFMP_OUTPUTS/$tumor
 
@@ -194,8 +193,6 @@ for tumor in $tumors
 	$TCGAFMP_ROOT_DIR/shscript/Item_Blacklist.sh $tumor $TCGAFMP_ROOT_DIR/shscript/blacklist.spec >& Item_Blacklist.$curDate.log
 	#### cd /users/sreynold/code/AnnotM/
 	#### ./Item_Blacklist.sh $tumor blacklist
-	#### mv $tumor.blacklist.samples.tsv /titan/cancerregulome3/TCGA/outputs/$tumor/$curDate/$tumor.blacklist.samples.$curDate.tsv
-	#### cd /titan/cancerregulome3/TCGA/outputs/$tumor/$curDate
 	rm -fr cTmp.tsv
 	cp finalClin.$tumor.$curDate.tsv cTmp.tsv
 	rm -fr filterSamp.clin.$curDate.log

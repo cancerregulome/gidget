@@ -37,7 +37,6 @@ args=("$@")
 for tumor in $tumors
     do
 
-	## cd /titan/cancerregulome3/TCGA/outputs/$tumor
 	## cd $TCGAFMP_DATA_DIR/$tumor
 	cd $TCGAFMP_OUTPUTS/$tumor
 

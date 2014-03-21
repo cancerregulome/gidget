@@ -33,7 +33,6 @@ for tumor in skcm stad thca ucec
 
     do
 
-	## cd /titan/cancerregulome3/TCGA/outputs/$tumor
 	cd $TCGAFMP_DATA_DIR/$tumor
 
 	echo " "
@@ -238,8 +237,6 @@ for tumor in skcm stad thca ucec
 	$TCGAFMP_ROOT_DIR/shscript/Item_Blacklist.sh $tumor $TCGAFMP_ROOT_DIR/shscript/blacklist.spec
 	#### cd /users/sreynold/code/AnnotM/
 	#### ./Item_Blacklist.sh $tumor blacklist
-	#### mv $tumor.blacklist.samples.tsv /titan/cancerregulome3/TCGA/outputs/$tumor/$curDate/$tumor.blacklist.samples.$curDate.tsv
-	#### cd /titan/cancerregulome3/TCGA/outputs/$tumor/$curDate
 	cp finalClin.$tumor.$curDate.tsv cTmp.tsv
 	rm -fr filterSamp.clin.$curDate.log
 	python $TCGAFMP_ROOT_DIR/main/filterTSVbySampList.py cTmp.tsv $tumor.blacklist.samples.tsv \
