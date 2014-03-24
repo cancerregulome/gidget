@@ -3,7 +3,7 @@
 ###
 # usage
 
-# every file in the TCGA MAF project should begin
+# every file in the TCGA MAF processing project should begin
 # by sourcing tcga_maf_util.sh, NOT this file
 
 
@@ -33,37 +33,6 @@ TCGAMAF_IMPORTED_UTILS=
 # functions
 
 
-# TODO more helpful error messages
-
-# examples for currently filesystem layout:
-
-# TGCAMAF_DATA_DIR=$TCAGMAF_ROOT_DIR/data
-# TGCAMAF_REFERENCES_DIR=$TCAGMAF_ROOT_DIR/reference
-# TGCAMAF_TOOLS_DIR=$TCAGMAF_ROOT_DIR/tools
-# TGCAMAF_SCRIPTS_DIR=$TCAGMAF_ROOT_DIR/src
-verifyRequiredVariables () {
-    : ${LD_LIBRARY_PATH:?" environment variable must be set and non-empty"}
-
-    # path to #TODO
-    : ${TCGAMAF_ROOT_DIR:?" environment variable must be set and non-empty"}
-
-    # path to #TODO
-    : ${TCGAMAF_DATA_DIR:?" environment variable must be set and non-empty"}
-
-    # TODO
-    : ${TCGAMAF_REFERENCES_DIR:?" environment variable must be set and non-empty"}
-
-    # TODO
-    : ${TCGAMAF_TOOLS_DIR:?" environment variable must be set and non-empty"}
-
-    # TODO
-    : ${TCGAMAF_SCRIPTS_DIR:?" environment variable must be set and non-empty"}
-
-    # TODO
-    : ${TCGAMAF_PYTHON_BINARY:?" environment variable must be set and non-empty"}
-}
-
-
 # remove any symlinks by recursively expanding path, in a POSIX-compliant way
 # from # http://stackoverflow.com/questions/4774054/reliable-way-for-a-bash-script-to-get-the-full-path-to-itself
 getScriptPath() {
@@ -77,6 +46,41 @@ getScriptPath() {
     SCRIPT_PATH="`pwd`";
     popd  > /dev/null
     export SCRIPT_PATH
+}
+
+
+# checks for required variables, as described by the file named
+# in the parameter 
+verifyRequiredVariables () {
+    while read line; do
+
+        if [[ $line == \#* ]]; then
+            # comment line
+            continue
+        fi
+
+        if [ -z "$line" ]; then
+            # blank line
+            continue
+        fi
+
+        # the $'\t' syntax below is an 'ANSI-C' bash string:
+        # http://stackoverflow.com/a/6656767
+        varName=${line%%$'\t'*}
+        descr=${line##*$'\t'}
+        # echo [$varName]: $descr
+
+        # the ${!varName} syntax is an indirect refernce,
+        # supported since bash v2
+        if [ -z ${!varName} ]; then
+            echo "*** error: required environmental variable $varName was not set"
+            echo "usage:"
+            echo "  $varName: $descr"
+            echo
+            echo "*** exiting"
+            exit -1
+        fi
+    done < $1
 }
 
 
@@ -98,8 +102,8 @@ checkPythonPath() {
 ###
 # run tests and set global variables
 
-verifyRequiredVariables
 getScriptPath
+verifyRequiredVariables ${SCRIPT_PATH}/../config/required_env_vars
 checkPythonPath
 
 # this must be the last line; prevents re-execution of this script.
