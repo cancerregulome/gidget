@@ -22,7 +22,7 @@ echo " *" $curDate
 echo " *******************"
 
 
-	cd /titan/cancerregulome14/TCGAfmp_outputs/coadread
+	cd $TCGAFMP_DATA_DIR/coadread
 
 	echo " "
 	echo " "

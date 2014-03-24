@@ -1,14 +1,9 @@
 #!/bin/bash
 
-: ${LD_LIBRARY_PATH:?" environment variable must be set and non-empty"}
-: ${TCGAFMP_ROOT_DIR:?" environment variable must be set and non-empty"}
+# every TCGA FMP script should start with these lines:
+: ${TCGAFMP_ROOT_DIR:?" environment variable must be set and non-empty; defines the path to the TCGA FMP scripts directory"}
+source ${TCGAFMP_ROOT_DIR}/shscript/tcga_fmp_util.sh
 
-if [[ "$PYTHONPATH" != *"gidget"* ]]; then
-    echo " "
-    echo " your PYTHONPATH should include paths to gidget/commands/... directories "
-    echo " "
-    exit 99
-fi
 
 ## this script should be called with the following parameters:
 ##      date, eg '29jan13'
@@ -31,8 +26,7 @@ for ((i=0; i<$#; i++))
     do
         tumor=${args[$i]}
 
-	## cd /titan/cancerregulome3/TCGA/outputs/$tumor
-	cd /titan/cancerregulome14/TCGAfmp_outputs/$tumor
+	cd $TCGAFMP_DATA_DIR/$tumor
 
 	echo " "
 	echo " "
@@ -68,7 +62,7 @@ for ((i=0; i<$#; i++))
 		sed -e '2,$s/-06C	/-06	/' | \
 		sed -e '2,$s/-06D	/-06	/' >& gnab.tmp.1
 
-	/users/sreynold/scripts/transpose gnab.tmp.1 >& gnab.tmp.2
+	$TCGA_ROOT_DIR/shscript/tcga_fmp_transpose.sh gnab.tmp.1 >& gnab.tmp.2
 
 	## now for some ugly processing ...
 	sed -e '1s/	/B:GNAB	/' gnab.tmp.2 | sed -e '2,$s/^/B:GNAB:/g' | sed -e '2,$s/_/:::::/' | \

@@ -1,17 +1,11 @@
 #!/bin/bash
 
-if [ $# -ne 1 ]
-then
-  echo "Usage: `basename $0` local-TCGA-directory"
-  echo "   eg: for disk structure as"
-  echo "         <path to TCGA data>/TCGA/repostiories,"
-  echo "         <path to TCGA data>/TCGA/repostiories/dcc-mirror,"
-  echo "         etc,"
-  echo "       use"
-  echo "         `basename $0` <path to TCGA data>/TCGA"
-  exit -1
-fi
+# every TCGA FMP script should start with these lines:
+: ${TCGAFMP_ROOT_DIR:?" environment variable must be set and non-empty; defines the path to the TCGA FMP scripts directory"}
+source ${TCGAFMP_ROOT_DIR}/shscript/tcga_fmp_util.sh
 
+
+# TODO: probably replace below with env var:
 TCGA_DATA_TOP_DIR=$1
 echo "using local TCGA top-level data directory $TCGA_DATA_TOP_DIR"
 echo

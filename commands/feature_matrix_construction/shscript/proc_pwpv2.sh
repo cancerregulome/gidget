@@ -1,3 +1,9 @@
+#!/bin/bash
+
+# every TCGA FMP script should start with these lines:
+: ${TCGAFMP_ROOT_DIR:?" environment variable must be set and non-empty; defines the path to the TCGA FMP scripts directory"}
+source ${TCGAFMP_ROOT_DIR}/shscript/tcga_fmp_util.sh
+
 
 ## now we assume that in the input specified directory, we have
 ## one enormous file called post_proc_all.tsv and then all of 
@@ -13,10 +19,10 @@ echo " "
 echo " processing temp files in $1 "
 
 uName=`whoami`
-tDir='/local/'$uName'/pw_scratch'
+tDir='/tmp/'$uName'/pw_scratch'
 if [ ! -d $tDir ]
     then
-        tDir = '/titan/cancerregulome13/TCGA/pw_scratch/'
+        mkdir -p $tDir
     fi
 echo " using temp scratch directory " $tDir
 

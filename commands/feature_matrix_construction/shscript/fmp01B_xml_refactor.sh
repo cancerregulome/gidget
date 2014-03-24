@@ -1,14 +1,9 @@
 #!/bin/bash
 
-: ${LD_LIBRARY_PATH:?" environment variable must be set and non-empty"}
-: ${TCGAFMP_ROOT_DIR:?" environment variable must be set and non-empty"}
+# every TCGA FMP script should start with these lines:
+: ${TCGAFMP_ROOT_DIR:?" environment variable must be set and non-empty; defines the path to the TCGA FMP scripts directory"}
+source ${TCGAFMP_ROOT_DIR}/shscript/tcga_fmp_util.sh
 
-if [[ "$PYTHONPATH" != *"gidget"* ]]; then
-    echo " "
-    echo " your PYTHONPATH should include paths to gidget/commands/... directories "
-    echo " "
-    exit 99
-fi
 
 ## this script should be called with the following parameters:
 ##	date, eg '29jan13'
@@ -42,8 +37,7 @@ echo " *******************"
 args=("$@")
 for tumor in $tumors
 	do 
-	## cd /titan/cancerregulome3/TCGA/outputs/$tumor
-	## cd /titan/cancerregulome14/TCGAfmp_outputs/$tumor
+	## cd $TCGAFMP_DATA_DIR/$tumor
 	cd $TCGAFMP_OUTPUTS/$tumor
 
 	echo " "
@@ -199,8 +193,6 @@ for tumor in $tumors
 	$TCGAFMP_ROOT_DIR/shscript/Item_Blacklist.sh $tumor $TCGAFMP_ROOT_DIR/shscript/blacklist.spec >& Item_Blacklist.$curDate.log
 	#### cd /users/sreynold/code/AnnotM/
 	#### ./Item_Blacklist.sh $tumor blacklist
-	#### mv $tumor.blacklist.samples.tsv /titan/cancerregulome3/TCGA/outputs/$tumor/$curDate/$tumor.blacklist.samples.$curDate.tsv
-	#### cd /titan/cancerregulome3/TCGA/outputs/$tumor/$curDate
 	rm -fr cTmp.tsv
 	cp finalClin.$tumor.$curDate.tsv cTmp.tsv
 	rm -fr filterSamp.clin.$curDate.log

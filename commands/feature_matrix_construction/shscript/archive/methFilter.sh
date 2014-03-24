@@ -8,7 +8,7 @@
 
 ## methFile=/users/sreynold/to_be_checked_in/TCGAfmp/main/skcm.meth.top05.annot.tsv
 methFile=/local/sreynold/scratch/skcm.jhu-usc.edu__humanmethylation450__methylation.450k_test.tsv
-## gexpFile=/titan/cancerregulome14/TCGAfmp_outputs/skcm/test3/skcm.gexp.seq.tmpData2.tsv
+## gexpFile=$TCGAFMP_DATA_DIR/skcm/test3/skcm.gexp.seq.tmpData2.tsv
 gexpFile=/local/sreynold/scratch/skcm.gexp.seq.tmpData2.tsv
 
 rm -fr /local/sreynold/scratch/qq*
@@ -16,8 +16,8 @@ rm -fr /local/sreynold/scratch/qq*
 head -1 $methFile >& /local/sreynold/scratch/qq01
 head -1 $gexpFile >& /local/sreynold/scratch/qq02
 
-~/scripts/transpose /local/sreynold/scratch/qq01 | cut -c-15 >& /local/sreynold/scratch/qq03
-~/scripts/transpose /local/sreynold/scratch/qq02 | cut -c-15 >& /local/sreynold/scratch/qq04
+$TCGA_ROOT_DIR/shscript/tcga_fmp_transpose.sh /local/sreynold/scratch/qq01 | cut -c-15 >& /local/sreynold/scratch/qq03
+$TCGA_ROOT_DIR/shscript/tcga_fmp_transpose.sh /local/sreynold/scratch/qq02 | cut -c-15 >& /local/sreynold/scratch/qq04
 
 cat /local/sreynold/scratch/qq03 /local/sreynold/scratch/qq04 | sort | uniq -c | sort -nr | grep " 2 " | cut -c9- | sort >& /local/sreynold/scratch/qq05
 
@@ -29,8 +29,8 @@ rm -fr /local/sreynold/scratch/????File.h?
 head -1 $methFile.qq.tsv >& /local/sreynold/scratch/methFile.h1
 head -1 $gexpFile.qq.tsv >& /local/sreynold/scratch/gexpFile.h1
 
-~/scripts/transpose /local/sreynold/scratch/methFile.h1 | cut -c-15 >& /local/sreynold/scratch/methFile.h2
-~/scripts/transpose /local/sreynold/scratch/gexpFile.h1 | cut -c-15 >& /local/sreynold/scratch/gexpFile.h2
+$TCGA_ROOT_DIR/shscript/tcga_fmp_transpose.sh /local/sreynold/scratch/methFile.h1 | cut -c-15 >& /local/sreynold/scratch/methFile.h2
+$TCGA_ROOT_DIR/shscript/tcga_fmp_transpose.sh /local/sreynold/scratch/gexpFile.h1 | cut -c-15 >& /local/sreynold/scratch/gexpFile.h2
 
 ## at this point the methFile.h2 and gexpFile.h2 should be identical or else we should not go forward !!!
 

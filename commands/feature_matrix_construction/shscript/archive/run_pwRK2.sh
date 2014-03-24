@@ -39,7 +39,7 @@ for ((i=1; i<$#; i++))
                 for st in TP TM TB allT
                     do
 
-                        if [ -f /titan/cancerregulome14/TCGAfmp_outputs/$tumor/$curDate/$tumor.$p.$curDate.$st.tsv ]
+                        if [ -f $TCGAFMP_DATA_DIR/$tumor/$curDate/$tumor.$p.$curDate.$st.tsv ]
                             then
 
                                 echo " "
@@ -48,7 +48,7 @@ for ((i=1; i<$#; i++))
                                 date
                                 echo $tumor $p $st
                                 nohup python $TCGAFMP_ROOT_DIR/main/run_pwRK2.py --pvalue 1.e-06 --all --forRE \
-                                        --tsvFile /titan/cancerregulome14/TCGAfmp_outputs/$tumor/$curDate/$tumor.$p.$curDate.$st.tsv &
+                                        --tsvFile $TCGAFMP_DATA_DIR/$tumor/$curDate/$tumor.$p.$curDate.$st.tsv &
                                 sleep 2000
 
                             fi
