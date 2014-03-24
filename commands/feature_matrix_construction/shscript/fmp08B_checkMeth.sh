@@ -68,6 +68,12 @@ for ((i=1; i<$#; i++))
 			echo $h
 			python $TCGAFMP_ROOT_DIR/main/checkMethCnvr.py $f $g >& $h 
 
+                        ## and add the summary methylation feature
+                        rm -fr sm.tsv
+                        python $TCGAFMP_ROOT_DIR/main/summaryMeth.py $g sm.tsv >> $h
+                        rm -fr $g
+                        mv sm.tsv $g
+
 		fi
 
 	    done
