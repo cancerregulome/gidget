@@ -168,10 +168,13 @@ def parseBestClusFiles(lastDir, outDir, zCancer):
                     elif (fName.find("CopyNumber_Clustering_CNMF_thresholded.Level_4") >= 0):
                         clusType = "cnvr_CNMF"
                     else:
-                        print " ERROR in parseBestClusFiles ... failed to find magic string ??? "
-                        print fName
-                        print d2Name
-                        sys.exit(-1)
+                        print " --> failed to find magic string ... skipping ... "
+                        continue
+                        if ( 0 ):
+                            print " ERROR in parseBestClusFiles ... failed to find magic string ??? "
+                            print fName
+                            print d2Name
+                            sys.exit(-1)
 
                     # 03may13 ... need to chop up the filename and use some information
                     # from the filename for the feature name ...
