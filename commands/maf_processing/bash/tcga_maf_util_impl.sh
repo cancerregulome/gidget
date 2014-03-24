@@ -34,6 +34,13 @@ TCGAMAF_IMPORTED_UTILS=
 
 
 # TODO more helpful error messages
+
+# examples for currently filesystem layout:
+
+# TGCAMAF_DATA_DIR=$TCAGMAF_ROOT_DIR/data
+# TGCAMAF_REFERENCES_DIR=$TCAGMAF_ROOT_DIR/reference
+# TGCAMAF_TOOLS_DIR=$TCAGMAF_ROOT_DIR/tools
+# TGCAMAF_SCRIPTS_DIR=$TCAGMAF_ROOT_DIR/src
 verifyRequiredVariables () {
     : ${LD_LIBRARY_PATH:?" environment variable must be set and non-empty"}
 

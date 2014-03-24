@@ -7,17 +7,17 @@ source ${TCGAFMP_ROOT_DIR}/bash/tcga_maf_util.sh
 
 # Cronjob for downloading reference data against 
 
-if [ -z $MAF_REFERENCES_DIR ]; then 	# -n tests to see if the argument is non empty
+if [ -z $TCGAMAF_REFERENCES_DIR ]; then 	# -n tests to see if the argument is non empty
 	echo "!! Reference directory not defined! Aborting."
 	exit
 fi
 
-if [ -z $MAF_SCRIPTS_DIR ]; then 	# -n tests to see if the argument is non empty
+if [ -z $TCGAMAF_SCRIPTS_DIR ]; then 	# -n tests to see if the argument is non empty
 	echo "!! Script directory not defined! Aborting."
 	exit
 fi
 
-cd "$MAF_REFERENCES_DIR"
+cd "$TCGAMAF_REFERENCES_DIR"
 
 rm -rf gene2accession*
 rm -rf gene2refseq* 
@@ -87,6 +87,7 @@ done
 
 
 # TODO: make sure that downstream scripts are okay with the versioned filenames.
+
 # Use the above resources to map genes to uniprot protein accessions
 #sh "$MAF_SCRIPTS_DIR/bash/prepareEntrezGeneUniprotReferences.sh"
 
