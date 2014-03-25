@@ -16,21 +16,21 @@ class mdanderson_org_mda_rppa_core(technology_type):
         Constructor
         '''
         technology_type.__init__(self, config, platformID)
-        self.createGeneList = True
         self.configuration.update(config.items('mdanderson_org_mda_rppa_core'))
+        self.fname2row = {}
+        self.topRowIndex = 0
 
     def includeFile(self, tokens):
+        barcode = tokens[self.iBarcode]
         if ( miscTCGA.looks_like_uuid(tokens[self.iBarcode]) ):
             barcode = miscTCGA.uuid_to_barcode(tokens[self.iBarcode])
         elif ( not tokens[self.iBarcode].startswith("Control") ):
             print " ERROR in handling RPPA data ??? this field in the SDRF should be a UUID ??? <%s> " % tokens[self.iBarcode]
             mess = '(f) NOT including this file ... ', self.iFilename, tokens[self.iFilename], self.iBarcode, tokens[self.iBarcode], self.iOther, tokens[self.iOther]
             return (None, None, None, None, False, mess)
-        else:
-            barcode = tokens[self.iBarcode]
 
         if not barcode.startswith("TCGA-"):
-            mess = '(e) NOT including this file ... ', self.iFilename, tokens[self.iFilename], self.iBarcode, tokens[self.iBarcode], barcode, self.iOther, tokens[self.iOther]
+            mess = '(e) NOT including this file ... ', self.iFilename, tokens[self.iFilename], self.iBarcode, tokens[self.iBarcode], self.iOther, tokens[self.iOther]
             return (None, None, None, None, False, mess)
         return technology_type.includeFile(self, tokens)
 
@@ -51,24 +51,45 @@ class mdanderson_org_mda_rppa_core(technology_type):
     #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
     def postprocess(self, dataMatrix, geneList, sampleList):
         # trim the data matrix to the actual found genes
-        dataMatrix = dataMatrix[0:len(geneList)]
-        return technology_type.postprocess(self, dataMatrix, geneList, sampleList)
+        print 'total genes: %i mapped genes: %i' % (len(self.genename2geneinfo), len(self.fname2row))
+        dataMatrix = dataMatrix[0:self.topRowIndex]
+        # fill in NA for where the gene wasn't used
+        for row in range(len(dataMatrix)):
+            for col in range(len(dataMatrix[row])):
+                if '' == dataMatrix[row][col]:
+                    dataMatrix[row][col] = self.NA_VALUE
+        # and return the genelist with the complete set of genes from all archives
+        # in the order that they appeared
+        return technology_type.postprocess(self, dataMatrix, self.myGeneList, sampleList)
     
     #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
+    def readNullValue(self, tokens, dataMatrix, sampleIndex, e):
+        raise NotImplementedError('readNullValue not implemented for this subclass')
+
+    #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
+    def _readDatumDetails(self, info, tokens, dataMatrix, sampleIndex):
+        raise NotImplementedError('_readDatumDetails not implemented for this subclass')
+    
+    #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
+    def _readGeneDetails(self, tokens, geneList):
+        raise NotImplementedError('_readDatumDetails not implemented for this subclass')
+    
+    #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
+    # do not call _readGeneDetails(), _readDatumDetails() or readNullValue(),  
+    # have all the necessarydetails to decide what row to actually write to
     def _readDataDetails(self, info, tokens, geneList, dataMatrix, sampleIndex):
-        if self.createGeneList:
-            gene = self.genename2geneinfo[tokens[self.tokenGeneIndex]]
+        gene = self.genename2geneinfo[tokens[self.tokenGeneIndex]]
+        if not self.fname2row.has_key(gene):
             geneList += [gene]
             self.myGeneList += [gene]
-            try:
-                self._readDatumDetails(info, tokens, dataMatrix, sampleIndex)
-            except Exception as e:
-                self.readNullValue(tokens, dataMatrix, sampleIndex, e)
-            self.curGeneCount += 1
-        else:
-            if self.genename2geneinfo.get(tokens[self.tokenGeneIndex]):
-                technology_type._readDataDetails(self, info, tokens, geneList, dataMatrix, sampleIndex)
-    
-    #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
-    def postReadFile(self):
-        self.createGeneList = False
+            self.fname2row[gene] = self.topRowIndex
+            self.topRowIndex += 1
+        row = self.fname2row[gene]
+        self.curGeneCount += 1
+        try:
+            dataMatrix[row][sampleIndex] = float(tokens[self.tokenDatumIndex])
+        except Exception as e:
+            if (len(tokens) == 1 or tokens[1] == 'null' or tokens[1] == 'NA'):
+                dataMatrix[row][sampleIndex] = self.NA_VALUE
+            else:
+                raise ValueError('ERROR converting token to float ??? %s: token length: %i tokens: %s', (str(self), len(tokens), tokens), e)
