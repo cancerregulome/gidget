@@ -277,10 +277,23 @@ def get_uuid2barcode_dict():
         nowTokens = tNow.split()
         metTokens = tMet.split()
         refreshFlag = 0
+        ## nowTokens example: ['Tue', 'Mar', '25', '10:14:44', '2014']
+        ## check year token
+        if (nowTokens[4] > metTokens[4]):
+            refreshFlag = 1
+        ## check month token
         if (nowTokens[1] != metTokens[1]):
             refreshFlag = 1
+        ## check day of month token
         if (int(nowTokens[2]) > int(metTokens[2])):
             refreshFlag = 1
+        if ( not refreshFlag ):
+            nowHr = nowTokens[3].split(':')
+            metHr = metTokens[3].split(':')
+            ## if we don't need to refresh, it might still be a 
+            ## good idea to pause briefly ...
+            if ( nowHr[0] == metHr[0] ):
+                time.sleep(20)
     except:
         refreshFlag = 1
 
