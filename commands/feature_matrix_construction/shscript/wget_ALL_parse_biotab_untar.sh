@@ -32,12 +32,12 @@ echo "===wget_ALL==="
 ./wget_ALL.sh $TCGA_DATA_TOP_DIR
 
 date
-echo "===parse_biotab==="
-./parse_biospecimen_biotab_files.sh $TCGA_DATA_TOP_DIR $TCGA_FMP_OUTPUT_DIR
-
-date
 echo "===untar==="
 ./untar.mirror_date.sh $TCGA_DATA_TOP_DIR
+
+date
+echo "===parse_biotab==="
+./parse_biospecimen_biotab_files.sh $TCGA_DATA_TOP_DIR $TCGA_FMP_OUTPUT_DIR
 
 cd $firstDir
 
