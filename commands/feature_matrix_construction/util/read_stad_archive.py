@@ -9,7 +9,6 @@ import urllib
 
 from record_info import recordInfo
 
-
 def isExcluded(ri, excludes, value, barcode):
     excl = False
     for exclude in excludes:
@@ -65,10 +64,13 @@ def main(latest, excbarcodes, platform2includes, platforms2platform):
     platforms = set()
     count = 0
     countNoPlatform = 0
-    batches = [0,48,57,95,129,152,165,211,220,242,257,269]
+# for STAD datafreeze
+#    batches = [0,48,57,95,129,152,165,211,220,242,257,269]
+# for ESCA
+    batches = []
 
     if writeArchive:
-        archiveFile = open(latest, 'w')
+        archiveFile = open('archives/' +latest, 'w')
         archiveFile.write(url.readline())
     else:
         url.readline()
@@ -80,7 +82,7 @@ def main(latest, excbarcodes, platform2includes, platforms2platform):
         count += 1
         
         ri = recordInfo(line.strip('\n').split('\t'))
-        if '-' == ri.batch or int(ri.batch) not in batches:
+        if '-' == ri.batch or (0 < len(batches) and int(ri.batch) not in batches):
             continue
         if '0' == ri.batch and ri.barcode[13] != '2':
             # we only expect cell lines in batch 0
@@ -142,5 +144,5 @@ def main(latest, excbarcodes, platform2includes, platforms2platform):
     return includeexclude, platforms2samples, participant2sample2aliquot2ris
     
 if __name__ == '__main__':
-    # STAD.freeze.2013.349.txt
+    # ESCA.freeze.2014.83.txt
     main(sys.argv[1])
