@@ -1,0 +1,12 @@
+# required environmental variables
+#
+# all scripts should reference the project's utility functions,
+# which should verify that all of these variables here have been set
+
+# VAR_NAME\tdescription
+
+TCGAFMP_ROOT_DIR	path to the top level of the feature matrix project's code
+TCGAFMP_DATA_DIR	path to general data directory, including feature matrix outputs
+TCGAFMP_DCC_MIRROR	path to local DCC mirror
+TCGAFMP_DCC_SNAPSHOT	path to local DCC snapshot
+TCGAFMP_FIREHOUSE_MIRROR	path to local Firehouse mirror
