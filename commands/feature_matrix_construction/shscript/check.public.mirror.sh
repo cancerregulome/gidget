@@ -4,7 +4,7 @@
 : ${TCGAFMP_ROOT_DIR:?" environment variable must be set and non-empty; defines the path to the TCGA FMP scripts directory"}
 source ${TCGAFMP_ROOT_DIR}/shscript/tcga_fmp_util.sh
 
-cd $TCGAFMP_DCC_MIRROR/public/tumor
+cd ${TCGAFMP_DCC_REPOSITORIES}/dcc-mirror/public/tumor
 
 ## note that the assumption below is that all <name>.tar.gz files un-tar
 ## to create a directory called <name>, but this is not true for the
@@ -39,7 +39,7 @@ for arg in `find . -type d`
 			    fi
 		    fi
 	    done
-	cd $TCGAFMP_DCC_MIRROR/public/tumor
+	cd ${TCGAFMP_DCC_REPOSITORIES}/public/tumor
     done
 
 date

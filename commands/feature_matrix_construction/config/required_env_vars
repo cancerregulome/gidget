@@ -7,7 +7,7 @@
 
 TCGAFMP_ROOT_DIR	path to the top level of the feature matrix project's code
 TCGAFMP_DATA_DIR	path to general data directory, including feature matrix outputs
-TCGAFMP_DCC_MIRROR	path to local DCC mirror
+
 TCGAFMP_DCC_SNAPSHOT	path to local DCC snapshot
 
 TCGAFMP_DCC_REPOSITORIES	path to directory which contains subdirectories such as "dcc-mirror", "dcc-snapshot", "dcc-snapshot-20sep13", etc; for example: ".../TCGA/repositories"
