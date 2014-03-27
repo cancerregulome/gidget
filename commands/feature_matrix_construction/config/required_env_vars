@@ -10,3 +10,6 @@ TCGAFMP_DATA_DIR	path to general data directory, including feature matrix output
 TCGAFMP_DCC_MIRROR	path to local DCC mirror
 TCGAFMP_DCC_SNAPSHOT	path to local DCC snapshot
 TCGAFMP_FIREHOSE_MIRROR	path to local Firehouse mirror
+
+# scratch space
+TCGAFMP_SCRATCH	path to large scratch space (some scripts such as pairwise need more than /tmp); for example: ".../TCGA/pw_scratch"
