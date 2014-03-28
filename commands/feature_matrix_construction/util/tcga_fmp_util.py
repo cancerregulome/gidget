@@ -5,7 +5,7 @@
 
 # all python scripts in the TCGA FMP project should include this line:
 
-# from tcga_fmp_util.py import tcgaFMPVars
+# from tcga_fmp_util import tcgaFMPVars
 
 # which checks to make sure that all required environmental variables are defined,
 # and if so, populates a dictionary "tcgaFMPVars" the the env var names and values 
