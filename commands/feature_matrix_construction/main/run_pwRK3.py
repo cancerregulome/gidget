@@ -8,6 +8,7 @@ import os.path
 import sys
 import time
 
+from tcga_fmp_util.py import tcgaFMPVars
 import miscIO
 
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
@@ -190,7 +191,7 @@ def preProcessTSV(tsvFile):
         (status, output) = commands.getstatusoutput(cmdString)
 
         print " creating bin file "
-        cmdString = "/users/rkramer/bin/python3 /titan/cancerregulome8/TCGA/scripts/prep4pairwise.py %s" % tsvFile
+        cmdString = "/users/rkramer/bin/python3 %s/prep4pairwise.py %s" % (tcgaFMPVars['TCGAFMP_PAIRWISE_ROOT'], tsvFile)
         (status, output) = commands.getstatusoutput(cmdString)
         if (status != 0):
             print " (a) ERROR ??? failed to execute command ??? "
@@ -221,7 +222,7 @@ def preProcessTSV(tsvFile):
 
 def getLocalScratchDir():
 
-    cr13scratch = "/titan/cancerregulome13/TCGA/pw_scratch"
+    defaultscratch = tcgaFMPVars['TCGAFMP_SCRATCH']
 
     try:
         dirName = "/local/" + getpass.getuser()
@@ -233,8 +234,8 @@ def getLocalScratchDir():
         print " local scratch directory : ", dirName
         return ( dirName )
     except:
-        print " local scratch directory : ", cr13scratch
-        return ( cr13scratch )
+        print " local scratch directory : ", defaultscratch
+        return ( defaultscratch )
 
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 
@@ -260,8 +261,8 @@ def tuplesOverlap(iTuple, jTuple):
     return (1)
 
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
-#  tmpDir13 : </titan/cancerregulome13/TCGA/pw_scratch/YNNROlQo.1388771679.87.scratch>
-#  localDir : </local/sreynold/pw_scratch/>
+#  tmpDir13 : <.../TCGA/pw_scratch/YNNROlQo.1388771679.87.scratch>
+#  localDir : </local/<user>/pw_scratch/>
 
 def copyScratchFiles ( tmpDir13, localDir ):
 
@@ -497,7 +498,7 @@ if __name__ == "__main__":
     print " randomly generated job name : <%s> " % curJobName
     print " "
 
-    tmpDir13 = "/titan/cancerregulome13/TCGA/pw_scratch/%s" % curJobName
+    tmpDir13 = "%s/%s" % (tcgaFMPVars['TCGAFMP_SCRATCH'], curJobName)
     cmdString = "mkdir %s" % tmpDir13
     (status, output) = commands.getstatusoutput(cmdString)
     if (not os.path.exists(tmpDir13)):
@@ -548,7 +549,7 @@ if __name__ == "__main__":
     pythonbin = "/tools/bin/python2.7"
 
     golempwd = "PASSWD_HERE"
-    fhC = file ( "/titan/cancerregulome13/TCGA/pw_scratch/config", 'r' )
+    fhC = file (tcgaFMPVars['TCGAFMP_SCRATCH'] + "/config", 'r' )
     aLine = fhC.readline()
     fhC.close()
     aLine = aLine.strip()
@@ -573,8 +574,7 @@ if __name__ == "__main__":
         while iStart < numFeat:
             iStop = min ( (iStart + nFpJ), numFeat )
             outName = tmpDir13 + "/" + str(numJobs) + ".pw"
-            cmdString = "1 /titan/cancerregulome8/TCGA/scripts/pairwise-1.1.2"
-            ## cmdString = "1 /titan/cancerregulome8/TCGA/scripts/pairwise"
+            cmdString = "1 " + tcgaFMPVars['TCGAFMP_PAIRWISE_ROOT'] + "/pairwise-1.1.2"
             cmdString += " --pvalue %g --min-ct-cell %d --min-mx-cell %d --min-samples %d" \
                 % (args.pvalue, args.min_ct_cell, args.min_mx_cell, args.min_samples)
             cmdString += " --outer %d:%d:1 --inner +1::1  %s  %s " \
@@ -600,8 +600,7 @@ if __name__ == "__main__":
         for iTuple in iRanges1:
             for jTuple in iRanges2:
                 outName = tmpDir13 + "/" + str(numJobs) + ".pw"
-                cmdString = "1 /titan/cancerregulome8/TCGA/scripts/pairwise-1.1.2"
-                ## cmdString = "1 /titan/cancerregulome8/TCGA/scripts/pairwise"
+                cmdString = "1 " + tcgaFMPVars['TCGAFMP_PAIRWISE_ROOT'] + "/pairwise-1.1.2"
                 cmdString += " --pvalue %g --min-ct-cell %d --min-mx-cell %d --min-samples %d" \
                     % (args.pvalue, args.min_ct_cell, args.min_mx_cell, args.min_samples)
 
@@ -636,8 +635,7 @@ if __name__ == "__main__":
         # handle the single index vs all option ...
         # ( note that the single-index vs a specified "type" is handled above )
         outName = tmpDir13 + "/" + str(index) + ".pw"
-        cmdString = "1 /titan/cancerregulome8/TCGA/scripts/pairwise-1.1.2"
-        ## cmdString = "1 /titan/cancerregulome8/TCGA/scripts/pairwise"
+        cmdString = "1 " + tcgaFMPVars['TCGAFMP_PAIRWISE_ROOT'] + "/pairwise-1.1.2"
         cmdString += " --pvalue %g --min-ct-cell %d --min-mx-cell %d --min-samples %d" \
             % (args.pvalue, args.min_ct_cell, args.min_mx_cell, args.min_samples)
         cmdString += " --outer %d:%d:1 --inner 0::1  %s  %s " \

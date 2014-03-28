@@ -1,5 +1,6 @@
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 
+from tcga_fmp_util.py import tcgaFMPVars
 import arffIO
 import miscClin
 import miscTCGA
@@ -373,7 +374,6 @@ def getTumorBarcodes(mafFilename):
 #
 # this program loops over the tumor types in the cancerDirNames list and
 # looks for all available *clinical*.xml files in the current "dcc-snapshot"
-## on /titan/cancerregulome7
 #
 # all of the information is bundled into a dictionary called allClinDict
 #
@@ -484,8 +484,8 @@ if __name__ == "__main__":
     fh.close()
 
     print " annotating output file ... "
-    cmdString = "python $TCGAFMP_ROOT_DIR/main/annotateTSV.py %s hg19 %s" % (
-        tmpFilename, outFilename)
+    cmdString = "python %s/main/annotateTSV.py %s hg19 %s" % (
+        tcgaFMPVar['TCGAFMP_ROOT_DIR'], tmpFilename, outFilename)
     print cmdString
     (status, output) = commands.getstatusoutput(cmdString)
 

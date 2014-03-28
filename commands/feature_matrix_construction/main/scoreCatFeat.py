@@ -9,6 +9,7 @@ import os.path
 import sys
 import time
 
+from tcga_fmp_util.py import tcgaFMPVars
 import miscIO
 
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
@@ -161,7 +162,7 @@ def preProcessTSV(tsvFile):
         (status, output) = commands.getstatusoutput(cmdString)
 
         print " creating bin file "
-        cmdString = "/users/rkramer/bin/python3 /titan/cancerregulome8/TCGA/scripts/prep4pairwise.py %s" % tsvFile
+        cmdString = "/users/rkramer/bin/python3 %s/prep4pairwise.py %s" % (tcgaFMPVars['TCGAFMP_PAIRWISE_ROOT'], tsvFile)
         (status, output) = commands.getstatusoutput(cmdString)
         if (status != 0):
             print " ERROR ??? failed to execute command ??? "
@@ -361,7 +362,7 @@ if __name__ == "__main__":
     print " randomly generated job name : <%s> " % curJobName
     print " "
 
-    tmpDir = "/titan/cancerregulome13/TCGA/pw_scratch/%s" % curJobName
+    tmpDir = "%s/%s" % (tcgaFMPVars['TCGAFMP_SCRATCH'], curJobName)
     cmdString = "mkdir %s" % tmpDir
     (status, output) = commands.getstatusoutput(cmdString)
     if (not os.path.exists(tmpDir)):
@@ -390,7 +391,7 @@ if __name__ == "__main__":
     pythonbin = "/tools/bin/python2.7"
 
     golempwd = "PASSWD_HERE"
-    fhC = file ( "/titan/cancerregulome13/TCGA/pw_scratch/config", 'r' )
+    fhC = file ( tcgaFMPVars['TCGAFMP_SCRATCH'] + "/config", 'r' )
     aLine = fhC.readline()
     fhC.close()
     aLine = aLine.strip()
@@ -400,7 +401,7 @@ if __name__ == "__main__":
     numJobs = 0
     for index in indexList:
         outName = tmpDir + "/" + str(index) + ".pw"
-        cmdString = "1 /titan/cancerregulome8/TCGA/scripts/pairwise-1.1.2"
+        cmdString = "1 " + tcgaFMPVars['TCGAFMP_PAIRWISE_ROOT'] + "/pairwise-1.1.2"
         cmdString += " --pvalue 1. --min-ct-cell %d --min-mx-cell %d --min-samples %d" \
             % (args.min_ct_cell, args.min_mx_cell, args.min_samples)
         cmdString += " --outer %d:%d:1 --inner 0::1  %s  %s " \

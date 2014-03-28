@@ -9,6 +9,7 @@
 import sys
 
 # these are my local ones
+from tcga_fmp_util.py import tcgaFMPVars
 import chrArms
 import refData
 import tsvIO
@@ -298,12 +299,13 @@ if __name__ == "__main__":
     fhOut = file(mapFile, 'w')
 
     # and get the coordinates for these genes ...
-    gafFilename = "/titan/cancerregulome3/TCGA/GAF/GAF3.0/all.gaf"
-    gencodeFilename = "/titan/cancerregulome9/workspaces/bioinformatics_references/gencode/gencode.v19.gene.gtf"
-    refGeneFilename = "/titan/cancerregulome3/TCGA/hg19/refGene.txt"
-    cybFilename = "/titan/cancerregulome3/TCGA/hg19/cytoBand.hg19.txt"
+    bioinformaticsReferencesDir = tcgaFMPVars['TCGAFMP_BIOINFORMATICS_REFERENCES']
+    gafFilename = bioinformaticsReferencesDir + "/GAF/GAF3.0/all.gaf"
+    gencodeFilename = bioinformaticsReferencesDir + "/gencode/gencode.v19.gene.gtf"
+    refGeneFilename = bioinformaticsReferencesDir + "/hg19/refGene.txt"
+    cybFilename = bioinformaticsReferencesDir + "/hg19/cytoBand.hg19.txt"
 
-    infFilename = "/titan/cancerregulome3/TCGA/ftp.ncbi.nlm.nih.gov/gene/DATA/gene_info"
+    infFilename = bioinformaticsReferencesDir + "/ftp.ncbi.nlm.nih.gov/gene/DATA/gene_info"
 
     print " "
     print " Running : %s %s %s %s %s " % (sys.argv[0], sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4])

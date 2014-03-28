@@ -1,5 +1,6 @@
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 
+from tcga_fmp_util.py import tcgaFMPVars
 import chrArms
 import miscMath
 import miscTCGA
@@ -1518,8 +1519,7 @@ if __name__ == "__main__":
 
     # 22jun : switching to new firehose analyses that were downloaded using
     # firehose_get -b analyses latest
-    firehoseTopDir = "/titan/cancerregulome9/TCGA/firehose/"
-    ## outDir = "/titan/cancerregulome3/TCGA/outputs/"
+    firehoseTopDir = tcgaFMPVars['TCGAFMP_FIREHOSE_MIRROR']+ "/"
     outDir = "./"
 
     # first thing we have to do is find the most recent top-level directory

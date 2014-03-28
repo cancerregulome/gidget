@@ -1,5 +1,6 @@
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 
+from tcga_fmp_util.py import tcgaFMPVars
 import miscMath
 import miscTCGA
 
@@ -226,7 +227,7 @@ def lookAtData(dataVec):
 
 def readNameMapDict():
 
-    fh = file("/titan/cancerregulome9/TCGA/firehose/metadata/name_map.tsv")
+    fh = file(tcgaFMPVars['TCGAFMP_FIREHOSE_MIRROR'] + "/metadata/name_map.tsv")
     for aLine in fh:
         aLine = aLine.strip()
         tokenList = aLine.split('\t')
@@ -506,10 +507,8 @@ def parseMethylationDataFiles(lastDir, outDir, zCancer, subsetName, suffixString
 
                             # --------------------------------------
                             # do we need some metadata?
-                            ## metaData = getMetaDataInfo ( "/titan/cancerregulome9/TCGA/firehose/metadata/meth.probes.11sep13.txt" )
-                            ## metaData = getMetaDataInfo ( "/titan/cancerregulome9/TCGA/firehose/metadata/meth.probes.04oct13.txt" )
                             metaData = getMetaDataInfo(
-                                "/titan/cancerregulome9/TCGA/firehose/metadata/meth.probes.15oct13.txt")
+                                tcgaFMPVars['TCGAFMP_FIREHOSE_MIRROR'] + "/metadata/meth.probes.15oct13.txt")
 
                             # --------------------------------------
                             # ok, time to parse the input file and write the
@@ -831,7 +830,7 @@ def getGeneAntibodyMap():
 
     geneAntibodyMap = {}
 
-    fh = file( "/titan/cancerregulome9/workspaces/bioinformatics_references/tcga_platform_genelists/MDA_antibody_annotation_2014_03_04.txt" )
+    fh = file( tcgaFMPVars['TCGAFMP_BIOINFORMATICS_REFERENCES'] + "/tcga_platform_genelists/MDA_antibody_annotation_2014_03_04.txt" )
     for aLine in fh:
         aLine = aLine.strip()
         tokenList = aLine.split('\t')
@@ -1306,7 +1305,7 @@ if __name__ == "__main__":
             else:
                 # if we are not told where to get the stddata, then get the
                 # most recent ...
-                firehoseTopDir = "/titan/cancerregulome9/TCGA/firehose/"
+                firehoseTopDir = tcgaFMPVars['TCGAFMP_FIREHOSE_MIRROR'] + "/"
                 topDir = getMostRecentDir(firehoseTopDir, cancerDirNames)
 
             if (len(sys.argv) == 5):
@@ -1318,7 +1317,6 @@ if __name__ == "__main__":
             else:
                 subsetName = ""
 
-    ## outDir = "/titan/cancerregulome3/TCGA/outputs/"
     outDir = "./"
 
     # outer loop over tumor types

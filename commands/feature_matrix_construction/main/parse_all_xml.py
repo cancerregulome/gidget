@@ -1,5 +1,6 @@
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 
+from tcga_fmp_util.py import tcgaFMPVars
 import arffIO
 import miscClin
 import miscTCGA
@@ -353,7 +354,7 @@ def walk(parent, xmlDict, xmlFlags):
 
 def writeDataFreezeLog(fhLog, fName):
 
-    ## fName = "/titan/cancerregulome11/TCGA/repositories/dcc-snapshot/public/tumor/brca/bcr/nationwidechildrens.org/bio/clin/nationwidechildrens.org_BRCA.bio.Level_1.120.20.0/nationwidechildrens.org_clinical.TCGA-A2-A1FZ.xml"
+    ## fName = ".../TCGA/repositories/dcc-snapshot/public/tumor/brca/bcr/nationwidechildrens.org/bio/clin/nationwidechildrens.org_BRCA.bio.Level_1.120.20.0/nationwidechildrens.org_clinical.TCGA-A2-A1FZ.xml"
 
     i1 = len(fName) - 1
     while (fName[i1] != '/'):
@@ -384,7 +385,7 @@ def getFeatNamesDict():
     if ( featNamesLoaded ):
         return
     try:
-        fh = file ("/titan/cancerregulome11/TCGA/repositories/bio_clin/featNames.tsv")
+        fh = file (tcgaFMPVars['TCGAFMP_DCC_REPOSITORIES'] + "/bio_clin/featNames.tsv")
         for aLine in fh:
             tokenList = aLine.split()
             featName = tokenList[1]
@@ -465,7 +466,7 @@ def fixUpFeatureNames(allClinDict):
 
 def parseOneXmlFile(xmlFilename):
 
-    ## xmlFilename = "/titan/cancerregulome7/TCGA/repositories/dcc-mirror/coad/bcr/intgen.org/bio/clin/intgen.org_COAD.bio.Level_1.41.3.0/intgen.org_clinical.TCGA-AA-3984.xml"
+    ## xmlFilename = ".../TCGA/repositories/dcc-mirror/coad/bcr/intgen.org/bio/clin/intgen.org_COAD.bio.Level_1.41.3.0/intgen.org_clinical.TCGA-AA-3984.xml"
 
     print " "
     print " --------------------------------------------------------------------------------- "
@@ -516,7 +517,6 @@ def parseOneXmlFile(xmlFilename):
 #
 # this program loops over the tumor types in the cancerDirNames list and
 # looks for all available *clinical*.xml files in the current "dcc-snapshot"
-## on /titan/cancerregulome7
 #
 # all of the information is bundled into a dictionary called allClinDict
 #
@@ -542,7 +542,7 @@ if __name__ == "__main__":
             else:
                 snapshotName = "dcc-snapshot"
 
-            ## outName = "/titan/cancerregulome3/TCGA/outputs/" + tumorType + "/" + tumorType + "." + outSuffix
+            ## outName = ".../TCGA/outputs/" + tumorType + "/" + tumorType + "." + outSuffix
             outName = "./" + tumorType + "." + outSuffix
 
     # open output header files ...
@@ -572,8 +572,8 @@ if __name__ == "__main__":
         print ' '
         print ' OUTER LOOP over CANCER TYPES ... ', zCancer
 
-        ## topDir = "/titan/cancerregulome11/TCGA/repositories/dcc-snapshot/public/tumor/" + zCancer + "/bcr"
-        topDir = "/titan/cancerregulome11/TCGA/repositories/" + \
+        ## topDir = ".../TCGA/repositories/dcc-snapshot/public/tumor/" + zCancer + "/bcr"
+        topDir = tcgaFMPVars['TCGAFMP_DCC_REPOSITORIES'] + "/" + \
             snapshotName + "/public/tumor/" + zCancer + "/bcr"
 
         # get the contents of the bcr directory and loop over the subdirectories which
@@ -603,7 +603,7 @@ if __name__ == "__main__":
 
             # finally, at this level is where we look for "Level_1" archives, so d2Name
             # will, for example, look like:
-            # /titan/cancerregulome7/TCGA/repositories/dcc-snapshot/coad/bcr/intgen.org/bio/clin/intgen.org_COAD.bio.Level_1.45.6.0
+            # .../TCGA/repositories/dcc-snapshot/coad/bcr/intgen.org/bio/clin/intgen.org_COAD.bio.Level_1.45.6.0
             for d2Name in d2.dirs():
                 print '        ', d2Name
                 if (d2Name.find("Level_1") >= 0):

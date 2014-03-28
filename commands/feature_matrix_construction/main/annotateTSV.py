@@ -4,6 +4,7 @@
 import sys
 
 # these are my local ones
+from tcga_fmp_util.py import tcgaFMPVars
 import chrArms
 import refData
 import tsvIO
@@ -824,19 +825,20 @@ if __name__ == "__main__":
         nameChangeFlag = "NO"
 
     # and get the coordinates for these genes ...
+    bioinformaticsReferencesDir = tcgaFMPVars['TCGAFMP_BIOINFORMATICS_REFERENCES']
     if (build == 'hg18'):
-        gafFilename = "/titan/cancerregulome3/TCGA/GAF/Feb2011/GAF.hg18.Feb2011/GAF_bundle/outputs/TCGA.hg18.Feb2011.gaf"
+        gafFilename = bioinformaticsReferencesDir + "/GAF/Feb2011/GAF.hg18.Feb2011/GAF_bundle/outputs/TCGA.hg18.Feb2011.gaf"
         gencodeFilename = ""
-        cybFilename = "/titan/cancerregulome3/TCGA/hg18/cytoBand.hg18.txt"
+        cybFilename = bioinformaticsReferencesDir + "/hg18/cytoBand.hg18.txt"
     elif (build == 'hg19'):
-        gafFilename = "/titan/cancerregulome3/TCGA/GAF/GAF3.0/all.gaf"
-        gencodeFilename = "/titan/cancerregulome9/workspaces/bioinformatics_references/gencode/gencode.v19.gene.gtf"
-        refGeneFilename = "/titan/cancerregulome3/TCGA/hg19/refGene.txt"
-        cybFilename = "/titan/cancerregulome3/TCGA/hg19/cytoBand.hg19.txt"
+        gafFilename = bioinformaticsReferencesDir + "/GAF/GAF3.0/all.gaf"
+        gencodeFilename = bioinformaticsReferencesDir + "/gencode/gencode.v19.gene.gtf"
+        refGeneFilename = bioinformaticsReferencesDir + "/hg19/refGene.txt"
+        cybFilename = bioinformaticsReferencesDir + "/hg19/cytoBand.hg19.txt"
     else:
         print " ERROR ... genome build must be either hg18 or hg19 "
 
-    infFilename = "/titan/cancerregulome3/TCGA/ftp.ncbi.nlm.nih.gov/gene/DATA/gene_info"
+    infFilename = bioinformaticsReferencesDir + "/ftp.ncbi.nlm.nih.gov/gene/DATA/gene_info"
 
     print " "
     print " Running : %s %s %s %s " % (sys.argv[0], sys.argv[1], sys.argv[2], sys.argv[3])
