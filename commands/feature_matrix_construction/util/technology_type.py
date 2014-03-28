@@ -434,6 +434,8 @@ class technology_type(object):
         return dataD
 
     #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
+    # overridden by:
+    #    mdanderson_org_mda_rppa_core (mda_rppa_core.py)
     def readNullValue(self, tokens, dataMatrix, sampleIndex, e):
         if (len(tokens) == 1 or tokens[1] == 'null' or tokens[1] == 'NA'):
             dataMatrix[self.curGeneCount][sampleIndex] = self.NA_VALUE
@@ -444,6 +446,7 @@ class technology_type(object):
     # overridden by:
     #    broad_mit_edu_genome_wide_snp_6 (genome_wide_snp_6.py)
     #    humanmethylation (humanmethylation.py)
+    #    mdanderson_org_mda_rppa_core (mda_rppa_core.py)
     def _readDatumDetails(self, info, tokens, dataMatrix, sampleIndex):
         dataMatrix[self.curGeneCount][sampleIndex] = float(tokens[self.tokenDatumIndex])
     
@@ -455,6 +458,7 @@ class technology_type(object):
     #    unc_edu_illuminaga_rnaseqv2 (illumina_rnaseq.py)
     #    unc_edu_illuminahiseq_rnaseq (illumina_rnaseq.py)
     #    unc_edu_illuminahiseq_rnaseqv2 (illumina_rnaseq.py)
+    #    mdanderson_org_mda_rppa_core (mda_rppa_core.py)
     def _readGeneDetails(self, tokens, geneList):
         geneList += [self.genename2geneinfo[tokens[self.tokenGeneIndex]]]
         # verify order of genes stays the same for all files
@@ -485,7 +489,6 @@ class technology_type(object):
     #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
     # overridden by:
     #    humanmethylation (humanmethylation.py)
-    #    mdanderson_org_mda_rppa_core (mda_rppa_core.py)
     def postReadFile(self):
         # base class does nothing
         pass
