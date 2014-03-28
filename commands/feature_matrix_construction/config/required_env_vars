@@ -12,7 +12,7 @@ TCGAFMP_ROOT_DIR	path to the top level of the feature matrix project's code; for
 TCGAFMP_DATA_DIR	path to general data directory containing per-tumor-type feature matrix outputs; for example ".../TCGAfmp_outputs", which should contain subdirectories for each tumor type, each again with subdirectories per date.
 
 # dcc data
-TCGAFMP_DCC_REPOSITORIES	path to directory which contains subdirectories such as "dcc-mirror", "dcc-snapshot", "dcc-snapshot-20sep13", etc; for example: ".../TCGA/repositories"
+TCGAFMP_DCC_REPOSITORIES	path to directory which contains subdirectories such as "dcc-mirror", "dcc-snapshot", "dcc-snapshot-20sep13", "bio_clin", "uuids", etc; for example: ".../TCGA/repositories"
 
 # firehose data
 TCGAFMP_FIREHOSE_MIRROR	path to local Firehouse mirror
