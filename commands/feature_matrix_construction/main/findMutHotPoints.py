@@ -447,8 +447,13 @@ if __name__ == "__main__":
 
     # now create an output feature for each of these frequent mutations ...
     tmpFilename = "Hotpoint_mutations." + tumorType + ".forTSVmerge.tmp"
-    outFilename = tmpFilename[:-4] + ".tsv"
     fh = file(tmpFilename, 'w')
+
+    outFilename = tmpFilename[:-4] + ".tsv"
+    iTst = 1
+    while ( os.path.exists(outFilename) ):
+        outFilename = tmpFilename[:-4] + ".tsv" + str(iTst)
+        iTst += 1
 
     # the header row has all of the tumor barcodes ...
     outLine = "B:GNAB"
