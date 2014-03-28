@@ -102,7 +102,7 @@ def preProcessTSV(tsvFile):
         (status, output) = commands.getstatusoutput(cmdString)
 
         print " creating bin file "
-        cmdString = "/users/rkramer/bin/python3 %s/prep4pairwise.py %s" % (tcgaFMPVars['TCGAFMP_PAIRWISE_ROOT'], tsvFile)
+        cmdString = "%s %s/prep4pairwise.py %s" % (tcgaFMPVars['TCGAFMP_PYTHON3'], tcgaFMPVars['TCGAFMP_PAIRWISE_ROOT'], tsvFile)
         (status, output) = commands.getstatusoutput(cmdString)
         if (status != 0):
             print " (a) ERROR ??? failed to execute command ??? "
