@@ -388,7 +388,7 @@ if __name__ == "__main__":
         print " failed to open output file <%s>, exiting ... " % runFile
         sys.exit(-1)
 
-    pythonbin = "/tools/bin/python2.7"
+    pythonbin = sys.executable
 
     golempwd = "PASSWD_HERE"
     fhC = file ( tcgaFMPVars['TCGAFMP_SCRATCH'] + "/config", 'r' )

@@ -11,6 +11,7 @@ from a configuration file.
 import os
 import re
 import shutil
+import sys
 
 __author__ = 'anorberg'
 
@@ -114,7 +115,7 @@ class Golemizer:
     Class that represents connection/configuration information for a Golem server, and the logic to distribute a job.
     """
 
-    def __init__(self, serverUrl, serverPass, golemOutputPath, pickleScratch, thisLibraryPath, pyPath="/tools/bin/python2.7", pickleOut=None, taskSize=10):
+    def __init__(self, serverUrl, serverPass, golemOutputPath, pickleScratch, thisLibraryPath, pyPath=sys.executable, pickleOut=None, taskSize=10):
         """
         Constructor for a Golemizer.
         Parameters:
@@ -126,7 +127,7 @@ class Golemizer:
                             and possibly other files. Needs to be reachable, via the same path, on all workers.
             thisLibraryPath - String representing the file system path, accessible from all machines, to golemize.py.
             pyPath - String representing the file system path to the installation of Python on the workers.
-                     Default: "/tools/bin/python2.7" ( was "/hpc/bin/python" )
+                     Default: the python interpreter invoked to process this file, from sys.executable ( was "/hpc/bin/python" )
             pickleOut - Alternate output directory for pickle files. The working directory for the Golem nodes
                         will be used if this is not provided. Default: "None", which is equivalent to "./" or
                         anything that evaluates to false
@@ -430,7 +431,7 @@ def dictToGolemizer(config):
                           if somewhere other than their working directory.
             "taskSize" - optional. An integer number of tasks per job bundle.
             "pythonBin" - optional. The path to the Python interpreter on each worker. If this field is
-                          not present, the default is "/tools/bin/python2.7".
+                          not present, the default is the interpreter invoked to execute this file.
             "serverURL" - The string representing the URL to reach the Golem server with, including port.
             "serverPassword" - The string representing the login password for the Golem server.
             "golemResultRoot" - The string representing the root path to where Golem aggregates worker node
@@ -449,7 +450,7 @@ def dictToGolemizer(config):
     taskSize = 10
     if "taskSize" in config:
         taskSize = int(config["taskSize"])
-    pythonBinPath = "/tools/bin/python2.7"
+    pythonBinPath = sys.executable
     if "pythonBin" in config:
         pythonBinPath = str(config["pythonBin"])
 
