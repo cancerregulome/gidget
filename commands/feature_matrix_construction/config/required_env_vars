@@ -24,3 +24,7 @@ TCGAFMP_SCRATCH	path to large scratch space (some scripts such as pairwise need 
 
 # auxiliary code: pairwise
 TCGAFMP_PAIRWISE_ROOT	path to the top level of the pairwise project's code which should contain the 'pairwise' executable, 'prep4pairwise.py', etc; or example ".../TCGA/scripts"
+
+# python3 binary
+# TODO: can this be required from the standard shell env and tested for?
+TCGAFMP_PYTHON3	path to python3 binary
