@@ -19,3 +19,6 @@ TCGAFMP_FIREHOSE_MIRROR	path to local Firehouse mirror
 
 # scratch space
 TCGAFMP_SCRATCH	path to large scratch space (some scripts such as pairwise need more than /tmp); for example: ".../TCGA/pw_scratch"
+
+# auxiliary code: pairwise
+TCGAFMP_PAIRWISE_ROOT	path to the top level of the pairwise project's code which should contain the 'pairwise' executable, 'prep4pairwise.py', etc; or example ".../TCGA/scripts"
