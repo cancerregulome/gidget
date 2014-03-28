@@ -76,7 +76,7 @@ class mdanderson_org_mda_rppa_core(technology_type):
     
     #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
     # do not call _readGeneDetails(), _readDatumDetails() or readNullValue(),  
-    # have all the necessarydetails to decide what row to actually write to
+    # have all the necessary details to decide what row to actually write to
     def _readDataDetails(self, info, tokens, geneList, dataMatrix, sampleIndex):
         gene = self.genename2geneinfo[tokens[self.tokenGeneIndex]]
         if not self.fname2row.has_key(gene):
