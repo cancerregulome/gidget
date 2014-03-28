@@ -1,7 +1,5 @@
 #!/usr/bin/env python
 
-from tcga_fmp_util.py import tcgaFMPVars
-
 import base64
 import commands
 import numpy
@@ -119,51 +117,6 @@ def delete_file(fname):
     (status, output) = commands.getstatusoutput(cmdString)
 
     return (status)
-
-#------------------------------------------------------------------------------
-# this file takes a single-sequence FASTA file and 'crunches' it so that it
-# is only 2 lines long: one line for the header, and one line for the sequence
-# no matter how long the sequence is ... this allows for MUCH faster reading
-# of the file ...
-
-
-def crunch_file(fname):
-
-    rname = make_random_fname()
-    # print rname
-
-    try:
-        fhRand = file(tcgaFMPVars['TCGAFMP_SCRATCH'] +  "/" + rname + '.head.1', 'w')
-    except:
-        print ' FATAL ERROR ... could not open scratch file '
-        sys.exit(-1)
-
-    fullRname = fhRand.name
-    fhRand.close()
-
-    # print fullRname
-
-    cmdString = "head -1 " + fname + " > " + fullRname + ".head.1"
-    (status, output) = commands.getstatusoutput(cmdString)
-
-    cmdString = "grep -v '>' " + fname + " > " + fullRname + ".data.1"
-    (status, output) = commands.getstatusoutput(cmdString)
-
-    cmdString = "sed -e 'H;$!d;x;s/\n//g' " + \
-        fullRname + ".data.1 > " + fullRname + ".data.2"
-    (status, output) = commands.getstatusoutput(cmdString)
-
-    cmdString = "cat " + fullRname + ".head.1 " + \
-        fullRname + ".data.2 > " + fullRname + ".new"
-    (status, output) = commands.getstatusoutput(cmdString)
-
-    cmdString = "rm " + fullRname + ".head.1 "
-    (status, output) = commands.getstatusoutput(cmdString)
-
-    cmdString = "rm " + fullRname + ".data.? "
-    (status, output) = commands.getstatusoutput(cmdString)
-
-    return (fullRname + '.new')
 
 #------------------------------------------------------------------------------
 
