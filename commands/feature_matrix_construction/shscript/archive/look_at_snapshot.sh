@@ -5,10 +5,10 @@ d2='08aug13'
 rm -fr ~/scratch/ls.lR.$d1.?
 rm -fr ~/scratch/ls.lR.$d2.?
 
-cd $TCGAFMP_DCC_SNAPSHOT-$d1
+cd ${TCGAFMP_DCC_REPOSITORIES}/dcc-snapshot-$d1
 ls -lR | grep "^lrwxrwxrwx" | grep "Level_" | grep -v "README" | grep -v "MANIFEST" | grep -v "CHANGES" | grep -v "DCC_ALTERED" | grep -v "ADDITIONS" | grep -v "REMOVED" | grep -v "DESCRIPTION" | grep -v ";O=" >& ~/scratch/ls.lR.$d1.a
 
-cd $TCGAFMP_DCC_SNAPSHOT-$d2
+cd ${TCGAFMP_DCC_REPOSITORIES}/dcc-snapshot-$d2
 ls -lR | grep "^lrwxrwxrwx" | grep "Level_" | grep -v "README" | grep -v "MANIFEST" | grep -v "CHANGES" | grep -v "DCC_ALTERED" | grep -v "ADDITIONS" | grep -v "REMOVED" | grep -v "DESCRIPTION" | grep -v ";O=" >& ~/scratch/ls.lR.$d2.a
 
 cd ~/scratch/
