@@ -159,22 +159,8 @@ for ((i=1; i<$#; i++))
                 ../aux/$tumor.whitelist.strict.tsv white strict \
                 >& filterSamp.meth.tmpA.log
 
-	## a) merge 
-	python $TCGAFMP_ROOT_DIR/main/mergeTSV.py \
-		$tumor.meth.tmpA.tsv \
-		$tumor.meth.tmpB.tsv \
-		$tumor.meth.tmpData1.tsv >& merge.meth.$curDate.log
-	## b) annotate
-	rm -fr annotate.meth.$curDate.log
-	python $TCGAFMP_ROOT_DIR/main/annotateTSV.py \
-		$tumor.meth.tmpData1.tsv hg19 \
-		$tumor.meth.tmpData2.tsv NO >& annotate.meth.$curDate.log
-	## c) highVar
-	rm -fr highVar.meth.$curDate.log
-	python $TCGAFMP_ROOT_DIR/main/highVarTSV.py \
-		$tumor.meth.tmpData2.tsv \
-		$tumor.meth.tmpData3.tsv \
-		0.75 IDR >& highVar.meth.$curDate.log 
+        ## the typical steps a) b) and c) are no longer needed here
+        ## because the data is already all prepped in the ../meth450k/ file
 
 	## .......................................
 	## the RPPA data we will only annotate and filter out black-listed samples
