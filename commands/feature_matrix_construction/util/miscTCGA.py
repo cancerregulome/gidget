@@ -1,3 +1,5 @@
+from tcga_fmp_util.py import tcgaFMPVars
+
 import commands
 from datetime import datetime
 import os.path
@@ -8,8 +10,8 @@ import time
 #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 
 NA_VALUE = -999999
-uuidMetadataScript='/titan/cancerregulome11/TCGA/repositories/uuids/get_metadata.sh'
-uuidMappingFile = "/titan/cancerregulome11/TCGA/repositories/uuids/metadata.current.txt"
+uuidMetadataScript = tcgaFMPVars['TCGAFMP_DCC_REPOSITORIES'] + '/uuids/get_metadata.sh'
+uuidMappingFile = tcgaFMPVars['TCGAFMP_DCC_REPOSITORIES'] + '/uuids/metadata.current.txt'
 uuid_re=re.compile('^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$')
 barcodes=re.compile('^TCGA-\w{2}-\w{4}(-\w{2}[a-zA-Z](-\w{2}[a-zA-Z]?(-\w{4}(-[0-9]{2})*)*)*)*$')
 

@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+from tcga_fmp_util.py import tcgaFMPVars
+
 import base64
 import commands
 import numpy
@@ -131,13 +133,10 @@ def crunch_file(fname):
     # print rname
 
     try:
-        fhRand = file('/s0/sheila/scratch/' + rname + '.head.1', 'w')
+        fhRand = file(tcgaFMPVars['TCGAFMP_SCRATCH'] +  "/" + rname + '.head.1', 'w')
     except:
-        try:
-            fhRand = file('/s1/sheila/scratch/' + rname + '.head.1', 'w')
-        except:
-            print ' FATAL ERROR ... could not open scratch file '
-            sys.exit(-1)
+        print ' FATAL ERROR ... could not open scratch file '
+        sys.exit(-1)
 
     fullRname = fhRand.name
     fhRand.close()

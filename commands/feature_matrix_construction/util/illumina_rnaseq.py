@@ -3,6 +3,8 @@ Created on Jun 20, 2012
 
 @author: michael
 '''
+from tcga_fmp_util.py import tcgaFMPVars
+
 import commands
 from datetime import datetime
 import os
@@ -145,7 +147,7 @@ class illumina_rnaseq(technology_type):
                 if (dirName.find(zPlat[:zPlat.rfind('_')]) < 0):
                     raise ValueError(" not a valid platform: %s ??? !!! " % (dirName))
 
-                cmdString = "$TCGAFMP_ROOT_DIR/%s " % self.configuration['matrix_script']
+                cmdString = tcgaFMPVars['TCGAFMP_ROOT_DIR'] + "/" + self.configuration['matrix_script']
                 cmdString += "-m %s " % self.configuration['matrix_adf']
                 cmdString += "-o %s " % outDir
                 cmdString += "-p %s " % topDir

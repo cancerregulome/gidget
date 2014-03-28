@@ -3,6 +3,8 @@ Created on Aug 2, 2012
 
 @author: michael
 '''
+from tcga_fmp_util.py import tcgaFMPVars
+
 from xml.dom  import minidom
 from xml.dom  import Node
 
@@ -344,7 +346,7 @@ class clinical(technology_type):
     
     def parseOneXmlFile (self, xmlFilename):
     
-        ## xmlFilename = "/titan/cancerregulome7/TCGA/repositories/dcc-mirror/coad/bcr/intgen.org/bio/clin/intgen.org_COAD.bio.Level_1.41.3.0/intgen.org_clinical.TCGA-AA-3984.xml"
+        ## xmlFilename = ".../TCGA/repositories/dcc-mirror/coad/bcr/intgen.org/bio/clin/intgen.org_COAD.bio.Level_1.41.3.0/intgen.org_clinical.TCGA-AA-3984.xml"
     
         print " "
         print "\t\t--------------------------------------------------------------------------------- "
@@ -393,7 +395,8 @@ class clinical(technology_type):
         if ( self.featNamesLoaded ):
             return
         try:
-            fh = file ("/titan/cancerregulome11/TCGA/repositories/bio_clin/featNames.tsv")
+            featureNamesFilename = tcgaFMPVars['TCGAFMP_DCC_REPOSITORIES'] + "/bio_clin/featNames.tsv"
+            fh = file (featureNamesFilename)
             for aLine in fh:
                 tokenList = aLine.split()
                 featName = tokenList[1]
@@ -565,7 +568,7 @@ class clinical(technology_type):
         level = self.getDirectoryLevel()
         ## finally, at this level is where we look for "Level_1" potentArchives, so potentArchive
         ## will, for example, look like:
-        ## /titan/cancerregulome7/TCGA/repositories/dcc-snapshot/coad/bcr/intgen.org/bio/clin/intgen.org_COAD.bio.Level_1.45.6.0
+        ## .../TCGA/repositories/dcc-snapshot/coad/bcr/intgen.org/bio/clin/intgen.org_COAD.bio.Level_1.45.6.0
         baseDirs = path.path ( topDir )
         try:
             baseDirs = path.path ( topDir )
