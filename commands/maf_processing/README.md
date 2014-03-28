@@ -60,17 +60,15 @@ $ ./fmp03B_gnab_part.sh <tumor>
 $ cd $TCGAFMP_OUTPUTS/<tumor>/gnab/
 $ python $TCGAFMP_ROOT_DIR/main/highVarTSV.py skcm.gnab.tmpData1.tsv skcm.gnab.tmpData2.tsv -2 NZC
         ```
-        
-        the above command will remove all features that don't have at least 2 mutations
-      * additional, optional filtering approaches:
+        the above command will remove all features that don't have at least 2 mutations.
+    4. additional, optional filtering approaches:
           * TODO
           * TODO
-      * adding annotations to feature names:
+    5. adding annotations to feature names:
 
-          ```
+        ```
 $ cd $TCGAFMP_OUTPUTS/<tumor>/gnab/
 $ python $TCGAFMP_ROOT_DIR/main/annotateTSV.py <infile> hg19 skcm.gnab.tmpData4b.tsv
-          ```
-      ***Note***: it is important that the final output of this process be a 
-      file in ```$TCGAFMP_OUTPUTS/<tumor>/gnab/ called <tumor>.gnab.tmpData4b.tsv```, as that is where the FMxP will be looking for mutation data.
+        ```
+        ***Note***: it is important that the final output of this process be a file in ```$TCGAFMP_OUTPUTS/<tumor>/gnab/ called <tumor>.gnab.tmpData4b.tsv```, as that is where the FMxP will be looking for mutation data.
 
