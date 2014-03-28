@@ -8,6 +8,8 @@
 # path to FMP scripts
 TCGAFMP_ROOT_DIR	path to the top level of the feature matrix project's code; for example ".../commands/feature_matrix_construction"
 
+TCGAFMP_BIOINFORMATICS_REFERENCES	path to external databases, containing subdirectories for "uniprot", "gencode", etc; for example ".../bioinformatics_references"
+
 # fmp outputs
 TCGAFMP_DATA_DIR	path to general data directory containing per-tumor-type feature matrix outputs; for example ".../TCGAfmp_outputs", which should contain subdirectories for each tumor type, each again with subdirectories per date.
 
