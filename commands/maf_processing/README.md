@@ -11,7 +11,7 @@ $ cd $TCGAFMP_DCC_REPOSITORIES/dcc-mirror/public/tumor/<tumor>/gsc/
 $ ls -alt */*dna*/*/*/*.maf
     ```
 and you can check the time stamp of the first MAF file listed -- usually you want to use the most recent one available, but sometimes an older one might have been "curated" or might be from a preferred sequencing center.
-Sometimes the largest / most recent one is the one that is most likely to be of interest.
+Generally, the most recent and/or largest MAF file is the one that is most likely to be of interest.
 
 - On the other hand, you might have obtained a MAF file from a different
 source.
@@ -21,7 +21,7 @@ We will use this SKCM MAF file as an example:
 $TCGAFMP_DCC_REPOSITORIES/dcc-mirror/public/tumor/skcm/gsc/broad.mit.edu/illuminaga_dnaseq/mutations/broad.mit.edu_SKCM.IlluminaGA_DNASeq.Level_2.1.5.0/skcm_clean_pairs.aggregated.capture.tcga.uuid.somatic.maf
 ```
 
-If you want to some basic information from this MAF such as the number of samples, the most frequently mutated genes, etc, there is a simple script called ```$TCGAFMP_ROOT_DIR/shscript/qMaf``` that you can use.  On this particular MAF file, it will report, for example, that the most frequently mutated genes (and the counts) are:
+If you want to see some basic information about  this MAF such as the number of samples, the most frequently mutated genes, etc, there is a simple script called ```$TCGAFMP_ROOT_DIR/shscript/qMaf``` that you can use.  On this particular MAF file, it will report, for example, that the most frequently mutated genes (and the counts) are:
 
 ```
         1794 TTN
@@ -60,15 +60,17 @@ $ ./fmp03B_gnab_part.sh <tumor>
 $ cd $TCGAFMP_OUTPUTS/<tumor>/gnab/
 $ python $TCGAFMP_ROOT_DIR/main/highVarTSV.py skcm.gnab.tmpData1.tsv skcm.gnab.tmpData2.tsv -2 NZC
         ```
-        the above command will remove all features that don't have at least 2 mutations.
+        the above command will remove all features that don't have at least 2 mutations.  If you know that your tumor-type has a very high mutation rate, you might want to set this value higher (but be sure to keep the negative sign in front -- ```highVarTSV.py``` has several different options/modes and this particular use case is indicated by a negative value).
     4. additional, optional filtering approaches:
-          * TODO
-          * TODO
+          * filtering out identical features: Often, two features for the same gene will actually be identical.  If, for example, all of the mutations in a particular gene are all nonsilent, then the "y_n" feature and the "nonsilent" feature will be identical.  Identical features can be removed using ```$TCGAFMP_ROOT_DIR/main/filterIdentFeat2.py```
+          * keep only a certain class of muations:  Another approach that is sometimes used is to keep only a certain class of mutations for all genes, eg those with "code_potential" in the feature name.  This can easily be done simply by editing the TSV file using ```grep``` etc, just make sure that you keep the header line with the sample identifiers as part of the final file.
+          * keep features only for specified genes:  Another approache is to keep only those features that pertain to a specified list of genes.  This can be done using ```$TCGAFMP_ROOT_DIR/main/filterByGeneList.py```.
     5. adding annotations to feature names:
 
         ```
 $ cd $TCGAFMP_OUTPUTS/<tumor>/gnab/
 $ python $TCGAFMP_ROOT_DIR/main/annotateTSV.py <infile> hg19 skcm.gnab.tmpData4b.tsv
         ```
-        ***Note***: it is important that the final output of this process be a file in ```$TCGAFMP_OUTPUTS/<tumor>/gnab/ called <tumor>.gnab.tmpData4b.tsv```, as that is where the FMxP will be looking for mutation data.
+        
+***Note***: it is important that the final output of this process be a file in the directory ```$TCGAFMP_OUTPUTS/<tumor>/gnab/```, in a file called ```<tumor>.gnab.tmpData4b.tsv```, as that is where the FMxP will be looking for mutation data.
 
