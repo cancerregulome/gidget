@@ -244,7 +244,7 @@ if __name__ == "__main__":
                     sys.exit(-1)
 
 
-                cmdString = "$TCGAFMP_ROOT_DIR/shscript/expression_matrix_mimat.pl "
+                cmdString = "%s/shscript/expression_matrix_mimat.pl " % tcgaFMPVars['TCGAFMP_ROOT_DIR']
                 cmdString += "-m " + tcgaFMPVars['TCGAFMP_DCC_REPOSITORIES'] + "/mirna_bcgsc/tcga_mirna_bcgsc_hg19.adf "
                 cmdString += "-o %s " % outDir
                 cmdString += "-p %s " % topDir

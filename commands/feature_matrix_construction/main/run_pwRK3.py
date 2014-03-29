@@ -653,7 +653,7 @@ if __name__ == "__main__":
     print " "
 
     # ok, now we want to actually launch the jobs ...
-    cmdString = "python $TCGAFMP_ROOT_DIR/main/golem.py "
+    cmdString = "python %s/main/golem.py " % tcgaFMPVars['TCGAFMP_ROOT_DIR']
     cmdString += "http://glados.systemsbiology.net:7083 -p " + golempwd + " "
     cmdString += "-L pairwiseRK -u "
     cmdString += getpass.getuser() + " "
@@ -714,8 +714,8 @@ if __name__ == "__main__":
         # first we run post_pwRK2.py which writes
         # out something that looks like the output from runPWPV
         iOne = index
-        cmdString = "python $TCGAFMP_ROOT_DIR/main/post_pwRK2.py %s %s %d %g" % (
-            tmpDir13, tsvFile, iOne, args.useBC)
+        cmdString = "python %s/main/post_pwRK2.py %s %s %d %g" % (
+            tcgaFMPVars['TCGAFMP_ROOT_DIR'], tmpDir13, tsvFile, iOne, args.useBC)
         print " < %s > " % cmdString
         (status, output) = commands.getstatusoutput(cmdString)
         print status, output
@@ -750,8 +750,8 @@ if __name__ == "__main__":
 
         # first we run post_pwRK2.py which concatenates them all and writes
         # out something that looks like the output from runPWPV
-        cmdString = "python $TCGAFMP_ROOT_DIR/main/post_pwRK2.py %s %s -1 %g" % (
-            tmpDir13, tsvFile, args.useBC)
+        cmdString = "python %s/main/post_pwRK2.py %s %s -1 %g" % (
+            tcgaFMPVars['TCGAFMP_ROOT_DIR'], tmpDir13, tsvFile, args.useBC)
         print " < %s > " % cmdString
         (status, output) = commands.getstatusoutput(cmdString)
         print " STATUS : ", status
@@ -759,7 +759,7 @@ if __name__ == "__main__":
         print " (d) TIME ", time.asctime(time.localtime(time.time()))
 
         # and then we run the script that sorts and trims the output file
-        cmdString = "$TCGAFMP_ROOT_DIR/shscript/proc_pwpv2.sh %s" % tmpDir13
+        cmdString = "%s/shscript/proc_pwpv2.sh %s" % (tcgaFMPVars['TCGAFMP_ROOT_DIR'], tmpDir13)
         print " < %s > " % cmdString
         (status, output) = commands.getstatusoutput(cmdString)
         print " STATUS : ", status
@@ -797,15 +797,15 @@ if __name__ == "__main__":
 
         # first we run post_pwRK2.py which concatenates them all and writes
         # out something that looks like the output from runPWPV
-        cmdString = "python $TCGAFMP_ROOT_DIR/main/post_pwRK2.py %s %s -1 %g" % (
-            tmpDir13, tsvFile, args.useBC)
+        cmdString = "python %s/main/post_pwRK2.py %s %s -1 %g" % (
+            tcgaFMPVars['TCGAFMP_ROOT_DIR'], tmpDir13, tsvFile, args.useBC)
         print " < %s > " % cmdString
         (status, output) = commands.getstatusoutput(cmdString)
         print " (e) TIME ", time.asctime(time.localtime(time.time()))
 
         # at this point we have post_proc_all.tsv
         # and post_proc_all.NGEXP.NGEXP.tmp
-        cmdString = "$TCGAFMP_ROOT_DIR/shscript/proc_pancan.sh %s" % tmpDir13
+        cmdString = "%s/shscript/proc_pancan.sh %s" % (tcgaFMPVars['TCGAFMP_ROOT_DIR'], tmpDir13)
         print " < %s > " % cmdString
         (status, output) = commands.getstatusoutput(cmdString)
         print " (f) TIME ", time.asctime(time.localtime(time.time()))

@@ -1247,8 +1247,7 @@ def parseSNP6dataFiles(lastDir, outDir, zCancer, subsetName, suffixString):
                         inputFile = fName
                         outputFile = zCancer + ".broad.mit.edu__genome_wide_snp_6__snp." + \
                             suffixString + ".tsv"
-                        ## cmdString = "python $TCGAFMP_ROOT_DIR/main/snp_firehose_Level3_matrix.py --include " + inputFile + " " + outputFile
-                        cmdString = "python $TCGAFMP_ROOT_DIR/main/snp_firehose_Level3_matrix.py " + \
+                        cmdString = "python " + tcgaFMPVars['TCGAFMP_ROOT_DIR'] + "/main/snp_firehose_Level3_matrix.py " + \
                             inputFile + " " + outputFile
                         print " running command : "
                         print cmdString

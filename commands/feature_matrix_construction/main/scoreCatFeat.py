@@ -412,7 +412,7 @@ if __name__ == "__main__":
     fh.close()
 
     # ok, now we want to actually launch the jobs ...
-    cmdString = "python $TCGAFMP_ROOT_DIR/main/golem.py "
+    cmdString = "python " + tcgaFMPVars['TCGAFMP_ROOT_DIR'] + "/main/golem.py "
     cmdString += "http://glados.systemsbiology.net:7083 -p " + golempwd + " "
     cmdString += "-L scoreCatFeat -u "
     cmdString += getpass.getuser() + " "
