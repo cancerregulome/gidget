@@ -148,10 +148,10 @@ class illumina_rnaseq(technology_type):
                     raise ValueError(" not a valid platform: %s ??? !!! " % (dirName))
 
                 cmdString = tcgaFMPVars['TCGAFMP_ROOT_DIR'] + "/" + self.configuration['matrix_script']
-                cmdString += "-m %s " % self.configuration['matrix_adf']
-                cmdString += "-o %s " % outDir
-                cmdString += "-p %s " % topDir
-                cmdString += "-n %s " % zPlat
+                cmdString += " -m %s " % self.configuration['matrix_adf']
+                cmdString += " -o %s " % outDir
+                cmdString += " -p %s " % topDir
+                cmdString += " -n %s " % zPlat
 
                 print " "
                 print cmdString
