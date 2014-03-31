@@ -37,8 +37,7 @@ args=("$@")
 for tumor in $tumors
     do
 
-	## cd $TCGAFMP_DATA_DIR/$tumor
-	cd $TCGAFMP_OUTPUTS/$tumor
+	cd $TCGAFMP_DATA_DIR/$tumor
 
 	echo " "
 	echo " "
