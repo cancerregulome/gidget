@@ -2358,7 +2358,6 @@ def loadPlatformMetaData(zString):
             zString == "jhu-usc.edu/humanmethylation27/methylation/"):
 
         if (1):
-            ## metaDataFilename = "/proj/ilyalab/sreynold/TCGA/HumanMethylation450/featNames.15oct13.hg19.txt"
             metaDataFilename = tcgaFMPVars['TCGAFMP_BIOINFORMATICS_REFERENCES'] + "/tcga_platform_genelists/featNames.15oct13.hg19.txt"
             fh = file(metaDataFilename)
             metaData = {}

@@ -1544,7 +1544,6 @@ if __name__ == "__main__":
         parseMutSigFiles(lastDir, outDir, MSverString)
 
         # next we process the files that come out of Gistic
-        ## lastDir = "/users/sreynold/scratch/"
         parseGisticFiles(lastDir, outDir)
 
         # and finally grab the 'mature' miRNA matrix ...

@@ -157,6 +157,7 @@ def _run(argv):
     print 'overall results:\n\tcurrent success: %i/%i\n\trefactored success: %i/%i\n\tdiff success: %i/%i' % (totalCurSuccess, total, totalReSuccess, total, totalDiffSuccess, total)
 
 if __name__ == '__main__':
+# TODO: is this file needed?
 # run from: /users/mmiller/tcga/sreynold_scripts/outputs
 # cmdline: python -u ../mm_src/util/test_parse_tcga.py ../mm_src/config/test_parse_tcga.config
     print datetime.now(), 'starting check'

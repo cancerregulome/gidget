@@ -190,7 +190,6 @@ for tumor in $tumors
 	## NEW as of 01 nov 2012 ... get the blacklist of patients and samples from the TCGA
 	## annotations manager
 	$TCGAFMP_ROOT_DIR/shscript/Item_Blacklist.sh $tumor $TCGAFMP_ROOT_DIR/shscript/blacklist.spec >& Item_Blacklist.$curDate.log
-	#### cd /users/sreynold/code/AnnotM/
 	#### ./Item_Blacklist.sh $tumor blacklist
 	rm -fr cTmp.tsv
 	cp finalClin.$tumor.$curDate.tsv cTmp.tsv

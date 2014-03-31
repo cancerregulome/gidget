@@ -931,7 +931,6 @@ def makeFeatureName(dType, fType, fName, chr='', start=-1, stop=-1, strand='', x
     if (fType == "RPPA"):
         if (len(RPPAdict) == 0):
             print " reading in RPPA annotation file ... "
-            ## fh = file ( "/proj/ilyalab/sreynold/TCGA/MDA_RPPA_Core/MDA_antibody_annotation.txt" )
             fh = file(
                 tcgaFMPVars['TCGAFMP_DCC_REPOSITORIES'] + "/rppa/MDA_antibody_annotation.txt")
             for aLine in fh:
