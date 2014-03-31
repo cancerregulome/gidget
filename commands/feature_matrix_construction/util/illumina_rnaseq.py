@@ -3,7 +3,7 @@ Created on Jun 20, 2012
 
 @author: michael
 '''
-from tcga_fmp_util.py import tcgaFMPVars
+from tcga_fmp_util import tcgaFMPVars
 
 import commands
 from datetime import datetime
