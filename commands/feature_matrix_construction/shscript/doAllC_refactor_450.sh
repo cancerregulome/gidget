@@ -9,7 +9,7 @@ source ${TCGAFMP_ROOT_DIR}/shscript/tcga_fmp_util.sh
 ##      date, eg '12jul13' or 'test'
 ##      snapshot name, either 'dcc-snapshot' or 'dcc-snapshot-28jun13'
 ##      one tumor type, eg 'ucec'
-##      a config file, eg 'parse_tcga.config', relative to $TCGAFMP_DATA_DIR/config
+##      a config file, eg 'parse_tcga.config', relative to $TCGAFMP_ROOT_DIR/config
 
 WRONGARGS=1
 if [ $# != 5 ]
