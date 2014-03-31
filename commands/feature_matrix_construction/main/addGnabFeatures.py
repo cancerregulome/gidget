@@ -5,7 +5,7 @@ import numpy
 import sys
 
 # these are my local ones
-from tcga_fmp_util.py import tcgaFMPVars
+from tcga_fmp_util import tcgaFMPVars
 import tsvIO
 
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#

@@ -9,7 +9,7 @@ import os.path
 import sys
 import time
 
-from tcga_fmp_util.py import tcgaFMPVars
+from tcga_fmp_util import tcgaFMPVars
 import miscIO
 
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#

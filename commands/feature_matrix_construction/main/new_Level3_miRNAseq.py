@@ -7,7 +7,7 @@ import os
 import sys
 
 # these are my local modules
-from tcga_fmp_util.py import tcgaFMPVars
+from tcga_fmp_util import tcgaFMPVars
 import miscIO
 import miscTCGA
 import path
