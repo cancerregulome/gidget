@@ -6,7 +6,6 @@ import miscMath
 import miscTCGA
 
 import numpy
-import os
 import path
 import sys
 
@@ -1435,7 +1434,7 @@ def getMutSigVersionString ( zCancer ):
     defaultString = "MutSigNozzleReportCV"
 
     try:
-        rootString = os.environ['TCGAFMP_OUTPUTS']
+        rootString = tcgaFMPVars['TCGAFMP_DATA_DIR']
     except:
         MSverString = defaultString
         print "     --> defaulting to %s " % defaultString
