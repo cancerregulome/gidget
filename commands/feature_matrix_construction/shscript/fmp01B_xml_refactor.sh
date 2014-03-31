@@ -37,8 +37,7 @@ echo " *******************"
 args=("$@")
 for tumor in $tumors
 	do 
-	## cd $TCGAFMP_DATA_DIR/$tumor
-	cd $TCGAFMP_OUTPUTS/$tumor
+	cd $TCGAFMP_DATA_DIR/$tumor
 
 	echo " "
 	echo " "
@@ -208,7 +207,7 @@ for tumor in $tumors
         ## NOTE that this gets run in the background !!!
         nohup python $TCGAFMP_ROOT_DIR/main/run_pwRK3.py \
                 --pvalue 2. --all --forRE \
-                --tsvFile $TCGAFMP_OUTPUTS/$tumor/$curDate/finalClin.$tumor.$curDate.tsv &
+                --tsvFile $TCGAFMP_DATA_DIR/$tumor/$curDate/finalClin.$tumor.$curDate.tsv &
 
 	## ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 	## here we are building a subset of the clinical data based on the 'finalClin' file
