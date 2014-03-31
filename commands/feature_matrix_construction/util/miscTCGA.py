@@ -1,4 +1,4 @@
-from tcga_fmp_util.py import tcgaFMPVars
+from tcga_fmp_util import tcgaFMPVars
 
 import commands
 from datetime import datetime
