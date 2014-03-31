@@ -352,8 +352,6 @@ if __name__ == "__main__":
     bestKeyOrder = miscClin.getBestKeyOrder(allClinDict, naCounts)
 
     # now we want to read in a new tsv file ...
-    ## newInfo = "/users/sreynold/TCGA/COAD+READ/tcga_crc_cluster_info_12272010_b.tsv"
-    ## tsvName2 = "/users/sreynold/TCGA/COAD+READ/crc_dna_methylation_cluster_01-20-11_b.tsv"
     print " "
     print " ****************************************************************** "
     print " reading input file <%s> " % tsvName2
