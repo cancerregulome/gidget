@@ -39,7 +39,7 @@ for arg in `find . -type d`
 			    fi
 		    fi
 	    done
-	cd ${TCGAFMP_DCC_REPOSITORIES}/public/tumor
+        cd ${TCGAFMP_DCC_REPOSITORIES}/dcc-mirror/public/tumor
     done
 
 date
