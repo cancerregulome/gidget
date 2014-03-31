@@ -99,7 +99,7 @@ for ((i=0; i<$#; i++))
 
 	rm -fr smg.log
 	python $TCGAFMP_ROOT_DIR/main/filterByGeneList.py $tumor.gnab.tmpData1.tsv $tumor.gnab.tmpData2.tsv \
-		~/TCGA/sig_genes.2k.26feb13.txt >& smg.log 
+		$TCGAFMP_BIOINFORMATICS_REFERENCES/sig_genes.2k.26feb13.txt >& smg.log 
 
 	## ----------------------------------------------------------------------------
 	## filter the MAF file based on the blacklist ...
