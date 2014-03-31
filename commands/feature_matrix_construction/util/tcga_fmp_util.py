@@ -14,7 +14,12 @@ import os
 
 tcgaFMPVars={}
 
-requiredEnvVarFilePath = "../config/required_env_vars"
+try:
+    rootDir = os.getenv("TCGAFMP_ROOT_DIR")
+    requiredEnvVarFilePath = rootDir + "/config/required_env_vars"
+except:
+    print " ERROR ... TCGAFMP_ROOT_DIR environment variable is required "
+    sys.exit(-1)
 
 f = open(requiredEnvVarFilePath, 'r')
 
