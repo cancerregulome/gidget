@@ -11,34 +11,32 @@ source ${TCGAFMP_ROOT_DIR}/shscript/tcga_fmp_util.sh
 ##      (if the snapshotName is not provided, it will default to the most recent)
 
 WRONGARGS=1
-if [[ $# != 3 ]] && [[ $# != 2 ]]
+if [[ $# != 2 ]] && [[ $# != 1 ]]
     then
-        echo " Usage   : `basename $0` <tgca FMP output directory> <tumorType> <snapshotName> "
-        echo " Example : `basename $0` <path-to-tgca-fmp> skcm dcc-snapshot-06jan14 "
-        echo "           the snapshotName is optional and defaults to dcc-snapshot "
-        echo "           <path-to-tgca-fmp> should contain a subdir named as the given tumorType"
+        echo " Usage   : `basename $0` <tumorType> <snapshotName>"
+        echo " Example : `basename $0` skcm dcc-snapshot-06jan14"
+        echo "           the snapshotName is optional and defaults to dcc-snapshot"
         exit $WRONGARGS
 fi
 
-TCGA_FMP_OUTPUT_DIR=$1
-tumor=$2
-if [ $# == 2 ]
+tumor=$1
+if [ $# == 1 ]
     then
         snapshotName=dcc-snapshot
     else
-        snapshotName=$3
+        snapshotName=$2
 fi
 
 echo " "
 echo " "
 echo " *******************"
 echo `date`
-echo " *" output directory: $TCGA_FMP_OUTPUT_DIR
+echo " *" output directory: $TCGAFMP_DATA_DIR
 echo " *" $tumor
 echo " *" $snapshotName
 echo " *******************"
 
-cd $TCGA_FMP_OUTPUT_DIR/$tumor
+cd $TCGAFMP_DATA_DIR/$tumor
 mkdir meth450k
 cd meth450k
 

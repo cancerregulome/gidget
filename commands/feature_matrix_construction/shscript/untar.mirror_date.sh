@@ -5,28 +5,9 @@
 source ${TCGAFMP_ROOT_DIR}/shscript/tcga_fmp_util.sh
 
 
-if [ $# -ne 1 ]
-then
-  echo "Usage: `basename $0` local-TCGA-directory"
-  echo "   eg: for disk structure as"
-  echo "         <path to TCGA data>/TCGA/repostiories,"
-  echo "         <path to TCGA data>/TCGA/repostiories/dcc-mirror,"
-  echo "         etc,"
-  echo "       use"
-  echo "         `basename $0` <path to TCGA data>/TCGA"
-  exit -1
-fi
-
-TCGA_DATA_TOP_DIR=$1
-echo "using local TCGA top-level data directory $TCGA_DATA_TOP_DIR"
-echo
-
-# TODO: validate that TCGA_DATA_TOP_DIR is a valid directory
-
-
 curDir=`pwd`
 
-cd $TCGA_DATA_TOP_DIR/repositories/dcc-mirror/public/tumor
+cd $TCGAFMP_DCC_REPOSITORIES/dcc-mirror/public/tumor
 
 ## note that the assumption below is that all <name>.tar.gz files un-tar
 ## to create a directory called <name>, but this is not true for the
@@ -62,11 +43,11 @@ for arg in `find . -type d`
 			    fi
 		    fi
 	    done
-	cd $TCGA_DATA_TOP_DIR/repositories/dcc-mirror/public/tumor
+	cd $TCGAFMP_DCC_REPOSITORIES/dcc-mirror/public/tumor
     done
 
 ## now same for secure side ...
-cd $TCGA_DATA_TOP_DIR/repositories/dcc-mirror/secure/tumor
+cd $TCGAFMP_DCC_REPOSITORIES/dcc-mirror/secure/tumor
 
 for arg in `find . -type d`
     do
@@ -97,21 +78,21 @@ for arg in `find . -type d`
 			    fi
 		    fi
 	    done
-	cd $TCGA_DATA_TOP_DIR/repositories/dcc-mirror/secure/tumor
+	cd $TCGAFMP_DCC_REPOSITORIES/dcc-mirror/secure/tumor
     done
 
 echo " "
 echo " removing temporary mimat files ... "
-cd $TCGA_DATA_TOP_DIR/repositories/dcc-snapshot/public/tumor/
+cd $TCGAFMP_DCC_REPOSITORIES/dcc-snapshot/public/tumor/
 find . -type f -name "*expn_matrix_mimat*" -exec rm -f '{}' \;
 
 echo " "
 echo " running snapshot ... "
-python2.7 $TCGAFMP_ROOT_DIR/shscript/make-dcc-snapshot.py $TCGA_DATA_TOP_DIR/repositories/dcc-mirror $TCGA_DATA_TOP_DIR/repositories/dcc-snapshot-`echo "$(date +"%d%b%y")" | tr '[A-Z]' '[a-z]'`
+python2.7 $TCGAFMP_ROOT_DIR/shscript/make-dcc-snapshot.py $TCGAFMP_DCC_REPOSITORIES/dcc-mirror $TCGAFMP_DCC_REPOSITORIES/dcc-snapshot-`echo "$(date +"%d%b%y")" | tr '[A-Z]' '[a-z]'`
 
 echo " recreating symbolic link ... "
-rm $TCGA_DATA_TOP_DIR/repositories/dcc-snapshot
-ln -s $TCGA_DATA_TOP_DIR/repositories/dcc-snapshot-`echo "$(date +"%d%b%y")" | tr '[A-Z]' '[a-z]'` $TCGA_DATA_TOP_DIR/repositories/dcc-snapshot
+rm $TCGAFMP_DCC_REPOSITORIES/dcc-snapshot
+ln -s $TCGAFMP_DCC_REPOSITORIES/dcc-snapshot-`echo "$(date +"%d%b%y")" | tr '[A-Z]' '[a-z]'` $TCGAFMP_DCC_REPOSITORIES/dcc-snapshot
 
 echo " "
 echo " DONE "

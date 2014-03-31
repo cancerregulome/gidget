@@ -5,25 +5,6 @@
 source ${TCGAFMP_ROOT_DIR}/shscript/tcga_fmp_util.sh
 
 
-if [ $# -ne 2 ]
-then
-  echo "Usage:   `basename $0` local-TCGA-directory TCGA-fmp-output-directory"
-  echo "         TCGA-fmp-output-directory must contain subdirectories named as the tumor types"
-  echo "example: for disk structure as"
-  echo "           <path to TCGA data>/TCGA/repostiories,"
-  echo "           <path to TCGA data>/TCGA/repostiories/dcc-mirror,"
-  echo "           <path to TCGA outputs>/TCGAfmp_outputs"
-  echo "           etc,"
-  echo "         use"
-  echo "           `basename $0` <path to TCGA data>/TCGA <path to TCGA outputs>/TCGAfmp_outputs"
-  exit -1
-fi
-
-TCGA_DATA_TOP_DIR=$1
-TCGA_FMP_OUTPUT_DIR=$2
-# TODO: validate that TCGA_DATA_TOP_DIR is a valid directory
-
-
 for tumor in `cat $TCGAFMP_ROOT_DIR/shscript/tumor_list.txt`
     do
 
@@ -33,11 +14,9 @@ for tumor in `cat $TCGAFMP_ROOT_DIR/shscript/tumor_list.txt`
         echo $tumor
         echo " "
 
-        rm -fr $TCGA_DATA_TOP_DIR/repositories/scratch/t?
+        rm -fr $TCGAFMP_DCC_REPOSITORIES/scratch/t?
 
-        ## cd $TCGA_DATA_TOP_DIR/repositories/dcc-mirror/public/tumor/$tumor/bcr/biotab/clin
-        ## cd $TCGA_DATA_TOP_DIR/repositories/dcc-mirror/public/tumor/$tumor/bcr/nationwidechildrens.org/bio/clin
-        cd $TCGA_DATA_TOP_DIR/repositories/dcc-snapshot/public/tumor/$tumor/bcr/nationwidechildrens.org/bio/clin
+        cd $TCGAFMP_DCC_REPOSITORIES/dcc-snapshot/public/tumor/$tumor/bcr/nationwidechildrens.org/bio/clin
 
         ## 07mar14 ... looking at files for LGG ...
 
@@ -88,24 +67,24 @@ for tumor in `cat $TCGAFMP_ROOT_DIR/shscript/tumor_list.txt`
 	##   5 tumor_weight
 	##   6 vial_number
 
-        rm -fr $TCGA_DATA_TOP_DIR/repositories/scratch/t?
+        rm -fr $TCGAFMP_DCC_REPOSITORIES/scratch/t?
 
-        cut -f 1,5 *bio.Level_2*/nationwidechildrens.org_biospecimen_cqcf*.txt         | sort | sed -e '1,$s/\[Not Available\]/NA/g' | sed -e '1,$s/\[Not Reported\]/NA/g' | sed -e '1,$s/\[Not Applicable\]/NA/g' | sed -e '1,$s/null/NA/g' >& $TCGA_DATA_TOP_DIR/repositories/scratch/t1
+        cut -f 1,5 *bio.Level_2*/nationwidechildrens.org_biospecimen_cqcf*.txt         | sort | sed -e '1,$s/\[Not Available\]/NA/g' | sed -e '1,$s/\[Not Reported\]/NA/g' | sed -e '1,$s/\[Not Applicable\]/NA/g' | sed -e '1,$s/null/NA/g' >& $TCGAFMP_DCC_REPOSITORIES/scratch/t1
 
-        cut -f 1,4-  *bio.Level_2*/nationwidechildrens.org_biospecimen_slide*.txt        | sort | sed -e '1,$s/\[Not Available\]/NA/g' | sed -e '1,$s/\[Not Reported\]/NA/g' | sed -e '1,$s/\[Not Applicable\]/NA/g' | sed -e '1,$s/null/NA/g' >& $TCGA_DATA_TOP_DIR/repositories/scratch/t2
+        cut -f 1,4-  *bio.Level_2*/nationwidechildrens.org_biospecimen_slide*.txt        | sort | sed -e '1,$s/\[Not Available\]/NA/g' | sed -e '1,$s/\[Not Reported\]/NA/g' | sed -e '1,$s/\[Not Applicable\]/NA/g' | sed -e '1,$s/null/NA/g' >& $TCGAFMP_DCC_REPOSITORIES/scratch/t2
 
-        cut -f 1,3-  *bio.Level_2*/nationwidechildrens.org_biospecimen_tumor_sample*.txt | sort | sed -e '1,$s/\[Not Available\]/NA/g' | sed -e '1,$s/\[Not Reported\]/NA/g' | sed -e '1,$s/\[Not Applicable\]/NA/g' | sed -e '1,$s/null/NA/g' >& $TCGA_DATA_TOP_DIR/repositories/scratch/t3
+        cut -f 1,3-  *bio.Level_2*/nationwidechildrens.org_biospecimen_tumor_sample*.txt | sort | sed -e '1,$s/\[Not Available\]/NA/g' | sed -e '1,$s/\[Not Reported\]/NA/g' | sed -e '1,$s/\[Not Applicable\]/NA/g' | sed -e '1,$s/null/NA/g' >& $TCGAFMP_DCC_REPOSITORIES/scratch/t3
 
-        python $TCGAFMP_ROOT_DIR/main/massageTSV.py $TCGA_DATA_TOP_DIR/repositories/scratch/t1 \
-                $TCGA_FMP_OUTPUT_DIR/$tumor/aux/biospecimen_cqcf.forXmlMerge.tsv
+        python $TCGAFMP_ROOT_DIR/main/massageTSV.py $TCGAFMP_DCC_REPOSITORIES/scratch/t1 \
+                $TCGAFMP_DATA_DIR/$tumor/aux/biospecimen_cqcf.forXmlMerge.tsv
 
-        python $TCGAFMP_ROOT_DIR/main/massageTSV.py $TCGA_DATA_TOP_DIR/repositories/scratch/t2 \
-                $TCGA_FMP_OUTPUT_DIR/$tumor/aux/biospecimen_slide.forXmlMerge.tsv
+        python $TCGAFMP_ROOT_DIR/main/massageTSV.py $TCGAFMP_DCC_REPOSITORIES/scratch/t2 \
+                $TCGAFMP_DATA_DIR/$tumor/aux/biospecimen_slide.forXmlMerge.tsv
 
-        python $TCGAFMP_ROOT_DIR/main/massageTSV.py $TCGA_DATA_TOP_DIR/repositories/scratch/t3 \
-                $TCGA_FMP_OUTPUT_DIR/$tumor/aux/biospecimen_tumor_sample.forXmlMerge.tsv
+        python $TCGAFMP_ROOT_DIR/main/massageTSV.py $TCGAFMP_DCC_REPOSITORIES/scratch/t3 \
+                $TCGAFMP_DATA_DIR/$tumor/aux/biospecimen_tumor_sample.forXmlMerge.tsv
 
-        chmod g+w $TCGA_DATA_TOP_DIR/repositories/scratch/t?
+        chmod g+w $TCGAFMP_DCC_REPOSITORIES/scratch/t?
 
     done
 
