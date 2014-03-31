@@ -56,7 +56,7 @@ echo " *******************"
         ## now we need to make the clinical output of the above look like the 'old' output
         ## of the parse_all_xml script ...
         rm -fr t?
-        $TCGA_ROOT_DIR/shscript/tcga_fmp_transpose.sh $tumor.firehose__clin_merged.$curDate.tsv >& t1
+        $TCGAFMP_ROOT_DIR/shscript/tcga_fmp_transpose.sh $tumor.firehose__clin_merged.$curDate.tsv >& t1
         sed -e '1s/M:CLIN/bcr_patient_barcode/' t1 >& t2
         mv t2 $tumor.clinical.$curDate.tsv
         rm -fr t1
