@@ -7,7 +7,7 @@ source ${TCGAFMP_ROOT_DIR}/shscript/tcga_fmp_util.sh
 
 # =============================================================================
 # broad.mit.edu/illuminaga_dnaseq_cont/mutations_protected
-for d in `cat $TCGAFMP_ROOT_DIR/shscript/tumor_list.txt`
+for d in `cat $TCGAFMP_ROOT_DIR/config/tumor_list.txt`
 
     do
 
@@ -43,7 +43,7 @@ for d in `cat $TCGAFMP_ROOT_DIR/shscript/tumor_list.txt`
 
 # =============================================================================
 # genome.wustl.edu/illuminaga_dnaseq_cont/mutations_protected
-for d in `cat $TCGAFMP_ROOT_DIR/shscript/tumor_list.txt`
+for d in `cat $TCGAFMP_ROOT_DIR/config/tumor_list.txt`
 
     do
 
@@ -77,7 +77,7 @@ for d in `cat $TCGAFMP_ROOT_DIR/shscript/tumor_list.txt`
 
 # =============================================================================
 # hgsc.bcm.edu/illuminaga_dnaseq_cont/mutations_protected
-for d in `cat $TCGAFMP_ROOT_DIR/shscript/tumor_list.txt`
+for d in `cat $TCGAFMP_ROOT_DIR/config/tumor_list.txt`
 
     do
 
@@ -111,7 +111,7 @@ for d in `cat $TCGAFMP_ROOT_DIR/shscript/tumor_list.txt`
 
 # =============================================================================
 # hgsc.bcm.edu/illuminaga_dnaseq_cont_curated/mutations/
-for d in `cat $TCGAFMP_ROOT_DIR/shscript/tumor_list.txt`
+for d in `cat $TCGAFMP_ROOT_DIR/config/tumor_list.txt`
 
     do
 

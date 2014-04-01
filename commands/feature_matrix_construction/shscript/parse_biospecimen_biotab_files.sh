@@ -5,7 +5,7 @@
 source ${TCGAFMP_ROOT_DIR}/shscript/tcga_fmp_util.sh
 
 
-for tumor in `cat $TCGAFMP_ROOT_DIR/shscript/tumor_list.txt`
+for tumor in `cat $TCGAFMP_ROOT_DIR/config/tumor_list.txt`
     do
 
         echo " "
