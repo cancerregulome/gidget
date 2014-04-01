@@ -18,4 +18,4 @@ TCGAMAF_TOOLS_DIR	path containing annovar
 TCGAMAF_SCRIPTS_DIR	(currently same as TCGAMAF_ROOT_DIR)
 
 # should this be specified in another way?
-TCGAMAF_PYTHON_BINARY:?" environment variable must be set and non-empty"}
+TCGAMAF_PYTHON_BINARY	TODO
