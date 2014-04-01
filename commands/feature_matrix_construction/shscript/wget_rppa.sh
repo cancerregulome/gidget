@@ -1,6 +1,11 @@
 #!/bin/bash
 
-for d in `cat $TCGAFMP_ROOT_DIR/shscript/tumor_list.txt`
+# every TCGA FMP script should start with these lines:
+: ${TCGAFMP_ROOT_DIR:?" environment variable must be set and non-empty; defines the path to the TCGA FMP scripts directory"}
+source ${TCGAFMP_ROOT_DIR}/shscript/tcga_fmp_util.sh
+
+
+for d in `cat $TCGAFMP_ROOT_DIR/config/tumor_list.txt`
 
     do
 
@@ -8,7 +13,7 @@ for d in `cat $TCGAFMP_ROOT_DIR/shscript/tumor_list.txt`
 	echo " "
 	echo " ******************************************************************** "
 	echo $d
-	cd /titan/cancerregulome11/TCGA/repositories/dcc-mirror/public/tumor/$d/cgcc/
+	cd $TCGAFMP_DCC_REPOSITORIES/dcc-mirror/public/tumor/$d/cgcc/
         mkdir mdanderson.org
         chmod g+w mdanderson.org
         cd mdanderson.org

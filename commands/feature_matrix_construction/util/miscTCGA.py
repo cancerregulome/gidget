@@ -1,3 +1,5 @@
+from tcga_fmp_util import tcgaFMPVars
+
 import commands
 from datetime import datetime
 import os.path
@@ -8,8 +10,8 @@ import time
 #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 
 NA_VALUE = -999999
-uuidMetadataScript='/titan/cancerregulome11/TCGA/repositories/uuids/get_metadata.sh'
-uuidMappingFile = "/titan/cancerregulome11/TCGA/repositories/uuids/metadata.current.txt"
+uuidMetadataScript = tcgaFMPVars['TCGAFMP_DCC_REPOSITORIES'] + '/uuids/get_metadata.sh'
+uuidMappingFile = tcgaFMPVars['TCGAFMP_DCC_REPOSITORIES'] + '/uuids/metadata.current.txt'
 uuid_re=re.compile('^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$')
 barcodes=re.compile('^TCGA-\w{2}-\w{4}(-\w{2}[a-zA-Z](-\w{2}[a-zA-Z]?(-\w{4}(-[0-9]{2})*)*)*)*$')
 
@@ -277,10 +279,23 @@ def get_uuid2barcode_dict():
         nowTokens = tNow.split()
         metTokens = tMet.split()
         refreshFlag = 0
+        ## nowTokens example: ['Tue', 'Mar', '25', '10:14:44', '2014']
+        ## check year token
+        if (nowTokens[4] > metTokens[4]):
+            refreshFlag = 1
+        ## check month token
         if (nowTokens[1] != metTokens[1]):
             refreshFlag = 1
+        ## check day of month token
         if (int(nowTokens[2]) > int(metTokens[2])):
             refreshFlag = 1
+        if ( not refreshFlag ):
+            nowHr = nowTokens[3].split(':')
+            metHr = metTokens[3].split(':')
+            ## if we don't need to refresh, it might still be a 
+            ## good idea to pause briefly ...
+            if ( nowHr[0] == metHr[0] ):
+                time.sleep(20)
     except:
         refreshFlag = 1
 
@@ -358,7 +373,7 @@ def get_uuid2barcode_dict():
     print datetime.now(), " done reading UUID to barcode mapping file (%d UUIDs and %d patients) " % ( len(uuid2barcode_dict), len(patient_dict) )
 
     if ( len(uuid2barcode_dict) < 50000 ):
-        print " ERROR in get_uuid2barcode_dict ??? "
+        print " ERROR in get_uuid2barcode_dict ??? it should be much longer than: "
         print len(uuid2barcode_dict)
         sys.exit(-1)
 

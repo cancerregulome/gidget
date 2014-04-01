@@ -1,4 +1,10 @@
 #!/bin/bash
+
+# every TCGA MAF script should start with these lines:
+: ${TCGAMAF_ROOT_DIR:?" environment variable must be set and non-empty; defines the path to the TCGA MAF directory"}
+source ${TCGAFMP_ROOT_DIR}/bash/tcga_maf_util.sh
+
+
 # script to output non-exonic variant types in a final MAF
 #
 if [ $# -ne 1 ]

@@ -3,6 +3,8 @@ Created on Jun 20, 2012
 
 @author: michael
 '''
+from tcga_fmp_util import tcgaFMPVars
+
 import commands
 from datetime import datetime
 import os
@@ -145,11 +147,11 @@ class illumina_rnaseq(technology_type):
                 if (dirName.find(zPlat[:zPlat.rfind('_')]) < 0):
                     raise ValueError(" not a valid platform: %s ??? !!! " % (dirName))
 
-                cmdString = "$TCGAFMP_ROOT_DIR/%s " % self.configuration['matrix_script']
-                cmdString += "-m %s " % self.configuration['matrix_adf']
-                cmdString += "-o %s " % outDir
-                cmdString += "-p %s " % topDir
-                cmdString += "-n %s " % zPlat
+                cmdString = tcgaFMPVars['TCGAFMP_ROOT_DIR'] + "/" + self.configuration['matrix_script']
+                cmdString += " -m %s " % self.configuration['matrix_adf']
+                cmdString += " -o %s " % outDir
+                cmdString += " -p %s " % topDir
+                cmdString += " -n %s " % zPlat
 
                 print " "
                 print cmdString
@@ -397,6 +399,26 @@ class unc_edu_illuminaga_rnaseq(illumina_rnaseq):
 
     def includeFile(self, tokens):
         if tokens[self.iOther].lower().find("gene") < 0 or tokens[self.iOther].lower().find("expression") < 0:
+            mess = '(e) NOT including this file ... ', self.iFilename, tokens[self.iFilename], self.iBarcode, tokens[self.iBarcode], self.iOther, tokens[self.iOther]
+            return (None, None, None, None, False, mess)
+        return illumina_rnaseq.includeFile(self, tokens)
+
+    def _addGeneName(self, tokens):
+        self._addGeneNameForRNA(tokens)
+
+class unc_edu_illuminaga_rnaseqv2(illumina_rnaseq):
+    '''
+    the illumina ga v2 platform for ngs for mRNA
+    '''
+    def __init__(self, config, platformID):
+        '''
+        Constructor
+        '''
+        illumina_rnaseq.__init__(self, config, platformID)
+        self.configuration.update(config.items('unc_edu_illuminaga_rnaseqv2'))
+
+    def includeFile(self, tokens):
+        if tokens[self.iOther] != "RSEM_genes_normalized":
             mess = '(e) NOT including this file ... ', self.iFilename, tokens[self.iFilename], self.iBarcode, tokens[self.iBarcode], self.iOther, tokens[self.iOther]
             return (None, None, None, None, False, mess)
         return illumina_rnaseq.includeFile(self, tokens)

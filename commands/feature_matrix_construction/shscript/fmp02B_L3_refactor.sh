@@ -1,14 +1,9 @@
 #!/bin/bash
 
-: ${LD_LIBRARY_PATH:?" environment variable must be set and non-empty"}
-: ${TCGAFMP_ROOT_DIR:?" environment variable must be set and non-empty"}
+# every TCGA FMP script should start with these lines:
+: ${TCGAFMP_ROOT_DIR:?" environment variable must be set and non-empty; defines the path to the TCGA FMP scripts directory"}
+source ${TCGAFMP_ROOT_DIR}/shscript/tcga_fmp_util.sh
 
-if [[ "$PYTHONPATH" != *"gidget"* ]]; then
-    echo " "
-    echo " your PYTHONPATH should include paths to gidget/commands/... directories "
-    echo " "
-    exit 99
-fi
 
 ## this script should be called with the following parameters:
 ##      date, eg '29jan13'
@@ -20,7 +15,7 @@ WRONGARGS=1
 if [ $# != 4 ]
     then
         echo " Usage   : `basename $0` <curDate> <snapshotName> <tumorType> <config>"
-        echo " Example : `basename $0` 28oct13 dcc-snapshot-28oct13 brca parse_tcga.config"
+        echo " Example : `basename $0` 28oct13  dcc-snapshot-28oct13  brca  parse_tcga.27_450k.config"
         exit $WRONGARGS
 fi
 
@@ -42,9 +37,7 @@ args=("$@")
 for tumor in $tumors
     do
 
-	## cd /titan/cancerregulome3/TCGA/outputs/$tumor
-	## cd /titan/cancerregulome14/TCGAfmp_outputs/$tumor
-	cd $TCGAFMP_OUTPUTS/$tumor
+	cd $TCGAFMP_DATA_DIR/$tumor
 
 	echo " "
 	echo " "
@@ -64,18 +57,17 @@ for tumor in $tumors
         rm -fr *__*.$curDate.tsv.bkp
 
 	## COPY-NUMBER
-        ## 29may13 : subbing in Michael's version that calls his resegmentation code which should be at least 5x faster
 	python $TCGAFMP_ROOT_DIR/main/parse_tcga.py $TCGAFMP_ROOT_DIR/config/$config broad.mit.edu/genome_wide_snp_6/snp/ $tumor $curDate $snapshotName           >& level3.broad.snp_6.$curDate.log 
-	## python $TCGAFMP_ROOT_DIR/main/new_Level3_matrix.py $curDate broad.mit.edu/genome_wide_snp_6/snp $tumor $snapshotName                  >& level3.broad.snp_6.$curDate.log 
-	## python $TCGAFMP_ROOT_DIR/main/new_Level3_matrix.py $curDate genome.wustl.edu/genome_wide_snp_6/snp $tumor $snapshotName               >& level3.wustl.snp_6.$curDate.log 
 
-	## MICRO-RNA
-	##python $TCGAFMP_ROOT_DIR/main/new_Level3_matrix.py $curDate bcgsc.ca/illuminaga_mirnaseq/mirnaseq $tumor $snapshotName                >& level3.bcgsc.ga_mirn.$curDate.log 
+	## MICRO-RNA (both GA and HiSeq)
 	python $TCGAFMP_ROOT_DIR/main/parse_tcga.py $TCGAFMP_ROOT_DIR/config/$config bcgsc.ca/illuminaga_mirnaseq/mirnaseq/ $tumor $curDate $snapshotName                >& level3.bcgsc.ga_mirn.$curDate.log 
-	##python $TCGAFMP_ROOT_DIR/main/new_Level3_matrix.py $curDate bcgsc.ca/illuminahiseq_mirnaseq/mirnaseq $tumor $snapshotName             >& level3.bcgsc.hiseq_mirn.$curDate.log 
 	python $TCGAFMP_ROOT_DIR/main/parse_tcga.py $TCGAFMP_ROOT_DIR/config/$config bcgsc.ca/illuminahiseq_mirnaseq/mirnaseq/ $tumor $curDate $snapshotName             >& level3.bcgsc.hiseq_mirn.$curDate.log 
+        for f in *__mirnaseq*tsv
+            do
+                $TCGAFMP_ROOT_DIR/shscript/fmp00B_hackBarcodes.sh $f
+            done
 
-	## MESSENGER-RNA
+	## MESSENGER-RNA (many different platforms)
 	python $TCGAFMP_ROOT_DIR/main/parse_tcga.py $TCGAFMP_ROOT_DIR/config/$config bcgsc.ca/illuminaga_rnaseq/rnaseq/ $tumor $curDate $snapshotName                    >& level3.bcgsc.ga_rnaseq.$curDate.log 
 	python $TCGAFMP_ROOT_DIR/main/parse_tcga.py $TCGAFMP_ROOT_DIR/config/$config bcgsc.ca/illuminahiseq_rnaseq/rnaseq/ $tumor $curDate $snapshotName                 >& level3.bcgsc.hiseq_rnaseq.$curDate.log 
 	python $TCGAFMP_ROOT_DIR/main/parse_tcga.py $TCGAFMP_ROOT_DIR/config/$config unc.edu/agilentg4502a_07_1/transcriptome/ $tumor $curDate $snapshotName             >& level3.unc.agil_07_1.$curDate.log 
@@ -86,7 +78,7 @@ for tumor in $tumors
 	python $TCGAFMP_ROOT_DIR/main/parse_tcga.py $TCGAFMP_ROOT_DIR/config/$config unc.edu/illuminaga_rnaseqv2/rnaseqv2/ $tumor $curDate $snapshotName                 >& level3.unc.ga_rnaseqv2.$curDate.log 
 	python $TCGAFMP_ROOT_DIR/main/parse_tcga.py $TCGAFMP_ROOT_DIR/config/$config unc.edu/illuminahiseq_rnaseqv2/rnaseqv2/ $tumor $curDate $snapshotName              >& level3.unc.hiseq_rnaseqv2.$curDate.log 
 
-	## METHYLATION
+	## METHYLATION (both 27k and 450k platforms)
 	python $TCGAFMP_ROOT_DIR/main/parse_tcga.py $TCGAFMP_ROOT_DIR/config/$config jhu-usc.edu/humanmethylation27/methylation/ $tumor $curDate $snapshotName           >& level3.jhu-usc.meth27.$curDate.log 
 	python $TCGAFMP_ROOT_DIR/main/parse_tcga.py $TCGAFMP_ROOT_DIR/config/$config jhu-usc.edu/humanmethylation450/methylation/ $tumor $curDate $snapshotName          >& level3.jhu-usc.meth450.$curDate.log 
 
@@ -99,96 +91,54 @@ for tumor in $tumors
 	## now we need to move any 'obsolete' expression datasets out of the way ...
 	rm -fr $tumor.*.$curDate.tsv.bkp
 
-	## new as of 25mar13 ... there is now GA_RNASeqV2 data for COAD, READ and UCEC which
-	## we are going to say for now "outranks" any HiSeq_RNASeqV2 data ...
-	if [ -f $tumor.unc.edu__illuminaga_rnaseqv2__rnaseqv2.$curDate.tsv ]
-	    then
-		if [ -f $tumor.unc.edu__illuminahiseq_rnaseqv2__rnaseqv2.$curDate.tsv ]
-		    then
-			echo " Illumina GA RNAseq V2 data exists ... moving HiSeq RNAseq V2 dataset to bkp "
-		        mv $tumor.unc.edu__illuminahiseq_rnaseqv2__rnaseqv2.$curDate.tsv \
-			   $tumor.unc.edu__illuminahiseq_rnaseqv2__rnaseqv2.$curDate.tsv.bkp
-		fi
-		if [ -f $tumor.unc.edu__illuminahiseq_rnaseq__rnaseq.$curDate.tsv ]
-		    then
-			echo " Illumina GA RNAseq V2 data exists ... moving HiSeq RNAseq V1 dataset to bkp "
-		        mv $tumor.unc.edu__illuminahiseq_rnaseq__rnaseq.$curDate.tsv \
-			   $tumor.unc.edu__illuminahiseq_rnaseq__rnaseq.$curDate.tsv.bkp
-		fi
-		if [ -f $tumor.unc.edu__illuminaga_rnaseq__rnaseq.$curDate.tsv ]
-		    then
-			echo " Illumina GA RNAseq V2 data exists ... moving GA RNAseq V1 dataset to bkp "
-		        mv $tumor.unc.edu__illuminaga_rnaseq__rnaseq.$curDate.tsv \
-			   $tumor.unc.edu__illuminaga_rnaseq__rnaseq.$curDate.tsv.bkp
-		fi
-		if [ -f $tumor.bcgsc.ca__illuminahiseq_rnaseq__rnaseq.$curDate.tsv ]
-		    then
-			echo " Illumina GA RNAseq V2 data exists ... moving BCGSC HiSeq dataset to bkp "
-		        mv $tumor.bcgsc.ca__illuminahiseq_rnaseq__rnaseq.$curDate.tsv \
-			   $tumor.bcgsc.ca__illuminahiseq_rnaseq__rnaseq.$curDate.tsv.bkp
-		fi
-		if [ -f $tumor.bcgsc.ca__illuminaga_rnaseq__rnaseq.$curDate.tsv ]
-		    then
-			echo " Illumina GA RNAseq V2 data exists ... moving BCGSC GA dataset to bkp "
-		        mv $tumor.bcgsc.ca__illuminaga_rnaseq__rnaseq.$curDate.tsv \
-			   $tumor.bcgsc.ca__illuminaga_rnaseq__rnaseq.$curDate.tsv.bkp
-		fi
-	fi
-	
+        ## cleaning this up a bit ...
+        ## we want to check for all of the various types of RNAseq data we might have ...
 
-	## there are a few cases where there is a V1 and a V2 RNAseq dataset at this point, 
-	## and we want to only use V2 if it is available ...
-	if [ -f $tumor.unc.edu__illuminahiseq_rnaseqv2__rnaseqv2.$curDate.tsv ]
-	    then
-		if [ -f $tumor.unc.edu__illuminahiseq_rnaseq__rnaseq.$curDate.tsv ]
-		    then
-			echo " Illumina HiSeq RNAseq V2 data exists ... moving HiSeq RNAseq V1 dataset to bkp "
-		        mv $tumor.unc.edu__illuminahiseq_rnaseq__rnaseq.$curDate.tsv \
-			   $tumor.unc.edu__illuminahiseq_rnaseq__rnaseq.$curDate.tsv.bkp
-		fi
-		if [ -f $tumor.unc.edu__illuminaga_rnaseq__rnaseq.$curDate.tsv ]
-		    then
-			echo " Illumina HiSeq RNAseq V2 data exists ... moving GA RNAseq V1 dataset to bkp "
-		        mv $tumor.unc.edu__illuminaga_rnaseq__rnaseq.$curDate.tsv \
-			   $tumor.unc.edu__illuminaga_rnaseq__rnaseq.$curDate.tsv.bkp
-		fi
-		if [ -f $tumor.bcgsc.ca__illuminahiseq_rnaseq__rnaseq.$curDate.tsv ]
-		    then
-			echo " Illumina HiSeq RNAseq V2 data exists ... moving BCGSC HiSeq dataset to bkp "
-		        mv $tumor.bcgsc.ca__illuminahiseq_rnaseq__rnaseq.$curDate.tsv \
-			   $tumor.bcgsc.ca__illuminahiseq_rnaseq__rnaseq.$curDate.tsv.bkp
-		fi
-		if [ -f $tumor.bcgsc.ca__illuminaga_rnaseq__rnaseq.$curDate.tsv ]
-		    then
-			echo " Illumina HiSeq RNAseq V2 data exists ... moving BCGSC GA dataset to bkp "
-		        mv $tumor.bcgsc.ca__illuminaga_rnaseq__rnaseq.$curDate.tsv \
-			   $tumor.bcgsc.ca__illuminaga_rnaseq__rnaseq.$curDate.tsv.bkp
-		fi
-	fi
-	
-	## also HiSeq RNASeq outranks GA RNASeq ... (and any data from BCGSC)
-	if [ -f $tumor.unc.edu__illuminahiseq_rnaseq__rnaseq.$curDate.tsv ]
-	    then
-		if [ -f $tumor.unc.edu__illuminaga_rnaseq__rnaseq.$curDate.tsv ]
-		    then
-			echo " Illumina HiSeq RNAseq V1 data exists ... moving GA RNAseq V1 dataset to bkp "
-		        mv $tumor.unc.edu__illuminaga_rnaseq__rnaseq.$curDate.tsv \
-			   $tumor.unc.edu__illuminaga_rnaseq__rnaseq.$curDate.tsv.bkp
-		fi
-		if [ -f $tumor.bcgsc.ca__illuminahiseq_rnaseq__rnaseq.$curDate.tsv ]
-		    then
-			echo " Illumina HiSeq RNAseq V1 data exists ... moving BCGSC HiSeq dataset to bkp "
-		        mv $tumor.bcgsc.ca__illuminahiseq_rnaseq__rnaseq.$curDate.tsv \
-			   $tumor.bcgsc.ca__illuminahiseq_rnaseq__rnaseq.$curDate.tsv.bkp
-		fi
-		if [ -f $tumor.bcgsc.ca__illuminaga_rnaseq__rnaseq.$curDate.tsv ]
-		    then
-			echo " Illumina HiSeq RNAseq V1 data exists ... moving BCGSC GA dataset to bkp "
-		        mv $tumor.bcgsc.ca__illuminaga_rnaseq__rnaseq.$curDate.tsv \
-			   $tumor.bcgsc.ca__illuminaga_rnaseq__rnaseq.$curDate.tsv.bkp
-		fi
-	fi
-	
+        haveUNC_HiSeq_V2=false
+        haveUNC_GA_V2=false
+        haveUNC_HiSeq_V1=false
+        haveUNC_GA_V1=false
+        haveBCG_HiSeq=false
+        haveBCG_GA=false
+
+	if [ -f $tumor.unc.edu__illuminahiseq_rnaseqv2__rnaseqv2.$curDate.tsv ] ; then haveUNC_HiSeq_V2=true ; fi
+	if [ -f $tumor.unc.edu__illuminaga_rnaseqv2__rnaseqv2.$curDate.tsv ];     then haveUNC_GA_V2=true ;    fi
+	if [ -f $tumor.unc.edu__illuminahiseq_rnaseq__rnaseq.$curDate.tsv ] ;     then haveUNC_HiSeq_V1=true ; fi
+	if [ -f $tumor.unc.edu__illuminaga_rnaseq__rnaseq.$curDate.tsv ] ;        then haveUNC_GA_V1=true ;    fi
+	if [ -f $tumor.bcgsc.ca__illuminahiseq_rnaseq__rnaseq.$curDate.tsv ] ;    then haveBCG_HiSeq=true ;    fi
+	if [ -f $tumor.bcgsc.ca__illuminaga_rnaseq__rnaseq.$curDate.tsv ] ;       then haveBCG_GA=true ;       fi
+
+        echo " have these RNAseq data types: " $haveUNC_HiSeq_V2 $haveUNC_GA_V2 $haveUNC_HiSeq_V1 $haveUNC_GA_V1 $haveBCG_HiSeq $haveBCG_GA
+
+        ## if we have data from BCGSC ~and~ from UNC, then we disregard the BCGSC data entirely ...
+        if [[ $haveUNC_HiSeq_V2 == true || $haveUNC_GA_V2 == true || $haveUNC_HiSeq_V1 == true || $haveUNC_GA_V1 == true ]]
+            then
+                if [[ $haveBCG_HiSeq == true ]]
+                    then
+                        echo " WARNING: deprecating BCGSC HiSeq RNAseq data in favor of UNC RNAseq data "
+                        mv $tumor.bcgsc.ca__illuminahiseq_rnaseq__rnaseq.$curDate.tsv $tumor.bcgsc.ca__illuminahiseq_rnaseq__rnaseq.$curDate.tsv.bkp
+                fi
+                if [[ $haveBCG_GA == true ]]
+                    then
+                        echo " WARNING: deprecating BCGSC GA RNAseq data in favor of UNC RNAseq data "
+                        mv $tumor.bcgsc.ca__illuminaga_rnaseq__rnaseq.$curDate.tsv $tumor.bcgsc.ca__illuminaga_rnaseq__rnaseq.$curDate.tsv.bkp
+                fi
+        fi
+
+        ## if we have UNC HiSeq data from both V1 and V2 pipelines, deprecate V1
+        if [[ $haveUNC_HiSeq_v2 == true && $haveUNC_HiSeq_V1 == true ]]
+            then
+                echo " WARNING: deprecating UNC HiSeq RNAseq V1 data in favor of V2 data "
+                mv $tumor.unc.edu__illuminahiseq_rnaseq__rnaseq.$curDate.tsv $tumor.unc.edu__illuminahiseq_rnaseq__rnaseq.$curDate.tsv.bkp
+        fi
+
+        ## if we have UNC GA data from both V1 and V2 pipelines, deprecate V1
+        if [[ $haveUNC_GA_v2 == true && $haveUNC_GA_V1 == true ]]
+            then
+                echo " WARNING: deprecating UNC GA RNAseq V1 data in favor of V2 data "
+                mv $tumor.unc.edu__illuminaga_rnaseq__rnaseq.$curDate.tsv $tumor.unc.edu__illuminaga_rnaseq__rnaseq.$curDate.tsv.bkp
+        fi
+
     done
 
 echo " "

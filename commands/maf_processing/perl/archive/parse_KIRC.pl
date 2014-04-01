@@ -9,6 +9,7 @@ use warnings;
 #to tell if exonic or non-exonic, grab the last field from line
 #non-exonic matches variant_type
 
+#TODO: configurable path
 my $maf_uniprot="/titan/cancerregulome9/workspaces/users/liype/maf_protein/output/run2_KIRC/BI_and_BCM_1.4.aggregated.tcga.maf.ncm.with_uniprot";
 
 open (MAF_UNIPROT, $maf_uniprot) or die "Error: cannot read from MAF.NCM.UNIPROT file $maf_uniprot: $!\n";

@@ -289,10 +289,11 @@ def mergeClinDict(aDict, bDict):
             taKey = bKey
             print "         defaulting taKey to : ", taKey
 
-        print " making sure we have some values in bDict ... ", bKey
-        print bDict[bKey][0:5]
-        print " making sure we have some values in aDict ... ", taKey
-        print aDict[taKey][0:5]
+        if ( 0 ):
+            print " making sure we have some values in bDict ... ", bKey
+            print bDict[bKey][0:5]
+            print " making sure we have some values in aDict ... ", taKey
+            print aDict[taKey][0:5]
 
         for ii in range(len(bDict[keepKey])):
             bCode = bDict[keepKey][ii]
@@ -301,7 +302,7 @@ def mergeClinDict(aDict, bDict):
             if (jj >= 0):
                 try:
                     aDict[taKey][jj] = bDict[bKey][ii]
-                    print " setting aDict[%s][%d] = bDict[%s][%d] = " % ( taKey, jj, bKey, ii ), bDict[bKey][ii]
+                    ## print " setting aDict[%s][%d] = bDict[%s][%d] = " % ( taKey, jj, bKey, ii ), bDict[bKey][ii]
                 except:
                     print " this did not work ", ii, jj, taKey, bKey
                     print len(bDict[bKey]), bDict[bKey]
@@ -351,8 +352,6 @@ if __name__ == "__main__":
     bestKeyOrder = miscClin.getBestKeyOrder(allClinDict, naCounts)
 
     # now we want to read in a new tsv file ...
-    ## newInfo = "/users/sreynold/TCGA/COAD+READ/tcga_crc_cluster_info_12272010_b.tsv"
-    ## tsvName2 = "/users/sreynold/TCGA/COAD+READ/crc_dna_methylation_cluster_01-20-11_b.tsv"
     print " "
     print " ****************************************************************** "
     print " reading input file <%s> " % tsvName2

@@ -7,6 +7,7 @@ import os
 import sys
 
 # these are my local modules
+from tcga_fmp_util import tcgaFMPVars
 import miscIO
 import miscTCGA
 import path
@@ -192,7 +193,6 @@ if __name__ == "__main__":
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     # now we need to get set up for writing the output ...
     # NEW: 21dec12 ... assuming that we will write to current working directory
-    ## outDir = "/titan/cancerregulome3/TCGA/outputs/"
     outDir = "./"
     outFilename = makeOutputFilename(
         outDir, tumorList, platformID, outSuffix)
@@ -213,8 +213,8 @@ if __name__ == "__main__":
         print ' LOOP over %d CANCER TYPES ... %s ' % (len(tumorList), zCancer)
 
         # piece together the directory name ...
-        ## topDir = "/titan/cancerregulome11/TCGA/repositories/dcc-snapshot/public/tumor/" + zCancer + "/cgcc/" + platformID
-        topDir = "/titan/cancerregulome11/TCGA/repositories/" + \
+        ## topDir = tcgaFMPVars['TCGAFMP_DCC_REPOSITORIES'] + "/dcc-snapshot/public/tumor/" + zCancer + "/cgcc/" + platformID
+        topDir = tcgaFMPVars['TCGAFMP_DCC_REPOSITORIES'] + "/" + \
             snapshotName + "/public/tumor/" + zCancer + "/cgcc/" + platformID
 
         print ' starting from top-level directory ', topDir
@@ -244,8 +244,8 @@ if __name__ == "__main__":
                     sys.exit(-1)
 
 
-                cmdString = "$TCGAFMP_ROOT_DIR/shscript/expression_matrix_mimat.pl "
-                cmdString += "-m /titan/cancerregulome11/TCGA/repositories/mirna_bcgsc/tcga_mirna_bcgsc_hg19.adf "
+                cmdString = "%s/shscript/expression_matrix_mimat.pl " % tcgaFMPVars['TCGAFMP_ROOT_DIR']
+                cmdString += "-m " + tcgaFMPVars['TCGAFMP_DCC_REPOSITORIES'] + "/mirna_bcgsc/tcga_mirna_bcgsc_hg19.adf "
                 cmdString += "-o %s " % outDir
                 cmdString += "-p %s " % topDir
                 cmdString += "-n %s " % zPlat
@@ -287,7 +287,7 @@ if __name__ == "__main__":
 
     # we also need to read in the mapping file ...
     metaData = loadNameMap(
-        "/titan/cancerregulome11/TCGA/repositories/mirna_bcgsc/mature.fa.flat.human.mirbase_v19.txt")
+        tcgaFMPVars['TCGAFMP_DCC_REPOSITORIES'] + "/mirna_bcgsc/mature.fa.flat.human.mirbase_v19.txt")
 
     if (1):
 

@@ -57,7 +57,7 @@ class genome_wide_snp_6(technology_type):
         ## for the SNP platform, we're only keeping tumor samples ...
         ## (which means they can be 01, 02, 06 ... I think anything that starts with a '0' basically)
         ## (yes, according to https://wiki.nci.nih.gov/display/TCGA/TCGA+barcode#TCGAbarcode-ReadingBarcodes --mm)
-        if retVal[4] and  tokens[self.iBarcode][13] != "0":
+        if retVal[4] and  retVal[0][13] != "0":
             retVal = list(retVal)
             retVal[4] = False
             retVal[5] = '(e) NOT including this file ... ', self.iFilename, tokens[self.iFilename], self.iBarcode, tokens[self.iBarcode], self.iYes, tokens[self.iYes], tokens[self.iOther]

@@ -41,6 +41,10 @@ if __name__ == "__main__":
     hdrLine = hdrLine.strip()
     hdrTokens = hdrLine.split('\t')
     numTokens = len(hdrTokens)
+
+    print numTokens
+    print hdrTokens
+
     if (numTokens < 2):
         print " ERROR ... no information available ??? "
         sys.exit(-1)
@@ -51,20 +55,37 @@ if __name__ == "__main__":
         aLine = fhIn.readline()
         aLine = aLine.strip()
         tokenList = aLine.split('\t')
-        if (len(tokenList) != numTokens):
-            done = 1
-            continue
+        ## print len(tokenList), tokenList
+
+        if (len(tokenList)<2): done = 1
+        if (len(tokenList) != numTokens): continue
+
+        if ( not aLine.startswith("TCGA") ): continue
 
         barcode = tokenList[0]
         if (len(barcode) >= 15):
             barcode = barcode[:15]
+
+        ## print barcode
 
         if (barcode in dataDict.keys()):
             dataDict[barcode] += [(tokenList[1:])]
         else:
             dataDict[barcode] = [(tokenList[1:])]
 
+    print " done reading input file ... "
     fhIn.close()
+
+    print " "
+    if ( len(dataDict) == 0 ):
+        print " ERROR ??? empty data dictionary ??? "
+        print " "
+        sys.exit(-1)
+    print len(dataDict)
+    aBarcode = (dataDict.keys())[0]
+    print aBarcode
+    print dataDict[aBarcode]
+    print " "
 
     # now we have to go back and make sure we have only *one* set of inputs
     # per patient/sample ...
