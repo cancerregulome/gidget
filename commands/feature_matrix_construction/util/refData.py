@@ -342,6 +342,7 @@ def readGAF(gafFilename):
         if (aLine.startswith("#")):
             continue
         tokenList = aLine.split('\t')
+        # print len(tokenList), tokenList
 
         if (len(tokenList) < 17):
             continue
@@ -349,7 +350,9 @@ def readGAF(gafFilename):
         ## print " "
         ## print tokenList
 
-        ## print tokenList[16]
+        # print tokenList[16]
+        # print tokenList[2]
+
         if (not tokenList[16].startswith("chr")):
             # print " f17 does not start with chr ??? "
             # print tokenList[16]
@@ -376,10 +379,17 @@ def readGAF(gafFilename):
         geneName = geneTokenList[0]
         if (len(geneTokenList) == 2):
             geneID = geneTokenList[1]
+            if ( geneID.startswith("MIMAT") ):
+                if ( geneID[-2] == "_" ): geneID = geneID[:-2]
         else:
             geneID = '?'
 
-        ## print geneToken, geneTokenList, geneName, geneID
+        ## for a miRNA, we are getting at this point:
+        ##      geneToken = hsa-let-7a-2-3p|MIMAT0010195_1
+        ##      geneTokenList = ['hsa-let-7a-2-3p', 'MIMAT0010195_1']
+        ##      geneName = hsa-let-7a-2-3p
+        ##      geneID = MIMAT0010195_1
+        # print geneToken, geneTokenList, geneName, geneID
 
         if (0):
             # we're skipping entries of the form ?|791120 or T|6862
@@ -409,12 +419,14 @@ def readGAF(gafFilename):
                 doNothing = 1
             else:
                 GAF_geneCoordDict_bySymbol[geneName] = coordToken
+                # print " adding ", geneName, coordToken
 
         if (geneID != '?'):
             if (geneID in GAF_geneCoordDict_byID):
                 doNothing = 1
             else:
                 GAF_geneCoordDict_byID[geneID] = coordToken
+                # print " adding ", geneID, coordToken
 
         # 19dec12 : now also creating the GAF_geneSymbol_byID dict ...
         if (geneID != '?'):
@@ -428,6 +440,8 @@ def readGAF(gafFilename):
                         GAF_geneSymbol_byID[geneID] = ["TRIM74"]
             else:
                 GAF_geneSymbol_byID[geneID] = [geneName]
+
+            # print geneID, geneName, GAF_geneSymbol_byID[geneID]
 
     fh.close()
 
