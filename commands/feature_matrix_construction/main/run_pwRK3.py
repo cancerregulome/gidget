@@ -222,21 +222,20 @@ def preProcessTSV(tsvFile):
 
 def getLocalScratchDir():
 
-    defaultscratch = tcgaFMPVars['TCGAFMP_SCRATCH']
+    defaultscratch = tcgaFMPVars['TCGAFMP_CLUSTER_SCRATCH']
+    localscratch = tcgaFMPVars['TCGAFMP_LOCAL_SCRATCH']
 
-    try:
-        dirName = "/local/" + getpass.getuser()
-        cmdString = "mkdir %s" % dirName
-        (status, output) = commands.getstatusoutput(cmdString)
-        dirName = "/local/" + getpass.getuser() + "/pw_scratch"
-        cmdString = "mkdir %s" % dirName
-        (status, output) = commands.getstatusoutput(cmdString)
-        print " local scratch directory : ", dirName
-        return ( dirName )
-    except:
-        print " local scratch directory : ", defaultscratch
-        return ( defaultscratch )
-
+    if (not os.path.exists(localscratch)):
+        if (not os.path.exists(defaultscratch)):
+            print " FATAL ERROR ... need access to some scratch space !!! "
+            sys.exit(-1)
+        else:
+            print " --> using this scratch directory : ", defaultscratch
+            return ( defaultscratch )
+    else:
+        print " --> using this scratch directory : ", localscratch
+        return ( localscratch )
+        
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 
 
@@ -498,7 +497,7 @@ if __name__ == "__main__":
     print " randomly generated job name : <%s> " % curJobName
     print " "
 
-    tmpDir13 = "%s/%s" % (tcgaFMPVars['TCGAFMP_SCRATCH'], curJobName)
+    tmpDir13 = "%s/%s" % (tcgaFMPVars['TCGAFMP_CLUSTER_SCRATCH'], curJobName)
     cmdString = "mkdir %s" % tmpDir13
     (status, output) = commands.getstatusoutput(cmdString)
     if (not os.path.exists(tmpDir13)):
@@ -549,7 +548,7 @@ if __name__ == "__main__":
     pythonbin = sys.executable
 
     golempwd = "PASSWD_HERE"
-    fhC = file (tcgaFMPVars['TCGAFMP_SCRATCH'] + "/config", 'r' )
+    fhC = file (tcgaFMPVars['TCGAFMP_CLUSTER_SCRATCH'] + "/config", 'r' )
     aLine = fhC.readline()
     fhC.close()
     aLine = aLine.strip()

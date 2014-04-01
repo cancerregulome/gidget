@@ -19,8 +19,11 @@ TCGAFMP_DCC_REPOSITORIES	path to directory which contains subdirectories such as
 # firehose data
 TCGAFMP_FIREHOSE_MIRROR	path to local Firehouse mirror; for example: ".../TCGA/firehose"
 
-# scratch space
-TCGAFMP_SCRATCH	path to large scratch space (some scripts such as pairwise need more than /tmp); for example: ".../TCGA/pw_scratch"
+# scratch space -- one should be local on the computer you typically
+# launch jobs from, and the other should be on a file-server and
+# accessible from the cluster
+TCGAFMP_LOCAL_SCRATCH	path to large scratch space (some scripts such as pairwise need more than /tmp); for example: "/local/.../pw_scratch/"
+TCGAFMP_CLUSTER_SCRATCH	path to large scratch space accessible by cluster; for example: ".../TCGA/pw_scratch"
 
 # auxiliary code: pairwise
 TCGAFMP_PAIRWISE_ROOT	path to the top level of the pairwise project's code which should contain the 'pairwise' executable, 'prep4pairwise.py', etc; or example ".../TCGA/scripts"

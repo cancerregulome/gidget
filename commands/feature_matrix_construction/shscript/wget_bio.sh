@@ -5,7 +5,7 @@
 source ${TCGAFMP_ROOT_DIR}/shscript/tcga_fmp_util.sh
 
 
-for d in `cat $TCGAFMP_ROOT_DIR/shscript/tumor_list.txt`
+for d in `cat $TCGAFMP_ROOT_DIR/config/tumor_list.txt`
 
     do
 
@@ -39,7 +39,7 @@ for d in `cat $TCGAFMP_ROOT_DIR/shscript/tumor_list.txt`
 
     done
 
-for d in `cat $TCGAFMP_ROOT_DIR/shscript/tumor_list.txt`
+for d in `cat $TCGAFMP_ROOT_DIR/config/tumor_list.txt`
     do
 
 	echo " "
@@ -70,7 +70,7 @@ for d in `cat $TCGAFMP_ROOT_DIR/shscript/tumor_list.txt`
     done
 
 
-for d in `cat $TCGAFMP_ROOT_DIR/shscript/tumor_list.txt`
+for d in `cat $TCGAFMP_ROOT_DIR/config/tumor_list.txt`
     do
 
 	echo " "

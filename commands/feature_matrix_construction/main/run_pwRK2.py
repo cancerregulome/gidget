@@ -238,7 +238,7 @@ if __name__ == "__main__":
     print " randomly generated job name : <%s> " % curJobName
     print " "
 
-    tmpDir = "%s/%s" % (tcgaFMPVars['TCGAFMP_SCRATCH'], curJobName)
+    tmpDir = "%s/%s" % (tcgaFMPVars['TCGAFMP_CLUSTER_SCRATCH'], curJobName)
     cmdString = "mkdir %s" % tmpDir
     (status, output) = commands.getstatusoutput(cmdString)
     if (not os.path.exists(tmpDir)):
@@ -282,7 +282,7 @@ if __name__ == "__main__":
     pythonbin = sys.executable
 
     golempwd = "PASSWD_HERE"
-    fhC = file ( tcgaFMPVars['TCGAFMP_SCRATCH'] + "/config", 'r' )
+    fhC = file ( tcgaFMPVars['TCGAFMP_CLUSTER_SCRATCH'] + "/config", 'r' )
     aLine = fhC.readline()
     fhC.close()
     aLine = aLine.strip()
@@ -366,7 +366,7 @@ if __name__ == "__main__":
         print status, output
 
         cmdString = "sort -grk 5 --temporary-directory=%s/ %s/post_proc_all.tsv >& %s/%d.all.pwpv.sort" % (
-            tcgaFMPVars['TCGAFMP_SCRATCH'], tmpDir, tmpDir, iOne)
+            tcgaFMPVars['TCGAFMP_CLUSTER_SCRATCH'], tmpDir, tmpDir, iOne)
         print " < %s > " % cmdString
         (status, output) = commands.getstatusoutput(cmdString)
         print status, output

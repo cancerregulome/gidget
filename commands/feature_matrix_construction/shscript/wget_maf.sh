@@ -7,7 +7,7 @@ source ${TCGAFMP_ROOT_DIR}/shscript/tcga_fmp_util.sh
 
 # =============================================================================
 # broad.mit.edu/illuminaga_dnaseq/mutations/
-for d in `cat $TCGAFMP_ROOT_DIR/shscript/tumor_list.txt`
+for d in `cat $TCGAFMP_ROOT_DIR/config/tumor_list.txt`
 
     do
 
@@ -42,7 +42,7 @@ for d in `cat $TCGAFMP_ROOT_DIR/shscript/tumor_list.txt`
 
 # =============================================================================
 # broad.mit.edu/illuminaga_dnaseq_curated/mutations/
-for d in `cat $TCGAFMP_ROOT_DIR/shscript/tumor_list.txt`
+for d in `cat $TCGAFMP_ROOT_DIR/config/tumor_list.txt`
 
     do
 
@@ -77,7 +77,7 @@ for d in `cat $TCGAFMP_ROOT_DIR/shscript/tumor_list.txt`
 
 # =============================================================================
 # genome.wustl.edu/illuminaga_dnaseq/mutations
-for d in `cat $TCGAFMP_ROOT_DIR/shscript/tumor_list.txt`
+for d in `cat $TCGAFMP_ROOT_DIR/config/tumor_list.txt`
 
     do
 
@@ -109,7 +109,7 @@ for d in `cat $TCGAFMP_ROOT_DIR/shscript/tumor_list.txt`
 
 # =============================================================================
 # hgsc.bcm.edu/illuminaga_dnaseq/mutations/
-for d in `cat $TCGAFMP_ROOT_DIR/shscript/tumor_list.txt`
+for d in `cat $TCGAFMP_ROOT_DIR/config/tumor_list.txt`
 
     do
 
@@ -141,7 +141,7 @@ for d in `cat $TCGAFMP_ROOT_DIR/shscript/tumor_list.txt`
 
 # =============================================================================
 # hgsc.bcm.edu/illuminaga_dnaseq_automated/mutations/
-for d in `cat $TCGAFMP_ROOT_DIR/shscript/tumor_list.txt`
+for d in `cat $TCGAFMP_ROOT_DIR/config/tumor_list.txt`
 
     do
 
@@ -173,7 +173,7 @@ for d in `cat $TCGAFMP_ROOT_DIR/shscript/tumor_list.txt`
 
 # =============================================================================
 # hgsc.bcm.edu/illuminaga_dnaseq_curated/mutations/
-for d in `cat $TCGAFMP_ROOT_DIR/shscript/tumor_list.txt`
+for d in `cat $TCGAFMP_ROOT_DIR/config/tumor_list.txt`
 
     do
 
@@ -205,7 +205,7 @@ for d in `cat $TCGAFMP_ROOT_DIR/shscript/tumor_list.txt`
 
 # =============================================================================
 # ucsc.edu/illuminaga_dnaseq/mutations
-for d in `cat $TCGAFMP_ROOT_DIR/shscript/tumor_list.txt`
+for d in `cat $TCGAFMP_ROOT_DIR/config/tumor_list.txt`
 
     do
 
