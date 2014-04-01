@@ -75,7 +75,7 @@ def geneSymbolLooksOK ( aGene ):
             except:
                 doNothing = 1
 
-    print " geneSymbolLooksOK %s " % aGene
+    # print " geneSymbolLooksOK %s " % aGene
     return ( 1 )
 
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
@@ -85,6 +85,8 @@ def geneSymbolLooksOK ( aGene ):
 
 def overlap ( curRowLabel, Gencode_geneCoordDict_bySymbol, \
               GAF_geneCoordDict_bySymbol, extra_bp):
+
+    # print " in function overlap ", curRowLabel
 
     tokenList = curRowLabel.split(':')
     geneList = []
@@ -113,6 +115,7 @@ def overlap ( curRowLabel, Gencode_geneCoordDict_bySymbol, \
         # any that overlap ...
 
         # first for Gencode ...
+        # print " looking thru Gencode info ... "
         for aGene in Gencode_geneCoordDict_bySymbol.keys():
 
             # if this gene is not even on the same chromosome we're done ...
@@ -133,6 +136,8 @@ def overlap ( curRowLabel, Gencode_geneCoordDict_bySymbol, \
                 if ( aGene not in geneList ):
                     ## print " adding this gene ", aGene, curRowLabel, Gencode_geneCoordDict_bySymbol[aGene]
                     geneList += [aGene]
+
+        # print " looking thru GAF info ... "
 
         # and then for GAF ...
         for aGene in GAF_geneCoordDict_bySymbol.keys():
@@ -197,6 +202,10 @@ def mapFeatures2Genes ( dataD, geneInfoDict, synMapDict, \
         print " ERROR in mapFeatures2Genes ??? bad data ??? "
         return (dataD)
 
+    # we are going to keep track of how many features each gene
+    # gets mapped to ...
+    geneCounts = {}
+
     # outer loop over feature names ...
     print " "
     print " starting loop over %d feature names ... " % numRow
@@ -206,7 +215,7 @@ def mapFeatures2Genes ( dataD, geneInfoDict, synMapDict, \
         curLabel = rowLabels[iRow]
 
         if (iRow % 100 == 0):
-            print " QQ ", iRow, curLabel
+            print " QQ %6d <%s> " % ( iRow, curLabel )
 
         # grab current feature type
         curType = curLabel[2:6]
@@ -217,8 +226,9 @@ def mapFeatures2Genes ( dataD, geneInfoDict, synMapDict, \
         # don't make any attempts at annotating CLIN or SAMP features ...
         if (curType == "CLIN" or curType == "SAMP"): continue
 
-        # also don't do anything with Gistic arm-level features
-        if (curLabel.find("GisticArm") > 0): continue
+        if ( 1 ):
+            # also don't do anything with Gistic arm-level features
+            if (curLabel.find("GisticArm") > 0): continue
 
         # sample feature names:
         # N:METH:C3orf39:chr3:43146780:::cg00008665_5pUTR_NShore
@@ -262,6 +272,7 @@ def mapFeatures2Genes ( dataD, geneInfoDict, synMapDict, \
                                  GAF_geneCoordDict_bySymbol, extra_bp )
             # print geneList
 
+            # write out the output line ...
             outLine = curLabel + "\t" + str(len(geneList)) + "\t"
             for aGene in geneList:
                 outLine += aGene + ","
@@ -269,8 +280,41 @@ def mapFeatures2Genes ( dataD, geneInfoDict, synMapDict, \
                 outLine = outLine[:-1]
             fhOut.write("%s\n" % outLine)
 
+            # also keep track of how many features each gene is mapped to
+            for aGene in geneList:
+                if ( aGene in geneCounts ):
+                    geneCounts[aGene] += 1
+                else:
+                    geneCounts[aGene] = 1
+        
+
     # END OF OUTER LOOP OVER ROWS ...
 
+    print " "
+    print " "
+
+    # now have a look at the geneCounts dictionary ...
+    maxGeneCount = 0
+    maxGeneSymbol = "NA"
+    for aGene in geneCounts:
+        if ( geneCounts[aGene] > maxGeneCount ):
+            maxGeneCount = geneCounts[aGene]
+            maxGeneSymbol = aGene
+
+    print " "
+    print " gene symbol mapped to the most features : ", maxGeneSymbol, maxGeneCount
+    print " total number of symbols : ", len(geneCounts)
+    print " "
+
+    histCount = [0] * (maxGeneCount+1)
+    for aGene in geneCounts:
+        histCount[geneCounts[aGene]] += 1
+
+    print " "
+    for iCount in range(len(histCount)):
+        if ( histCount[iCount] > 0 ):
+            print " %4d  %6d " % ( iCount, histCount[iCount] )
+        
     print " "
     print " "
 
@@ -360,7 +404,7 @@ if __name__ == "__main__":
     print " --> calling mapFeatures2Genes ... "
     annotD = mapFeatures2Genes ( testD, geneInfoDict, synMapDict, \
         Gencode_geneCoordDict_bySymbol, Gencode_geneCoordDict_byID, Gencode_geneSymbol_byID, \
-        GAF_geneCoordDict_byID, GAF_geneCoordDict_byID, GAF_geneSymbol_byID, \
+        GAF_geneCoordDict_bySymbol, GAF_geneCoordDict_byID, GAF_geneSymbol_byID, \
         refGeneDict, cytoDict, featType, extra_bp )
 
     print " "
