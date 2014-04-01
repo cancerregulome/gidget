@@ -1,15 +1,9 @@
 #!/bin/bash
 
-: ${LD_LIBRARY_PATH:?" environment variable must be set and non-empty"}
-: ${TCGAFMP_ROOT_DIR:?" environment variable must be set and non-empty"}
-: ${TCGAFMP_DATA_DIR:?" environment variable must be set and non-empty"}
+# every TCGA FMP script should start with these lines:
+: ${TCGAFMP_ROOT_DIR:?" environment variable must be set and non-empty; defines the path to the TCGA FMP scripts directory"}
+source ${TCGAFMP_ROOT_DIR}/shscript/tcga_fmp_util.sh
 
-if [[ "$PYTHONPATH" != *"gidget"* ]]; then
-    echo " "
-    echo " your PYTHONPATH should include paths to gidget/commands/... directories "
-    echo " "
-    exit 99
-fi
 
 ## this script should be called with the following parameters:
 ##      date, eg '12jul13' or 'test'
@@ -21,7 +15,7 @@ WRONGARGS=1
 if [ $# != 4 ]
     then
         echo " Usage   : `basename $0`  <curDate>  <tumorType>  <fhDir>  <fhSubset> "
-        echo " Example : `basename $0`  28oct13FH  skcm  /titan/cancerregulome9/TCGA/firehose/awg_skcm__2013_10_13  All_Samples "
+        echo " Example : `basename $0`  28oct13FH  skcm  <path to>/TCGA/firehose/awg_skcm__2013_10_13  All_Samples "
         exit $WRONGARGS
 fi
 
@@ -50,7 +44,7 @@ $TCGAFMP_ROOT_DIR/shscript/fmp01B_FH.sh $curDate $oneTumor $fhDir $fhSubset >& $
 ## $TCGAFMP_ROOT_DIR/shscript/fmp02B_L3_FH.sh  $curDate $oneTumor >& $TCGAFMP_DATA_DIR/$oneTumor/scratch/fmp02B.$curDate.FH.$oneTumor.log
 
 $TCGAFMP_ROOT_DIR/shscript/fmp05B_filter.sh        $curDate $oneTumor >& $TCGAFMP_DATA_DIR/$oneTumor/scratch/fmp05B.$curDate.$oneTumor.log
-$TCGAFMP_ROOT_DIR/shscript/fmp06B_merge.sh         $curDate $oneTumor >& $TCGAFMP_DATA_DIR/$oneTumor/scratch/fmp06B.$curDate.$oneTumor.log
+$TCGAFMP_ROOT_DIR/shscript/fmp06B_merge.sh         $curDate $oneTumor private >& $TCGAFMP_DATA_DIR/$oneTumor/scratch/fmp06B.$curDate.$oneTumor.log
 $TCGAFMP_ROOT_DIR/shscript/fmp07B_misc.sh          $curDate $oneTumor >& $TCGAFMP_DATA_DIR/$oneTumor/scratch/fmp07B.$curDate.$oneTumor.log
 $TCGAFMP_ROOT_DIR/shscript/fmp08B_checkMeth.sh     $curDate $oneTumor >& $TCGAFMP_DATA_DIR/$oneTumor/scratch/fmp08B.$curDate.$oneTumor.log
 $TCGAFMP_ROOT_DIR/shscript/fmp09B_addGnab.sh       $curDate $oneTumor >& $TCGAFMP_DATA_DIR/$oneTumor/scratch/fmp09B.$curDate.$oneTumor.log

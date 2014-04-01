@@ -1,14 +1,9 @@
 #!/bin/bash
 
-: ${LD_LIBRARY_PATH:?" environment variable must be set and non-empty"}
-: ${TCGAFMP_ROOT_DIR:?" environment variable must be set and non-empty"}
+# every TCGA FMP script should start with these lines:
+: ${TCGAFMP_ROOT_DIR:?" environment variable must be set and non-empty; defines the path to the TCGA FMP scripts directory"}
+source ${TCGAFMP_ROOT_DIR}/shscript/tcga_fmp_util.sh
 
-if [[ "$PYTHONPATH" != *"gidget"* ]]; then
-    echo " "
-    echo " your PYTHONPATH should include paths to gidget/commands/... directories "
-    echo " "
-    exit 99
-fi
 
 ## this script should be called with the following parameters:
 ##      date, eg '29jan13'
@@ -31,8 +26,7 @@ for ((i=0; i<$#; i++))
     do
         tumor=${args[$i]}
 
-	## cd /titan/cancerregulome3/TCGA/outputs/$tumor
-	cd /titan/cancerregulome14/TCGAfmp_outputs/$tumor
+	cd $TCGAFMP_DATA_DIR/$tumor
 
 	echo " "
 	echo " "
@@ -68,7 +62,7 @@ for ((i=0; i<$#; i++))
 		sed -e '2,$s/-06C	/-06	/' | \
 		sed -e '2,$s/-06D	/-06	/' >& gnab.tmp.1
 
-	/users/sreynold/scripts/transpose gnab.tmp.1 >& gnab.tmp.2
+	$TCGAFMP_ROOT_DIR/shscript/tcga_fmp_transpose.sh gnab.tmp.1 >& gnab.tmp.2
 
 	## now for some ugly processing ...
 	sed -e '1s/	/B:GNAB	/' gnab.tmp.2 | sed -e '2,$s/^/B:GNAB:/g' | sed -e '2,$s/_/:::::/' | \
@@ -76,15 +70,15 @@ for ((i=0; i<$#; i++))
 		sed -e '1s/Native-//g' | sed -e '1s/-Tumor//g' >& gnab.tmp.3
 	
 	## change the iarc_freq feature(s) to "N" from "B"
-	grep    "iarc_freq" gnab.tmp.3 | sed -e '1,$s/B:GNAB/N:GNAB/' >& gnab.tmp.3a
+	grep "iarc_freq" gnab.tmp.3 | sed -e '1,$s/B:GNAB/N:GNAB/' >& gnab.tmp.3a
+        grep "ja_lhood_" gnab.tmp.3 | sed -e '1,$s/B:GNAB/N:GNAB/' >& gnab.tmp.3b
+        grep "ja_ddG_"   gnab.tmp.3 | sed -e '1,$s/B:GNAB/N:GNAB/' >& gnab.tmp.3c
+        grep "ja_PP_"    gnab.tmp.3 | sed -e '1,$s/B:GNAB/N:GNAB/' >& gnab.tmp.3d
 	
 	## grab all the rest, then divide into features with decimals and features w/o
-	grep -v "iarc_freq" gnab.tmp.3 >& gnab.tmp.3b
-	grep -v "\." gnab.tmp.3b >& gnab.tmp.3c
-	grep    "\." gnab.tmp.3b >& gnab.tmp.3d
-	sed -e '1,$s/B:GNAB/N:GNAB/' gnab.tmp.3d >& gnab.tmp.3e
+	grep -v "iarc_freq" gnab.tmp.3 | grep -v "ja_lhood_" | grep -v "ja_ddG_" | grep -v "ja_PP_" >& gnab.tmp.3e
 	
-	cat gnab.tmp.3c gnab.tmp.3a gnab.tmp.3e >& gnab.tmp.4
+        cat gnab.tmp.3e gnab.tmp.3a gnab.tmp.3b gnab.tmp.3c gnab.tmp.3d >& gnab.tmp.4
 	
 	## NEW: put in a step here that checks/fixes the feature names (B: vs N:)
 	## and also removes any features that are *uniform*

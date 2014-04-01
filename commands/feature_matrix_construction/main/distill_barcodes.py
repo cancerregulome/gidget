@@ -6,13 +6,15 @@ Created on Aug 16, 2013
 from datetime import datetime
 import os
 import sys
+import traceback
 
 import read_stad_archive
 # import read_stad_snapshot
 
-def main(outfileName, archive, config, tumorType, excfilename, incfilename):
-    print datetime.now(), 'begin reading archive and snapshot: outfile pattern: %s archive: %s config file: %s tumor type: %s exclusion file name: %s override exclusion filename: %s' %\
-        (outfileName, archive, config, tumorType, excfilename, incfilename)
+def main(outfileName, archive, config, tumorType, excfilename, incfilename, excludePlatforms):
+    print datetime.now(), 'begin reading archive and snapshot: outfile pattern: %s archive: %s config file: %s tumor type: %s \
+        exclusion file name: %s override exclusion filename: %s exclude platforms: %s' %\
+        (outfileName, archive, config, tumorType, excfilename, incfilename, excludePlatforms)
     
     index = outfileName.rindex('/')
     if -1 < index:
@@ -81,6 +83,8 @@ def main(outfileName, archive, config, tumorType, excfilename, incfilename):
         platformInfo = [[set(), set()], [set(), set()]]
         platforms2samples[platform] = platformInfo
         for p in platforms:
+            if not platforms2samples.has_key(p):
+                continue
             info = platforms2samples.pop(p)
             for i in range(len(platformInfo)):
                 for j in range(len(platformInfo[0])):
@@ -117,9 +121,11 @@ def main(outfileName, archive, config, tumorType, excfilename, incfilename):
 
         outfile.write('%s:\n' % ('Samples'))
         countfile.write('%s:\n' % ('Samples'))
+        sampleset = set()
         platforms = platforms2samples.keys()
         platforms.sort()
         for platform in platforms:
+            sampleset |= samples[0][0] | samples[0][1]
             samples = platforms2samples[platform]
             gtslen = len(samples[0][0])
             btslen = len(samples[1][0])
@@ -138,6 +144,17 @@ def main(outfileName, archive, config, tumorType, excfilename, incfilename):
             outfile.write('\n')
             countfile.write('platform: %s\n\tinclude(%i tumor: %i normal: %i)\n\texclude(%i tumor: %i normal: %i)\n' % (platform, gtslen + gnslen, gtslen, gnslen, btslen + bnslen, btslen, bnslen))
             countfile.write('\n')
+            
+    print datetime.now(), 'writing consolidated sample file'
+    with open(outfileName + '_samples.txt', 'w') as outfile:
+        outfile.write('%s:\n' % ('SAMPLE_BARCODE'))
+        samplelist = list(sampleset)
+        samplelist.sort()
+        for sample in samplelist:
+            if 'DNU' in sample:
+                print 'skipping %s' % (sample)
+                continue
+            outfile.write('%s\n' % (sample[:sample.index('\t')]))
         
     print datetime.now(), 'writing participant file'
     with open(outfileName + '_by_participant.txt', 'w') as outfile:
@@ -160,20 +177,21 @@ def main(outfileName, archive, config, tumorType, excfilename, incfilename):
                     for ri in ris:
                         outfile.write('\t\t\t%s\t%s\t%s\n' % (ri.data_level, ri.platform, ri.annotation_types))
     
+    archiveset = set()
     excludeNormal = set(['genome_wide_snp_6'])
     header = 'PARTICIPANT	SAMPLE	BARCODE	UUID_ALIQUOT	DATA_TYPE	PLATFORM	URL	DATA_LEVEL	ARCHIVE_NAME	BATCH	DATE_ADDED	ANNOTATION_TYPES'
     print datetime.now(), 'writing full platform files'
     platforms = platforms2samples.keys()
+    partMap = {}
+    sampleMap = {}
     for platform in platforms:
         usePlatforms = set([platform])
         if platform2platforms.has_key(platform):
             for p in platform2platforms[platform]:
                 usePlatforms.add(p)
-        partSet = set()
-        sampleSet = set()
         with open(outfileName + '_%s.txt' % (platform), 'w') as outfile:
             print 'writing platform %s' % (platform)
-            outfile.write('%s:\n' % (header))
+            outfile.write('%s\n' % (header))
             samples = platforms2samples[platform]
             for index in range(len(samples[0])):
                 if 1 == index and platform in excludeNormal:
@@ -186,13 +204,89 @@ def main(outfileName, archive, config, tumorType, excfilename, incfilename):
                     for ris in aliquot2ris.itervalues():
                         for ri in ris:
                             if ri.platform.lower() in usePlatforms:
-                                partSet.add(ri.participant)
-                                sampleSet.add(ri.sample)
-                                outfile.write('%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t\n' % (ri.participant, ri.sample, ri.barcode, ri.uuid_aliquot, ri.data_type, \
-                                    ri.platform, ri.url, ri.data_level, ri.archive_name, ri.batch, ri.date_added, ri.annotation_types))
-        print '\t%s: participants %i, samples %i' % (platform, len(partSet), len(sampleSet))
+                                platforms = partMap.get(ri.participant, set())
+                                platforms.add(ri.data_type)
+                                partMap[ri.participant] = platforms
+                                platforms = sampleMap.get(ri.sample, set())
+                                platforms.add(ri.data_type)
+                                sampleMap[ri.sample] = platforms
+                                
+                                line = '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t\n' % (ri.participant, ri.sample, ri.barcode, ri.uuid_aliquot, ri.data_type, \
+                                    ri.platform, ri.url, ri.data_level, ri.archive_name, ri.batch, ri.date_added, ri.annotation_types)
+                                outfile.write(line)
+                                archiveset.add(line)
+        print '\t%s: participants %i, samples %i' % (platform, len(partMap), len(sampleMap))
+    with open(outfileName + '_availability_participant.tsv', 'w') as outfile:
+        print 'writing data availability for participant'
+        platforms = ["Complete Clinical Set", "DNA Methylation", "RNASeq", "miRNASeq", "CNV (SNP Array)", "Somatic Mutations", 
+                  "Protected Mutations", "CNV (Low Pass DNASeq)", "Expression-Protein", "Fragment Analysis Results"]
+        outfile.write('\t%s\ttotal\n' % ('\t'.join(platforms)))
+        colTotals = {}
+        keys = partMap.keys()
+        keys.sort()
+        for key in keys:
+            rowTotal = 0
+            outfile.write('%s' % key)
+            for platform in platforms:
+                value = 1 if platform in partMap.get(key) else 0
+                rowTotal += value
+                colTotals[platform] = colTotals.get(platform, 0) + value
+                outfile.write('\t%i' % value)
+            outfile.write('\t%i\n' % rowTotal)
+        outfile.write('totals')
+        for platform in platforms:
+            try:
+                outfile.write('\t%i' % colTotals[platform])
+            except Exception as e:
+                traceback.print_exc()
+                print 'problem getting column totals for %s: %s' % (platform, e)
+        outfile.write('\n')
+
+    with open(outfileName + '_availability_sample.tsv', 'w') as outfile:
+        print 'writing data availability for sample'
+        platforms = ["Complete Clinical Set", "DNA Methylation", "RNASeq", "miRNASeq", "CNV (SNP Array)", "Somatic Mutations", 
+                  "Protected Mutations", "CNV (Low Pass DNASeq)", "Expression-Protein", "Fragment Analysis Results"]
+        outfile.write('\t%s\ttotal\n' % ('\t'.join(platforms)))
+        colTotals = {}
+        keys = sampleMap.keys()
+        keys.sort()
+        for key in keys:
+            rowTotal = 0
+            outfile.write('%s' % key)
+            for platform in platforms:
+                value = 1 if platform in sampleMap.get(key) else 0
+                rowTotal += value
+                colTotals[platform] = colTotals.get(platform, 0) + value
+                outfile.write('\t%i' % value)
+            outfile.write('\t%i\n' % rowTotal)
+        outfile.write('totals')
+        for platform in platforms:
+            outfile.write('\t%i' % colTotals[platform])
+        outfile.write('\n')
+
+    with open(outfileName + '_archive.txt', 'w') as outfile:
+        print 'writing archive'
+        outfile.write('%s\n' % (header))
+        archivelist = list(archiveset)
+        archivelist.sort()
+        for archiveline in archivelist:
+            if archiveline.split('\t')[5] in excludePlatforms:
+                continue
+            outfile.write('%s' % (archiveline))
+
 #    print 'archive:\n\t%s \nsnapshot:\n\t%s' % ('\n\t'.join(archiveBarcodes.keys()), '\n\t'.join(snapshotBarcodes.keys()))
     print datetime.now(), 'done reading archive and snapshot and writing file'
 
+# python -u \
+#    main/distill_barcodes.py \
+#    2014_01_18_stad_counts/barcodes \
+#    STAD.freeze.2013.350.txt \
+#    config/parse_tcga_count.config \
+#    stad \
+#    EPCBlacklist_042413.txt \
+#    PlatformOverridelist_101613.txt
 if __name__ == '__main__':
-    main(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4], sys.argv[5], sys.argv[6])
+    excludePlatforms = []
+    if 8 == len(sys.argv):
+        excludePlatforms = sys.argv[7].split(',')
+    main(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4], sys.argv[5], sys.argv[6], excludePlatforms)

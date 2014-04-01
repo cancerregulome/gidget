@@ -3,6 +3,7 @@ Created on Jun 18, 2012
 
 @author: m.miller
 '''
+import miscTCGA
 from technology_type import technology_type
 
 class unc_edu_agilentg4502a_07(technology_type):
@@ -16,6 +17,15 @@ class unc_edu_agilentg4502a_07(technology_type):
         technology_type.__init__(self, config, platformID)
         self.configuration.update(config.items('unc_edu_agilentg4502a_07'))
     
+    #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
+    # this older platform doesn't always have UUID's
+    def _checkForUUID(self, tokens):
+        barcode = tokens[self.iBarcode]
+        if (miscTCGA.looks_like_uuid(barcode)):
+            barcode = miscTCGA.uuid_to_barcode(barcode)
+        # assume this is the barcode, it will be validated on return
+        return '', barcode
+
     def includeFile(self, tokens):
         retVal = technology_type.includeFile(self, tokens)
         if retVal[4] and  retVal[3] != "cy5":

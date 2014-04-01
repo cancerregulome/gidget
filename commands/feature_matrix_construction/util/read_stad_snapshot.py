@@ -236,7 +236,7 @@ def getFilesFromArchives(topDir, techName, techType, archiveInfo):
     level = techType.getDirectoryLevel()
     ## finally, at this level is where we look for "Level_1" potentArchives, so potentArchive
     ## will, for example, look like:
-    ## /titan/cancerregulome7/TCGA/repositories/dcc-snapshot/coad/bcr/intgen.org/bio/clin/intgen.org_COAD.bio.Level_1.45.6.0
+    ## .../TCGA/repositories/dcc-snapshot/coad/bcr/intgen.org/bio/clin/intgen.org_COAD.bio.Level_1.45.6.0
     baseDirs = path.path ( topDir )
     try:
         baseDirs = path.path ( topDir )

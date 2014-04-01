@@ -1,14 +1,9 @@
 #!/bin/bash
 
-: ${LD_LIBRARY_PATH:?" environment variable must be set and non-empty"}
-: ${TCGAFMP_ROOT_DIR:?" environment variable must be set and non-empty"}
+# every TCGA FMP script should start with these lines:
+: ${TCGAFMP_ROOT_DIR:?" environment variable must be set and non-empty; defines the path to the TCGA FMP scripts directory"}
+source ${TCGAFMP_ROOT_DIR}/shscript/tcga_fmp_util.sh
 
-if [[ "$PYTHONPATH" != *"gidget"* ]]; then
-    echo " "
-    echo " your PYTHONPATH should include paths to gidget/commands/... directories "
-    echo " "
-    exit 99
-fi
 
 ## this script should be called with the following parameters:
 ##      date, eg '29jan13'
@@ -20,7 +15,7 @@ WRONGARGS=1
 if [ $# != 4 ]
     then
         echo " Usage   : `basename $0` <curDate> <snapshotName> <tumorType> <config>"
-        echo " Example : `basename $0` 28oct13 dcc-snapshot-28oct13 brca parse_tcga.config"
+        echo " Example : `basename $0` 28oct13  dcc-snapshot-28oct13  brca  parse_tcga.27_450k.config"
         exit $WRONGARGS
 fi
 
@@ -42,9 +37,7 @@ args=("$@")
 for tumor in $tumors
     do
 
-	## cd /titan/cancerregulome3/TCGA/outputs/$tumor
-	## cd /titan/cancerregulome14/TCGAfmp_outputs/$tumor
-	cd $TCGAFMP_OUTPUTS/$tumor
+	cd $TCGAFMP_DATA_DIR/$tumor
 
 	echo " "
 	echo " "
@@ -69,6 +62,10 @@ for tumor in $tumors
 	## MICRO-RNA (both GA and HiSeq)
 	python $TCGAFMP_ROOT_DIR/main/parse_tcga.py $TCGAFMP_ROOT_DIR/config/$config bcgsc.ca/illuminaga_mirnaseq/mirnaseq/ $tumor $curDate $snapshotName                >& level3.bcgsc.ga_mirn.$curDate.log 
 	python $TCGAFMP_ROOT_DIR/main/parse_tcga.py $TCGAFMP_ROOT_DIR/config/$config bcgsc.ca/illuminahiseq_mirnaseq/mirnaseq/ $tumor $curDate $snapshotName             >& level3.bcgsc.hiseq_mirn.$curDate.log 
+        for f in *__mirnaseq*tsv
+            do
+                $TCGAFMP_ROOT_DIR/shscript/fmp00B_hackBarcodes.sh $f
+            done
 
 	## MESSENGER-RNA (many different platforms)
 	python $TCGAFMP_ROOT_DIR/main/parse_tcga.py $TCGAFMP_ROOT_DIR/config/$config bcgsc.ca/illuminaga_rnaseq/rnaseq/ $tumor $curDate $snapshotName                    >& level3.bcgsc.ga_rnaseq.$curDate.log 

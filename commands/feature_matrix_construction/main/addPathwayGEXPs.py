@@ -5,6 +5,7 @@ import numpy
 import sys
 
 # these are my local ones
+from tcga_fmp_util import tcgaFMPVars
 import tsvIO
 
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
@@ -76,12 +77,8 @@ def cleanUpName(aName):
 
 def readPathways():
 
-    ## fh = file ( "/users/sreynold/scratch/CPDB_pathways_genes.tab", 'r' )
-    ## fh = file ( "/users/sreynold/scratch/CPDB_plus.tab", 'r' )
-    ## fh = file ( "/proj/ilyalab/sreynold/TCGA/pathways/only_biocarta.tab", 'r' )
-    ## fh = file ( "/proj/ilyalab/sreynold/TCGA/pathways/only_NCI_Nature.tab", 'r' )
     fh = file(
-        "/proj/ilyalab/sreynold/TCGA/pathways/only_NCI_Nature_ver4.tab", 'r')
+        tcgaFMPVars['TCGAFMP_BIOINFORMATICS_REFERENCES'] + "/nci_pid/only_NCI_Nature_ver4.tab", 'r')
 
     pwDict = {}
 

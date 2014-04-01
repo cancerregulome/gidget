@@ -562,7 +562,7 @@ def writeTSV_clinicalFlipNumeric ( allClinDict, bestKeyOrder, outName ):
 def buildPath ( outFilename ):
 
     # output filename might look something like this:
-    # /titan/cancerregulome3/TCGA/outputs/brca_kirc/brca_kirc.bcgsc.ca__illuminahiseq_mirnaseq__mirnaseq.test.tsv
+    # .../TCGA/outputs/brca_kirc/brca_kirc.bcgsc.ca__illuminahiseq_mirnaseq__mirnaseq.test.tsv
 
     # so figure out the directory path name and then create it ...
     i1 = len(outFilename) - 1
