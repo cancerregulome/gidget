@@ -1,5 +1,6 @@
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 
+from tcga_fmp_util import tcgaFMPVars
 import miscMath
 import miscTCGA
 
@@ -295,7 +296,7 @@ if __name__ == "__main__":
                 print cancerDirNames
                 sys.exit(-1)
 
-    firehoseTopDir = "/titan/cancerregulome9/TCGA/firehose/"
+    firehoseTopDir = tcgaFMPVars['TCGAFMP_FIREHOSE_MIRROR']+ "/"
     outDir = "./"
 
     # first thing we have to do is find the most recent top-level directory

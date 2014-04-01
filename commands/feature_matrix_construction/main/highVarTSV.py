@@ -378,6 +378,11 @@ if __name__ == "__main__":
             if (rowLabels[iRow].startswith("B:")):
                 continue
 
+        # likewise, if the filter type is NZC, this will only apply to binary features
+        if (method == "NZC"):
+            if (not rowLabels[iRow].startswith("B:")):
+                continue
+
         # now start grabbing the test statistic ...
         if (method == "MAD"):
             if (strictStat):

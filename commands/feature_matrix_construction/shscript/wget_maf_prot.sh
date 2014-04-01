@@ -1,8 +1,13 @@
 #!/bin/bash
 
+# every TCGA FMP script should start with these lines:
+: ${TCGAFMP_ROOT_DIR:?" environment variable must be set and non-empty; defines the path to the TCGA FMP scripts directory"}
+source ${TCGAFMP_ROOT_DIR}/shscript/tcga_fmp_util.sh
+
+
 # =============================================================================
 # broad.mit.edu/illuminaga_dnaseq_cont/mutations_protected
-for d in `cat $TCGAFMP_ROOT_DIR/shscript/tumor_list.txt`
+for d in `cat $TCGAFMP_ROOT_DIR/config/tumor_list.txt`
 
     do
 
@@ -11,7 +16,7 @@ for d in `cat $TCGAFMP_ROOT_DIR/shscript/tumor_list.txt`
 	echo " ******************************************************************** "
 	echo $d
 
-	cd /titan/cancerregulome11/TCGA/repositories/dcc-mirror/secure/tumor/$d
+	cd $TCGAFMP_DCC_REPOSITORIES/dcc-mirror/secure/tumor/$d
         mkdir gsc
         chmod g+w gsc
         cd gsc
@@ -38,7 +43,7 @@ for d in `cat $TCGAFMP_ROOT_DIR/shscript/tumor_list.txt`
 
 # =============================================================================
 # genome.wustl.edu/illuminaga_dnaseq_cont/mutations_protected
-for d in `cat $TCGAFMP_ROOT_DIR/shscript/tumor_list.txt`
+for d in `cat $TCGAFMP_ROOT_DIR/config/tumor_list.txt`
 
     do
 
@@ -47,7 +52,7 @@ for d in `cat $TCGAFMP_ROOT_DIR/shscript/tumor_list.txt`
 	echo " ******************************************************************** "
 	echo $d
 
-	cd /titan/cancerregulome11/TCGA/repositories/dcc-mirror/secure/tumor/$d/gsc/
+	cd $TCGAFMP_DCC_REPOSITORIES/dcc-mirror/secure/tumor/$d/gsc/
 	mkdir genome.wustl.edu
         chmod g+w genome.wustl.edu
 	cd genome.wustl.edu
@@ -72,7 +77,7 @@ for d in `cat $TCGAFMP_ROOT_DIR/shscript/tumor_list.txt`
 
 # =============================================================================
 # hgsc.bcm.edu/illuminaga_dnaseq_cont/mutations_protected
-for d in `cat $TCGAFMP_ROOT_DIR/shscript/tumor_list.txt`
+for d in `cat $TCGAFMP_ROOT_DIR/config/tumor_list.txt`
 
     do
 
@@ -81,7 +86,7 @@ for d in `cat $TCGAFMP_ROOT_DIR/shscript/tumor_list.txt`
 	echo " ******************************************************************** "
 	echo $d
 
-	cd /titan/cancerregulome11/TCGA/repositories/dcc-mirror/secure/tumor/$d/gsc/
+	cd $TCGAFMP_DCC_REPOSITORIES/dcc-mirror/secure/tumor/$d/gsc/
 	mkdir hgsc.bcm.edu
         chmod g+w hgsc.bcm.edu
 	cd hgsc.bcm.edu
@@ -106,7 +111,7 @@ for d in `cat $TCGAFMP_ROOT_DIR/shscript/tumor_list.txt`
 
 # =============================================================================
 # hgsc.bcm.edu/illuminaga_dnaseq_cont_curated/mutations/
-for d in `cat $TCGAFMP_ROOT_DIR/shscript/tumor_list.txt`
+for d in `cat $TCGAFMP_ROOT_DIR/config/tumor_list.txt`
 
     do
 
@@ -115,7 +120,7 @@ for d in `cat $TCGAFMP_ROOT_DIR/shscript/tumor_list.txt`
 	echo " ******************************************************************** "
 	echo $d
 
-	cd /titan/cancerregulome11/TCGA/repositories/dcc-mirror/public/tumor/$d/gsc/
+	cd $TCGAFMP_DCC_REPOSITORIES/dcc-mirror/public/tumor/$d/gsc/
 	mkdir hgsc.bcm.edu
         chmod g+w hgsc.bcm.edu
 	cd hgsc.bcm.edu

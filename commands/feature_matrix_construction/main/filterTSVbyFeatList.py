@@ -24,7 +24,15 @@ def readFeatureListFromFile(featNameFile):
 
     for aLine in fh:
         aLine = aLine.strip()
-        featNameList += [aLine]
+        if ( aLine.startswith ("#") ): continue
+        if ( aLine.find('\t') > 0 ):
+            aTokens = aLine.split()
+            featNameList += [ aTokens[0] ]
+        elif ( aLine.find('#') > 0 ):
+            aTokens = aLine.split()
+            featNameList += [ aTokens[0] ]
+        else:
+            featNameList += [aLine]
 
     fh.close()
 
