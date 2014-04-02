@@ -70,7 +70,8 @@ def writeARFF(allClinDict, bestKeyOrder, progName, outName):
     now = datetime.datetime.now()
     fh.write('%% TCGA clinical data extracted from xml files\n')
     fh.write('%% %s\n' % str(progName))
-    fh.write('%% SReynolds@systemsbiology.org\n')
+    # TODO: replease with configurable username!
+    fh.write('%% TODO@systemsbiology.org\n')
     fh.write('%% %s\n' % now.strftime("%Y-%m-%d %H:%M"))
     fh.write('%% %d numeric fields, %d nominal fields, %d skipped\n' %
              (numNumeric, numNominal, numSkip))

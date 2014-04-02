@@ -1,29 +1,25 @@
 #!/bin/bash
 
-: ${LD_LIBRARY_PATH:?" environment variable must be set and non-empty"}
-: ${TCGAFMP_ROOT_DIR:?" environment variable must be set and non-empty"}
+# every TCGA FMP script should start with these lines:
+: ${TCGAFMP_ROOT_DIR:?" environment variable must be set and non-empty; defines the path to the TCGA FMP scripts directory"}
+source ${TCGAFMP_ROOT_DIR}/shscript/tcga_fmp_util.sh
 
-if [[ "$PYTHONPATH" != *"gidget"* ]]; then
-    echo " "
-    echo " your PYTHONPATH should include paths to gidget/commands/... directories "
-    echo " "
-    exit 99
-fi
 
 ## this script should be called with the following parameters:
 ##      date, eg '12jul13' or 'test'
 ##      one tumor type, eg 'ucec'
 
 WRONGARGS=1
-if [ $# != 2 ]
+if [ $# != 3 ]
     then
-        echo " Usage   : `basename $0` <curDate> <tumorType> "
-        echo " Example : `basename $0` 28oct13  brca "
+        echo " Usage   : `basename $0` <curDate> <tumorType> <public/private> "
+        echo " Example : `basename $0` 28oct13  brca  private "
         exit $WRONGARGS
 fi
 
 curDate=$1
 tumor=$2
+ppString=$3
 
 echo " "
 echo " "
@@ -32,13 +28,8 @@ echo `date`
 echo " *" $curDate
 echo " *******************"
 
-args=("$@")
-for ((i=1; i<$#; i++))
-    do
-        tumor=${args[$i]}
 
-	## cd /titan/cancerregulome3/TCGA/outputs/$tumor
-	cd /titan/cancerregulome14/TCGAfmp_outputs/$tumor
+	cd $TCGAFMP_DATA_DIR/$tumor
 
 	echo " "
 	echo " "
@@ -46,14 +37,6 @@ for ((i=1; i<$#; i++))
 	date
 
 	cd $curDate
-
-        ## 06nov13 NEW: if the file $tumor.meth.filt.annot.forTSVmerge.tsv
-        ## exists in the $tumor/aux/ directory, then we will NOT use
-        ## the methylation file created by the pipeline as is ...
-        if [ -f ../aux/$tumor.meth.filt.annot.forTSVmerge.tsv ]
-            then
-                mv $tumor.meth.tmpData3.tsv $tumor.meth.tmpData3.tsv_obsolete
-        fi
 
 	## NOTE: within data types (eg mRNA expression, methylation, microRNA),
 	## if there are duplicate samples/values between separate input data
@@ -67,6 +50,19 @@ for ((i=1; i<$#; i++))
 	rm -fr $tumor.newMerge.???.$curDate.tsv
         rm -fr $tumor.newMerge*.$curDate.*tsv
 
+        auxFiles=''
+        if [ "$ppString" = 'private' ]
+            then
+                auxFiles=`ls ../aux/*.forTSVmerge.tsv`
+            fi
+
+        echo " "
+        echo " **** "
+        echo " auxFiles : "
+        echo $auxFiles
+        echo " **** "
+        echo " "
+
         ## here we build the merged matrix using only sequencing-based data (if it exists)
 	if [ -f $tumor.gexp.seq.tmpData3.tsv ]
 	    then
@@ -79,7 +75,7 @@ for ((i=1; i<$#; i++))
 			$tumor.msat.tmpData3.tsv \
 			$tumor.gexp.seq.tmpData3.tsv \
 			../gnab/$tumor.gnab.tmpData4b.tsv \
-			`ls ../aux/*.forTSVmerge.tsv` \
+			$auxFiles \
 			$tumor.newMerge.seq.$curDate.tsv >& $tumor.newMerge.seq.$curDate.log 
 	fi
 
@@ -95,7 +91,7 @@ for ((i=1; i<$#; i++))
 			$tumor.msat.tmpData3.tsv \
 			$tumor.gexp.ary.tmpData3.tsv \
 			../gnab/$tumor.gnab.tmpData4b.tsv \
-			`ls ../aux/*.forTSVmerge.tsv` \
+			$auxFiles \
 			$tumor.newMerge.ary.$curDate.tsv >& $tumor.newMerge.ary.$curDate.log 
 	fi
 
@@ -110,10 +106,9 @@ for ((i=1; i<$#; i++))
 			$tumor.gexp.ary.tmpData3.tsv \
 			$tumor.gexp.seq.tmpData3.tsv \
 			../gnab/$tumor.gnab.tmpData4b.tsv \
-			`ls ../aux/*.forTSVmerge.tsv` \
+			$auxFiles \
 			$tumor.newMerge.all.$curDate.tsv >& $tumor.newMerge.all.$curDate.log 
 
-    done
 
 echo " "
 echo " fmp06B_merge script is FINISHED !!! "

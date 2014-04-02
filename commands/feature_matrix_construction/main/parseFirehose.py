@@ -1,5 +1,6 @@
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 
+from tcga_fmp_util import tcgaFMPVars
 import chrArms
 import miscMath
 import miscTCGA
@@ -22,11 +23,11 @@ def getDate(dName):
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 
 
-def getMostRecentDir(topDir, cancerList):
+def getMostRecentDir(topDir, cancerList, awgFlag):
 
     print " in getMostRecentDir ... "
     print topDir
-    print cancerList
+    print cancerList, awgFlag
 
     d1 = path.path(topDir)
     iDates = []
@@ -36,9 +37,10 @@ def getMostRecentDir(topDir, cancerList):
             iDates += [getDate(d1Name)]
 
         if (len(cancerList) == 1):
-            if (d1Name.find("awg_") >= 0):
-                if (d1Name.find(cancerList[0]) >= 0):
-                    iDates += [getDate(d1Name)]
+            if ( awgFlag == "YES" ):
+                if (d1Name.find("awg_") >= 0):
+                    if (d1Name.find(cancerList[0]) >= 0):
+                        iDates += [getDate(d1Name)]
 
     iDates.sort()
     print iDates
@@ -51,10 +53,11 @@ def getMostRecentDir(topDir, cancerList):
     for d1Name in d1.dirs():
         # give first priority to awg specific run ...
         if (len(cancerList) == 1):
-            if (d1Name.find("awg_") >= 0):
-                if (d1Name.find(cancerList[0]) >= 0):
-                    if (d1Name.find(lastDate) >= 0):
-                        lastDir = d1Name
+            if ( awgFlag == "YES" ):
+                if (d1Name.find("awg_") >= 0):
+                    if (d1Name.find(cancerList[0]) >= 0):
+                        if (d1Name.find(lastDate) >= 0):
+                            lastDir = d1Name
 
     if (lastDir == "NA"):
         for d1Name in d1.dirs():
@@ -161,13 +164,17 @@ def parseBestClusFiles(lastDir, outDir, zCancer):
                         clusType = "RPPA_CC"
                     elif (fName.find("CopyNumber_Clustering_CNMF_arm") >= 0):
                         clusType = "cnvr_CNMF_arm"
-                    elif (fName.find("CopyNumber_Clustering_CNMF") >= 0):
+                    ## elif (fName.find("CopyNumber_Clustering_CNMF.Level_4") >= 0):
+                    elif (fName.find("CopyNumber_Clustering_CNMF_thresholded.Level_4") >= 0):
                         clusType = "cnvr_CNMF"
                     else:
-                        print " ERROR in parseBestClusFiles ... failed to find magic string ??? "
-                        print fName
-                        print d2Name
-                        sys.exit(-1)
+                        print " --> failed to find magic string ... skipping ... "
+                        continue
+                        if ( 0 ):
+                            print " ERROR in parseBestClusFiles ... failed to find magic string ??? "
+                            print fName
+                            print d2Name
+                            sys.exit(-1)
 
                     # 03may13 ... need to chop up the filename and use some information
                     # from the filename for the feature name ...
@@ -481,7 +488,7 @@ def parseMutSig_CountsRatesFile(inName, outName):
 
             try:
                 if (numTokens == 8):
-                    print " WARNING : no dbSNP rate column "
+                    ## print " WARNING : no dbSNP rate column "
                     rateDbSnp = 0.
                     rateSil = float(tokenList[6])
                     rateNon = float(tokenList[7])
@@ -498,7 +505,7 @@ def parseMutSig_CountsRatesFile(inName, outName):
                     rateSil = float(tokenList[10])
                     rateNon = float(tokenList[11])
                 elif (numTokens == 13):
-                    print " WARNING : no dbSNP rate column "
+                    ## print " WARNING : no dbSNP rate column "
                     rateDbSnp = 0.
                     rateSil = float(tokenList[11])
                     rateNon = float(tokenList[12])
@@ -795,10 +802,10 @@ def parseMutSig_SigGenesFile(inName, outName):
 # this is the top-level driver for parsing the MutSig files -- it calls
 # other function to handle each individual file
 
-def parseMutSigFiles(lastDir, outDir):
+def parseMutSigFiles(lastDir, outDir, MSverString):
 
     print " "
-    print " START: parsing MutSig files from firehose outputs "
+    print " START: parsing MutSig files from firehose outputs ", MSverString
     print " "
     numGot = 0
 
@@ -809,10 +816,8 @@ def parseMutSigFiles(lastDir, outDir):
     d2 = path.path(lastDir)
     for d2Name in d2.dirs():
 
-        # if ( d2Name.find("Mutation_Significance.Level_4")>0  or  d2Name.find("MutSigNozzleReport2.0.Level_4")>0 ):
-        # if ( d2Name.find("Mutation_Significance.Level_4")>0  or
-        # d2Name.find("MutSigNozzleReportCV.Level_4")>0 ):
-        if (d2Name.find("Mutation_Significance.Level_4") > 0 or d2Name.find("MutSigNozzleReport1.5.Level_4") > 0):
+        ## if (d2Name.find("Mutation_Significance.Level_4") > 0 or d2Name.find("MutSigNozzleReport1.5.Level_4") > 0):
+        if ( d2Name.find(MSverString) >= 0  and  d2Name.find("Level_4") >= 0 ):
 
             d3 = path.path(d2Name)
             for fName in d3.files():
@@ -1178,16 +1183,19 @@ def parseGistic_BroadArmValuesFile(inName, outName):
             # create two features per arm ... a 'continuous' feature and a
             # 'discrete' feature
 
-            # first the continuous or "_r" feature:
-            featName = "N:CNVR:" + armName + ":chr" + chrName + \
-                ":%d:%d::%s_GisticArm_r" % (startPos, stopPos, namePrefix)
-            armDict[featName] = numpy.zeros(numSamples)
-            armList += [featName]
-            for ii in range(numSamples):
-                armDict[featName][ii] = float(tokenList[1 + ii])
+            # 30jan14 : commenting this out (SMR)
+            if ( 0 ):
+                # first the continuous or "_r" feature:
+                featName = "N:CNVR:" + armName + ":chr" + chrName + \
+                    ":%d:%d::%s_GisticArm_r" % (startPos, stopPos, namePrefix)
+                armDict[featName] = numpy.zeros(numSamples)
+                armList += [featName]
+                for ii in range(numSamples):
+                    armDict[featName][ii] = float(tokenList[1 + ii])
 
             # then the discrete or "_d" feature:
-            featName = "C:CNVR:" + armName + ":chr" + chrName + \
+            # 30jan14 : and changing this to a Numerical feature (SMR)
+            featName = "N:CNVR:" + armName + ":chr" + chrName + \
                 ":%d:%d::%s_GisticArm_d" % (startPos, stopPos, namePrefix)
             armDict[featName] = numpy.zeros(numSamples)
             armList += [featName]
@@ -1421,6 +1429,33 @@ def buildSampleWhiteList(lastDir, outDir):
 
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 
+def getMutSigVersionString ( zCancer ):
+
+    defaultString = "MutSigNozzleReportCV"
+
+    try:
+        rootString = tcgaFMPVars['TCGAFMP_DATA_DIR']
+    except:
+        MSverString = defaultString
+        print "     --> defaulting to %s " % defaultString
+
+    fName = rootString + "/" + zCancer.lower() + "/aux/MutSigversion.txt"
+    try:
+        fh = file ( fName, 'r' )
+        print "     checking file %s for MutSig version specification " % fName
+        for aLine in fh:
+            if ( aLine.startswith("#") ): continue
+            if ( aLine.find("MutSig") >= 0 ):
+                MSverString = aLine.strip()
+                print "     --> will look for %s outputs " % defaultString
+    except:
+        MSverString = defaultString
+        print "     --> defaulting to %s " % defaultString
+
+    return ( MSverString )
+
+# -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
+
 
 def getLastBit(aName):
 
@@ -1450,8 +1485,11 @@ if __name__ == "__main__":
         'thca', 'ucec', 'lcml', 'pcpg']
 
     if (1):
-        if (len(sys.argv) != 2):
-            print " Usage: %s <tumorType> " % sys.argv[0]
+        if (len(sys.argv) != 3):
+            print " Usage: %s <tumorType> <public/private> " % sys.argv[0]
+            print " Notes: a single tumor type can be specified, eg brca "
+            print "        the public/private option indicates whether an awg-specific "
+            print "        firehose run should be used if available "
             sys.exit(-1)
         else:
             tumorType = sys.argv[1].lower()
@@ -1467,16 +1505,26 @@ if __name__ == "__main__":
                 print cancerDirNames
                 sys.exit(-1)
 
+            ppString = sys.argv[2].lower()
+            if ( ppString.find("pub") >= 0 ):
+                awgFlag = "NO"
+                print " --> will NOT use awg-specific firehose analyses even if available "
+            elif ( ppString.find("priv") >= 0 ):
+                awgFlag = "YES"
+                print " --> WILL use awg-specific firehose anlaysese IF available "
+            else:
+                print " invalid public/private string ", ppString
+                sys.exit(-1)
+
     # 22jun : switching to new firehose analyses that were downloaded using
     # firehose_get -b analyses latest
-    firehoseTopDir = "/titan/cancerregulome9/TCGA/firehose/"
-    ## outDir = "/titan/cancerregulome3/TCGA/outputs/"
+    firehoseTopDir = tcgaFMPVars['TCGAFMP_FIREHOSE_MIRROR']+ "/"
     outDir = "./"
 
     # first thing we have to do is find the most recent top-level directory
     # which should have a name of the form
     # analyses__2012_04_25
-    topDir = getMostRecentDir(firehoseTopDir, cancerDirNames)
+    topDir = getMostRecentDir(firehoseTopDir, cancerDirNames, awgFlag)
     print " here now : ", topDir
 
     # outer loop over tumor types
@@ -1490,10 +1538,12 @@ if __name__ == "__main__":
         parseBestClusFiles(lastDir, outDir, zCancer)
 
         # next we process files that come out of the MutSig module
-        parseMutSigFiles(lastDir, outDir)
+        # ( but first we ask which version of MutSig is supposed to be 
+        #   used for this tumor type )
+        MSverString = getMutSigVersionString ( zCancer )
+        parseMutSigFiles(lastDir, outDir, MSverString)
 
         # next we process the files that come out of Gistic
-        ## lastDir = "/users/sreynold/scratch/"
         parseGisticFiles(lastDir, outDir)
 
         # and finally grab the 'mature' miRNA matrix ...

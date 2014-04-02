@@ -2,6 +2,7 @@
 
 import sys
 
+from tcga_fmp_util import tcgaFMPVars
 import miscTCGA
 import path
 import tsvIO
@@ -77,8 +78,7 @@ if __name__ == "__main__":
     listDict = {}
 
     # find all of the .ids.txt files and build up the various named lists ...
-    topDir = "/titan/cancerregulome14/TCGAfmp_outputs/%s/%s" % (tumorString,
-                                                                dateString)
+    topDir = "%s/%s/%s" % (tcgaFMPVars['TCGAFMP_DATA_DIR'], tumorString, dateString)
     d1 = path.path(topDir)
     for f1 in d1.files():
         if (f1.endswith(".ids.txt")):
@@ -104,8 +104,8 @@ if __name__ == "__main__":
     print len(uList)
 
     # ok and now we can write out the indicator features ...
-    outFile = "/titan/cancerregulome14/TCGAfmp_outputs/%s/aux/namedLists.forXmlMerge.tsv" % (
-        tumorString)
+    outFile = "%s/%s/aux/namedLists.forXmlMerge.tsv" % (
+        tcgaFMPVars['TCGAFMP_DATA_DIR'], tumorString)
     fh = file(outFile, 'w')
 
     outLine = "bcr_patient_barcode"

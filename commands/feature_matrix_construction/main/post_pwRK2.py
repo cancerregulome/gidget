@@ -353,14 +353,17 @@ if __name__ == "__main__":
                         bTokens = bFeat.split(':')
                         if (aTokens[2] == bTokens[2]):
                             dqFlag = 1
-                    elif (aType[1:] == "CLIN"):
-                        dqFlag = 1
-                    elif (bType[1:] == "CLIN"):
-                        dqFlag = 1
-                    elif (aType[1:] == "SAMP"):
-                        dqFlag = 1
-                    elif (bType[1:] == "SAMP"):
-                        dqFlag = 1
+
+                    if ( 0 ):
+                        if ( not dqFlag ):
+                            if (aType[1:] == "CLIN"):
+                                dqFlag = 1
+                            elif (bType[1:] == "CLIN"):
+                                dqFlag = 1
+                            elif (aType[1:] == "SAMP"):
+                                dqFlag = 1
+                            elif (bType[1:] == "SAMP"):
+                                dqFlag = 1
 
             # do not write out if this line has been "disqualified" ...
 

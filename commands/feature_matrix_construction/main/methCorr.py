@@ -245,7 +245,6 @@ if __name__ == "__main__":
     sortRowFlag = 0
     sortColFlag = 0
 
-    ## methOutFile = "/local/sreynold/scratch/methOut2.tsv"
     tsvIO.writeTSV_dataMatrix(methD, sortRowFlag, sortColFlag, outFile)
 
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
