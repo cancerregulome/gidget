@@ -1,0 +1,57 @@
+{
+    "fmFileName": "<feature matrix to annotate path>",
+    "outFileName": "<output tsv annotation file path>",
+    "header":      [
+                    "id",
+                    "label",
+                    "name",
+                    "dtype",
+                    "data_type",
+                    "ftype",
+                    "feature_type",
+                    "description",
+                    "chromosome",
+                    "start postion",
+                    "end position",
+                    "strand",
+                    "annotation",
+                    "counts",
+                    "numeric",
+                    "category"
+                ],
+    "datatypemap": {
+                    "N": "Numerical",
+                    "B": "Boolean",
+                    "C": "Categorical"
+                },
+    "featuretypemap": {
+                    "CLIN": "Clinical",
+                    "SAMP": "Sample",
+                    "CNVR": "Copy Number",
+                    "GEXP": "Gene expression",
+                    "MIRN": "MicroRNA",
+                    "GNAB": "Mutation",
+                    "METH": "Methylation",
+                    "RPPA": "Reverse phase protein array"
+                },
+    "ftype2method": {
+                    "CLIN": "annotClinical",
+                    "SAMP": "annotClinical",
+                    "CNVR": "annotGenomic",
+                    "GEXP": "annotGenomic",
+                    "MIRN": "annotGenomic",
+                    "GNAB": "annotGenomic",
+                    "METH": "annotGenomic",
+                    "RPPA": "annotGenomic"
+                },
+
+    "host": "<mongo db server>",
+    "port": "<mongo db port>",
+    "database": "<mongo db database to save to>",
+    "collection": "<mongo db collection to save to>",
+    "dropdb": true,
+    "int_fields": [9, 10],
+    "bool_fields": [],
+    "dict_fields": [13, 14, 15],
+    "reg_indices": [0,1,2,3,4,5,6,8,9]
+}

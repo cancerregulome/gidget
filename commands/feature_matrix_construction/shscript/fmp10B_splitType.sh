@@ -92,8 +92,12 @@ for ((i=1; i<$#; i++))
                             ../aux/$tumor.whitelist.strict.tsv white strict \
                             >> filterFeat.log
 
-                echo " and finally split according to sampleType ... "
+                echo " get summary information on this file ... "
                 echo $k
+		s=${k/.tsv/.summary}
+                python $TCGAFMP_ROOT_DIR/main/quickLook.py $k >& $s
+
+                echo " and finally split according to sampleType ... "
                 python $TCGAFMP_ROOT_DIR/main/splitTSVbyCat.py \
                         $k sampleType >> sampleType.split.log
 

@@ -9,9 +9,9 @@ import sys
 
 def feature_id_extract(feature):
     feature_parts = feature.split(":")
-    source = feature_parts[1].lower()
+    source = feature_parts[1]
 
-    if "chr" in feature_parts[3]:
+    if "chr" in feature_parts[3].lower():
         start = feature_parts[4]
         end = feature_parts[5]
         if not start:
@@ -23,7 +23,7 @@ def feature_id_extract(feature):
             "id": feature,
             "type": feature_parts[0],
             "source": source,
-            "gene": feature_parts[2].lower(),
+            "gene": feature_parts[2],
             "label": feature_parts[2],
             "chr": feature_parts[3][3:],
             "start": int(start),
@@ -45,7 +45,7 @@ def iterate_fmx_files(dir_path):
     for filename in os.listdir(dir_path):
         # Suppose that file name format is '<cancer>.<name>.<date>.tsv',
         # for example 'blca.newMerge.05nov.tsv'
-        fileparts = filename.strip().lower().split('.')
+        fileparts = filename.strip().split('.')
         if (len(fileparts) != 4):
             continue
 
@@ -104,7 +104,7 @@ def iterate_features(descriptor):
                 continue
 
             feature_object = feature_id_extract(feature_id)
-            feature_object['cancer'] = descriptor['subtype']
+            #feature_object['cancer'] = descriptor['subtype']
 
             if feature_object['type'] == 'N':
                 feature_object['values'] = build_value_dict_numerical(ids, values)
