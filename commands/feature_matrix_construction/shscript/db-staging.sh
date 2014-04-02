@@ -6,29 +6,32 @@ source ${TCGAFMP_ROOT_DIR}/shscript/tcga_fmp_util.sh
 
 
 ## this script should be called with the following parameters:
-##      date, eg '29jan13'
 ##      snapshot, either 'dcc-snapshot' (most recent) or, eg, 'dcc-snapshot-29jan13;
 ##      one or more tumor types, eg: 'prad thca skcm stad'
 
 if [ $# != 3 ]
     then
-        echo " Usage   : `basename $0` <curDate> <stagingDir>"
-        echo " Example : `basename $0` 28oct13 /local/staging"
+        echo " Usage   : `basename $0` <fmxRunName> <curDateNumeric> <stagingDir>"
+        echo " Example : `basename $0` private-run 20140101 /local/staging"
         exit -1
 fi
 
-curDate=$1
-stagingDir=$2
+fmxRunName=$1
+curDateNumeric=$2
+stagingDir=$3
 
-for tumor in `cat $TCGAFMP_SCRIPT_DIR /tumor-types.txt`; do 
+#brca/test_public/brca.all.test_public.tsv
+for tumor in `cat $TCGAFMP_ROOT_DIR/config/tumor_list.txt`; do 
   tumor_UC=`echo $tumor | tr [:lower:] [:upper:]`
-  for fmx in `ls -1 $TCGAFMP_DATA_DIR/$tumor/$tumor.all.tsv`; do
+
+  for fmx in `ls -1 $TCGAFMP_DATA_DIR/$tumor/$fmxRunName/$tumor.all.$fmxRunName.tsv`; do
     echo found $fmx
-    mkdir -p $curDate/$tumor
-    cp $fmx $curDate/$tumor
-    orignalFMXName=$fmx
-    newFMXName=$fmx
-    mv $t/20131223/$lc.all.23dec13.tsv $t/20131223/$t.20131223.tsv; 
-    echo "Original file provided by sreynolds at $originalFMXName, copied as $newFMXName" > $newFMXName.provenance
+    newFMXDir=$stagingDir/$curDateNumeric/$tumor_UC
+    mkdir -p $newFMXDir
+    cp $fmx $newFMXDir
+    #orignalFMXName=$fmx # $tumor.all.$fmxRunName.tsv
+    #newFMXName=$fmx
+    #mv $t/20131223/$lc.all.23dec13.tsv $t/20131223/$tumor.20131223.tsv;
+    echo "Original file provided by sreynolds at $fmx" > $newFMXDir/provenance.fmx
   done
 done
