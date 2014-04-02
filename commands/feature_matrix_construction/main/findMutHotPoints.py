@@ -1,5 +1,6 @@
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 
+from tcga_fmp_util import tcgaFMPVars
 import arffIO
 import miscClin
 import miscTCGA
@@ -373,7 +374,6 @@ def getTumorBarcodes(mafFilename):
 #
 # this program loops over the tumor types in the cancerDirNames list and
 # looks for all available *clinical*.xml files in the current "dcc-snapshot"
-## on /titan/cancerregulome7
 #
 # all of the information is bundled into a dictionary called allClinDict
 #
@@ -447,8 +447,13 @@ if __name__ == "__main__":
 
     # now create an output feature for each of these frequent mutations ...
     tmpFilename = "Hotpoint_mutations." + tumorType + ".forTSVmerge.tmp"
-    outFilename = tmpFilename[:-4] + ".tsv"
     fh = file(tmpFilename, 'w')
+
+    outFilename = tmpFilename[:-4] + ".tsv"
+    iTst = 1
+    while ( os.path.exists(outFilename) ):
+        outFilename = tmpFilename[:-4] + ".tsv" + str(iTst)
+        iTst += 1
 
     # the header row has all of the tumor barcodes ...
     outLine = "B:GNAB"
@@ -479,8 +484,8 @@ if __name__ == "__main__":
     fh.close()
 
     print " annotating output file ... "
-    cmdString = "python $TCGAFMP_ROOT_DIR/main/annotateTSV.py %s hg19 %s" % (
-        tmpFilename, outFilename)
+    cmdString = "python %s/main/annotateTSV.py %s hg19 %s" % (
+        tcgaFMPVar['TCGAFMP_ROOT_DIR'], tmpFilename, outFilename)
     print cmdString
     (status, output) = commands.getstatusoutput(cmdString)
 

@@ -1,5 +1,12 @@
 #!/bin/bash
 
+# every TCGA FMP script should start with these lines:
+: ${TCGAFMP_ROOT_DIR:?" environment variable must be set and non-empty; defines the path to the TCGA FMP scripts directory"}
+source ${TCGAFMP_ROOT_DIR}/shscript/tcga_fmp_util.sh
+
+
+# TODO: addition parameter checking, as below:
+
 ## this script should be called with the following parameters:
 ##      date, eg '29jan13'
 ##      tumor type, eg 'gbm'
@@ -7,6 +14,7 @@
 curDate=$1
 tumor=$2
 tsvFile=$3
+featFile=$4
 
 if [ -z "$curDate" ]
     then
@@ -21,6 +29,11 @@ fi
 if [ -z "$tsvFile" ]
     then
         echo " this script must be called with TSV file specified "
+        exit
+fi
+if [ -z "$featFile" ]
+    then
+        echo " this script must be called with feature file specified "
         exit
 fi
 
@@ -71,12 +84,12 @@ echo " *******************"
                         echo " ready to invoke SurvivalPVal.sh ... "
                         echo $tsvFile
                         wc -l $TCGAFMP_DATA_DIR/$tumor/$curDate/Survival.CVars.txt
-                        cat $TCGAFMP_DATA_DIR/$tumor/aux/survival.feat.txt
+                        cat $TCGAFMP_DATA_DIR/$tumor/aux/$featFile
 
                         ./SurvivalPVal.sh \
                                 -f $TCGAFMP_DATA_DIR/$tumor/$curDate/$tsvFile \
                                 -c $TCGAFMP_DATA_DIR/$tumor/$curDate/Survival.CVars.txt \
-                                -m $TCGAFMP_DATA_DIR/$tumor/aux/survival.feat.txt \
+                                -m $TCGAFMP_DATA_DIR/$tumor/aux/$featFile \
                                 -o $TCGAFMP_DATA_DIR/$tumor/$curDate/SurvivalPVal.$st.tmp >& $TCGAFMP_DATA_DIR/$tumor/scratch/SurvivalPVal.$st.log
 
                         rm -fr $TCGAFMP_DATA_DIR/$tumor/$curDate/$g

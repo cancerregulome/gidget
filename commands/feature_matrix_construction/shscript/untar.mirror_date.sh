@@ -1,6 +1,13 @@
+#!/bin/bash
+
+# every TCGA FMP script should start with these lines:
+: ${TCGAFMP_ROOT_DIR:?" environment variable must be set and non-empty; defines the path to the TCGA FMP scripts directory"}
+source ${TCGAFMP_ROOT_DIR}/shscript/tcga_fmp_util.sh
+
+
 curDir=`pwd`
 
-cd /titan/cancerregulome11/TCGA/repositories/dcc-mirror/public/tumor
+cd $TCGAFMP_DCC_REPOSITORIES/dcc-mirror/public/tumor
 
 ## note that the assumption below is that all <name>.tar.gz files un-tar
 ## to create a directory called <name>, but this is not true for the
@@ -36,11 +43,11 @@ for arg in `find . -type d`
 			    fi
 		    fi
 	    done
-	cd /titan/cancerregulome11/TCGA/repositories/dcc-mirror/public/tumor
+	cd $TCGAFMP_DCC_REPOSITORIES/dcc-mirror/public/tumor
     done
 
 ## now same for secure side ...
-cd /titan/cancerregulome11/TCGA/repositories/dcc-mirror/secure/tumor
+cd $TCGAFMP_DCC_REPOSITORIES/dcc-mirror/secure/tumor
 
 for arg in `find . -type d`
     do
@@ -71,21 +78,21 @@ for arg in `find . -type d`
 			    fi
 		    fi
 	    done
-	cd /titan/cancerregulome11/TCGA/repositories/dcc-mirror/secure/tumor
+	cd $TCGAFMP_DCC_REPOSITORIES/dcc-mirror/secure/tumor
     done
 
 echo " "
 echo " removing temporary mimat files ... "
-cd /titan/cancerregulome11/TCGA/repositories/dcc-snapshot/public/tumor/
+cd $TCGAFMP_DCC_REPOSITORIES/dcc-snapshot/public/tumor/
 find . -type f -name "*expn_matrix_mimat*" -exec rm -f '{}' \;
 
 echo " "
 echo " running snapshot ... "
-python2.7 $TCGAFMP_ROOT_DIR/shscript/make-dcc-snapshot.py /titan/cancerregulome11/TCGA/repositories/dcc-mirror /titan/cancerregulome11/TCGA/repositories/dcc-snapshot-`echo "$(date +"%d%b%y")" | tr '[A-Z]' '[a-z]'`
+python2.7 $TCGAFMP_ROOT_DIR/shscript/make-dcc-snapshot.py $TCGAFMP_DCC_REPOSITORIES/dcc-mirror $TCGAFMP_DCC_REPOSITORIES/dcc-snapshot-`echo "$(date +"%d%b%y")" | tr '[A-Z]' '[a-z]'`
 
 echo " recreating symbolic link ... "
-rm /titan/cancerregulome11/TCGA/repositories/dcc-snapshot
-ln -s /titan/cancerregulome11/TCGA/repositories/dcc-snapshot-`echo "$(date +"%d%b%y")" | tr '[A-Z]' '[a-z]'` /titan/cancerregulome11/TCGA/repositories/dcc-snapshot
+rm $TCGAFMP_DCC_REPOSITORIES/dcc-snapshot
+ln -s $TCGAFMP_DCC_REPOSITORIES/dcc-snapshot-`echo "$(date +"%d%b%y")" | tr '[A-Z]' '[a-z]'` $TCGAFMP_DCC_REPOSITORIES/dcc-snapshot
 
 echo " "
 echo " DONE "

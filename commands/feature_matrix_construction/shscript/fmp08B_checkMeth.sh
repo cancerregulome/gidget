@@ -1,14 +1,9 @@
 #!/bin/bash
 
-: ${LD_LIBRARY_PATH:?" environment variable must be set and non-empty"}
-: ${TCGAFMP_ROOT_DIR:?" environment variable must be set and non-empty"}
+# every TCGA FMP script should start with these lines:
+: ${TCGAFMP_ROOT_DIR:?" environment variable must be set and non-empty; defines the path to the TCGA FMP scripts directory"}
+source ${TCGAFMP_ROOT_DIR}/shscript/tcga_fmp_util.sh
 
-if [[ "$PYTHONPATH" != *"gidget"* ]]; then
-    echo " "
-    echo " your PYTHONPATH should include paths to gidget/commands/... directories "
-    echo " "
-    exit 99
-fi
 
 ## this script should be called with the following parameters:
 ##      date, eg '12jul13' or 'test'
@@ -37,8 +32,7 @@ for ((i=1; i<$#; i++))
     do
         tumor=${args[$i]}
 
-	## cd /titan/cancerregulome3/TCGA/outputs/$tumor
-	cd /titan/cancerregulome14/TCGAfmp_outputs/$tumor
+	cd $TCGAFMP_DATA_DIR/$tumor
 
 	echo " "
 	echo " "
@@ -67,6 +61,12 @@ for ((i=1; i<$#; i++))
 			echo $g
 			echo $h
 			python $TCGAFMP_ROOT_DIR/main/checkMethCnvr.py $f $g >& $h 
+
+                        ## and add the summary methylation feature
+                        rm -fr sm.tsv
+                        python $TCGAFMP_ROOT_DIR/main/summaryMeth.py $g sm.tsv >> $h
+                        rm -fr $g
+                        mv sm.tsv $g
 
 		fi
 

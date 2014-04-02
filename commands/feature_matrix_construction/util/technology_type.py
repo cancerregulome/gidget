@@ -115,24 +115,40 @@ class technology_type(object):
         return
 
     #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
+    # overridden by:
+    #    unc_edu_agilentg4502a_07 (agilentg4502a_07.py)
+    def _checkForUUID(self, tokens):
+        barcode = tokens[self.iBarcode]
+        # typical full barcode looks like this:
+        #      TCGA-A1-A0SE-01A-11R-A085-13
+        # need 12 characters to identify patient
+        #      16 characters to identify sample
+        #      20 characters to identify aliquot
+        #      25 characters to include plate id
+        #      28 characters to include cgcc id
+        # added some functionality to miscTCGA and this step here on 21jun2012 ...
+        # and a typical UUID looks like this:
+        #    6d41d8c9-f2bf-4440-8b8d-907e3b2682f5
+        if (miscTCGA.looks_like_uuid(barcode)):
+            barcode = miscTCGA.uuid_to_barcode(barcode)
+            mess = ''
+        else:
+            found = False
+            for i, token in enumerate(tokens):
+                if miscTCGA.looks_like_uuid(token):
+                    found = True
+                    print 'found UUID column(%i): %s' % (i, token)
+                    break
+            mess = '(g) NOT including this file, not UUID ... ', found, self.iFilename, tokens[self.iFilename], self.iBarcode, tokens[self.iBarcode], self.iYes, tokens[self.iYes] # we want to always use the uuid now --mm 2014-01-29
+    # if this fails to map the UUID to a barcode it will return "NA"
+    # which will fail the next trap ...
+        return mess, barcode
+
     def _checkBarcode(self, tokens):
         if (tokens[self.iYes].lower() == "yes"):
-            barcode = tokens[self.iBarcode]
-            # typical full barcode looks like this:
-            #      TCGA-A1-A0SE-01A-11R-A085-13
-            # need 12 characters to identify patient
-            #      16 characters to identify sample
-            #      20 characters to identify aliquot
-            #      25 characters to include plate id
-            #      28 characters to include cgcc id
-
-            # added some functionality to miscTCGA and this step here on 21jun2012 ...
-            # and a typical UUID looks like this:
-            #    6d41d8c9-f2bf-4440-8b8d-907e3b2682f5
-            if (miscTCGA.looks_like_uuid(barcode)):
-                barcode = miscTCGA.uuid_to_barcode(barcode)
-                # if this fails to map the UUID to a barcode it will return "NA"
-                # which will fail the next trap ...
+            mess, barcode = self._checkForUUID(tokens)
+            if mess:
+                return (tokens[self.iBarcode], None, None, None, False, mess)
 
             # adding this trap 03May2012 ...
             if (not barcode.startswith("TCGA-")):
@@ -418,6 +434,8 @@ class technology_type(object):
         return dataD
 
     #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
+    # overridden by:
+    #    mdanderson_org_mda_rppa_core (mda_rppa_core.py)
     def readNullValue(self, tokens, dataMatrix, sampleIndex, e):
         if (len(tokens) == 1 or tokens[1] == 'null' or tokens[1] == 'NA'):
             dataMatrix[self.curGeneCount][sampleIndex] = self.NA_VALUE
@@ -440,6 +458,7 @@ class technology_type(object):
     #    unc_edu_illuminaga_rnaseqv2 (illumina_rnaseq.py)
     #    unc_edu_illuminahiseq_rnaseq (illumina_rnaseq.py)
     #    unc_edu_illuminahiseq_rnaseqv2 (illumina_rnaseq.py)
+    #    mdanderson_org_mda_rppa_core (mda_rppa_core.py)
     def _readGeneDetails(self, tokens, geneList):
         geneList += [self.genename2geneinfo[tokens[self.tokenGeneIndex]]]
         # verify order of genes stays the same for all files
@@ -470,7 +489,6 @@ class technology_type(object):
     #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
     # overridden by:
     #    humanmethylation (humanmethylation.py)
-    #    mdanderson_org_mda_rppa_core (mda_rppa_core.py)
     def postReadFile(self):
         # base class does nothing
         pass

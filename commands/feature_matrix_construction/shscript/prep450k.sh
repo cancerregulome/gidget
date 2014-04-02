@@ -1,14 +1,9 @@
 #!/bin/bash
 
-: ${LD_LIBRARY_PATH:?" environment variable must be set and non-empty"}
-: ${TCGAFMP_ROOT_DIR:?" environment variable must be set and non-empty"}
+# every TCGA FMP script should start with these lines:
+: ${TCGAFMP_ROOT_DIR:?" environment variable must be set and non-empty; defines the path to the TCGA FMP scripts directory"}
+source ${TCGAFMP_ROOT_DIR}/shscript/tcga_fmp_util.sh
 
-if [[ "$PYTHONPATH" != *"gidget"* ]]; then
-    echo " "
-    echo " your PYTHONPATH should include paths to gidget/commands/... directories "
-    echo " "
-    exit 99
-fi
 
 ## this script should be called with the following parameters:
 ##      one tumor type (eg 'skcm')
@@ -18,9 +13,9 @@ fi
 WRONGARGS=1
 if [[ $# != 2 ]] && [[ $# != 1 ]]
     then
-        echo " Usage   : `basename $0` <tumorType> <snapshotName> "
-        echo " Example : `basename $0` skcm dcc-snapshot-06jan14 "
-        echo "           the snapshotName is optional and defaults to dcc-snapshot "
+        echo " Usage   : `basename $0` <tumorType> <snapshotName>"
+        echo " Example : `basename $0` skcm dcc-snapshot-06jan14"
+        echo "           the snapshotName is optional and defaults to dcc-snapshot"
         exit $WRONGARGS
 fi
 
@@ -36,11 +31,12 @@ echo " "
 echo " "
 echo " *******************"
 echo `date`
+echo " *" output directory: $TCGAFMP_DATA_DIR
 echo " *" $tumor
 echo " *" $snapshotName
 echo " *******************"
 
-cd /titan/cancerregulome14/TCGAfmp_outputs/$tumor
+cd $TCGAFMP_DATA_DIR/$tumor
 mkdir meth450k
 cd meth450k
 
@@ -79,6 +75,11 @@ python $TCGAFMP_ROOT_DIR/main/parse_tcga.py \
     $tumor meth450k dcc-snapshot >& level3.mirn.log 
 # and here we should have an output file with ~1200 rows
 grep "finished in writeTSV_dataMatrix" level3.mirn.log
+
+for f in *.tsv
+    do
+        echo $TCGAFMP_ROOT_DIR/shscript/fmp00B_hackBarcodes.sh $f
+    done
 
 ## then we annotate the GEXP and MIRN data ... because we need
 ## to have the genomic coordinates for these features ...

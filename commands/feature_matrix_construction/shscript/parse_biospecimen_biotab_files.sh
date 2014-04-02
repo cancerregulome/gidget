@@ -1,5 +1,11 @@
+#!/bin/bash
 
-for tumor in `cat $TCGAFMP_ROOT_DIR/shscript/tumor_list.txt`
+# every TCGA FMP script should start with these lines:
+: ${TCGAFMP_ROOT_DIR:?" environment variable must be set and non-empty; defines the path to the TCGA FMP scripts directory"}
+source ${TCGAFMP_ROOT_DIR}/shscript/tcga_fmp_util.sh
+
+
+for tumor in `cat $TCGAFMP_ROOT_DIR/config/tumor_list.txt`
     do
 
         echo " "
@@ -8,90 +14,77 @@ for tumor in `cat $TCGAFMP_ROOT_DIR/shscript/tumor_list.txt`
         echo $tumor
         echo " "
 
-        rm -fr /titan/cancerregulome11/TCGA/repositories/scratch/t?
+        rm -fr $TCGAFMP_DCC_REPOSITORIES/scratch/t?
 
-        cd /titan/cancerregulome11/TCGA/repositories/dcc-mirror/public/tumor/$tumor/bcr/biotab/clin
+        cd $TCGAFMP_DCC_REPOSITORIES/dcc-snapshot/public/tumor/$tumor/bcr/nationwidechildrens.org/bio/clin
 
-        ## NOTEs ...
-        ## no biospecimen_cqcf file for thca (?)
-        ## no biospecimen_slide file for laml (?)
-        ## no biospecimen_tumor_sample file for gbm, laml, ov (?)
+        ## 07mar14 ... looking at files for LGG ...
 
-        ## 27jun13 ... looking at files in detail ... for STAD ...
+        ## biospecimen_cqcf_lgg.txt file has 23 columns:
+	##   1 bcr_patient_barcode
+	##   2 consent_or_death_status
+	##   3 country
+	##   4 days_to_pathology_review
+	##   5 days_to_sample_procurement
+	##   6 digital_image_submitted
+	##   7 ethnicity
+	##   8 histological_type
+	##   9 histological_type_other              
+	##  10 history_of_neoadjuvant_treatment
+	##  11 method_of_sample_procurement
+	##  12 other_method_of_sample_procurement
+	##  13 other_vessel_used
+	##  14 path_confirm_diagnosis_matching
+	##  15 path_confirm_report_attached
+	##  16 path_confirm_tumor_necrosis_metrics
+	##  17 path_confirm_tumor_nuclei_metrics
+	##  18 race
+	##  19 reason_path_confirm_diagnosis_not_matching
+	##  20 sample_prescreened
+	##  21 submitted_for_lce
+	##  22 top_slide_submitted
+	##  23 vessel_used
 
-        ## biospecimen_cqcf_stad.txt file has 344 lines x 26 columns
-        ##     --> none of these actually seem interesting or relevant ???
-        ##              --> so I will NOT process these files anymore ...
-        ##
-	##	0       bcr_patient_barcode                             :       TCGA-B7-5816
-	##	1       b_cell_tumor_slide_submitted                    :       [Not Available]
-	##	2       country                                         :       Russia
-	##	3       cytogenetic_report_submitted                    :       [Not Available]
-	##	4       days_to_pathology_review                        :       [Completed]
-	##	5       days_to_sample_procurement                      :       [Completed]
-	##	6       differential_report_submitted                   :       [Not Available]
-	##	7       digital_image_submitted                         :       NO
-	##	8       ffpe_tumor_slide_submitted                      :       [Not Available]
-	##	9       hiv_positive_status                             :       [Not Available]
-	##	10      maximum_tumor_dimension                         :       [Not Available]
-	##	11      method_of_sample_procurement                    :       Surgical Resection
-	##	12      other_method_of_sample_procurement              :       [Not Available]
-	##	13      other_vessel_used                               :       [Not Available]
-	##	14      path_confirm_diagnosis_matching                 :       YES
-	##	15      path_confirm_report_attached                    :       YES
-	##	16      path_confirm_tumor_necrosis_metrics             :       YES
-	##	17      path_confirm_tumor_nuclei_metrics               :       YES
-	##	18      percent_myeloblasts_for_submitted_specimen      :       [Not Available]
-	##	19      reason_path_confirm_diagnosis_not_matching      :       [Not Available]
-	##	20      sample_prescreened                              :       YES
-	##	21      submitted_for_lce                               :       [Not Available]
-	##	22      t_cell_tumor_slide_submitted                    :       [Not Available]
-	##	23      top_slide_submitted                             :       YES
-	##	24      total_cells_submitted                           :       [Not Available]
-	##	25      vessel_used                                     :       Cryomold
+        ## biospecimen_slide_lgg.txt has 12 columns:
+	##   1 bcr_sample_barcode
+	##   2 bcr_slide_barcode
+	##   3 bcr_slide_uuid
+	##   4 percent_lymphocyte_infiltration
+	##   5 percent_monocyte_infiltration
+	##   6 percent_necrosis
+	##   7 percent_neutrophil_infiltration
+	##   8 percent_normal_cells
+	##   9 percent_stromal_cells
+	##  10 percent_tumor_cells
+	##  11 percent_tumor_nuclei
+	##  12 section_location
 
-        ## biospecimen_slide_stad.txt file has 738 lines x 16 columns
-	##	0       bcr_sample_barcode                              :       TCGA-B7-5816-01A
-	##	1       bcr_slide_barcode                               :       TCGA-B7-5816-01A-01-BS1
-	##	2       bcr_slide_uuid                                  :       842d5f43-6fda-4eb0-be82-8b3531ffcf73
-	##	3       number_proliferating_cells                      :       [Not Available]
-	##	4       percent_eosinophil_infiltration                 :       [Not Available]
-	##	5       percent_granulocyte_infiltration                :       [Not Available]
-	##	6       percent_inflam_infiltration                     :       [Not Available]
-	##	7       percent_lymphocyte_infiltration                 :       0
-	##	8       percent_monocyte_infiltration                   :       0
-	##	9       percent_necrosis                                :       15
-	##	10      percent_neutrophil_infiltration                 :       0
-	##	11      percent_normal_cells                            :       0
-	##	12      percent_stromal_cells                           :       30
-	##	13      percent_tumor_cells                             :       55
-	##	14      percent_tumor_nuclei                            :       70
-	##	15      section_location                                :       TOP
+        ## biospecimen_tumor_sample_lgg.txt file has 6 columns:
+	##   1 bcr_patient_barcode
+	##   2 bcr_sample_uuid
+	##   3 tumor_necrosis_percent
+	##   4 tumor_nuclei_percent
+	##   5 tumor_weight
+	##   6 vial_number
 
-        ## biospecimen_tumor_sample_stad.txt file has 325 lines x 7 columns
-	##	0       bcr_patient_barcode     :       TCGA-B7-5816
-	##	1       bcr_sample_uuid         :       1b4b19c1-75a6-4434-831e-adce44c54eb5
-	##	2       tumor_necrosis_percent  :       30
-	##	3       tumor_nuclei_percent    :       70
-	##	4       tumor_pathology         :       null
-	##	5       tumor_weight            :       360
-	##	6       vial_number             :       1
+        rm -fr $TCGAFMP_DCC_REPOSITORIES/scratch/t?
 
+        cut -f 1,5 *bio.Level_2*/nationwidechildrens.org_biospecimen_cqcf*.txt         | sort | sed -e '1,$s/\[Not Available\]/NA/g' | sed -e '1,$s/\[Not Reported\]/NA/g' | sed -e '1,$s/\[Not Applicable\]/NA/g' | sed -e '1,$s/null/NA/g' >& $TCGAFMP_DCC_REPOSITORIES/scratch/t1
 
-        ## cut -f 1- biospecimen_cqcf*.txt       | sort | sed -e '1,$s/\[Not Available\]/NA/g' | sed -e '1,$s/\[Not Reported\]/NA/g' | sed -e '1,$s/\[Not Applicable\]/NA/g' | sed -e '1,$s/null/NA/g' >& /titan/cancerregulome11/TCGA/repositories/scratch/t1
-        cut -f 1,4- biospecimen_slide*.txt       | sort | sed -e '1,$s/\[Not Available\]/NA/g' | sed -e '1,$s/\[Not Reported\]/NA/g' | sed -e '1,$s/\[Not Applicable\]/NA/g' | sed -e '1,$s/null/NA/g' >& /titan/cancerregulome11/TCGA/repositories/scratch/t2
-        cut -f 1,3- biospecimen_tumor_sample*.txt | sort | sed -e '1,$s/\[Not Available\]/NA/g' | sed -e '1,$s/\[Not Reported\]/NA/g' | sed -e '1,$s/\[Not Applicable\]/NA/g' | sed -e '1,$s/null/NA/g' >& /titan/cancerregulome11/TCGA/repositories/scratch/t3
+        cut -f 1,4-  *bio.Level_2*/nationwidechildrens.org_biospecimen_slide*.txt        | sort | sed -e '1,$s/\[Not Available\]/NA/g' | sed -e '1,$s/\[Not Reported\]/NA/g' | sed -e '1,$s/\[Not Applicable\]/NA/g' | sed -e '1,$s/null/NA/g' >& $TCGAFMP_DCC_REPOSITORIES/scratch/t2
 
-        ## python $TCGAFMP_ROOT_DIR/main/massageTSV.py /titan/cancerregulome11/TCGA/repositories/scratch/t1 \
-        ##         /titan/cancerregulome14/TCGAfmp_outputs/$tumor/aux/biospecimen_cqcf.forXmlMerge.tsv
+        cut -f 1,3-  *bio.Level_2*/nationwidechildrens.org_biospecimen_tumor_sample*.txt | sort | sed -e '1,$s/\[Not Available\]/NA/g' | sed -e '1,$s/\[Not Reported\]/NA/g' | sed -e '1,$s/\[Not Applicable\]/NA/g' | sed -e '1,$s/null/NA/g' >& $TCGAFMP_DCC_REPOSITORIES/scratch/t3
 
-        python $TCGAFMP_ROOT_DIR/main/massageTSV.py /titan/cancerregulome11/TCGA/repositories/scratch/t2 \
-                /titan/cancerregulome14/TCGAfmp_outputs/$tumor/aux/biospecimen_slide.forXmlMerge.tsv
+        python $TCGAFMP_ROOT_DIR/main/massageTSV.py $TCGAFMP_DCC_REPOSITORIES/scratch/t1 \
+                $TCGAFMP_DATA_DIR/$tumor/aux/biospecimen_cqcf.forXmlMerge.tsv
 
-        python $TCGAFMP_ROOT_DIR/main/massageTSV.py /titan/cancerregulome11/TCGA/repositories/scratch/t3 \
-                /titan/cancerregulome14/TCGAfmp_outputs/$tumor/aux/biospecimen_tumor_sample.forXmlMerge.tsv
+        python $TCGAFMP_ROOT_DIR/main/massageTSV.py $TCGAFMP_DCC_REPOSITORIES/scratch/t2 \
+                $TCGAFMP_DATA_DIR/$tumor/aux/biospecimen_slide.forXmlMerge.tsv
 
-        chmod g+w /titan/cancerregulome11/TCGA/repositories/scratch/t?
+        python $TCGAFMP_ROOT_DIR/main/massageTSV.py $TCGAFMP_DCC_REPOSITORIES/scratch/t3 \
+                $TCGAFMP_DATA_DIR/$tumor/aux/biospecimen_tumor_sample.forXmlMerge.tsv
+
+        chmod g+w $TCGAFMP_DCC_REPOSITORIES/scratch/t?
 
     done
 

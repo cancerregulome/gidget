@@ -1,0 +1,21 @@
+# required environmental variables
+#
+# all scripts should reference the project's utility functions,
+# which should verify that all of these variables here have been set
+
+# VAR_NAME\tdescription
+
+# TODO: better usage message; why necessary
+LD_LIBRARY_PATH	environment variable must be set and non-empty
+
+TCGAMAF_ROOT_DIR	path to the top level of the maf pipeline's code
+TCGAMAF_DATA_DIR	path to the maf data directory
+TCGAMAF_REFERENCES_DIR	path to the bioinformatics references for maf
+
+TCGAMAF_TOOLS_DIR	path containing annovar
+
+# currently same as TCGAMAF_ROOT_DIR; TODO merge
+TCGAMAF_SCRIPTS_DIR	(currently same as TCGAMAF_ROOT_DIR)
+
+# should this be specified in another way?
+TCGAMAF_PYTHON_BINARY	TODO
