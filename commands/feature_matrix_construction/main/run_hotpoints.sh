@@ -2,7 +2,7 @@
 
 # every TCGA FMP script should start with these lines:
 : ${TCGAFMP_ROOT_DIR:?" environment variable must be set and non-empty; defines the path to the TCGA FMP scripts directory"}
-source ${TCGAFMP_ROOT_DIR}/shscript/tcga_fmp_util.sh
+source ${TCGAFMP_ROOT_DIR}/../../gidget/util/tcga_fmp_util.sh
 
 
 python ./findMutHotPoints.py TCGAFMP_DCC_REPOSITORIES/dcc-mirror/public/tumor/blca/gsc/broad.mit.edu/illuminaga_dnaseq/mutations/broad.mit.edu_BLCA.IlluminaGA_DNASeq.Level_2.0.3.0/PR_TCGA_BLCA_PAIR_Capture_All_Pairs_QCPASS_v3.aggregated.capture.tcga.uuid.somatic.maf blca

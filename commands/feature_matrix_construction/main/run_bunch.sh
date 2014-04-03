@@ -2,7 +2,7 @@
 
 # every TCGA FMP script should start with these lines:
 : ${TCGAFMP_ROOT_DIR:?" environment variable must be set and non-empty; defines the path to the TCGA FMP scripts directory"}
-source ${TCGAFMP_ROOT_DIR}/shscript/tcga_fmp_util.sh
+source ${TCGAFMP_ROOT_DIR}/../../gidget/util/tcga_fmp_util.sh
 
 
 python ./run_pwRK2.py --pvalue 2. --one 248 --tsvFile $TCGAFMP_DATA_DIR/blca/22mar13/blca.seq.22mar13.TP.tsv
