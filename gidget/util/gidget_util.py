@@ -16,7 +16,7 @@ tcgaFMPVars={}
 
 try:
     rootDir = os.getenv("TCGAFMP_ROOT_DIR")
-    requiredEnvVarFilePath = rootDir + "/config/required_env_vars"
+    requiredEnvVarFilePath = rootDir + "/../../gidget/config/required_env_vars"
 except:
     print " ERROR ... TCGAFMP_ROOT_DIR environment variable is required "
     sys.exit(-1)
