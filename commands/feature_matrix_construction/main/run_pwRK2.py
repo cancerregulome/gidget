@@ -8,7 +8,7 @@ import os.path
 import sys
 import time
 
-from tcga_fmp_util import tcgaFMPVars
+from gidget_util import tcgaFMPVars
 import miscIO
 
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#

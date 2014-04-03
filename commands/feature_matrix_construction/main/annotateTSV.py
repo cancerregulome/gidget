@@ -4,7 +4,7 @@
 import sys
 
 # these are my local ones
-from tcga_fmp_util import tcgaFMPVars
+from gidget_util import tcgaFMPVars
 import chrArms
 import refData
 import tsvIO

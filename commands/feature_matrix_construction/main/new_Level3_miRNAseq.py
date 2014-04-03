@@ -7,7 +7,7 @@ import os
 import sys
 
 # these are my local modules
-from tcga_fmp_util import tcgaFMPVars
+from gidget_util import tcgaFMPVars
 import miscIO
 import miscTCGA
 import path

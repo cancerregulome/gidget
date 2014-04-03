@@ -4,7 +4,7 @@
 # usage
 
 # every file in the TCGA Feature Matrix Construction project should begin
-# by sourcing tcga_fmp_util.sh, NOT this file
+# by sourcing gidget_util.sh, NOT this file
 
 
 ###

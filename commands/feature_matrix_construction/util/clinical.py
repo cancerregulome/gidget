@@ -3,7 +3,7 @@ Created on Aug 2, 2012
 
 @author: michael
 '''
-from tcga_fmp_util import tcgaFMPVars
+from gidget_util import tcgaFMPVars
 
 from xml.dom  import minidom
 from xml.dom  import Node
