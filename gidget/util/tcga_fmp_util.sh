@@ -15,6 +15,6 @@
 if [ -z "${TCGAFMP_IMPORTED_UTILS}" ]
 then
     # echo "importing TCGA FMP utilities:"
-    source ${TCGAFMP_ROOT_DIR}/shscript/tcga_fmp_util_impl.sh
+    source ${TCGAFMP_ROOT_DIR}/../../gidget/util/tcga_fmp_util_impl.sh
     # echo "..done"
 fi

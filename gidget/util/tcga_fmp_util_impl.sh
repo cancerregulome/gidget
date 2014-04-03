@@ -91,7 +91,7 @@ verifyRequiredVariables () {
 checkPythonPath() {
     if [[ "$PYTHONPATH" != *"gidget"* ]]; then
         echo " "
-        echo " your PYTHONPATH should include paths to gidget/commands/... directories "
+        echo " your PYTHONPATH should include paths to gidget/commands/... and gidget/gidget/utils directories"
         echo " "
         exit 99
     fi
@@ -103,7 +103,7 @@ checkPythonPath() {
 # run tests and set global variables
 
 getScriptPath
-verifyRequiredVariables ${SCRIPT_PATH}/../config/required_env_vars
+verifyRequiredVariables ${TCGAFMP_ROOT_DIR}/config/required_env_vars
 checkPythonPath
 
 # this must be the last line; prevents re-execution of this script.
