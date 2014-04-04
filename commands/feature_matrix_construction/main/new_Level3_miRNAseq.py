@@ -7,7 +7,7 @@ import os
 import sys
 
 # these are my local modules
-from gidget_util import tcgaFMPVars
+from gidget_util import gidgetConfigVars
 import miscIO
 import miscTCGA
 import path
@@ -213,8 +213,8 @@ if __name__ == "__main__":
         print ' LOOP over %d CANCER TYPES ... %s ' % (len(tumorList), zCancer)
 
         # piece together the directory name ...
-        ## topDir = tcgaFMPVars['TCGAFMP_DCC_REPOSITORIES'] + "/dcc-snapshot/public/tumor/" + zCancer + "/cgcc/" + platformID
-        topDir = tcgaFMPVars['TCGAFMP_DCC_REPOSITORIES'] + "/" + \
+        ## topDir = gidgetConfigVars['TCGAFMP_DCC_REPOSITORIES'] + "/dcc-snapshot/public/tumor/" + zCancer + "/cgcc/" + platformID
+        topDir = gidgetConfigVars['TCGAFMP_DCC_REPOSITORIES'] + "/" + \
             snapshotName + "/public/tumor/" + zCancer + "/cgcc/" + platformID
 
         print ' starting from top-level directory ', topDir
@@ -244,8 +244,8 @@ if __name__ == "__main__":
                     sys.exit(-1)
 
 
-                cmdString = "%s/shscript/expression_matrix_mimat.pl " % tcgaFMPVars['TCGAFMP_ROOT_DIR']
-                cmdString += "-m " + tcgaFMPVars['TCGAFMP_DCC_REPOSITORIES'] + "/mirna_bcgsc/tcga_mirna_bcgsc_hg19.adf "
+                cmdString = "%s/shscript/expression_matrix_mimat.pl " % gidgetConfigVars['TCGAFMP_ROOT_DIR']
+                cmdString += "-m " + gidgetConfigVars['TCGAFMP_DCC_REPOSITORIES'] + "/mirna_bcgsc/tcga_mirna_bcgsc_hg19.adf "
                 cmdString += "-o %s " % outDir
                 cmdString += "-p %s " % topDir
                 cmdString += "-n %s " % zPlat
@@ -287,7 +287,7 @@ if __name__ == "__main__":
 
     # we also need to read in the mapping file ...
     metaData = loadNameMap(
-        tcgaFMPVars['TCGAFMP_DCC_REPOSITORIES'] + "/mirna_bcgsc/mature.fa.flat.human.mirbase_v19.txt")
+        gidgetConfigVars['TCGAFMP_DCC_REPOSITORIES'] + "/mirna_bcgsc/mature.fa.flat.human.mirbase_v19.txt")
 
     if (1):
 

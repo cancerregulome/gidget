@@ -7,7 +7,7 @@ import os
 import sys
 
 # these are my local modules
-from gidget_util import tcgaFMPVars
+from gidget_util import gidgetConfigVars
 import miscIO
 import miscTCGA
 import path
@@ -860,7 +860,7 @@ def makeFeatureName(dType, fType, fName, chr='', start=-1, stop=-1, strand='', x
         if (len(RPPAdict) == 0):
             print " reading in RPPA annotation file ... "
             fh = file(
-                tcgaFMPVars['TCGAFMP_DCC_REPOSITORIES'] + "/rppa/MDA_antibody_annotation.txt")
+                gidgetConfigVars['TCGAFMP_DCC_REPOSITORIES'] + "/rppa/MDA_antibody_annotation.txt")
             for aLine in fh:
                 aLine = aLine.strip()
                 aLine = aLine.split('\t')
@@ -2215,13 +2215,13 @@ if __name__ == "__main__":
         logFlag = 0
 
         # piece together the directory name ...
-        ## topDir = tcgaFMPVars['TCGAFMP_DCC_REPOSITORIES'] + "/dcc-snapshot/public/tumor/" + zCancer + "/cgcc/" + platformID
-        topDir = tcgaFMPVars['TCGAFMP_DCC_REPOSITORIES'] + "/" + \
+        ## topDir = gidgetConfigVars['TCGAFMP_DCC_REPOSITORIES'] + "/dcc-snapshot/public/tumor/" + zCancer + "/cgcc/" + platformID
+        topDir = gidgetConfigVars['TCGAFMP_DCC_REPOSITORIES'] + "/" + \
             snapshotName + "/public/tumor/" + zCancer + "/cgcc/" + platformID
 
         # HACK: the microsat_instability data is in the "secure" branch ...
         if (platformID.find("microsat_i") > 0):
-            topDir = tcgaFMPVars['TCGAFMP_DCC_REPOSITORIES'] + "/" + \
+            topDir = gidgetConfigVars['TCGAFMP_DCC_REPOSITORIES'] + "/" + \
                 snapshotName + "/secure/tumor/" + \
                 zCancer + "/cgcc/" + platformID
 
@@ -2328,13 +2328,13 @@ if __name__ == "__main__":
         print ' LOOP over %d CANCER TYPES ... %s ' % (len(tumorList), zCancer)
 
         # piece together the directory name ...
-        ## topDir = tcgaFMPVars['TCGAFMP_DCC_REPOSITORIES'] + "/dcc-snapshot/public/tumor/" + zCancer + "/cgcc/" + platformID
-        topDir = tcgaFMPVars['TCGAFMP_DCC_REPOSITORIES'] + "/" + \
+        ## topDir = gidgetConfigVars['TCGAFMP_DCC_REPOSITORIES'] + "/dcc-snapshot/public/tumor/" + zCancer + "/cgcc/" + platformID
+        topDir = gidgetConfigVars['TCGAFMP_DCC_REPOSITORIES'] + "/" + \
             snapshotName + "/public/tumor/" + zCancer + "/cgcc/" + platformID
 
         # HACK: the microsat_instability data is in the "secure" branch ...
         if (platformID.find("microsat_i") > 0):
-            topDir = tcgaFMPVars['TCGAFMP_DCC_REPOSITORIES'] + "/" + \
+            topDir = gidgetConfigVars['TCGAFMP_DCC_REPOSITORIES'] + "/" + \
                 snapshotName + "/secure/tumor/" + \
                 zCancer + "/cgcc/" + platformID
 

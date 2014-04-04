@@ -5,7 +5,7 @@ import numpy
 import sys
 
 # these are my local ones
-from gidget_util import tcgaFMPVars
+from gidget_util import gidgetConfigVars
 import tsvIO
 
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
@@ -78,7 +78,7 @@ def cleanUpName(aName):
 def readPathways():
 
     fh = file(
-        tcgaFMPVars['TCGAFMP_BIOINFORMATICS_REFERENCES'] + "/nci_pid/only_NCI_Nature_ver4.tab", 'r')
+        gidgetConfigVars['TCGAFMP_BIOINFORMATICS_REFERENCES'] + "/nci_pid/only_NCI_Nature_ver4.tab", 'r')
 
     pwDict = {}
 

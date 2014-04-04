@@ -9,7 +9,7 @@
 import sys
 
 # these are my local ones
-from gidget_util import tcgaFMPVars
+from gidget_util import gidgetConfigVars
 import chrArms
 import refData
 import tsvIO
@@ -343,7 +343,7 @@ if __name__ == "__main__":
     fhOut = file(mapFile, 'w')
 
     # and get the coordinates for these genes ...
-    bioinformaticsReferencesDir = tcgaFMPVars['TCGAFMP_BIOINFORMATICS_REFERENCES']
+    bioinformaticsReferencesDir = gidgetConfigVars['TCGAFMP_BIOINFORMATICS_REFERENCES']
     gafFilename = bioinformaticsReferencesDir + "/GAF/GAF3.0/all.gaf"
     gencodeFilename = bioinformaticsReferencesDir + "/gencode/gencode.v19.gene.gtf"
     refGeneFilename = bioinformaticsReferencesDir + "/hg19/refGene.txt"

@@ -1,6 +1,6 @@
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 
-from gidget_util import tcgaFMPVars
+from gidget_util import gidgetConfigVars
 import arffIO
 import miscClin
 import miscTCGA
@@ -385,7 +385,7 @@ def getFeatNamesDict():
     if ( featNamesLoaded ):
         return
     try:
-        fh = file (tcgaFMPVars['TCGAFMP_DCC_REPOSITORIES'] + "/bio_clin/featNames.tsv")
+        fh = file (gidgetConfigVars['TCGAFMP_DCC_REPOSITORIES'] + "/bio_clin/featNames.tsv")
         for aLine in fh:
             tokenList = aLine.split()
             featName = tokenList[1]
@@ -573,7 +573,7 @@ if __name__ == "__main__":
         print ' OUTER LOOP over CANCER TYPES ... ', zCancer
 
         ## topDir = ".../TCGA/repositories/dcc-snapshot/public/tumor/" + zCancer + "/bcr"
-        topDir = tcgaFMPVars['TCGAFMP_DCC_REPOSITORIES'] + "/" + \
+        topDir = gidgetConfigVars['TCGAFMP_DCC_REPOSITORIES'] + "/" + \
             snapshotName + "/public/tumor/" + zCancer + "/bcr"
 
         # get the contents of the bcr directory and loop over the subdirectories which
