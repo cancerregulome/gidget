@@ -12,10 +12,10 @@ date
 echo " wget_bio "
 ./wget_bio.sh
 
-cd $TCGAFMP_ROOT_DIR/shscript
-date
-echo " wget_biotab "
-./wget_biotab.sh
+### cd $TCGAFMP_ROOT_DIR/shscript
+### date
+### echo " wget_biotab "
+### ./wget_biotab.sh
 
 cd $TCGAFMP_ROOT_DIR/shscript
 date
