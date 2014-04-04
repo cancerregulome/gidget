@@ -5,14 +5,14 @@
 
 # all python scripts in the TCGA FMP project should include this line:
 
-# from gidget_util import tcgaFMPVars
+# from gidget_util import gidgetConfigVars
 
 # which checks to make sure that all required environmental variables are defined,
-# and if so, populates a dictionary "tcgaFMPVars" the the env var names and values 
+# and if so, populates a dictionary "gidgetConfigVars" the the env var names and values 
 
 import os
 
-tcgaFMPVars={}
+gidgetConfigVars={}
 
 try:
     rootDir = os.getenv("TCGAFMP_ROOT_DIR")
@@ -53,6 +53,6 @@ for line in f:
 		print "exiting with error"
 		exit(-1)
 
-	tcgaFMPVars[varName] = os.environ.get(varName)
+	gidgetConfigVars[varName] = os.environ.get(varName)
 
 #print "all required variables defined!"

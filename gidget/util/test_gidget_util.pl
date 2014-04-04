@@ -8,6 +8,6 @@ use Cwd qw(abs_path);
 use lib dirname(abs_path(__FILE__));
 use Gidget_Util;
 
-foreach my $var (keys %tcgaMAFVars) {
-    print "found $var: $tcgaMAFVars{$var}\n";
+foreach my $var (keys %gidgetConfigVars) {
+    print "found $var: $gidgetConfigVars{$var}\n";
 }

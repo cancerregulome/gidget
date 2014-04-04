@@ -16,7 +16,7 @@ Env::import();
 my $required_env_vars = dirname(abs_path (__FILE__)) . "/../config/required_env_vars";
 open (REQUIRED_ENV_VARS, $required_env_vars) or die "Error: cannot read required_env_vars file: $!\n";
 
-our %tcgaMAFVars = ();
+our %gidgetConfigVars = ();
 
 LINE: while (<REQUIRED_ENV_VARS>) {
     chomp;
@@ -43,7 +43,7 @@ LINE: while (<REQUIRED_ENV_VARS>) {
         }
         else {
             # print "  defined!\n";
-            $tcgaMAFVars{$linedata[0]} = $variableValue;
+            $gidgetConfigVars{$linedata[0]} = $variableValue;
         }
     }
     else {
@@ -53,4 +53,4 @@ LINE: while (<REQUIRED_ENV_VARS>) {
     }
 }
 
-our @EXPORT = qw(%tcgaMAFVars); # put stuff here you want to export
+our @EXPORT = qw(%gidgetConfigVars); # put stuff here you want to export
