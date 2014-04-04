@@ -2,6 +2,13 @@
 
 # version 7.1
 
+use File::Basename;
+use Cwd qw(abs_path);
+
+use lib dirname(abs_path(__FILE__)) . "/../../gidget/util";
+use Gidget_Util;
+
+
 $maf_file = $ARGV[0] || die "usage: $0 MAF_FILE\n";
 
 &read_tcga_mutation_data;
