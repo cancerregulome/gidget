@@ -36,7 +36,10 @@ LINE: while (<REQUIRED_ENV_VARS>) {
     if (exists $ENV{$linedata[0]}) {
         $variableValue = $ENV{$linedata[0]};
         if ($variableValue eq "") {
-            print "  exists but unintialized or blank!\n"
+            print "\n";
+            print "$linedata[0]:\n";
+            print "  $linedata[1]\n";
+            die "ERROR: $linedata[0] exists but unintialized or blank!\n(try \"export $linedata[0]=<YOUR_SETTING>\")\n";
         }
         else {
             # print "  defined!\n";
@@ -44,7 +47,9 @@ LINE: while (<REQUIRED_ENV_VARS>) {
         }
     }
     else {
-        die "$linedata[0] not defined!\n"
+            print "$linedata[0]:\n";
+            print "  $linedata[1]\n";
+            die "ERROR: $linedata[0] not defined!\n(try \"export $linedata[0]=<YOUR_SETTING>\")\n";
     }
 }
 
