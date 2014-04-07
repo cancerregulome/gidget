@@ -7,6 +7,13 @@
 
 
 ##
+# -- gidget config
+#
+
+GIGDET_SOURCE_ROOT	path to top-level of gidget project; for example, directory with subdirs "commands", "config", "gidget", etc
+
+
+##
 # -- feature matrix (fmp, FMx) construction
 #
 
