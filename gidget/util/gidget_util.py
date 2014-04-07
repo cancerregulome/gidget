@@ -3,7 +3,7 @@
 # verify that all required environmental variables are present,
 # and set in the global namespace if they aren't already
 
-# all python scripts in the TCGA FMP project should include this line:
+# all python scripts in the gidget project should include this line:
 
 # from gidget_util import gidgetConfigVars
 
@@ -15,10 +15,10 @@ import os
 gidgetConfigVars={}
 
 try:
-    rootDir = os.getenv("TCGAFMP_ROOT_DIR")
-    requiredEnvVarFilePath = rootDir + "/../../gidget/config/required_env_vars"
+    rootDir = os.getenv("GIGDET_SOURCE_ROOT")
+    requiredEnvVarFilePath = rootDir + "/config/required_env_vars"
 except:
-    print " ERROR ... TCGAFMP_ROOT_DIR environment variable is required "
+    print " ERROR ... GIGDET_SOURCE_ROOT environment variable is required"
     sys.exit(-1)
 
 f = open(requiredEnvVarFilePath, 'r')

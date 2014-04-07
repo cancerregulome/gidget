@@ -8,13 +8,13 @@
 # do not source the implementation file directly; this file provides the equivilent
 # of header guards
 
-: ${TCGAFMP_ROOT_DIR:?" environment variable must be set and non-empty; defines the path to the TCGA FMP scripts directory"}
+: ${GIGDET_SOURCE_ROOT:?" environment variable must be set and non-empty; defines the path to the local gidget sourcecode"}
 
 # prevent multiple imports and avoid multiple global variable and function
 # definitions, and function executions
-if [ -z "${TCGAFMP_IMPORTED_UTILS}" ]
+if [ -z "${GIDGET_IMPORTED_UTILS}" ]
 then
     # echo "importing TCGA FMP utilities:"
-    source ${TCGAFMP_ROOT_DIR}/../../gidget/util/gidget_util_impl.sh
+    source ${GIGDET_SOURCE_ROOT}/gidget/util/gidget_util_impl.sh
     # echo "..done"
 fi
