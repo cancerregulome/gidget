@@ -13,7 +13,7 @@ use Env;
 
 Env::import();
 
-my $required_env_vars = dirname(abs_path (__FILE__)) . "/../config/required_env_vars";
+my $required_env_vars = dirname(abs_path (__FILE__)) . "/../../config/required_env_vars";
 open (REQUIRED_ENV_VARS, $required_env_vars) or die "Error: cannot read required_env_vars file: $!\n";
 
 our %gidgetConfigVars = ();

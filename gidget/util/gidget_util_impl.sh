@@ -103,7 +103,7 @@ checkPythonPath() {
 # run tests and set global variables
 
 getScriptPath
-verifyRequiredVariables ${TCGAFMP_ROOT_DIR}/../../gidget/config/required_env_vars
+verifyRequiredVariables ${TCGAFMP_ROOT_DIR}/../../config/required_env_vars
 checkPythonPath
 
 # this must be the last line; prevents re-execution of this script.
