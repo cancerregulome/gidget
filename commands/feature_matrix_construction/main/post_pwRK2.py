@@ -167,6 +167,9 @@ if __name__ == "__main__":
     print numFeat, numSamp
     print featTypesCounts
 
+    ## new 04apr14 ... still having NFS latency problems ...
+    time.sleep ( 30 )
+
     featTypesList = featTypesCounts.keys()
     featTypesList.sort()
     print featTypesList
@@ -267,6 +270,30 @@ if __name__ == "__main__":
         if (iFeat % 10000 == 0):
             print " feature # ", iFeat
 
+        # NEW TEST 04apr14 ... read through the entire file to try and
+        # check for truncation problems ...
+        ## print " NEW TESTING FOR FILE COMPLETENESS !!! ", inFile
+        fileGood = 0
+        while ( not fileGood ):
+            fhIn.close()
+            fhIn = file(inFile, 'r')
+            bailFlag = 0
+            numLines = 0
+            for aLine in fhIn:
+                numLines += 1
+                aLine = aLine.strip()
+                tokenList = aLine.split('\t')
+                if ( len(tokenList)>0 and len(tokenList)<10 ):
+                    bailFlag = 1
+                    print " BAILING ... RETRY !!! ", numLines
+                    continue
+            if ( not bailFlag ):
+                fileGood = 1
+                ## print "         YAY ", numLines, inFile
+                fhIn.close()
+                fhIn = file(inFile, 'r')
+
+
         # print " beginning to loop over input lines ... "
         for aLine in fhIn:
 
@@ -280,6 +307,16 @@ if __name__ == "__main__":
 
             aLine = aLine.strip()
             tokenList = aLine.split('\t')
+
+            # this should not happen and yet it does sometimes,
+            # when a file has gotten truncated ...
+            if ( len(tokenList) < 10 ): 
+                print " "
+                print " WARNING !!! truncated file ??? "
+                print len(tokenList), tokenList
+                print " "
+                continue
+
 
             aFeat = tokenList[0]
             bFeat = tokenList[1]
@@ -309,12 +346,19 @@ if __name__ == "__main__":
                 except:
                     rhoString = "NA"
 
-            num = int(tokenList[4])
-            logP = float(tokenList[5])
-            nA = int(tokenList[6])
-            pA = float(tokenList[7])
-            nB = int(tokenList[8])
-            pB = float(tokenList[9])
+            try:
+                num = int(tokenList[4])
+                logP = float(tokenList[5])
+                nA = int(tokenList[6])
+                pA = float(tokenList[7])
+                nB = int(tokenList[8])
+                pB = float(tokenList[9])
+            except:
+                print " "
+                print " WARNING !!! truncated file ??? "
+                print len(tokenList), tokenList
+                print " "
+                continue
 
             # rules for disqualifying this ...
             dqFlag = 0
