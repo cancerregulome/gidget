@@ -18,12 +18,13 @@ echo " "
 echo " "
 echo " processing temp files in $1 "
 
-uName=`whoami`
-tDir='/tmp/'$uName'/pw_scratch'
-if [ ! -d $tDir ]
-    then
-        mkdir -p $tDir
-    fi
+## uName=`whoami`
+## tDir='/tmp/'$uName'/pw_scratch'
+## if [ ! -d $tDir ]
+##     then
+##         mkdir -p $tDir
+##     fi
+tDir=$TCGAFMP_LOCAL_SCRATCH
 echo " using temp scratch directory " $tDir
 
 date
