@@ -290,7 +290,13 @@ def copyScratchFiles ( tmpDir13, localDir ):
         time.sleep(sleepTime)
         watchDir ( newDir )
 
+        print "     --> returning <%s> " % newDir
         return ( newDir )
+
+    else:
+        print " NOT copying scratch files ... "
+        print "     --> returning <%s> " % tmpDir13
+        return ( tmpDir13 )
 
 
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
@@ -713,6 +719,8 @@ if __name__ == "__main__":
     print " localDir : <%s> " % localDir
     tmpDir13 = copyScratchFiles ( tmpDir13, localDir )
     print " "
+
+    ## NOTE that from now on, tmpDir13 hopefully points to a LOCAL scratch directory ...
 
     # if there was only one job, then we're done now ...
     if ((numJobs == 1) and (not args.byType) and (one_vs_all_flag==1)):
