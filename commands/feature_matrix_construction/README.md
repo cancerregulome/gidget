@@ -13,9 +13,20 @@
 	$ ls -alt humanmethylation450/methylation/*Level_3*.tar.gz | wc -l
 ```
 
-- If you have only 450k data, then you need to pre-process this data prior to building a feature matrix combining all of the other data.  This is done by the ``` $TCGAFMP_ROOT_DIR/shscript/prep450k.sh ``` script as follows:
+- If you have only 450k data, then you need to pre-process this data prior to building a feature matrix combining all of the other data.  Currently, the tumor types that have only 450k data are: ACC, BLCA, CESC, ESCA, HNSC, LGG, LIHC, MESO, PCPG, PRAD, SARC, SKCM, and THCA.  This pre-processing step is done by the ``` $TCGAFMP_ROOT_DIR/shscript/prep450k.sh ``` script as follows:
 
 ```
 	$ $TCGAFMP_ROOT_DIR/shscript/prep450k.sh <tumor> <snpashot-name>
 ```
+
+This step actually involves looking at the DNA methylation data, the mRNAseq data (specifically IlluminaHiSeq RNAseqV2 data from UNC), and the miRNAseq data (specifically IlluminaHiSeq data from BCGSC) jointly.  (If your mRNAseq or miRNAseq data is not from those centers/platforms and you want to use this pre-processing step, it will need to be modified.)  After combining these three data types, the methylation features are correlated against the proximal expression features and when the absolute value of the correlation coefficient is > 0.30, those features will be kept.  In addition, the top 2% most variable probes (according to interdecile variability) will also be kept.  This pre-processing has not been optimized at all (and probably won't be any time soon since it only needs to be run when new 450k data becomes available for a tumor type of interest), and should be run overnight as it takes ~10h.
+
+- Now you are ready to run a the high-level script that will produce a FMx.  There are actually two of these, depending again on whether you have only 450k data or you are combining 27k and 450k data.  The usage of the two scripts is very similar:
+
+```
+	$ $TCGAFMP_ROOT_DIR/shscript/doAllC_refactor.sh  <curDate>  <snapshotName>  <tumor>  <config>  <public/private>
+	$ $TCGAFMP_ROOT_DIR/shscript/doAllC_refactor_450.sh  <curDate>  <snapshotName>  <tumor>  <config>  <public/private>
+```
+
+The ```curDate``` parameter does not actually have to be a date and can be any string by which you want to identify this particular run.  The ```snapshotName``` can just be ```dcc-snapshot``` if you want to use the current snapshot, or you can refer to an earlier one explicitly, eg ```dcc-snapshot-03mar14```.  The ```config``` file should be either ```parse_tcga.27_450k.config``` or ```parse_tcga.all450k.config``` depending on what type of run you are doing.  This config file can be customized but it is unlikely that you will need to do that.  Finally, if you specify ```public```, then no additional data from the ```aux``` directory will be included into the feature matrix.  This step will take ~5h on a typical tumor (or as little as ~2h for a tumor with relatively few samples and possibly much longer for a tumor with a large number of samples such as BRCA).
 
