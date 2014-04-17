@@ -42,7 +42,7 @@ The code for this as well as these instructions should be moved out from this ``
 The main driver program for running pairwise analysis on a FMx is ```$TCGAFMP_ROOT_DIR/main/run_pwRK3.py```.  If you invoke it without any command-line arguments, it will give you the following usage information (as well as details on the format of the 12-column output file):
 
 ```
-bash-3.2$ python ./run_pwRK3.py
+bash-3.2$ python $TCGAFMP_ROOT_DIR/main/run_pwRK3.py
 
  Output of this script is a tab-delimited file with 12 columns, and
  one line for each significant pairwise association:
@@ -79,5 +79,16 @@ All pairwise statistical tests will be compared to the specified ```--pvalue``` 
 The ```--forRE``` option should be specified to produce output that is further filtered and appropriate for loading into Regulome Explorer.  This post-processing step has not been optimized and can be very slow if a loose p-value threshold was specified, resulting in hundreds of millions of significant pairs which now must be sorted and filtered.
 
 ### NEW Pairwise helper script
-Because different types of features tend to produce p-values with very different orders of magnitude, it has become obvious that it is useful to be able to specify a different p-value threshold for each type of comparison.  In order to facilitate this, the ```$TCGAFMP_ROOT_DIR/shscript/PairProcess.sh``` script has been provided.  It has not been optimized, but it calls the program described above once for every possible pair of feature types, using the p-value thresholds specified either in ```$TCGAFMP_OUTPUTS/<tumor>/aux/PairProcess_config.csv``` if it is available, or the defaults in ```$TCGAFMP_ROOT_DIR/shscript/PairProcess_config.csv```.  Being able to specify very stringent p-value thresholds for some type-pairs (*eg* GEXP,GEXP) while specifying much looser p-value thresholds for others (*eg* CLIN,CLIN) using this helper script will be significantly faster than simply running ```run_pwRK3.py``` using the ```--all``` option with a single very loose p-value threshold because of the significant time that will be spent in post-processing the outputs.
+Because different types of features tend to produce p-values with very different orders of magnitude, it has become obvious that it is useful to be able to specify a different p-value threshold for each type of comparison.  In order to facilitate this, the ```$TCGAFMP_ROOT_DIR/shscript/PairProcess.sh``` script has been provided.  It has not been optimized, but it calls the ```run_pwRK3.py``` program described above once for every possible pair of feature types, using the p-value thresholds specified either in ```$TCGAFMP_OUTPUTS/<tumor>/aux/PairProcess_config.csv``` if it is available, or the defaults in ```$TCGAFMP_ROOT_DIR/shscript/PairProcess_config.csv```.  Being able to specify very stringent p-value thresholds for some type-pairs (*eg* GEXP,GEXP) while specifying much looser p-value thresholds for others (*eg* CLIN,CLIN) using this helper script will be significantly faster than simply running ```run_pwRK3.py``` using the ```--all``` option with a single very loose p-value threshold because of the significant time that will be spent in post-processing the outputs.
+
+The usage for this script looks like this:
+```
+$TCGAFMP_ROOT_DIR/shscript/PairProcess.sh
+     Usage   : PairProcess.sh <curDate> <tumorType> <tsvExtension>
+     Example : PairProcess.sh 28oct13  brca  TP.tsv
+```
+where the above example usage would run the PairProcess on the file ```TCGAFMP_OUTPUTS/brca/28oct13/brca.seq.28oct13.TP.tsv```
+
+If you customize the ```PairProcess_config.csv``` file, it should have 36 lines: there are 8 different feature types (CLIN, CNVR, GEXP, GNAB, METH, MIRN, RPPA, and SAMP), and ```8 multichoose 2``` is equal to ```9 choose 2``` which is 36.  The default file has p-value thresholds ranging from 1.e-02 to 1.e-60.  Depending on the number of samples in your dataset, you may want to adjust these.  After running this script on a feature matrix, you will have 36 seperate output files called ```<FMx-root-name>.<type1>.<type2>.pwpv``` and 36 corresponding filtered files called ```<FMx-root-name>.<type1>.<type2>.pwpv.forRE```.  The filtering that produces the ```forRE``` output files limits each of these to 1-2 million significant pairs.  If the upstream un-filtered file has many more than that because of a relatively loose p-value threshold, the post-processing could be optimized by choosing a more stringent p-value threshold for that specific ```<type1>.<type2>``` comparison.  The typical *worst* offender is the (METH,METH) comparison.  If on the other hand, the individual ```forRE``` output files have fewer significant associations reported than you would like, you may want to consider a looser p-value threshold.  The final combined output file(s) are named ````<FMx-root-name>.pwpv``` and ```<FMx-root-name>.pwpv.forRE``` and it is this latter one that you will want to load into RE.
+
 
