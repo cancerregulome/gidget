@@ -32,5 +32,52 @@ Now you are ready to run a the high-level script that will produce a FMx.  There
 	$ $TCGAFMP_ROOT_DIR/shscript/doAllC_refactor_450.sh  <curDate>  <snapshotName>  <tumor>  <config>  <public/private>
 ```
 
-The ```curDate``` parameter does not actually have to be a date and can be any string by which you want to identify this particular run.  The ```snapshotName``` can just be ```dcc-snapshot``` if you want to use the current snapshot, or you can refer to an earlier one explicitly, eg ```dcc-snapshot-03mar14```.  The ```config``` file should be either ```parse_tcga.27_450k.config``` or ```parse_tcga.all450k.config``` depending on what type of run you are doing.  This config file can be customized but it is unlikely that you will need to do that.  Finally, if you specify ```public```, then no additional data from the ```aux``` directory will be included into the feature matrix.  This step will take ~5h on a typical tumor (or as little as ~2h for a tumor with relatively few samples and possibly much longer for a tumor with a large number of samples such as BRCA).
+The ```curDate``` parameter does not actually have to be a date and can be any string by which you want to identify this particular run.  The ```snapshotName``` can just be ```dcc-snapshot``` if you want to use the current snapshot, or you can refer to an earlier one explicitly, *eg* ```dcc-snapshot-03mar14```.  The ```config``` file should be either ```parse_tcga.27_450k.config``` or ```parse_tcga.all450k.config``` depending on what type of run you are doing.  This config file can be customized but it is unlikely that you will need to do that.  Finally, if you specify ```public```, then no additional data from the ```aux``` directory will be included into the feature matrix.  This step will take ~5h on a typical tumor (or as little as ~2h for a tumor with relatively few samples and possibly much longer for a tumor with a large number of samples such as BRCA).
+
+The outputs of this process will be a series of files called ```$TCGAFMP_OUTPUTS/<tumor>/<curDate>/<tumor>.{all,seq}.<curDate>.{subsetName}.tsv```.  The ```all``` *vs* ```seq``` indicates whether this FMx contains mRNAseq expression data only (*seq*) or may also include array-based expression data (*all*).  This really only applies to older tumor types such as BRCA, COAD, KIRC, KIRP, LGG, LUAD, LUSC, OV, READ, and UCEC, and for most of those there is now more mRNAseq data available than array data and it may be preferable to limit analysis to the mRNAseq data.  Multiple subsets may have been automatically created and are also indicated within the name of the FMx tsv file.
+
+### Pairwise analysis run
+The code for this as well as these instructions should be moved out from this ```feature_matrix_construction``` subdirectory and put into a new ```pairwise_analysis``` subdirectory, but for the moment this is where it resides.
+
+The main driver program for running pairwise analysis on a FMx is ```$TCGAFMP_ROOT_DIR/main/run_pwRK3.py```.  If you invoke it without any command-line arguments, it will give you the following usage information (as well as details on the format of the 12-column output file):
+
+```
+bash-3.2$ python ./run_pwRK3.py
+
+ Output of this script is a tab-delimited file with 12 columns, and
+ one line for each significant pairwise association:
+
+     # 1  feature A
+     # 2  feature B (order is alphabetical, and has no effect on result)
+     # 3  Spearman correlation coefficient (range is [-1,+1], or NA
+     # 4  number of samples used for pairwise test (non-NA overlap of feature A and feature B)
+     # 5  -log10(p-value)  (uncorrected)
+     # 6  log10(Bonferroni correction factor)
+     # 7  -log10(corrected p-value)   [ col #7 = min ( (col #5 - col #6), 0 ) ]
+     # 8  # of non-NA samples in feature A that were not used in pairwise test
+     # 9  -log(p-value) that the samples from A that were not used are 'different' from those that were
+     #10  (same as col #8 but for feature B)
+     #11  (same as col #9 but for feature B)
+     #12  genomic distance between features A and B (or 500000000)
+
+usage: run_pwRK3.py [-h] [--min-ct-cell MIN_CT_CELL]
+                    [--min-mx-cell MIN_MX_CELL] [--min-samples MIN_SAMPLES]
+                    [--pvalue PVALUE] [--adjP] [--all] [--one ONE] [--byType]
+                    [--type1 TYPE1] [--type2 TYPE2] [--verbosity VERBOSITY]
+                    --tsvFile TSVFILE [--forRE] [--forLisa] [--useBC USEBC]
+
+```
+
+It can be used in various modes:
+
+- ```--all``` : test all possible pairs (all-by-all, *ie* N-choose-2)
+- ```--one``` : test one feature against all others (or combine this with ```--byType``` to test one feature against all others of a specific type)
+- ```--byType``` : do all-by-all but only within the feature types defined by ```--type1``` and ```--type2``` (for example test all GEXP features against all METH features using ```--type1 GEXP --type2 METH``` or test all GNAB features against all other features using ```--type1 GNAB --type2 ANY```)
+
+All pairwise statistical tests will be compared to the specified ```--pvalue``` threshold and reported only if they are more significant.
+
+The ```--forRE``` option should be specified to produce output that is further filtered and appropriate for loading into Regulome Explorer.  This post-processing step has not been optimized and can be very slow if a loose p-value threshold was specified, resulting in hundreds of millions of significant pairs which now must be sorted and filtered.
+
+### NEW Pairwise helper script
+Because different types of features tend to produce p-values with very different orders of magnitude, it has become obvious that it is useful to be able to specify a different p-value threshold for each type of comparison.  In order to facilitate this, the ```$TCGAFMP_ROOT_DIR/shscript/PairProcess.sh``` script has been provided.  It has not been optimized, but it calls the program described above once for every possible pair of feature types, using the p-value thresholds specified either in ```$TCGAFMP_OUTPUTS/<tumor>/aux/PairProcess_config.csv``` if it is available, or the defaults in ```$TCGAFMP_ROOT_DIR/shscript/PairProcess_config.csv```.  Being able to specify very stringent p-value thresholds for some type-pairs (*eg* GEXP,GEXP) while specifying much looser p-value thresholds for others (*eg* CLIN,CLIN) using this helper script will be significantly faster than simply running ```run_pwRK3.py``` using the ```--all``` option with a single very loose p-value threshold because of the significant time that will be spent in post-processing the outputs.
 
