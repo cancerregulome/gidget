@@ -94,8 +94,8 @@ for ((i=1; i<$#; i++))
 
                 echo " get summary information on this file ... "
                 echo $k
-		s=${k/.tsv/.summary}
-                python $TCGAFMP_ROOT_DIR/main/quickLook.py $k >& $s
+		smry=${k/.tsv/.summary}
+                python $TCGAFMP_ROOT_DIR/main/quickLook.py $k >& $smry
 
                 echo " and finally split according to sampleType ... "
                 python $TCGAFMP_ROOT_DIR/main/splitTSVbyCat.py \

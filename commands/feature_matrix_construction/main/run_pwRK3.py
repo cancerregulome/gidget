@@ -95,6 +95,8 @@ def getIndexRanges(tsvFile, aType):
     fh.close()
 
     numI = len(iList)
+    if ( numI < 1 ): return ( [] )
+
     print " numI = ", numI
     print iList[:5]
     print iList[-5:]
@@ -267,21 +269,34 @@ def copyScratchFiles ( tmpDir13, localDir ):
 
     print " in copyScratchFiles ... <%s> <%s> " % ( tmpDir13, localDir )
 
-    if ( localDir.startswith("/local") ):
+    if ( not tmpDir13.startswith(localDir) ):
+
+        sleepTime=60
+        time.sleep(sleepTime)
+        watchDir ( tmpDir13 )
 
         ii = len(tmpDir13) - 3
         while ( tmpDir13[ii] != "/" ): ii -= 1
         sName = tmpDir13[ii+1:]
-        print ii, sName
+        ## print ii, sName
 
         cmdString = "cp -fr %s %s/" % ( tmpDir13, localDir )
-        print " cmdString : <%s> " % cmdString
+        print " DOING COPY ... cmdString : <%s> " % cmdString
         (status, output) = commands.getstatusoutput(cmdString)
 
         newDir = localDir + "/" + sName
         print " --> newDir : <%s> " % newDir
 
+        time.sleep(sleepTime)
+        watchDir ( newDir )
+
+        print "     --> returning <%s> " % newDir
         return ( newDir )
+
+    else:
+        print " NOT copying scratch files ... "
+        print "     --> returning <%s> " % tmpDir13
+        return ( tmpDir13 )
 
 
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
@@ -307,7 +322,7 @@ def watchDir ( aDir ):
 
     nLoop = 0
 
-    sleepTime = 10
+    sleepTime = 20
 
     time.sleep(sleepTime)
     t2 = lastModTime ( aDir )
@@ -323,6 +338,7 @@ def watchDir ( aDir ):
             print " BAILING out of watchDir ... ERROR ... EXITING "
             sys.exit(-1)
 
+    time.sleep(sleepTime)
     time.sleep(sleepTime)
     print " leaving watchDir "
 
@@ -678,7 +694,7 @@ if __name__ == "__main__":
             done = 1
         else:
             tSleep = max(10, int((numJobs - numOutFiles) / 20))
-            if (args.byType): tSleep = 20
+            if (args.byType): tSleep = min(20,tSleep)
             print " ( sleeping for %.0f seconds ) " % float(tSleep)
             time.sleep(tSleep)
 
@@ -703,6 +719,8 @@ if __name__ == "__main__":
     print " localDir : <%s> " % localDir
     tmpDir13 = copyScratchFiles ( tmpDir13, localDir )
     print " "
+
+    ## NOTE that from now on, tmpDir13 hopefully points to a LOCAL scratch directory ...
 
     # if there was only one job, then we're done now ...
     if ((numJobs == 1) and (not args.byType) and (one_vs_all_flag==1)):
