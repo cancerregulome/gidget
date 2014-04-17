@@ -274,19 +274,34 @@ if __name__ == "__main__":
         # check for truncation problems ...
         ## print " NEW TESTING FOR FILE COMPLETENESS !!! ", inFile
         fileGood = 0
+        numRetry = 0
         while ( not fileGood ):
             fhIn.close()
             fhIn = file(inFile, 'r')
             bailFlag = 0
             numLines = 0
-            for aLine in fhIn:
+            keepReading = 1
+            while ( keepReading ):
+                aLine = fhIn.readline()
                 numLines += 1
                 aLine = aLine.strip()
-                tokenList = aLine.split('\t')
-                if ( len(tokenList)>0 and len(tokenList)<10 ):
-                    bailFlag = 1
-                    print " BAILING ... RETRY !!! ", numLines
+                if ( len(aLine) == 0 ):
+                    keepReading = 0
                     continue
+                tokenList = aLine.split('\t')
+                if ( len(tokenList)>1 and len(tokenList)<10 ):
+                    bailFlag = 1
+                    print " BAILING ... RETRY !!! ", numLines, inFile, tokenList, numRetry
+                    fhIn.close()
+                    time.sleep ( 2 )
+                    fhIn = file(inFile, 'r')
+                    numLines = 0
+                    numRetry += 1
+                if ( numRetry > 3 ):
+                    print " too many retries ... ", numLines, inFile, numRetry
+                    keepReading = 0
+                    fileGood = 1
+                    bailFlag = 0
             if ( not bailFlag ):
                 fileGood = 1
                 ## print "         YAY ", numLines, inFile
