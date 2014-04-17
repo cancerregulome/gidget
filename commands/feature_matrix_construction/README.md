@@ -85,7 +85,7 @@ The usage for this script looks like this:
 ```
 $TCGAFMP_ROOT_DIR/shscript/PairProcess.sh
      Usage   : PairProcess.sh <curDate> <tumorType> <tsvExtension>
-     Example : PairProcess.sh 28oct13  brca  TP.tsv
+     Example : PairProcess.sh  28oct13   brca        TP.tsv
 ```
 where the above example usage would run the PairProcess on the file ```TCGAFMP_OUTPUTS/brca/28oct13/brca.seq.28oct13.TP.tsv```
 
