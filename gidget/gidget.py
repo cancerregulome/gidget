@@ -88,7 +88,7 @@ if __name__ == '__main__':
 
     # for "-h" or "--help", docopt prints usage and exits cleanly
     mainArgs = docopt(__doc__,
-                      version = 'gidget version 0.2.1',
+                      version = 'gidget version 0.2.2',
                       options_first = True)
 
 
