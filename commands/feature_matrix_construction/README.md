@@ -4,7 +4,7 @@ This README will lead you through the steps necessary to create a new tumor-spec
 for your tumor-type of interest.
 
 ### MAF processing
-If there is a MAF file for your tumor-type, then you should make sure that it has been processed and the binary mutation features are ready to be incorporated into the final FMx.  See the README under commands/maf_processing.
+If there is a MAF file for your tumor-type, then you should make sure that it has been processed and the binary mutation features are ready to be incorporated into the final FMx.  See the README under ```commands/maf_processing```.
 
 ### DNA Methylation processing
 The next thing you should know/decide is how you want to process the DNA methylation data.  Two DNA methylation platforms have been used over the course of the TCGA project: the 27k platform and the 450k platform.  For tumor types that contain data from both of these platforms (typically for disjoint sample sets), we typically process these in such a way as to only use the CpG probes that exist on both platforms (with a few extra microRNA specific probes from the 450k platform).  For tumor types that contain data only from the 450k platform, it is probably preferable not to restrict oneself to this limited set of probes.  In order to determine what type of DNA methylation is available for your tumor-type, check to see what types of data archives exist in the local DCC mirror.  (Note that the mere presence of the directories does not necessarily imply that any Level_3 data archives actually exist, so be sure to check for the presence of actual data archives.)
