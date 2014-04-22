@@ -19,10 +19,18 @@ The next thing you should know/decide is how you want to process the DNA methyla
 If you have only 450k data, then you need to pre-process this data prior to building a feature matrix combining all of the other data.  Currently, the tumor types that have only 450k data are: ACC, BLCA, CESC, ESCA, HNSC, LGG, LIHC, MESO, PCPG, PRAD, SARC, SKCM, and THCA.  This pre-processing step is done by the ``` $TCGAFMP_ROOT_DIR/shscript/prep450k.sh ``` script as follows:
 
 ```
+        ### WARNING !!! do not run this unless you really need to, it takes a LOOOOONG time !!!
 	$ $TCGAFMP_ROOT_DIR/shscript/prep450k.sh <tumor> <snpashot-name>
 ```
 
 This step actually involves looking at the DNA methylation data, the mRNAseq data (specifically IlluminaHiSeq RNAseqV2 data from UNC), and the miRNAseq data (specifically IlluminaHiSeq data from BCGSC) jointly.  (If your mRNAseq or miRNAseq data is not from those centers/platforms and you want to use this pre-processing step, it will need to be modified.)  After combining these three data types, the methylation features are correlated against the proximal expression features and when the absolute value of the correlation coefficient is > 0.30, those features will be kept.  In addition, the top 2% most variable probes (according to interdecile variability) will also be kept.  This pre-processing has not been optimized at all (and probably won't be any time soon since it only needs to be run when new 450k data becomes available for a tumor type of interest), and should be run overnight as it takes ~12h for a typical tumor.
+
+*NOTE:* In order to check whether you *really* need to re-run this ```prep450k.sh``` step, compare the dates for:
+
+```
+	$ ls -alt $TCGAFMP_DCC_REPOSITORIES/dcc-mirror/public/tumor/<tumor>/cgcc/jhu-usc.edu/humanmethylation450/methylation/*Level_3*.tar.gz
+	$ ls -alt $TCGAFMP_DATA_DIR/<tumor>/meth450k/<tumor>.meth_gexp_mirn.plus.annot.tsv
+```
 
 ### Heterogeneous FMx construction
 Now you are ready to run the high-level script that will produce a FMx.  There are actually two of these, depending again on whether you have only 450k data or you are combining 27k and 450k data.  The usage of the two scripts is very similar:
