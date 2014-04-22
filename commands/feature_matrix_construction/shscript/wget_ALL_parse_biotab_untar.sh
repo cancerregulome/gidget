@@ -24,3 +24,8 @@ cd $firstDir
 
 date
 echo DONE!!!
+
+echo print quick check
+echo -----------------
+grep -C 20 -P "((DONE)|(===))" /users/mmiller/tcga/sreynold_scripts/script_out/`echo "$(date +%Y-%m-%d)"`_wget_parse_untar_out.txt   
+
