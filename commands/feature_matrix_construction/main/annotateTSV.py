@@ -4,7 +4,7 @@
 import sys
 
 # these are my local ones
-from tcga_fmp_util import tcgaFMPVars
+from gidget_util import gidgetConfigVars
 import chrArms
 import refData
 import tsvIO
@@ -825,7 +825,7 @@ if __name__ == "__main__":
         nameChangeFlag = "NO"
 
     # and get the coordinates for these genes ...
-    bioinformaticsReferencesDir = tcgaFMPVars['TCGAFMP_BIOINFORMATICS_REFERENCES']
+    bioinformaticsReferencesDir = gidgetConfigVars['TCGAFMP_BIOINFORMATICS_REFERENCES']
     if (build == 'hg18'):
         gafFilename = bioinformaticsReferencesDir + "/GAF/Feb2011/GAF.hg18.Feb2011/GAF_bundle/outputs/TCGA.hg18.Feb2011.gaf"
         gencodeFilename = ""

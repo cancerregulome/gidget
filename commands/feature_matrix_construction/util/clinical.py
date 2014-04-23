@@ -3,7 +3,7 @@ Created on Aug 2, 2012
 
 @author: michael
 '''
-from tcga_fmp_util import tcgaFMPVars
+from gidget_util import gidgetConfigVars
 
 from xml.dom  import minidom
 from xml.dom  import Node
@@ -395,7 +395,7 @@ class clinical(technology_type):
         if ( self.featNamesLoaded ):
             return
         try:
-            featureNamesFilename = tcgaFMPVars['TCGAFMP_DCC_REPOSITORIES'] + "/bio_clin/featNames.tsv"
+            featureNamesFilename = gidgetConfigVars['TCGAFMP_DCC_REPOSITORIES'] + "/bio_clin/featNames.tsv"
             fh = file (featureNamesFilename)
             for aLine in fh:
                 tokenList = aLine.split()

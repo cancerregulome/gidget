@@ -9,7 +9,7 @@ import os.path
 import sys
 import time
 
-from tcga_fmp_util import tcgaFMPVars
+from gidget_util import gidgetConfigVars
 import miscIO
 
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
@@ -162,7 +162,7 @@ def preProcessTSV(tsvFile):
         (status, output) = commands.getstatusoutput(cmdString)
 
         print " creating bin file "
-        cmdString = "%s %s/prep4pairwise.py %s" % (tcgaFMPVars['TCGAFMP_PYTHON3'], tcgaFMPVars['TCGAFMP_PAIRWISE_ROOT'], tsvFile)
+        cmdString = "%s %s/prep4pairwise.py %s" % (gidgetConfigVars['TCGAFMP_PYTHON3'], gidgetConfigVars['TCGAFMP_PAIRWISE_ROOT'], tsvFile)
         (status, output) = commands.getstatusoutput(cmdString)
         if (status != 0):
             print " ERROR ??? failed to execute command ??? "
@@ -362,7 +362,7 @@ if __name__ == "__main__":
     print " randomly generated job name : <%s> " % curJobName
     print " "
 
-    tmpDir = "%s/%s" % (tcgaFMPVars['TCGAFMP_CLUSTER_SCRATCH'], curJobName)
+    tmpDir = "%s/%s" % (gidgetConfigVars['TCGAFMP_CLUSTER_SCRATCH'], curJobName)
     cmdString = "mkdir %s" % tmpDir
     (status, output) = commands.getstatusoutput(cmdString)
     if (not os.path.exists(tmpDir)):
@@ -391,7 +391,7 @@ if __name__ == "__main__":
     pythonbin = sys.executable
 
     golempwd = "PASSWD_HERE"
-    fhC = file ( tcgaFMPVars['TCGAFMP_CLUSTER_SCRATCH'] + "/config", 'r' )
+    fhC = file ( gidgetConfigVars['TCGAFMP_CLUSTER_SCRATCH'] + "/config", 'r' )
     aLine = fhC.readline()
     fhC.close()
     aLine = aLine.strip()
@@ -401,7 +401,7 @@ if __name__ == "__main__":
     numJobs = 0
     for index in indexList:
         outName = tmpDir + "/" + str(index) + ".pw"
-        cmdString = "1 " + tcgaFMPVars['TCGAFMP_PAIRWISE_ROOT'] + "/pairwise-1.1.2"
+        cmdString = "1 " + gidgetConfigVars['TCGAFMP_PAIRWISE_ROOT'] + "/pairwise-1.1.2"
         cmdString += " --pvalue 1. --min-ct-cell %d --min-mx-cell %d --min-samples %d" \
             % (args.min_ct_cell, args.min_mx_cell, args.min_samples)
         cmdString += " --outer %d:%d:1 --inner 0::1  %s  %s " \
@@ -412,7 +412,7 @@ if __name__ == "__main__":
     fh.close()
 
     # ok, now we want to actually launch the jobs ...
-    cmdString = "python " + tcgaFMPVars['TCGAFMP_ROOT_DIR'] + "/main/golem.py "
+    cmdString = "python " + gidgetConfigVars['TCGAFMP_ROOT_DIR'] + "/main/golem.py "
     cmdString += "http://glados.systemsbiology.net:7083 -p " + golempwd + " "
     cmdString += "-L scoreCatFeat -u "
     cmdString += getpass.getuser() + " "

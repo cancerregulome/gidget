@@ -3,7 +3,7 @@ Created on Jun 20, 2012
 
 @author: michael
 '''
-from tcga_fmp_util import tcgaFMPVars
+from gidget_util import gidgetConfigVars
 
 import commands
 from datetime import datetime
@@ -147,7 +147,7 @@ class illumina_rnaseq(technology_type):
                 if (dirName.find(zPlat[:zPlat.rfind('_')]) < 0):
                     raise ValueError(" not a valid platform: %s ??? !!! " % (dirName))
 
-                cmdString = tcgaFMPVars['TCGAFMP_ROOT_DIR'] + "/" + self.configuration['matrix_script']
+                cmdString = gidgetConfigVars['TCGAFMP_ROOT_DIR'] + "/" + self.configuration['matrix_script']
                 cmdString += " -m %s " % self.configuration['matrix_adf']
                 cmdString += " -o %s " % outDir
                 cmdString += " -p %s " % topDir

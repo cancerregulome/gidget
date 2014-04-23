@@ -1,6 +1,6 @@
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 
-from tcga_fmp_util import tcgaFMPVars
+from gidget_util import gidgetConfigVars
 import miscMath
 import miscTCGA
 
@@ -227,7 +227,7 @@ def lookAtData(dataVec):
 
 def readNameMapDict():
 
-    fh = file(tcgaFMPVars['TCGAFMP_FIREHOSE_MIRROR'] + "/metadata/name_map.tsv")
+    fh = file(gidgetConfigVars['TCGAFMP_FIREHOSE_MIRROR'] + "/metadata/name_map.tsv")
     for aLine in fh:
         aLine = aLine.strip()
         tokenList = aLine.split('\t')
@@ -508,7 +508,7 @@ def parseMethylationDataFiles(lastDir, outDir, zCancer, subsetName, suffixString
                             # --------------------------------------
                             # do we need some metadata?
                             metaData = getMetaDataInfo(
-                                tcgaFMPVars['TCGAFMP_FIREHOSE_MIRROR'] + "/metadata/meth.probes.15oct13.txt")
+                                gidgetConfigVars['TCGAFMP_FIREHOSE_MIRROR'] + "/metadata/meth.probes.15oct13.txt")
 
                             # --------------------------------------
                             # ok, time to parse the input file and write the
@@ -830,7 +830,7 @@ def getGeneAntibodyMap():
 
     geneAntibodyMap = {}
 
-    fh = file( tcgaFMPVars['TCGAFMP_BIOINFORMATICS_REFERENCES'] + "/tcga_platform_genelists/MDA_antibody_annotation_2014_03_04.txt" )
+    fh = file( gidgetConfigVars['TCGAFMP_BIOINFORMATICS_REFERENCES'] + "/tcga_platform_genelists/MDA_antibody_annotation_2014_03_04.txt" )
     for aLine in fh:
         aLine = aLine.strip()
         tokenList = aLine.split('\t')
@@ -1247,7 +1247,7 @@ def parseSNP6dataFiles(lastDir, outDir, zCancer, subsetName, suffixString):
                         inputFile = fName
                         outputFile = zCancer + ".broad.mit.edu__genome_wide_snp_6__snp." + \
                             suffixString + ".tsv"
-                        cmdString = "python " + tcgaFMPVars['TCGAFMP_ROOT_DIR'] + "/main/snp_firehose_Level3_matrix.py " + \
+                        cmdString = "python " + gidgetConfigVars['TCGAFMP_ROOT_DIR'] + "/main/snp_firehose_Level3_matrix.py " + \
                             inputFile + " " + outputFile
                         print " running command : "
                         print cmdString
@@ -1304,7 +1304,7 @@ if __name__ == "__main__":
             else:
                 # if we are not told where to get the stddata, then get the
                 # most recent ...
-                firehoseTopDir = tcgaFMPVars['TCGAFMP_FIREHOSE_MIRROR'] + "/"
+                firehoseTopDir = gidgetConfigVars['TCGAFMP_FIREHOSE_MIRROR'] + "/"
                 topDir = getMostRecentDir(firehoseTopDir, cancerDirNames)
 
             if (len(sys.argv) == 5):

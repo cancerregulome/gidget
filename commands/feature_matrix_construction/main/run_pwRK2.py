@@ -8,7 +8,7 @@ import os.path
 import sys
 import time
 
-from tcga_fmp_util import tcgaFMPVars
+from gidget_util import gidgetConfigVars
 import miscIO
 
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
@@ -102,7 +102,7 @@ def preProcessTSV(tsvFile):
         (status, output) = commands.getstatusoutput(cmdString)
 
         print " creating bin file "
-        cmdString = "%s %s/prep4pairwise.py %s" % (tcgaFMPVars['TCGAFMP_PYTHON3'], tcgaFMPVars['TCGAFMP_PAIRWISE_ROOT'], tsvFile)
+        cmdString = "%s %s/prep4pairwise.py %s" % (gidgetConfigVars['TCGAFMP_PYTHON3'], gidgetConfigVars['TCGAFMP_PAIRWISE_ROOT'], tsvFile)
         (status, output) = commands.getstatusoutput(cmdString)
         if (status != 0):
             print " (a) ERROR ??? failed to execute command ??? "
@@ -238,7 +238,7 @@ if __name__ == "__main__":
     print " randomly generated job name : <%s> " % curJobName
     print " "
 
-    tmpDir = "%s/%s" % (tcgaFMPVars['TCGAFMP_CLUSTER_SCRATCH'], curJobName)
+    tmpDir = "%s/%s" % (gidgetConfigVars['TCGAFMP_CLUSTER_SCRATCH'], curJobName)
     cmdString = "mkdir %s" % tmpDir
     (status, output) = commands.getstatusoutput(cmdString)
     if (not os.path.exists(tmpDir)):
@@ -282,7 +282,7 @@ if __name__ == "__main__":
     pythonbin = sys.executable
 
     golempwd = "PASSWD_HERE"
-    fhC = file ( tcgaFMPVars['TCGAFMP_CLUSTER_SCRATCH'] + "/config", 'r' )
+    fhC = file ( gidgetConfigVars['TCGAFMP_CLUSTER_SCRATCH'] + "/config", 'r' )
     aLine = fhC.readline()
     fhC.close()
     aLine = aLine.strip()
@@ -296,7 +296,7 @@ if __name__ == "__main__":
         numJobs = 0
         for index in range(numFeat - 1):
             outName = tmpDir + "/" + str(index) + ".pw"
-            cmdString = "1 " + tcgaFMPVars['TCGAFMP_PAIRWISE_ROOT'] + "/pairwise-1.1.2"
+            cmdString = "1 " + gidgetConfigVars['TCGAFMP_PAIRWISE_ROOT'] + "/pairwise-1.1.2"
             cmdString += " --pvalue %g --min-ct-cell %d --min-mx-cell %d --min-samples %d" \
                 % (args.pvalue, args.min_ct_cell, args.min_mx_cell, args.min_samples)
             cmdString += " --outer %d:%d:1 --inner +1::1  %s  %s " \
@@ -308,7 +308,7 @@ if __name__ == "__main__":
 
         # handle the single index vs all option ...
         outName = tmpDir + "/" + str(index) + ".pw"
-        cmdString = "1 " + tcgaFMPVars['TCGAFMP_PAIRWISE_ROOT'] + "/pairwise-1.1.2"
+        cmdString = "1 " + gidgetConfigVars['TCGAFMP_PAIRWISE_ROOT'] + "/pairwise-1.1.2"
         cmdString += " --pvalue %g --min-ct-cell %d --min-mx-cell %d --min-samples %d" \
             % (args.pvalue, args.min_ct_cell, args.min_mx_cell, args.min_samples)
         cmdString += " --outer %d:%d:1 --inner 0::1  %s  %s " \
@@ -319,7 +319,7 @@ if __name__ == "__main__":
     fh.close()
 
     # ok, now we want to actually launch the jobs ...
-    cmdString = "python %s/main/golem.py " % tcgaFMPVars['TCGAFMP_ROOT_DIR']
+    cmdString = "python %s/main/golem.py " % gidgetConfigVars['TCGAFMP_ROOT_DIR']
     cmdString += "http://glados.systemsbiology.net:7083 -p " + golempwd + " "
     cmdString += "-L pairwiseRK -u "
     cmdString += getpass.getuser() + " "
@@ -359,14 +359,14 @@ if __name__ == "__main__":
         # first we run post_rkpw.py which writes
         # out something that looks like the output from runPWPV
         iOne = index
-        cmdString = "python %s/main/post_pwRK2.py %s %s %d" % (tcgaFMPVars['TCGAFMP_ROOT_DIR'], tmpDir,
+        cmdString = "python %s/main/post_pwRK2.py %s %s %d" % (gidgetConfigVars['TCGAFMP_ROOT_DIR'], tmpDir,
                                                                tsvFile, iOne)
         print " < %s > " % cmdString
         (status, output) = commands.getstatusoutput(cmdString)
         print status, output
 
         cmdString = "sort -grk 5 --temporary-directory=%s/ %s/post_proc_all.tsv >& %s/%d.all.pwpv.sort" % (
-            tcgaFMPVars['TCGAFMP_CLUSTER_SCRATCH'], tmpDir, tmpDir, iOne)
+            gidgetConfigVars['TCGAFMP_CLUSTER_SCRATCH'], tmpDir, tmpDir, iOne)
         print " < %s > " % cmdString
         (status, output) = commands.getstatusoutput(cmdString)
         print status, output
@@ -387,13 +387,13 @@ if __name__ == "__main__":
 
         # first we run post_rkpw.py which concatenates them all and writes
         # out something that looks like the output from runPWPV
-        cmdString = "python %s/main/post_pwRK2.py %s %s" % (tcgaFMPVars['TCGAFMP_ROOT_DIR'], tmpDir,
+        cmdString = "python %s/main/post_pwRK2.py %s %s" % (gidgetConfigVars['TCGAFMP_ROOT_DIR'], tmpDir,
                                                             tsvFile)
         print " < %s > " % cmdString
         (status, output) = commands.getstatusoutput(cmdString)
 
         # and then we run the script that sorts and trims the output file
-        cmdString = "%s/shscript/proc_pwpv2.sh %s" % (tcgaFMPVars['TCGAFMP_ROOT_DIR'], tmpDir)
+        cmdString = "%s/shscript/proc_pwpv2.sh %s" % (gidgetConfigVars['TCGAFMP_ROOT_DIR'], tmpDir)
         print " < %s > " % cmdString
         (status, output) = commands.getstatusoutput(cmdString)
 
@@ -412,14 +412,14 @@ if __name__ == "__main__":
 
         # first we run post_rkpw.py which concatenates them all and writes
         # out something that looks like the output from runPWPV
-        cmdString = "python %s/main/post_pwRK2.py %s %s" % (tcgaFMPVars['TCGAFMP_ROOT_DIR'], tmpDir,
+        cmdString = "python %s/main/post_pwRK2.py %s %s" % (gidgetConfigVars['TCGAFMP_ROOT_DIR'], tmpDir,
                                                             tsvFile)
         print " < %s > " % cmdString
         (status, output) = commands.getstatusoutput(cmdString)
 
         # at this point we have post_proc_all.tsv
         # and post_proc_all.NGEXP.NGEXP.tmp
-        cmdString = "%s/shscript/proc_pancan.sh %s" % (tcgaFMPVars['TCGAFMP_ROOT_DIR'], tmpDir)
+        cmdString = "%s/shscript/proc_pancan.sh %s" % (gidgetConfigVars['TCGAFMP_ROOT_DIR'], tmpDir)
         print " < %s > " % cmdString
         (status, output) = commands.getstatusoutput(cmdString)
 

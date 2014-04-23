@@ -1,6 +1,6 @@
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 
-from tcga_fmp_util import tcgaFMPVars
+from gidget_util import gidgetConfigVars
 import arffIO
 import miscClin
 import miscTCGA

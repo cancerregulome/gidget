@@ -5,6 +5,18 @@
 
 # VAR_NAME\tdescription
 
+
+##
+# -- gidget config
+#
+
+GIDGET_SOURCE_ROOT	path to top-level of gidget project; for example, directory with subdirs "commands", "config", "gidget", etc
+
+
+##
+# -- feature matrix (fmp, FMx) construction
+#
+
 # path to FMP scripts
 TCGAFMP_ROOT_DIR	path to the top level of the feature matrix project's code; for example ".../commands/feature_matrix_construction"
 
@@ -31,3 +43,30 @@ TCGAFMP_PAIRWISE_ROOT	path to the top level of the pairwise project's code which
 # python3 binary
 # TODO: can this be required from the standard shell env and tested for?
 TCGAFMP_PYTHON3	path to python3 binary
+
+
+##
+# -- binarization --
+#
+
+TCGABINARIZATION_DATABASE_DIR	path to databases expected by binarization scripts; for example, should contain subdirs with "TRANSFAC_2010.1", "interpro/data", "uniprot/data", etc
+
+
+##
+# -- MAF processing --
+#
+
+# TODO: better usage message; why necessary
+LD_LIBRARY_PATH	environment variable must be set and non-empty
+
+TCGAMAF_ROOT_DIR	path to the top level of the maf pipeline's code
+TCGAMAF_DATA_DIR	path to the maf data directory
+TCGAMAF_REFERENCES_DIR	path to the bioinformatics references for maf
+
+TCGAMAF_TOOLS_DIR	path containing annovar
+
+# currently same as TCGAMAF_ROOT_DIR; TODO merge
+TCGAMAF_SCRIPTS_DIR	(currently same as TCGAMAF_ROOT_DIR)
+
+# should this be specified in another way?
+TCGAMAF_PYTHON_BINARY	TODO

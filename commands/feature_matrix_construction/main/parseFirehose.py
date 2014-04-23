@@ -1,6 +1,6 @@
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 
-from tcga_fmp_util import tcgaFMPVars
+from gidget_util import gidgetConfigVars
 import chrArms
 import miscMath
 import miscTCGA
@@ -1434,7 +1434,7 @@ def getMutSigVersionString ( zCancer ):
     defaultString = "MutSigNozzleReportCV"
 
     try:
-        rootString = tcgaFMPVars['TCGAFMP_DATA_DIR']
+        rootString = gidgetConfigVars['TCGAFMP_DATA_DIR']
     except:
         MSverString = defaultString
         print "     --> defaulting to %s " % defaultString
@@ -1518,7 +1518,7 @@ if __name__ == "__main__":
 
     # 22jun : switching to new firehose analyses that were downloaded using
     # firehose_get -b analyses latest
-    firehoseTopDir = tcgaFMPVars['TCGAFMP_FIREHOSE_MIRROR']+ "/"
+    firehoseTopDir = gidgetConfigVars['TCGAFMP_FIREHOSE_MIRROR']+ "/"
     outDir = "./"
 
     # first thing we have to do is find the most recent top-level directory
