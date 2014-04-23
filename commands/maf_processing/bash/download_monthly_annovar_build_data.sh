@@ -5,11 +5,10 @@
 source ${TCGAMAF_ROOT_DIR}/../../gidget/util/gidget_util.sh
 
 
-cd ${TCGAMAF_TOOLS_DIR}/annovar
 echo
 echo download UCSC knownGene files
 humandbFolder=${TCGAMAF_REFERENCES_DIR}/HumanDB
-./annotate_variation.pl -downdb -buildver hg18 knownGene $humandbFolder
-./annotate_variation.pl -downdb -buildver hg19 knownGene $humandbFolder
+${TCGAMAF_TOOLS_DIR}/annotate_variation.pl -downdb -buildver hg18 knownGene $humandbFolder
+${TCGAMAF_TOOLS_DIR}/annotate_variation.pl -downdb -buildver hg19 knownGene $humandbFolder
 
 
