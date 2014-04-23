@@ -15,10 +15,10 @@ import os
 gidgetConfigVars={}
 
 try:
-    rootDir = os.getenv("GIGDET_SOURCE_ROOT")
+    rootDir = os.getenv("GIDGET_SOURCE_ROOT")
     requiredEnvVarFilePath = rootDir + "/config/required_env_vars"
 except:
-    print " ERROR ... GIGDET_SOURCE_ROOT environment variable is required"
+    print " ERROR ... GIDGET_SOURCE_ROOT environment variable is required"
     sys.exit(-1)
 
 f = open(requiredEnvVarFilePath, 'r')
