@@ -72,7 +72,8 @@ sub read_tcga_mutation_data
 						$tumor_allele = $tumor_seq_allele2;
 					}
 					
-					print "$tumor_type\t$hugo_symbol\t$variant_classification\t$tumor_sample_barcode\t$chromo\:$start_position\t$reference_allele\->$tumor_allele\t$uniprot\t$mutation\t$two\t$one\t$three\n";
+					#print "$tumor_type\t$hugo_symbol\t$variant_classification\t$tumor_sample_barcode\t$chromo\:$start_position\t$reference_allele\->$tumor_allele\t$uniprot\t$mutation\t$two\t$one\t$three\n";
+					print "$hugo_symbol\t$variant_classification\t$tumor_sample_barcode\t$chromo\:$start_position\t$reference_allele\->$tumor_allele\t$uniprot\t$mutation\t$two\t$one\t$three\n";
 					
 					$uniprot_annotation{$hugo_symbol}{$uniprot} = 1;
 					
@@ -165,7 +166,8 @@ sub read_tcga_mutation_data
 									$tumor_allele = $tumor_seq_allele2;
 								}
 								
-								print "$tumor_type\t$hugo_symbol\t$variant_classification\t$tumor_sample_barcode\t$chromo\:$start_position\t$reference_allele\->$tumor_allele\tUNIPROT_FAIL\tUNIPROT_FAIL\n";
+								#print "$tumor_type\t$hugo_symbol\t$variant_classification\t$tumor_sample_barcode\t$chromo\:$start_position\t$reference_allele\->$tumor_allele\tUNIPROT_FAIL\tUNIPROT_FAIL\n";
+								print "$hugo_symbol\t$variant_classification\t$tumor_sample_barcode\t$chromo\:$start_position\t$reference_allele\->$tumor_allele\tUNIPROT_FAIL\tUNIPROT_FAIL\n";
 								
 								$mutations{$hugo_symbol}{$tumor_sample_barcode}{$position} = 1;
 								$type{$hugo_symbol}{$tumor_sample_barcode}{$position} = $manual_type;
