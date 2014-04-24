@@ -56,4 +56,6 @@ LINE: while (<REQUIRED_ENV_VARS>) {
     }
 }
 
+close (REQUIRED_ENV_VARS);
+
 1;
