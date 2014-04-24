@@ -1,17 +1,21 @@
 #!/usr/bin/perl
 
-$scriptVersion = "6.2";
-
+use strict;
 use warnings;
+
 
 use File::Basename;
 use Cwd qw(abs_path);
 
+my $scriptVersion = "6.2";
+
+my $tt = "UNDEFINED"; # commandline tumor type arg
+my $maf_file = "UNDEFINED"; #commandline maf file arg
 (($tt = $ARGV[0]) && ($maf_file = $ARGV[1])) || die "usage: $0 TUMOR_TYPE MAF_FILE\n";
 
 #@elements = split ('\.', $maf_file);
 #$tumor_type = $elements[0];
-$tumor_type = $tt;
+my $tumor_type = $tt;
 
 print "\n" . basename(abs_path(__FILE__)) . " version $scriptVersion\n\n";
 print "using:\n";
@@ -24,18 +28,18 @@ print "\n";
 ####################################################################################################
 sub read_tcga_mutation_data
 {
-	%uniprot_annotation = ();
-	%mutations = ();
-	%themut = ();
-	%tumor_ids = ();
-	%nonsilent = ();
-	%missense = ();
-	%mnf = ();
-	%mni = ();
-	%code_potential = ();
-	%annotation_seen = ();
+	my %uniprot_annotation = ();
+	my %mutations = ();
+	my %themut = ();
+	my %tumor_ids = ();
+	my %nonsilent = ();
+	my %missense = ();
+	my %mnf = ();
+	my %mni = ();
+	my %code_potential = ();
+	my %annotation_seen = ();
 	open (MAF, "< $maf_file") || die "cannot read maf file: $!\n";
-	while ($line = <MAF>)
+	while (my $line = <MAF>)
 	{
 		unless (($line =~ /^\#version/) || ($line =~ /^\Hugo_Symbol/))
 		{
@@ -43,6 +47,21 @@ sub read_tcga_mutation_data
 			#TCGA-AG-A032-01A-01W-A00E-09
 			if (($line =~ /^(\S*?)\t(\S*?)\t\S*?\t\S*?\t(\S*?)\t(\S*?)\t(\S*?)\t(\S*?)\t(\S*?)\t(\S*?)\t(\S*?)\t(\S*?)\t(\S*?)\t\S*?\t\S*?\t(\S*?)\t(\S*?)\t.+\t(\S{6})\S*?\t\S*?\t.+?:p\.(\w+\d+\S+?),.*\t/) && ($line !~ /NO UNIPROT MATCH/) && ($line !~ /NO ISOFORM MATCH/) && ($line !~ /NO UNIPROT ID/))
 			{
+				my $hugo_symbol = "UNDEFINED";
+				my $entrez_gene_id = "UNDEFINED";
+				my $chromo = "UNDEFINED";
+				my $start_position = "UNDEFINED";
+				my $end_position = "UNDEFINED";
+				my $strand = "UNDEFINED";
+				my $variant_classification = "UNDEFINED";
+				my $variant_type = "UNDEFINED";
+				my $reference_allele = "UNDEFINED";
+				my $tumor_seq_allele1 = "UNDEFINED";
+				my $tumor_seq_allele2 = "UNDEFINED";
+				my $tumor_sample_barcode = "UNDEFINED";
+				my $matched_norm_sample_barcode = "UNDEFINED";
+				my $uniprot = "UNDEFINED";
+				my $mutation = "UNDEFINED";
 				($hugo_symbol, $entrez_gene_id, $chromo, $start_position, $end_position, $strand, $variant_classification, $variant_type, $reference_allele, $tumor_seq_allele1, $tumor_seq_allele2, $tumor_sample_barcode, $matched_norm_sample_barcode, $uniprot, $mutation) = ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15);
 				
 				if ($tumor_sample_barcode ne $matched_norm_sample_barcode)
@@ -70,12 +89,14 @@ sub read_tcga_mutation_data
 					}
 					
 					#print "$uniprot\t$line\n";
-					
+					my $one;
+					my $two;
+					my $three;
 					($one, $two, $three) = ($1, $2, $3) if ($mutation =~ /^(\S+?)(\d+)(\S+?)$/);
 					
 					#BLCA    KIAA0090        Silent  TCGA-BL-A0C8    Q8N766  I784I   784     I       I
 					
-					
+					my $tumor_allele = "UNDEFINED";
 					if ($reference_allele ne $tumor_seq_allele1)
 					{
 						$tumor_allele = $tumor_seq_allele1;
@@ -95,12 +116,16 @@ sub read_tcga_mutation_data
 					
 					if (($reference_allele ne $tumor_seq_allele1) || ($reference_allele ne $tumor_seq_allele2))
 					{
+						my $wt = "UNDEFINED";
+						my $position = "UNDEFINED";
+						my $mut = "UNDEFINED";
 						($wt, $position, $mut) = ($1, $2, $3) if ($mutation =~ /^([a-zA-Z]+)(\d+)([a-zA-Z]+|\*)$/);
 						$wt = "CURRENTLY_UNUSED"; # slience perl warning
 						$mut = "CURRENTLY_UNUSED"; # slience perl warning
 						#print "muttype $mut\n";
 						$mutations{$hugo_symbol}{$tumor_sample_barcode}{$position} = 1;
 						$themut{$hugo_symbol}{$tumor_sample_barcode}{$mutation} = 1;
+						my %type = (); # TODO, should this be building up from the top, like %mutations?
 						$type{$hugo_symbol}{$tumor_sample_barcode}{$position} = $3;
 						$tumor_ids{$tumor_sample_barcode} = 1;
 						$nonsilent{$hugo_symbol}{$tumor_sample_barcode} = 1 if ($variant_classification !~ /^Silent$/);
@@ -146,6 +171,19 @@ sub read_tcga_mutation_data
 			{
 				if ($line =~ /^(\S*?)\t(\S*?)\t\S*?\t\S*?\t(\S*?)\t(\S*?)\t(\S*?)\t(\S*?)\t(\S*?)\t(\S*?)\t(\S*?)\t(\S*?)\t(\S*?)\t\S*?\t\S*?\t(\S+\-\S*?)\t(\S+\-\S*?)\t/)
 				{
+					my $hugo_symbol = "UNDEFINED";
+					my $entrez_gene_id = "UNDEFINED";
+					my $chromo = "UNDEFINED";
+					my $start_position = "UNDEFINED";
+					my $end_position = "UNDEFINED";
+					my $strand = "UNDEFINED";
+					my $variant_classification = "UNDEFINED";
+					my $variant_type = "UNDEFINED";
+					my $reference_allele = "UNDEFINED";
+					my $tumor_seq_allele1 = "UNDEFINED";
+					my $tumor_seq_allele2 = "UNDEFINED";
+					my $tumor_sample_barcode = "UNDEFINED";
+					my $matched_norm_sample_barcode = "UNDEFINED";
 					($hugo_symbol, $entrez_gene_id, $chromo, $start_position, $end_position, $strand, $variant_classification, $variant_type, $reference_allele, $tumor_seq_allele1, $tumor_seq_allele2, $tumor_sample_barcode, $matched_norm_sample_barcode) = ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13);
 					
 					if ($tumor_sample_barcode ne $matched_norm_sample_barcode)
@@ -167,11 +205,13 @@ sub read_tcga_mutation_data
 							if (($reference_allele ne $tumor_seq_allele1) || ($reference_allele ne $tumor_seq_allele2))
 							{
 								#set an arbitrary position since we do not have the actual annotation
-								$position = 999999999;
+								my $position = 999999999;
 								
+								my $manual_type = "UNDEFINED";
 								$manual_type = "fs" if (($variant_classification eq	"Frame_Shift_Del") || ($variant_classification eq	"Frame_Shift_Ins"));
 								$manual_type = "X" if ($variant_classification eq	"Nonsense_Mutation");
 								
+								my $tumor_allele = "UNDEFINED";
 								if ($reference_allele ne $tumor_seq_allele1)
 								{
 									$tumor_allele = $tumor_seq_allele1;
@@ -185,6 +225,7 @@ sub read_tcga_mutation_data
 								print "$hugo_symbol\t$variant_classification\t$tumor_sample_barcode\t$chromo\:$start_position\t$reference_allele\->$tumor_allele\tUNIPROT_FAIL\tUNIPROT_FAIL\n";
 								
 								$mutations{$hugo_symbol}{$tumor_sample_barcode}{$position} = 1;
+								my %type = (); # TODO, should this be building up from the top, like %mutations?
 								$type{$hugo_symbol}{$tumor_sample_barcode}{$position} = $manual_type;
 								$tumor_ids{$tumor_sample_barcode} = 1;
 								$nonsilent{$hugo_symbol}{$tumor_sample_barcode} = 1 if ($variant_classification !~ /^Silent$/);
@@ -199,9 +240,10 @@ sub read_tcga_mutation_data
 						}
 					}
 				}
-				else
+				else # TODO: is this block nested incorrectly? the variables refered to below are out of scope
 				{
-					print "blah warning: tumor sample barcode $tumor_sample_barcode matches normal sample barcode $matched_norm_sample_barcode\n$line\n";
+					# DISABLED DUE TO VARIABLE SCOPE ISSUES:
+					# print "blah warning: tumor sample barcode $tumor_sample_barcode matches normal sample barcode $matched_norm_sample_barcode\n$line\n";
 				}
 			}
 			else
