@@ -1,15 +1,18 @@
 #!/usr/bin/perl
 package gidget_util;
 
-use warnings;
 use strict;
+use warnings;
+
 
 use File::Basename;
 use Cwd qw(abs_path);
-
-use parent 'Exporter'; # imports and subclasses Exporter
-
 use Env;
+
+use Exporter;
+our @ISA = 'Exporter';
+our @EXPORT = qw( %gidgetConfigVars ); # automatically exported variables
+
 
 Env::import();
 
@@ -53,4 +56,4 @@ LINE: while (<REQUIRED_ENV_VARS>) {
     }
 }
 
-our @EXPORT = qw(%gidgetConfigVars); # put stuff here you want to export
+1;
