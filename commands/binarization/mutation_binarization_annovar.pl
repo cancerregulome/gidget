@@ -6,10 +6,11 @@ use File::Basename;
 use Cwd qw(abs_path);
 
 use lib dirname(abs_path(__FILE__)) . "/../../gidget/util";
-use Gidget_Util;
+use gidget_util;
 
 
 $maf_file = $ARGV[0] || die "usage: $0 MAF_FILE\n";
+$databaseDirectory = $gidgetConfigVars{'TCGABINARIZATION_DATABASE_DIR'} || die "did not get config variable\n";
 
 print "\n" . basename(abs_path(__FILE__)) . " version $VERSION\n\n";
 print "using:\n";

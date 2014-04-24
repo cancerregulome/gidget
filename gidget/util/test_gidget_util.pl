@@ -6,7 +6,7 @@ use File::Basename;
 use Cwd qw(abs_path);
 
 use lib dirname(abs_path(__FILE__));
-use Gidget_Util;
+use gidget_util;
 
 foreach my $var (keys %gidgetConfigVars) {
     print "found $var: $gidgetConfigVars{$var}\n";
