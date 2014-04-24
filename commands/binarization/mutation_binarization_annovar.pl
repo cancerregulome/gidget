@@ -2,6 +2,8 @@
 
 $VERSION = "7.1";
 
+use warnings;
+
 use File::Basename;
 use Cwd qw(abs_path);
 
@@ -14,7 +16,7 @@ $databaseDirectory = $gidgetConfigVars{'TCGABINARIZATION_DATABASE_DIR'} || die "
 
 print "\n" . basename(abs_path(__FILE__)) . " version $VERSION\n\n";
 print "using:\n";
-print "  database directory => $gidgetConfigVars{'TCGABINARIZATION_DATABASE_DIR'}\n";
+print "  database directory => $databaseDirectory\n";
 print "  input MAF file => $maf_file\n";
 print "\n";
 
@@ -86,6 +88,8 @@ sub read_tcga_mutation_data
 					if (($reference_allele ne $tumor_seq_allele1) || ($reference_allele ne $tumor_seq_allele2))
 					{
 						($wt, $position, $mut) = ($1, $2, $3) if ($mutation =~ /^([a-zA-Z]+)(\d+)([a-zA-Z]+|\*)$/);
+						$wt = "CURRENTLY_UNUSED"; # slience perl warning
+						$mut = "CURRENTLY_UNUSED"; # slience perl warning
 						#print "muttype $mut\n";
 						$mutations{$hugo_symbol}{$tumor_sample_barcode}{$position} = 1;
 						$themut{$hugo_symbol}{$tumor_sample_barcode}{$mutation} = 1;
@@ -201,6 +205,7 @@ sub define_dna_binding_domains
 		if ($line =~ /^(\S+)\s+(\S+)$/)
 		{
 			($interpro_id, $domain_or_family) = ($1, $2);
+			$domain_or_family = "CURRENTLY_UNUSED"; # slience perl warning
 			$interpro_dna_binding_domains{$interpro_id} = 1;
 			#print "$interpro_id\n";
 		}
@@ -227,7 +232,7 @@ sub read_interpro_domain_info
 			close (INTERPRO);
 			
 			$found_domain = 0;
-			$#non_dbd = -1;
+			# $#non_dbd = -1; # currently unused
 			for ($ln=0; $ln<=$#interpro_contents; $ln++)
 			{
 				$line = $interpro_contents[$ln];
@@ -391,10 +396,10 @@ sub read_interpro_domain_info
 				
 				
 				#warn "warning: no domain(s) found in $hugo_symbol $uniprot_id ($species{$uniprot_id}) - using entire sequence\n";
-				foreach $other_domain (@non_dbd)
-				{
-					#warn "warning: $uniprot_id ($species{$uniprot_id}) did find $other_domain\n";
-				}
+				#foreach $other_domain (@non_dbd)
+				#{
+				#	#warn "warning: $uniprot_id ($species{$uniprot_id}) did find $other_domain\n";
+				#}
 			}
 			last;
 		}
@@ -411,7 +416,6 @@ sub extract_domain_sequences
 	{
 		foreach $uniprot_id (sort keys %{$uniprot_annotation{$hugo_symbol}})
 		{
-			$uniprot_id = $target_id if ($single_target == 1);
 			$#uniprot_contents = -1;
 			unless (-e "$gidgetConfigVars{'TCGABINARIZATION_DATABASE_DIR'}/uniprot/data/$uniprot_id.txt")
 			{
