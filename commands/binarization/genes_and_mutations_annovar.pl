@@ -1,10 +1,23 @@
 #!/usr/bin/perl
 
+$scriptVersion = "6.2";
+
+use warnings;
+
+use File::Basename;
+use Cwd qw(abs_path);
+
 (($tt = $ARGV[0]) && ($maf_file = $ARGV[1])) || die "usage: $0 TUMOR_TYPE MAF_FILE\n";
 
 #@elements = split ('\.', $maf_file);
 #$tumor_type = $elements[0];
 $tumor_type = $tt;
+
+print "\n" . basename(abs_path(__FILE__)) . " version $scriptVersion\n\n";
+print "using:\n";
+print "  input MAF file => $maf_file\n";
+print "  (described as tumor type $tumor_type)\n";
+print "\n";
 
 &read_tcga_mutation_data;
 
@@ -83,6 +96,8 @@ sub read_tcga_mutation_data
 					if (($reference_allele ne $tumor_seq_allele1) || ($reference_allele ne $tumor_seq_allele2))
 					{
 						($wt, $position, $mut) = ($1, $2, $3) if ($mutation =~ /^([a-zA-Z]+)(\d+)([a-zA-Z]+|\*)$/);
+						$wt = "CURRENTLY_UNUSED"; # slience perl warning
+						$mut = "CURRENTLY_UNUSED"; # slience perl warning
 						#print "muttype $mut\n";
 						$mutations{$hugo_symbol}{$tumor_sample_barcode}{$position} = 1;
 						$themut{$hugo_symbol}{$tumor_sample_barcode}{$mutation} = 1;
