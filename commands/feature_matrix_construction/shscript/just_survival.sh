@@ -45,6 +45,7 @@ echo " *" $curDate
 echo " *******************"
 
 
+curDir=`pwd`
 
         echo " "
         echo " *************************************************************** "
@@ -63,6 +64,7 @@ echo " *******************"
                 ## ------------------------------------------------------------------- #
                 echo " "
         
+                echo " looking for " $tsvFile
                 if [ -f $tsvFile ]
                     then
         
@@ -103,6 +105,10 @@ echo " *******************"
         	        cd $TCGAFMP_DATA_DIR/$tumor/$curDate
                         rm -fr SurvivalPVal.$st.tmp
 
+                    else
+                        echo " "
+                        echo " FILE NOT FOUND ??? " $tsvFile
+                        echo " "
                     fi
 
             done ## loop over st (not really)
@@ -113,4 +119,6 @@ echo " "
 echo " just_survival script is FINISHED !!! "
 echo `date`
 echo " "
+
+cd $curDir
 
