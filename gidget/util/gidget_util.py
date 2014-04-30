@@ -1,4 +1,4 @@
-#!/usr/bin/env python 
+#!/usr/bin/env python
 
 # verify that all required environmental variables are present,
 # and set in the global namespace if they aren't already
@@ -8,9 +8,10 @@
 # from gidget_util import gidgetConfigVars
 
 # which checks to make sure that all required environmental variables are defined,
-# and if so, populates a dictionary "gidgetConfigVars" the the env var names and values 
+# and if so, populates a dictionary "gidgetConfigVars" the the env var names and values
 
 import os
+import sys
 
 gidgetConfigVars={}
 
