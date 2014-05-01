@@ -242,8 +242,10 @@ sub read_tcga_mutation_data
 				}
 				else # TODO: is this block nested incorrectly? the variables refered to below are out of scope
 				{
-					# DISABLED DUE TO VARIABLE SCOPE ISSUES:
-					# print "blah warning: tumor sample barcode $tumor_sample_barcode matches normal sample barcode $matched_norm_sample_barcode\n$line\n";
+					my $tumor_sample_barcode = "[variable out of scope!]"; # TODO !
+					my $matched_norm_sample_barcode = "[variable out of scope!]"; # TODO !
+					# VARIABLE SCOPE ISSUES:
+					print "blah warning: tumor sample barcode $tumor_sample_barcode matches normal sample barcode $matched_norm_sample_barcode\n$line\n";
 				}
 			}
 			else
