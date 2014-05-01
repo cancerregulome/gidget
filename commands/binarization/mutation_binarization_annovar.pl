@@ -25,7 +25,8 @@ print "\n";
 
 &read_tcga_mutation_data;
 
-&define_dna_binding_domains;
+my %interpro_dna_binding_domains_hash = ();
+&define_dna_binding_domains($databaseDirectory, \%interpro_dna_binding_domains_hash);
 
 ##potentially lots of unnecessary code in these two routines as they were taken from DoDoMa web server
 &read_interpro_domain_info;
@@ -34,6 +35,16 @@ print "\n";
 &binarize;
 
 &print_matrix;
+
+
+exit(0);
+
+
+
+###
+# subroutines
+#
+
 
 
 ####################################################################################################
@@ -229,24 +240,37 @@ sub read_tcga_mutation_data
 }
 ####################################################################################################
 
+
+
 ###################################################################################################################
+
+###
+# define_dna_binding_domains
+#
+# parameters:
+# database directory name
+# HASH REFERENCE to interpro_dna_binding_domains hash
+# 
+
 sub define_dna_binding_domains
 {
-	my %interpro_dna_binding_domains = ();
-	my @domain_contents = ();
-	$#domain_contents = -1; # TODO why?
-	open (DOMAINS, "< $gidgetConfigVars{'TCGABINARIZATION_DATABASE_DIR'}/TRANSFAC_2010.1/interpro_domains_vaquerizas_nature_2009.txt") || die "cannot read tf list file: $!\n";
-	@domain_contents = <DOMAINS>;
+	my $database_directory_name = shift @_;
+	my $interpro_dna_binding_domains_hashRef = shift @_;
+
+	my @domain_file_contents = ();
+	#$#domain_contents = -1; # TODO why?
+	open (DOMAINS, "< $database_directory_name/TRANSFAC_2010.1/interpro_domains_vaquerizas_nature_2009.txt") || die "cannot read tf list file: $!\n";
+	@domain_file_contents = <DOMAINS>;
 	close (DOMAINS);
-	foreach my $line (@domain_contents)
+	foreach my $line (@domain_file_contents)
 	{
 		if ($line =~ /^(\S+)\s+(\S+)$/)
 		{
-			my $interpro_id = "UNDEFINED";
-			my $domain_or_family = "UNDEFINED";
-			($interpro_id, $domain_or_family) = ($1, $2);
-			$domain_or_family = "CURRENTLY_UNUSED"; # slience perl warning
-			$interpro_dna_binding_domains{$interpro_id} = 1;
+			#my $domain_or_family = "UNDEFINED";
+			#($interpro_id, $domain_or_family) = ($1, $2);
+			my $interpro_id = $1;
+			#$domain_or_family = "CURRENTLY_UNUSED"; # slience perl warning
+			$interpro_dna_binding_domains_hashRef->{$interpro_id} = 1;
 			#print "$interpro_id\n";
 		}
 	}
