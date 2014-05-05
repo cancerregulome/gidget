@@ -41,10 +41,12 @@ for file in gene2accession gene2refseq Homo_sapiens.gene_info gene_refseq_unipro
 do
 
 	# add file's timestamp to the name as part of the string:
-	newfilename=$file-`stat -c %y $file.gz | cut -d ' ' -f1 | sed 's/-//g'`.gz
-	mv $file.gz $newfilename
+	# newfilename=$file-`stat -c %y $file.gz | cut -d ' ' -f1 | sed 's/-//g'`.gz
+	# mv $file.gz $newfilename
 
-	gunzip $newfilename
+	# gunzip $newfilename
+	echo gunzip $file
+	gunzip $file
 done
 
 
@@ -54,6 +56,7 @@ done
 # TODO: for ease of maintaining archives (which could be downloaded again),
 # do not modify file and look into modifying downstream tools to ignore the header line,
 # instead.
+echo removing first line
 sed -iorig '1d' Homo_sapiens.gene_info
 
 
@@ -80,9 +83,11 @@ rm -f relnotes.txt
 # rename files with uniprot version and uncompress
 for uniprotfile in idmapping_selected.tab uniprot_sprot_human.dat uniprot_trembl_human.dat uniprot_sprot_varsplic.fasta
 do
-	newuniprotfilename=$file-$uniprotversion.gz
-	mv $uniprotfile.gz $newuniprotfilename
-	gunzip $newuniprotfilename
+	#newuniprotfilename=$file-$uniprotversion.gz
+	#mv $uniprotfile.gz $newuniprotfilename
+	#gunzip $newuniprotfilename
+        echo gunzip $uniprotfile.gz
+	gunzip $uniprotfile.gz
 done
 
 
