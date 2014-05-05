@@ -5,17 +5,17 @@
 source ${TCGAMAF_ROOT_DIR}/../../gidget/util/gidget_util.sh
 
 
-if [ -z $MAF_REFERENCES_DIR ]; then      # -n tests to see if the argument is non empty
+if [ -z $TCGAMAF_REFERENCES_DIR ]; then      # -n tests to see if the argument is non empty
         echo "!! Reference directory not defined! Aborting."
         exit
 fi
 
-if [ -z $MAF_SCRIPTS_DIR ]; then      # -n tests to see if the argument is non empty
+if [ -z $TCGAMAF_SCRIPTS_DIR ]; then      # -n tests to see if the argument is non empty
         echo "!! Script folder not defined! Aborting."
         exit
 fi
 
-if [ -z $MAF_PYTHON_BINARY ]; then      # -n tests to see if the argument is non empty
+if [ -z $TCGAMAF_PYTHON_BINARY ]; then      # -n tests to see if the argument is non empty
         echo "!! Python binary not defined! Aborting."
         exit
 fi
@@ -47,8 +47,9 @@ gene2uniprot=$TCGAMAF_REFERENCES_DIR/gene2uniprot
 echo "cut -d' ' -f2,3,5 $geneInfo > $gene_info_subset"
 cut -d'	' -f2,3,5 $geneInfo > $gene_info_subset
 echo "build $gene2uniprot"
-echo "$TCGAMAF_PYTHON_BINARY $TGCAMAF_SCRIPTS_DIR/python/createGene2Uniprot.py -geneInfo $gene_info_subset -hgnc2uniprot $hgnc2uniprot -output $gene2uniprot"
-$TCGAMAF_PYTHON_BINARY $TGCAMAF_SCRIPTS_DIR/python/createGene2Uniprot.py -geneInfo $gene_info_subset -hgnc2uniprot $hgnc2uniprot -output $gene2uniprot
+echo scripts in: $TCGAMAF_SCRIPTS_DIR
+echo "$TCGAMAF_PYTHON_BINARY ${TCGAMAF_SCRIPTS_DIR}/python/createGene2Uniprot.py -geneInfo $gene_info_subset -hgnc2uniprot $hgnc2uniprot -output $gene2uniprot"
+$TCGAMAF_PYTHON_BINARY $TCGAMAF_SCRIPTS_DIR/python/createGene2Uniprot.py -geneInfo $gene_info_subset -hgnc2uniprot $hgnc2uniprot -output $gene2uniprot
 
 echo
 echo processing uniprot idmapping file $uniprot_idmapping
@@ -59,8 +60,8 @@ awk 'BEGIN{FS="\t"}\
         print $1,"\t",$3 }\
      }' $uniprot_idmapping > $uniprot2gene 
 echo update $gene2uniprot by adding more uniprot ids to the file using $uniprot2gene  
-echo "$TCGAMAF_PYTHON_BINARY $TGCAMAF_SCRIPTS_DIR/python/updateGene2Uniprot_with_uniprotIDMapping.py -uniprot2gene $uniprot2gene -gene2uniprot $gene2uniprot -output $gene2uniprot.temp"
-$TCGAMAF_PYTHON_BINARY $TGCAMAF_SCRIPTS_DIR/python/updateGene2Uniprot_with_uniprotIDMapping.py -uniprot2gene $uniprot2gene -gene2uniprot $gene2uniprot -output $gene2uniprot.temp
+echo "$TCGAMAF_PYTHON_BINARY $TCGAMAF_SCRIPTS_DIR/python/updateGene2Uniprot_with_uniprotIDMapping.py -uniprot2gene $uniprot2gene -gene2uniprot $gene2uniprot -output $gene2uniprot.temp"
+$TCGAMAF_PYTHON_BINARY $TCGAMAF_SCRIPTS_DIR/python/updateGene2Uniprot_with_uniprotIDMapping.py -uniprot2gene $uniprot2gene -gene2uniprot $gene2uniprot -output $gene2uniprot.temp
 echo "mv $gene2uniprot.temp $gene2uniprot"
 mv $gene2uniprot.temp $gene2uniprot
 
@@ -83,16 +84,16 @@ awk '{if($1=="ID" || $1=="AC" || $1=="GN" || ($1=="DR" && match($2,"GeneID;"))){
 
 echo
 echo update $gene2uniprot by adding more uniprot ids to the file using sprot and trembl
-echo "$TCGAMAF_PYTHON_BINARY $TGCAMAF_SCRIPTS_DIR/python/updateGene2Uniprot_with_sprot_trembl.py -uniprot_human $uniprot_human -gene2uniprot $gene2uniprot -output $gene2uniprot.temp"
-$TCGAMAF_PYTHON_BINARY $TGCAMAF_SCRIPTS_DIR/python/updateGene2Uniprot_with_sprot_trembl.py -uniprot_sprot_human $uniprot_sprot_human_subset -uniprot_trembl_human $uniprot_trembl_human_subset -gene2uniprot $gene2uniprot -output_sprot $gene2uniprot.sprot -output_trembl $gene2uniprot.trembl
+echo "$TCGAMAF_PYTHON_BINARY $TCGAMAF_SCRIPTS_DIR/python/updateGene2Uniprot_with_sprot_trembl.py -uniprot_human $uniprot_human -gene2uniprot $gene2uniprot -output $gene2uniprot.temp"
+$TCGAMAF_PYTHON_BINARY $TCGAMAF_SCRIPTS_DIR/python/updateGene2Uniprot_with_sprot_trembl.py -uniprot_sprot_human $uniprot_sprot_human_subset -uniprot_trembl_human $uniprot_trembl_human_subset -gene2uniprot $gene2uniprot -output_sprot $gene2uniprot.sprot -output_trembl $gene2uniprot.trembl
 
 echo
 echo create uniprot sprot and trembl isoform1 sequence files
 uniprot_isoform=$TCGAMAF_REFERENCES_DIR/uniprot_sprot_varsplic.fasta
 isoform1_sprot=$TCGAMAF_REFERENCES_DIR/isoform1.sprot
 isoform1_trembl=$TCGAMAF_REFERENCES_DIR/isoform1.trembl
-echo "$TCGAMAF_PYTHON_BINARY $TGCAMAF_SCRIPTS_DIR/python/createUniProt_ISOForm1_Sequence_File.py -uniprot_sprot_human $uniprot_sprot_human -uniprot_trembl_human $uniprot_trembl_human -uniprot_isoform $uniprot_isoform -output_sprot $isoform1_sprot -output_trembl $isoform1_trembl"
-$TCGAMAF_PYTHON_BINARY $TGCAMAF_SCRIPTS_DIR/python/createUniProt_ISOForm1_Sequence_File.py -uniprot_sprot_human $uniprot_sprot_human -uniprot_trembl_human $uniprot_trembl_human -uniprot_isoform $uniprot_isoform -output_sprot $isoform1_sprot -output_trembl $isoform1_trembl
+echo "$TCGAMAF_PYTHON_BINARY $TCGAMAF_SCRIPTS_DIR/python/createUniProt_ISOForm1_Sequence_File.py -uniprot_sprot_human $uniprot_sprot_human -uniprot_trembl_human $uniprot_trembl_human -uniprot_isoform $uniprot_isoform -output_sprot $isoform1_sprot -output_trembl $isoform1_trembl"
+$TCGAMAF_PYTHON_BINARY $TCGAMAF_SCRIPTS_DIR/python/createUniProt_ISOForm1_Sequence_File.py -uniprot_sprot_human $uniprot_sprot_human -uniprot_trembl_human $uniprot_trembl_human -uniprot_isoform $uniprot_isoform -output_sprot $isoform1_sprot -output_trembl $isoform1_trembl
 
 #using UCSC known genes
 echo
