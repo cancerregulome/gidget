@@ -11,6 +11,7 @@ gene2uniprot_sprot=$TCGAMAF_REFERENCES_DIR/gene2uniprot.sprot
 gene2uniprot_trembl=$TCGAMAF_REFERENCES_DIR/gene2uniprot.trembl
 
 mafInputList=${1:-$TCGAMAF_DATA_DIR/maf_file_list}
+echo using maf input list: $mafInputList
 newMafInputList=${mafInputList}.ncmlst
 outputFolder=${2:-$TCGAMAF_DATA_DIR}
 maf_unmapped_log=$TCGAMAF_DATA_DIR/UNMAPPED.log
@@ -19,12 +20,14 @@ maf_ncm=""
 echo STEP 0: decomment MAF files
 rm $newMafInputList
 echo > $newMafInputList
-while read line
-do
+while read line ; do
+    echo got line: $line
+    touch $line.ncm
     $TCGAMAF_PYTHON_BINARY $TCGAMAF_SCRIPTS_DIR/python/preprocess_maf.py $line ${line}.ncm
     echo ${line}.ncm >> $newMafInputList
     maf_ncm=${line}.ncm
 done < $mafInputList
+
 mafInputList=$newMafInputList
 
 ####################################################
@@ -55,7 +58,7 @@ echo Your file is $maf_uniprot
 ####################################################
 echo
 echo STEP2: update MAF files by annotating CDS/protein changes with ANNOVAR output 
-annovarExecutable=$$/annovar
+annovarExecutable=$TCGAMAF_TOOLS_DIR/annovar
 humandbFolder=$TCGAMAF_REFERENCES_DIR/HumanDB
 knowngene2protein=$TCGAMAF_REFERENCES_DIR/knowngene_to_protein
 refseq2uniprot=$TCGAMAF_REFERENCES_DIR/gene_refseq_uniprotkb_collab
@@ -64,8 +67,7 @@ uniprot_trembl_human=$TCGAMAF_REFERENCES_DIR/uniprot_trembl_human.dat
 uniprot_sec=$TCGAMAF_REFERENCES_DIR/uniprot_sec_ac.txt
 isoprot_seq=$TCGAMAF_REFERENCES_DIR/isoform1.sprot
 
-while read line
-do
+while read line; do
 	echo
 	date
     if [ -z $line ]
@@ -74,7 +76,8 @@ do
         continue
     fi
 
-	echo Create a short version of MAF
+    echo Create a short version of MAF
+    echo got line: $line
     #that previous line replacement is necessary to handle output that doesn't understand comment lines, which is everything
     $TCGAMAF_PYTHON_BINARY $TCGAMAF_SCRIPTS_DIR/python/simplify_maf.py $line ${line}.annovar_input ${line}.buildID
 	#awk 'BEGIN{FS="\t";OFS="\t"}NR>1{print $5,$6,$7,$11,$13,"line"NR,$1,$2,$10,$12}' $line > $line".annovar_input"
@@ -90,8 +93,8 @@ do
         # some parameters may need to change from the defaults depending on the MAF data @see http://www.openbioinformatics.org/annovar/annovar_gene.html; no separate flag is used; splicing_threshold and neargene are at their default values
 	splicing_threshold=2
 	neargene=1000
-	echo $annovarExecutable/annotate_variation.pl ${line}.annovar_input --buildver $buildver -splicing_threshold $splicing_threshold -neargene $neargene -dbtype knowngene $humandbFolder
-	$annovarExecutable/annotate_variation.pl ${line}.annovar_input --buildver $buildver -splicing_threshold $splicing_threshold -neargene $neargene -dbtype knowngene $humandbFolder
+	echo $TCGAMAF_TOOLS_DIR/annotate_variation.pl ${line}.annovar_input --buildver $buildver -splicing_threshold $splicing_threshold -neargene $neargene -dbtype knowngene $humandbFolder
+	$TCGAMAF_TOOLS_DIR/annotate_variation.pl ${line}.annovar_input --buildver $buildver -splicing_threshold $splicing_threshold -neargene $neargene -dbtype knowngene $humandbFolder
 	
         annovarExonicOutput=${line}.annovar_input.exonic_variant_function
 	#annovarExonicOutput_orig=$line".annovar_input.exonic_variant_function_orig"
@@ -125,7 +128,7 @@ do
 	uniprot_trembl_isoform1=$TCGAMAF_REFERENCES_DIR/isoform1.trembl
 
 	#file processing - problem here with isoform filtering - turned off filtering in this python script
-	$TCGAMAF_PYTHON_BINARY $scriptFolder/python/updateMAF_annotateMutation.py -mafWithUniprotID ${line}.with_uniprot -knowngene2protein $knowngene2protein -refseq2uniprot $refseq2uniprot \
+	$TCGAMAF_PYTHON_BINARY $TCGAMAF_SCRIPTS_DIR/python/updateMAF_annotateMutation.py -mafWithUniprotID ${line}.with_uniprot -knowngene2protein $knowngene2protein -refseq2uniprot $refseq2uniprot \
 	-uniprot_sprot_human $uniprot_sprot_human -uniprot_trembl_human $uniprot_trembl_human -uniprot_sprot_isoform1 $uniprot_sprot_isoform1 -uniprot_trembl_isoform1 $uniprot_trembl_isoform1 \
 	-output $outputFolder > ${line}.annotation_errors
 	
