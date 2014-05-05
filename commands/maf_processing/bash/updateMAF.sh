@@ -5,12 +5,12 @@
 source ${TCGAMAF_ROOT_DIR}/../../gidget/util/gidget_util.sh
 
 
-echo $TGCGAMAF_DATA_DIR
+echo $TCGAMAF_DATA_DIR
 
 gene2uniprot_sprot=$TCGAMAF_REFERENCES_DIR/gene2uniprot.sprot
 gene2uniprot_trembl=$TCGAMAF_REFERENCES_DIR/gene2uniprot.trembl
 
-mafInputList=${1:-$TCGAMAF_DATA_DIR/sept24_thca}
+mafInputList=${1:-$TCGAMAF_DATA_DIR/maf_file_list}
 newMafInputList=${mafInputList}.ncmlst
 outputFolder=${2:-$TCGAMAF_DATA_DIR}
 maf_unmapped_log=$TCGAMAF_DATA_DIR/UNMAPPED.log
