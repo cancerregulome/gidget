@@ -37,6 +37,7 @@ my %code_potential_hash = ();
 my %type_hash = ();
 
 
+
 #print "reading TCGA mutation data...\n";
 &read_tcga_mutation_data($maf_file,
 						 \%mutations_hash,
@@ -67,7 +68,7 @@ my %interpro_dna_binding_domains_hash = ();
 ###
 # global:
 my %domain_sequences_hash = ();
-my %dna_bin_hash = ();
+my %dna_binding_domain_hash = ();
 my %species_hash = ();
 
 
@@ -76,8 +77,9 @@ my %species_hash = ();
 						   \%mutations_hash,
 						   \%uniprot_annotations_hash,
 						   \%domain_sequences_hash,
-						   \%dna_bin_hash,
-						   \%species_hash);
+						   \%dna_binding_domain_hash,
+						   \%species_hash,
+						   \%interpro_dna_binding_domains_hash);
 #print "...done\n\n";
 
 
@@ -102,6 +104,7 @@ my %sortable_domain_sequences_hash = ();
 ###
 # globals:
 my %nsfs_hash = ();
+my %dna_bin_hash = ();
 my %binarization_hash = ();
 
 
@@ -111,6 +114,8 @@ my %binarization_hash = ();
 		  \%uniprot_annotations_hash,
 		  \%type_hash,
 		  \%sortable_domain_sequences_hash,
+		  \%dna_bin_hash,
+		  \%dna_binding_domain_hash,
 		  \%nsfs_hash,
 		  \%binarization_hash);
 #print "...done\n\n";
@@ -161,6 +166,7 @@ sub read_tcga_mutation_data
 	# subroutine parameters
 	my $maf_file_name = shift @_;
 
+	# these should all be passed in as blanks; they are poplulated here
 	my $mutations_hashRef = shift @_;
 	my $uniprot_annotation_hashRef = shift @_;
 	my $tumor_ids_hashRef = shift @_;
@@ -180,7 +186,7 @@ sub read_tcga_mutation_data
 	open (MAF, "< $maf_file_name") || die "cannot read maf file: $!\n";
 	while (my $line = <MAF>)
 	{
-		unless (($line =~ /^\#version/) || ($line =~ /^\Hugo_Symbol/))
+		unless (($line =~ /^\#version/) || ($line =~ /^Hugo_Symbol/))
 		{
 			if (($line =~ /^(\S*?)\t(\S*?)\t\S*?\t\S*?\t(\S*?)\t(\S*?)\t(\S*?)\t(\S*?)\t(\S*?)\t(\S*?)\t(\S*?)\t(\S*?)\t(\S*?)\t\S*?\t\S*?\t(\S*?)\t(\S*?)\t.+\t(\S{6})\S*?\t\S*?\t.+?:p\.(\w+\d+\S+?),.*\t/) && ($line !~ /NO UNIPROT MATCH/) && ($line !~ /NO ISOFORM MATCH/) && ($line !~ /NO UNIPROT ID/))
 			{
@@ -338,11 +344,10 @@ sub read_tcga_mutation_data
 							}
 						}
 					}
-				}
-				else
-				{	my $tumor_sample_barcode = "[variable out of scope!]"; # TODO !
-					my $matched_norm_sample_barcode = "[variable out of scope!]"; # TODO !
-					print "blah warning: tumor sample barcode $tumor_sample_barcode matches normal sample barcode $matched_norm_sample_barcode\n$line\n";
+					else
+					{
+						print "blah warning: tumor sample barcode $tumor_sample_barcode matches normal sample barcode $matched_norm_sample_barcode\n$line\n";
+					}
 				}
 			}
 			else
@@ -370,10 +375,9 @@ sub read_tcga_mutation_data
 sub define_dna_binding_domains
 {
 	my $database_directory_name = shift @_;
-	my $interpro_dna_binding_domains_hashRef = shift @_;
+	my $interpro_dna_binding_domains_hashRef = shift @_; # should be passed in as blank hash; populated here
 
 	my @domain_file_contents = ();
-	#$#domain_contents = -1; # TODO why?
 	open (DOMAINS, "< $database_directory_name/TRANSFAC_2010.1/interpro_domains_vaquerizas_nature_2009.txt") || die "cannot read tf list file: $!\n";
 	@domain_file_contents = <DOMAINS>;
 	close (DOMAINS);
@@ -408,6 +412,7 @@ sub define_dna_binding_domains
 # domain_sequences
 # dna_binding_domain
 # species_hash
+# interpro_dna_binding_domains
 # 
 
 sub read_interpro_domain_info
@@ -419,6 +424,7 @@ sub read_interpro_domain_info
 	my $domain_sequences_hashRef = shift @_;
 	my $dna_binding_domain_hashRef = shift @_;
 	my $species_hashRef = shift @_;
+	my $interpro_dna_binding_domains_hashRef = shift @_;
 
 
 	# subroutine local variables
@@ -453,9 +459,7 @@ sub read_interpro_domain_info
 					if (($previous_line =~ /dbname\=\"PROFILE\"/) || ($previous_line =~ /dbname\=\"PFAM\"/) || ($previous_line =~ /dbname\=\"SMART\"/))
 					{
 						my $dna_binding = 0;
-						# TODO the next line makes no sense as %interpro_dna_binding_domains is not defined here
-						# !!commenting out next line!!
-						#$dna_binding = 1 if (defined($interpro_dna_binding_domains{$interpro_id})); # we have flagged this interpro domain as dna binding
+						$dna_binding = 1 if (defined($interpro_dna_binding_domains_hashRef->{$interpro_id})); # we have flagged this interpro domain as dna binding
 						$found_domain = 1;
 						$ln++ if ($interpro_id =~ /\S+/);
 						my $next_line = $interpro_file_contents[$ln];
@@ -471,21 +475,18 @@ sub read_interpro_domain_info
 							{
 								foreach my $startend (keys %{$domain_sequences_hashRef->{$uniprot_id}})
 								{
+									my $existing_start = "UNDEFINED";
+									my $existing_end = "UNDEFINED";
 									if ($startend =~ /^(\d+)_(\d+)$/)
 									{	
-										my $existing_start = "UNDEFINED";
-										my $existing_end = "UNDEFINED";
 										($existing_start, $existing_end) = ($1, $2);
 									}
 									else
 									{
 										die "die: cannot parse starting and ending sequence coordinates\n";
 									}
-									# TODO these lines make no sense; possible resets variable values
-									my $existing_start = "UNDEFINED";
-									my $existing_end = "UNDEFINED";
-									my $current_length = $current_end - $current_start; # TODO: is these supposed to be a new variable?
-									my $existing_length = $existing_end - $existing_start; # TODO: is these supposed to be a new variable?
+									my $current_length = $current_end - $current_start;
+									my $existing_length = $existing_end - $existing_start;
 									
 									if (($existing_start == $current_start) && ($existing_end == $current_end)) # perfect match
 									{
@@ -682,10 +683,10 @@ sub extract_domain_sequences
 			{
 				#print "$hugo_symbol $uniprot_id kept $startend for evaluation\n";
 				
+				my $this_start = "UNDEFINED";
+				my $this_end = "UNDEFINED";
 				if ($startend =~ /^(\d+)_(\d+)$/)
 				{
-					my $this_start = "UNDEFINED";
-					my $this_end = "UNDEFINED";
 					($this_start, $this_end) = ($1, $2);
 				}
 				else
@@ -693,9 +694,7 @@ sub extract_domain_sequences
 					die "die: cannot parse starting and ending sequence coordinates\n";
 				}
 				#add one to the domain length to make sure we get full substring
-				my $this_start = "UNDEFINED";
-				my $this_end = "UNDEFINED";
-				my $domain_length = $this_end - $this_start + 1; # TODO how could this work? scope issue
+				my $domain_length = $this_end - $this_start + 1;
 				#subtract one from start position to go from 1-based domain position to 0-based substring
 				my $subsequence = substr($sequence,$this_start-1,$domain_length);
 				#print "$uniprot_id $startend $subsequence\n";
@@ -724,6 +723,8 @@ sub extract_domain_sequences
 # uniprot_annotation
 # type
 # sortable_domain_sequences
+# dna_bin
+# dna_binding_domain
 # nsfs
 # binarization
 
@@ -736,6 +737,8 @@ sub binarize
 	my $uniprot_annotation_hashRef = shift @_;
 	my $type_hashRef = shift @_;
 	my $sortable_domain_sequences_hashRef = shift @_;
+	my $dna_bin_hashRef = shift @_;
+	my $dna_binding_domain_hashRef = shift @_;
 	my $nsfs_hashRef = shift @_;
 	my $binarization_hashRef = shift @_;
 	
@@ -754,26 +757,24 @@ sub binarize
 					{
 						#print "$startend from $hugo_symbol $domain_start\n";
 						
+						my $this_start = "UNDEFINED";
+						my $this_end = "UNDEFINED";
 						if ($startend =~ /^(\d+)_(\d+)$/)
 						{
-							my $this_start = "UNDEFINED";
-							my $this_end = "UNDEFINED";
 							($this_start, $this_end) = ($1, $2);
 						}
 						my $statement = "not_within";
 
-						my $this_start = "UNDEFINED";
-						my $this_end = "UNDEFINED";
-						$statement = "within" if (($position >= $this_start) && ($position <= $this_end)); # TODO variable scope issue
+						$statement = "within" if (($position >= $this_start) && ($position <= $this_end));
 						#print "$sample $hugo_symbol $position $statement $this_start $this_end\n";
 						#print "$sample $hugo_symbol dna_binding\n" if (defined($dna_binding_domain{$hugo_symbol}{$startend}));
 						
-						# TODO: this makes no sense as dna_binding_domain isn't defined!
-						# !!! commenting out line below!
-						# $dna_bin{$sample}{$hugo_symbol} = 1  if (defined($dna_binding_domain{$hugo_symbol}{$startend}) && ($position >= $this_start) && ($position <= $this_end));
+						$dna_bin_hashRef->{$sample}{$hugo_symbol} = 1  if (defined($dna_binding_domain_hashRef->{$hugo_symbol}{$startend}) && ($position >= $this_start) && ($position <= $this_end));
 						
-						$nsfs_hashRef->{$sample}{$hugo_symbol}{$domain_start}{$startend} = 1  if ((($mut_type eq "*") || ($mut_type eq "fs") || ($mut_type eq "X")) && ($position <= $this_end)); # TODO how does this even work? see above line
-						
+						if (defined $mut_type) {
+							#print "mut_type is $mut_type\n";
+							$nsfs_hashRef->{$sample}{$hugo_symbol}{$domain_start}{$startend} = 1  if ((($mut_type eq "*") || ($mut_type eq "fs") || ($mut_type eq "X")) && ($position <= $this_end));
+						}
 						$binarization_hashRef->{$sample}{$hugo_symbol}{$domain_start}{$startend} = 1 if (($position >= $this_start) && ($position <= $this_end));
 					}
 				}
@@ -845,9 +846,7 @@ sub print_matrix
 			
 			$head .= "\t$hugo_symbol\_nonsilent";
 
-			$num = $nonsilence_hashRef->{$hugo_symbol}{$sample};
-
-			if ($num > 0)
+			if (exists $nonsilence_hashRef->{$hugo_symbol}{$sample} && $num > 0)
 			{
 				$vector .= "\t1";
 			}
@@ -925,14 +924,14 @@ sub print_matrix
 					$head .= "\t$hugo_symbol\_dom_$startend\_ns_or_fs";
 					my $binary = 0;
 
-					$binary = 1 if ($nsfs_hashRef->{$sample}{$hugo_symbol}{$domain_start}{$startend} > 0); # TODO how could this work?
+					$binary = 1 if ($nsfs_hashRef->{$sample}{$hugo_symbol}{$domain_start}{$startend} > 0);
 					$vector .= "\t$binary";
 					
 					
 					$head .= "\t$hugo_symbol\_dom_$startend";
 					$binary = 0;
 
-					$binary = 1 if ($binarization_hashRef->{$sample}{$hugo_symbol}{$domain_start}{$startend} > 0); # TODO how could this work?
+					$binary = 1 if ($binarization_hashRef->{$sample}{$hugo_symbol}{$domain_start}{$startend} > 0);
 					#print "$sample $hugo_symbol $domain_start $startend $binary\n";
 					$vector .= "\t$binary";
 				}
