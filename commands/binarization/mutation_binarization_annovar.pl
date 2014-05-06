@@ -846,7 +846,7 @@ sub print_matrix
 			
 			$head .= "\t$hugo_symbol\_nonsilent";
 
-			if (exists $nonsilence_hashRef->{$hugo_symbol}{$sample} && $num > 0)
+			if (exists $nonsilence_hashRef->{$hugo_symbol}{$sample} && $nonsilence_hashRef->{$hugo_symbol}{$sample} > 0)
 			{
 				$vector .= "\t1";
 			}
@@ -857,8 +857,7 @@ sub print_matrix
 			
 			$head .= "\t$hugo_symbol\_dna_bin";
 
-			$num = $dna_bin_hashRef->{$sample}{$hugo_symbol};
-			if ($num > 0)
+			if (exists $dna_bin_hashRef->{$sample}{$hugo_symbol} && $dna_bin_hashRef->{$sample}{$hugo_symbol} > 0)
 			{
 				$vector .= "\t1";
 			}
@@ -870,8 +869,7 @@ sub print_matrix
 			###############
 			$head .= "\t$hugo_symbol\_missense";
 
-			$num = $missense_hashRef->{$hugo_symbol}{$sample};
-			if ($num > 0)
+			if (exists $missense_hashRef->{$hugo_symbol}{$sample} && $missense_hashRef->{$hugo_symbol}{$sample} > 0)
 			{
 				$vector .= "\t1";
 			}
@@ -882,8 +880,7 @@ sub print_matrix
 			
 			$head .= "\t$hugo_symbol\_mnf";
 
-			$num = $mnf_hashRef->{$hugo_symbol}{$sample};
-			if ($num > 0)
+			if (exists $mnf_hashRef->{$hugo_symbol}{$sample} && $mnf_hashRef->{$hugo_symbol}{$sample} > 0)
 			{
 				$vector .= "\t1";
 			}
@@ -894,8 +891,7 @@ sub print_matrix
 			
 			$head .= "\t$hugo_symbol\_mni";
 
-			$num = $mni_hashRef->{$hugo_symbol}{$sample};
-			if ($num > 0)
+			if (exists $mni_hashRef->{$hugo_symbol}{$sample} && $mni_hashRef->{$hugo_symbol}{$sample} > 0)
 			{
 				$vector .= "\t1";
 			}
@@ -906,7 +902,6 @@ sub print_matrix
 			
 			$head .= "\t$hugo_symbol\_code_potential";
 
-			$num = $code_potential_hashRef->{$hugo_symbol}{$sample};
 			if ($num > 0)
 			{
 				$vector .= "\t1";
@@ -924,14 +919,22 @@ sub print_matrix
 					$head .= "\t$hugo_symbol\_dom_$startend\_ns_or_fs";
 					my $binary = 0;
 
-					$binary = 1 if ($nsfs_hashRef->{$sample}{$hugo_symbol}{$domain_start}{$startend} > 0);
+					if (exists $nsfs_hashRef->{$sample}{$hugo_symbol}{$domain_start}{$startend}  && $nsfs_hashRef->{$sample}{$hugo_symbol}{$domain_start}{$startend} > 0)
+					{
+						#$binary = 1 if ($nsfs_hashRef->{$sample}{$hugo_symbol}{$domain_start}{$startend} > 0);
+						$binary = 1;
+					}
 					$vector .= "\t$binary";
 					
 					
 					$head .= "\t$hugo_symbol\_dom_$startend";
 					$binary = 0;
 
-					$binary = 1 if ($binarization_hashRef->{$sample}{$hugo_symbol}{$domain_start}{$startend} > 0);
+					if (exists $binarization_hashRef->{$sample}{$hugo_symbol}{$domain_start}{$startend} && $binarization_hashRef->{$sample}{$hugo_symbol}{$domain_start}{$startend} > 0)
+					{
+						# $binary = 1 if ($binarization_hashRef->{$sample}{$hugo_symbol}{$domain_start}{$startend} > 0);
+						$binary = 1;
+					}
 					#print "$sample $hugo_symbol $domain_start $startend $binary\n";
 					$vector .= "\t$binary";
 				}
