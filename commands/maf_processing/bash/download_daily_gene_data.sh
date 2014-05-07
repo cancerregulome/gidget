@@ -73,7 +73,11 @@ curl -O ftp://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebas
 curl -O ftp://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/complete/uniprot_sprot_varsplic.fasta.gz
 curl -O ftp://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/complete/docs/sec_ac.txt
 mv sec_ac.txt uniprot_sec_ac.txt
-cp uniprot_sec_ac.txt uniprot_sec_ac.txt.orig
+cp uniprot_sec_ac.txt uniprot_sec_ac.txt.orig # TODO is this still necessary? probably there for manual version
+# before next line's automation:
+
+# removing header; only printing lines with Secondary AC[accession number]<space(s)>Primary AC
+sed -r -n -i '/^[a-zA-Z0-9]+[ \t]+[a-zA-Z0-9]+$/p' uniprot_sec_ac.txt
 
 # get the uniprot release name
 curl -O ftp://ftp.uniprot.org/pub/databases/uniprot/current_release/relnotes.txt
