@@ -660,6 +660,12 @@ if __name__ == "__main__":
 
     fh.close()
 
+    if ( numJobs < 1 ):
+        print " "
+        print " Bailing out now because there is nothing to do ... "
+        print " "
+        sys.exit(-1)
+
     print " "
     print " ********************************************* "
     print " Number of jobs about to be launched : ", numJobs
