@@ -232,7 +232,15 @@ def createOutputFileName ( inFile, rowLabel, aCat ):
         nameStr = ''
     else:
         tokenList = rowLabel.split(':')
-        nameStr = tokenList[2] + "_"
+        if ( tokenList[2].startswith("I(") ):
+            subName = tokenList[2][2:-1]
+            i1 = subName.find("|")
+            if ( i1 > 0 ): subName = subName[:i1]
+            i1 = subName.find(",")
+            if ( i1 > 0 ): subName = subName[:i1] + "_vs_" + subName[i1+1:]
+        else:
+            subName = tokenList[2]
+        nameStr = subName + "_"
         try:
             if ( len(tokenList[7]) > 0 ):
                 nameStr += tokenList[7] + "_"
