@@ -29,6 +29,8 @@ if __name__ == "__main__":
         inFile = sys.argv[1]
         outFile = sys.argv[2]
 
+    print " "
+    print " "
     print " ------------------------------------------- "
     print " input file  : ", inFile
     print " output file : ", outFile
@@ -63,8 +65,8 @@ if __name__ == "__main__":
         if ( not aLine.startswith("TCGA") ): continue
 
         barcode = tokenList[0]
-        if (len(barcode) >= 15):
-            barcode = barcode[:15]
+        ## if (len(barcode) >= 15): barcode = barcode[:15]
+        if (len(barcode) >= 16): barcode = barcode[:16]
 
         ## print barcode
 
@@ -81,26 +83,38 @@ if __name__ == "__main__":
         print " ERROR ??? empty data dictionary ??? "
         print " "
         sys.exit(-1)
-    print len(dataDict)
+    ## print len(dataDict)
     aBarcode = (dataDict.keys())[0]
-    print aBarcode
-    print dataDict[aBarcode]
-    print " "
+    ## print aBarcode
+    ## print dataDict[aBarcode]
+    ## print " "
 
     # now we have to go back and make sure we have only *one* set of inputs
     # per patient/sample ...
+
+    ## print " "
+    ## print " LOOP 1 "
+    ## print " "
 
     numOut = numTokens - 1
     intFlags = [1] * numOut
     ynFlags = [1] * numOut
     allNAs = [1] * numOut
+
+    # in this first pass we figure out whether each feature is either
+    # 'all NA', or an integer, or a yes/no flag ...
     for aBarcode in dataDict.keys():
         numVec = len(dataDict[aBarcode])
+        if ( 0 ):
+            if ( numVec > 1 ):
+                print " WARNING !!! have more than one data vector ", aBarcode, numVec, numOut
+            else:
+                print " all OK .... have exactly one data vector   ", aBarcode, numVec, numOut
         for iVec in range(numVec):
+            ## print "         ", iVec, dataDict[aBarcode][iVec]
             for iSamp in range(numOut):
                 curVal = dataDict[aBarcode][iVec][iSamp]
-                if (curVal == "NA"):
-                    continue
+                if (curVal == "NA"): continue
                 allNAs[iSamp] = 0
                 try:
                     iVal = int(curVal)
@@ -109,15 +123,22 @@ if __name__ == "__main__":
 
                 if (curVal != "YES" and curVal != "NO"):
                     ynFlags[iSamp] = 0
+                ## print "         allNAs %d    intFlags %d    ynFlags %d " % \
+                    (  allNAs[iSamp], intFlags[iSamp], ynFlags[iSamp] )
 
     print ' intFlags ...... ', intFlags
     print ' ynFlags ....... ', ynFlags
     print ' allNAs ........ ', allNAs
 
+    ## print " LOOP 2 "
+    # in this second pass we take a nother look at the contents of these
+    # data vectors ...
     for iSamp in range(numOut):
-        if (allNAs[iSamp]):
-            continue
 
+        # if all of the features are NA, nothing to be done ...
+        if (allNAs[iSamp]): continue
+
+        # if it is neither an integer nor a yes-no flag ...
         if ((intFlags[iSamp] + ynFlags[iSamp]) == 0):
             for aBarcode in dataDict.keys():
                 numVec = len(dataDict[aBarcode])
@@ -135,12 +156,14 @@ if __name__ == "__main__":
                             iVal = int(curVal[1:])
                             dataDict[aBarcode][iVec][iSamp] = iVal
                         else:
-                            print " forcing <%s> to NA " % curVal, iVec, iSamp, dataDict[aBarcode]
+                            # we are not handling strings, so if it is a string of some
+                            # kind (eg TOP or BOTTOM), then just force to NA for now
+                            ## print " forcing <%s> to NA " % curVal, iVec, iSamp, dataDict[aBarcode]
                             dataDict[aBarcode][iVec][iSamp] = "NA"
                             intFlags[iSamp] = 1
                             # print curVal
-                            # print " BAILING (a) ... "
 
+        # if it appears to sometimes be an integer and sometimes a yes-no flag (???)
         if ((intFlags[iSamp] + ynFlags[iSamp]) == 2):
             for aBarcode in dataDict.keys():
                 numVec = len(dataDict[aBarcode])
@@ -148,10 +171,12 @@ if __name__ == "__main__":
                     curVal = dataDict[aBarcode][iVec][iSamp]
                     if (curVal == "NA"):
                         continue
-                    print curVal
-            print " BAILING (b) ... "
+                    ## print curVal
+            print " BAILING (b) ... ", iSamp, intFlags, ynFlags, curVal, numVec
             sys.exit(-1)
 
+    # and now finally in this 3rd pass we need to do something ...
+    ## print " LOOP 3 "
     for aBarcode in dataDict.keys():
         if (len(dataDict[aBarcode]) > 1):
             print " need to compress this: ", dataDict[aBarcode]
@@ -161,35 +186,59 @@ if __name__ == "__main__":
             sumVec = [0] * numSamp
             countV = [0] * numSamp
             for iSamp in range(numSamp):
+                ## print "         allNAs %d    intFlags %d    ynFlags %d " % \
+                ##     (  allNAs[iSamp], intFlags[iSamp], ynFlags[iSamp] )
+                if ( allNAs[iSamp] ): continue
                 allInt = 1
+
                 for iVec in range(numVec):
                     curVal = dataDict[aBarcode][iVec][iSamp]
-                    if (curVal == "NA"):
-                        continue
-                    try:
-                        iVal = int(float(curVal))
-                        sumVec[iSamp] += iVal
-                        countV[iSamp] += 1
-                    except:
-                        allInt = 0
-                        if (sumVec[iSamp] == 0):
-                            sumVec[iSamp] = curVal
-                        if (sumVec[iSamp] != curVal):
-                            if (sumVec[iSamp] == "NO" and curVal == "YES"):
-                                sumVec[iSamp] = curVal
-                            elif (sumVec[iSamp] == "YES" and curVal == "NO"):
-                                doNothing = 1
-                            else:
-                                print " what to do now ??? ", iSamp, sumVec, dataDict[aBarcode][iVec][iSamp]
-                                sys.exit(-1)
+                    if (curVal == "NA"): continue
 
+                    ## if this is a yes-no flag, then initially set the 'newVec'
+                    ## to the first value and then check to see that there are
+                    ## no contradictions ...
+                    if ( ynFlags[iSamp] ):
+                        allInt = 0
+                        if ( iVec==0 ):
+                            ## print "         --> setting newVec[%d] to " % iSamp, curVal
+                            newVec[iSamp] = curVal
+                        else:
+                            ## if there is a contradiction, reset to NA
+                            ## print "         --> checking ... ", iSamp, newVec[iSamp], curVal
+                            if ( newVec[iSamp] != curVal ):
+                                ## print "         CONTRADICTION "
+                                newVec[iSamp] = "NA"
+
+                    else:
+                        try:
+                            iVal = int(float(curVal))
+                            sumVec[iSamp] += iVal
+                            countV[iSamp] += 1
+                        except:
+                            allInt = 0
+                            if (sumVec[iSamp] == 0):
+                                sumVec[iSamp] = curVal
+                            if (sumVec[iSamp] != curVal):
+                                if (sumVec[iSamp] == "NO" and curVal == "YES"):
+                                    sumVec[iSamp] = curVal
+                                elif (sumVec[iSamp] == "YES" and curVal == "NO"):
+                                    doNothing = 1
+                                else:
+                                    print " what to do now ??? ", iSamp, sumVec, dataDict[aBarcode][iVec][iSamp]
+                                    print " BAILING (c) ... ", iSamp, intFlags, ynFlags, curVal, numVec
+                                    sys.exit(-1)
+
+                # if all of the values were integers, now let's compute an average ...
                 if (allInt):
                     if (countV[iSamp] > 1):
-                        newVec[iSamp] = int(
-                            float(sumVec[iSamp]) / float(countV[iSamp]) + 0.1)
+                        ## print " computing average ", iSamp, sumVec[iSamp], countV[iSamp]
+                        newVec[iSamp] = int(float(sumVec[iSamp]) / float(countV[iSamp]) + 0.1)
                     elif (countV[iSamp] == 1):
+                        ## print " no need to average ", iSamp, sumVec[iSamp], countV[iSam]
                         newVec[iSamp] = sumVec[iSamp]
                     else:
+                        ## print " oops, resetting to NA ??? ", iSamp
                         newVec[iSamp] = "NA"
 
             dataDict[aBarcode] = [newVec]
@@ -231,5 +280,8 @@ if __name__ == "__main__":
 
     fhOut.close()
 
+    print " "
+    print " ------------------------------------------- "
+    print " "
 
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
