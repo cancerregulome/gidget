@@ -124,6 +124,10 @@ def parseBestClusFiles(lastDir, outDir, zCancer):
     for d2Name in d2.dirs():
 
         if (d2Name.find("Level_4") > 0):
+
+            ## careful never to grab those FFPE-specific runs
+            if ( d2Name.find("FFPE") > 0 ): continue
+
             d3 = path.path(d2Name)
             for fName in d3.files():
                 if (fName.endswith("bestclus.txt")):
@@ -819,6 +823,9 @@ def parseMutSigFiles(lastDir, outDir, MSverString):
         ## if (d2Name.find("Mutation_Significance.Level_4") > 0 or d2Name.find("MutSigNozzleReport1.5.Level_4") > 0):
         if ( d2Name.find(MSverString) >= 0  and  d2Name.find("Level_4") >= 0 ):
 
+            ## careful never to grab those FFPE-specific runs
+            if ( d2Name.find("FFPE") > 0 ): continue
+
             d3 = path.path(d2Name)
             for fName in d3.files():
 
@@ -1400,6 +1407,9 @@ def buildSampleWhiteList(lastDir, outDir):
     for d2Name in d2.dirs():
 
         if (d2Name.find("Level_4") > 0):
+
+            ## careful never to grab those FFPE-specific runs
+            if ( d2Name.find("FFPE") > 0 ): continue
 
             d3 = path.path(d2Name)
             for fName in d3.files():
