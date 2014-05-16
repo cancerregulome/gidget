@@ -1264,6 +1264,7 @@ def parseGisticFiles(lastDir, outDir):
     d2 = path.path(lastDir)
     for d2Name in d2.dirs():
 
+        # careful not to grab the "CopyNumberLowPass_Gistic2" outputs
         if (d2Name.find("CopyNumber_Gistic2.Level_4") > 0):
 
             d3 = path.path(d2Name)
@@ -1492,7 +1493,7 @@ if __name__ == "__main__":
         'acc',  'blca', 'brca', 'cesc', 'cntl', 'coad', 'dlbc', 'esca', 'gbm',
         'hnsc', 'kich', 'kirc', 'kirp', 'laml', 'lcll', 'lgg',  'lihc', 'lnnh',
         'luad', 'lusc', 'ov',   'paad', 'prad', 'read', 'sarc', 'skcm', 'stad',
-        'thca', 'ucec', 'lcml', 'pcpg']
+        'thca', 'ucec', 'lcml', 'pcpg', 'meso']
 
     if (1):
         if (len(sys.argv) != 3):
