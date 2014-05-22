@@ -563,16 +563,16 @@ def addFollowupInfo(allClinDict):
     aKey = findProperKey (allClinDict, "days_to_submitted_specimen_dx")
     tKey = findProperKey (allClinDict, "days_to_initial_pathologic_diagnosis")
 
-    try:
-        ## print aKey, allClinDict[aKey][:3]
+    if (aKey in allClinDict.keys()):
         haveA = 1
-    except:
-        print " do not have <%s> in allClinDict " % aKey
+    else:
+        print " do not have [days_to_submitted_specimen_dx] in allClinDict " 
         haveA = 0
 
     if (tKey in allClinDict.keys()):
         haveT = 1
     else:
+        print " do not have [days_to_initial_pathologic_diagnosis] in allClinDict "
         haveT = 0
 
     try:
@@ -675,17 +675,17 @@ def addFollowupInfo(allClinDict):
     aKey = findProperKey (allClinDict, "days_to_sample_procurement")
     tKey = findProperKey (allClinDict, "days_to_initial_pathologic_diagnosis")
 
-    try:
-        ## print aKey, allClinDict[aKey][:3]
+    if (aKey in allClinDict.keys()):
         haveA = 1
-    except:
-        print " do not have <%s> in allClinDict " % aKey
+    else:
+        print " do not have [days_to_sample_procurement] in allClinDict " 
         haveA = 0
 
     if (tKey in allClinDict.keys()):
         haveT = 1
     else:
         haveT = 0
+        print " do not have a [days_to_initial_pathologic_diagnosis] key "
 
     try:
         numClin = getNumPatients(allClinDict)
@@ -750,9 +750,13 @@ def addFollowupInfo(allClinDict):
                     newVec[kk] = "NA"
 
                     ## skip if an important value is NA
+                    print " checking for important information ... ", aKey, bKey, tKey
+                    print allClinDict[aKey][kk]
+                    print allClinDict[bKey][kk]
                     if (str(allClinDict[aKey][kk]).upper() == "NA"): continue
                     if (str(allClinDict[bKey][kk]).upper() == "NA"): continue
-                    if (haveT):
+                    if (haveT): 
+                        print allClinDict[tKey][kk]
                         if (str(allClinDict[tKey][kk]).upper() == "NA"): continue
 
                     ## deltaDays is either (days_to_sample_procurement) - (days_to_initial_pathologic_diagnosis)
@@ -761,6 +765,7 @@ def addFollowupInfo(allClinDict):
                         deltaDays = allClinDict[aKey][kk] - allClinDict[tKey][kk]
                     else:
                         deltaDays = allClinDict[aKey][kk]
+                    print " computed deltaDays : ", deltaDays
 
                     ## and then we subtract 'delta days', scaled to years ...
                     ## 03mar14 : actually we need to ADD here ...
