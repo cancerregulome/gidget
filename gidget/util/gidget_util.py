@@ -24,6 +24,7 @@ except:
 
 f = open(requiredEnvVarFilePath, 'r')
 
+allSet = True
 for line in f:
 	line=line.strip()
 	if len(line) == 0:
@@ -40,20 +41,22 @@ for line in f:
 	# print "variable name: " + varName
 	# print "description: " + varDesc
 	if os.environ.get(varName) == None:
-		print "ERROR: required environmental variable " + varName + " was not defined;"
+		print "*** ERROR: required environmental variable " + varName + " was not defined;"
+		print "*** usage:\n" + "***  " + varName + ": " + varDesc
 		print
-		print "    " + varName + ": " + varDesc
-		print
-		print "exiting with error"
-		exit(-1)
+		allSet = False
 	elif os.environ.get(varName) == "":
 		print "ERROR: required environmental variable " + varName + " was defined, but blank;"
+		print "*** usage:\n" + "***  " + varName + ": " + varDesc
 		print
-		print "    " + varName + ": " + varDesc
-		print
-		print "exiting with error"
-		exit(-1)
+		allSet = False
 
 	gidgetConfigVars[varName] = os.environ.get(varName)
+
+if allSet != True:
+		print
+		print "there were unset required variables; please see above."
+		print "exiting with error"
+		exit(-1)
 
 #print "all required variables defined!"
