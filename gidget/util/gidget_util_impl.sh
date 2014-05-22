@@ -26,7 +26,7 @@
 
 SCRIPT_PATH=
 GIDGET_IMPORTED_UTILS=
-
+allSet="true"
 
 
 ###
@@ -49,9 +49,23 @@ getScriptPath() {
 }
 
 
+# check that PYTHONPATH is set correctly
+# TODO: the currently check only verifies that some version of
+# gidget is in the path; to be more accurate, the test should make sure that
+# the specific version in GIDGET_SOURCE_ROOT is being used
+checkPythonPath() {
+    if [[ "$PYTHONPATH" != *"gidget"* ]]; then
+        echo "*** error: your PYTHONPATH should include paths to gidget/commands/... and gidget/gidget/utils directories"
+        echo
+        allSet="false"
+    fi
+}
+
+
 # checks for required variables, as described by the file named
 # in the parameter 
 verifyRequiredVariables () {
+    allSet="true"
     while read line; do
 
         if [[ $line == \#* ]]; then
@@ -73,30 +87,23 @@ verifyRequiredVariables () {
         # the ${!varName} syntax is an indirect refernce,
         # supported since bash v2
         if [ -z ${!varName} ]; then
+            allSet="false"
             echo "*** error: required environmental variable $varName was not set"
-            echo "usage:"
-            echo "  $varName: $descr"
+            echo "*** usage:"
+            echo "***  $varName: $descr"
             echo
-            echo "*** exiting"
-            exit -1
         fi
     done < $1
-}
 
+    checkPythonPath
 
-# check that PYTHONPATH is set correctly
-# TODO: the currently check only verifies that some version of
-# gidget is in the path; to be more accurate, the test should make sure that
-# the specific version in GIDGET_SOURCE_ROOT is being used
-checkPythonPath() {
-    if [[ "$PYTHONPATH" != *"gidget"* ]]; then
-        echo " "
-        echo " your PYTHONPATH should include paths to gidget/commands/... and gidget/gidget/utils directories"
-        echo " "
-        exit 99
+    if [ "$allSet" != "true" ]; then
+        echo "there were unset required variables; please see above."
+        echo "exiting with error"
+        exit -1
     fi
+    # otherwise, we're all okay
 }
-
 
 
 ###
@@ -104,7 +111,6 @@ checkPythonPath() {
 
 getScriptPath
 verifyRequiredVariables ${GIDGET_SOURCE_ROOT}/config/required_env_vars
-checkPythonPath
 
 # this must be the last line; prevents re-execution of this script.
 export GIDGET_IMPORTED_UTILS=IMPORTED
