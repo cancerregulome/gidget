@@ -138,7 +138,7 @@ if __name__ == "__main__":
         'acc',  'blca', 'brca', 'cesc', 'cntl', 'coad', 'dlbc', 'esca', 'gbm',
         'hnsc', 'kich', 'kirc', 'kirp', 'laml', 'lcll', 'lgg',  'lihc', 'lnnh',
         'luad', 'lusc', 'ov',   'paad', 'prad', 'read', 'sarc', 'skcm', 'stad',
-        'thca', 'ucec', 'lcml', 'pcpg', 'meso']
+        'thca', 'ucec', 'lcml', 'pcpg', 'meso', 'tgct']
 
     if (1):
 
