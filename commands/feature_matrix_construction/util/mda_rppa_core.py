@@ -40,8 +40,12 @@ class mdanderson_org_mda_rppa_core(technology_type):
            
     #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
     def _addGeneName(self, tokens):
+
         ## start out with LOTS of sanity checking of these input values ...
-        fType, fName = self._validateFeatureParts(self.dType, self.fType, tokens[0])
+        ## if the first token is actually a list of gene symbols, we will
+        ## take only the first one ...
+        tmpTokens = tokens[0].split()
+        fType, fName = self._validateFeatureParts(self.dType, self.fType, tmpTokens[0])
     
         ## create the feature name
         if not self.genename2geneinfo.get(tokens[1]):
