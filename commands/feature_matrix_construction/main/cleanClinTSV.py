@@ -2015,8 +2015,7 @@ def addDerivedFeatures(allClinDict):
 
         if (aKey == "bcr_patient_barcode"):
             continue
-        (keyType, nCount, nNA, nCard, labelList,
-         labelCount) = miscClin.lookAtKey(allClinDict[aKey])
+        (keyType, nCount, nNA, nCard, labelList, labelCount) = miscClin.lookAtKey(allClinDict[aKey])
         print " considering key <%s> " % (aKey), keyType, nCard
 
         if (keyType == "NOMINAL"):
