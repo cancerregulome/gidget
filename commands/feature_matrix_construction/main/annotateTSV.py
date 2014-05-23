@@ -315,7 +315,12 @@ def getCytobandLabel(curLabel, cytoDict):
         cbName = tList[0]
         if (chrName.startswith("chr")):
             # tack on the chromosome # before returning ...
-            cbName = chrName[3:] + cbName
+            if ( chrName[3].lower() == "x" ):
+                cbName = "X" + cbName
+            elif ( chrName[3].lower() == "y" ):
+                cbName = "Y" + cbName
+            else:
+                cbName = chrName[3:] + cbName
             return (cbName)
         else:
             print " ERROR ??? ", chrName, cbName
@@ -345,22 +350,33 @@ def getCytobandLabel(curLabel, cytoDict):
     if (len(cbName) > 1):
         if (cbName[-1] == '.'):
             cbName = cbName[:-1]
+        ## elif (cbName.find('.') > 0):
+        ##     print " CHECK THIS : ", cbName, tList
+        ## elif (cbName.find('.') < 0):
+        ##     print " AND THIS TOO : ", cbName, tList, len(cbName)
 
     # print " --> cbName : ", cbName
     if (len(cbName) < 3):
         # or if that didn't work well, then choose the one
         # cytoband with the largest overlap ...
         # FIXME: OR, we could just go down to 'p' or 'q' ???
+        #        OR, if there is a list of several, try to remove one and 
+        #            then look again for the common substring?
         maxOlap = 0
         for ii in range(len(tList)):
             if (maxOlap < oList[ii]):
                 maxOlap = oList[ii]
                 cbName = tList[ii]
-        # print cbName, maxOlap
+        ## print "     SWITCHING TO: ", cbName, maxOlap
 
     if (chrName.startswith("chr")):
         # tack on the chromosome # before returning ...
-        cbName = chrName[3:] + cbName
+        if ( chrName[3].lower() == "x" ):
+            cbName = "X" + cbName
+        elif ( chrName[3].lower() == "y" ):
+            cbName = "Y" + cbName
+        else:
+            cbName = chrName[3:] + cbName
         return (cbName)
     else:
         print " ERROR ??? ", chrName, cbName
@@ -721,7 +737,7 @@ def annotateFeatures ( dataD, geneInfoDict, synMapDict, \
             geneList = overlap(curLabel, GAF_geneCoordDict_bySymbol)
             # print geneList
 
-            if (len(geneList) != 1):
+            if ( (len(geneList)!=1) or (curType=="CNVR") ):
 
                 # if there are several (or zero) genes in this segment, then we
                 # annotate based on cytoband instead ...
