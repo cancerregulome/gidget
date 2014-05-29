@@ -16,6 +16,11 @@ if [[ $# != 3 ]] && [[ $# != 2 ]]
         echo " Usage   : `basename $0` <tumorType> <snapshotName> [meth tsv]"
         echo " Example : `basename $0` skcm dcc-snapshot-06jan14"
         echo "           for a non-standard methylation data source, use the 3rd argument to specify a path "
+        echo " "
+        echo " ******************************************************************************************* "
+        echo " ** ALSO PLEASE BE FOREWARNED THAT THIS SCRIPT TYPICALLY TAKES ABOUT 12 HOURS to COMPLETE ** "
+        echo " ******************************************************************************************* "
+        echo " "
         exit $WRONGARGS
 fi
 
