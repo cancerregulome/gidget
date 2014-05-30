@@ -175,9 +175,6 @@ if __name__ == "__main__":
     print numFeat, numSamp
     print featTypesCounts
 
-    ## new 04apr14 ... still having NFS latency problems ...
-    #### time.sleep ( 30 )
-
     featTypesList = featTypesCounts.keys()
     featTypesList.sort()
     print featTypesList
@@ -241,86 +238,10 @@ if __name__ == "__main__":
         if (iFeat == iOne):
             done = 1
 
-        # test to see if we can read the file properly ...
-        # BUT do this only if we're just reading a single file ...
-        if (not iFirst):
-            if (iFeat == iOne):
-                seemsOK = 0
-            else:
-                seemsOK = 1
-        else:
-            seemsOK = 0
-
-        sleepTime = 0
-        while not seemsOK:
-            if (sleepTime == 0):
-                print " testing whether <%s> seems ok or not ... " % inFile
-            aLine = fhIn.readline()
-            if (len(aLine) > 2):
-                print " seem to have something "
-                print aLine
-                seemsOK = 1
-            else:
-                if (sleepTime > 30):
-                    if (iFeat == iOne):
-                        print " BAILING ... nothing to post process here !!! "
-                        sys.exit(-1)
-                    else:
-                        print " assuming that we can continue ... "
-                        seemsOK = 1
-                if (sleepTime == 0):
-                    print " empty file ??? ", inFile
-                print " SLEEPING for one second ... "
-                time.sleep(1)
-                sleepTime += 1
-            fhIn.close()
-            fhIn = file(inFile, 'r')
-
         iFirst = 0
 
         if (iFeat % 10000 == 0):
             print " feature # ", iFeat
-
-        # NEW TEST 04apr14 ... read through the entire file to try and
-        # check for truncation problems ...
-        ## print " NEW TESTING FOR FILE COMPLETENESS !!! ", inFile
-        fileGood = 0
-        numRetry = 0
-        while ( not fileGood ):
-            fhIn.close()
-            fhIn = file(inFile, 'r')
-            bailFlag = 0
-            numLines = 0
-            keepReading = 1
-            while ( keepReading ):
-                aLine = fhIn.readline()
-                numLines += 1
-                aLine = aLine.strip()
-                if ( len(aLine) == 0 ):
-                    keepReading = 0
-                    continue
-                if ( aLine.startswith("#") ): continue
-                tokenList = aLine.split('\t')
-                if ( len(tokenList)>1 and len(tokenList)<10 ):
-                    bailFlag = 1
-                    print " BAILING ... RETRY !!! ", numLines, inFile, tokenList, numRetry
-                    fhIn.close()
-                    print " SLEEPING for two seconds "
-                    time.sleep ( 2 )
-                    fhIn = file(inFile, 'r')
-                    numLines = 0
-                    numRetry += 1
-                if ( numRetry > 3 ):
-                    print " too many retries ... ", numLines, inFile, numRetry
-                    keepReading = 0
-                    fileGood = 1
-                    bailFlag = 0
-            if ( not bailFlag ):
-                fileGood = 1
-                ## print "         YAY ", numLines, inFile
-                fhIn.close()
-                fhIn = file(inFile, 'r')
-
 
         # print " beginning to loop over input lines ... "
         for aLine in fhIn:
