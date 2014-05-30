@@ -429,6 +429,8 @@ def writeLuaScript ( tmpDir13, args, iRanges1, iRanges2 ):
 
 def writeFullList ( tmpDir13, args, numFeat, iRanges1, iRanges2 ):
 
+    print " in writeFullList ... (numFeat=%d) " % ( numFeat )
+
     listFile = tmpDir13 + "/full_list.txt"
     try:
         fh = file(listFile, 'w')
@@ -440,6 +442,11 @@ def writeFullList ( tmpDir13, args, numFeat, iRanges1, iRanges2 ):
 
     if (args.all):
         print " --> handling the all by all option ... "
+
+        if ( numFeat > 40000 ):
+            print " "
+            print " WARNING !!! this seems like a bad idea ... "
+            print " "
 
         for ii in range(numFeat):
             for jj in range(ii+1,numFeat):
@@ -486,6 +493,8 @@ def writeFullList ( tmpDir13, args, numFeat, iRanges1, iRanges2 ):
                 numPairs += 1
 
     fh.close()
+
+    print "     --> leaving writeFullList ... numPairs=%d " % ( numPairs )
     return ( listFile, numPairs )
 
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
@@ -562,6 +571,7 @@ def getDoneFrac ( output ):
 
 def splitList ( listFile, numPairs, numJobs ):
 
+    print " in splitList ... (numPairs=%d, numJobs=%d) " % ( numPairs, numJobs )
     numPairs_per_Job = (numPairs / numJobs) + 1
     numOut = 0
     numFiles = 0
@@ -578,6 +588,7 @@ def splitList ( listFile, numPairs, numJobs ):
     fhO.close()
 
     print numOut, numFiles
+    print "     --> finished with splitList ... (numOut=%d, numFiles=%d) " % ( numOut, numFiles )
     return ( numFiles )
 
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
@@ -802,7 +813,6 @@ if __name__ == "__main__":
 
         # first write the entire list ...
         ( listFile, numPairs ) = writeFullList ( tmpDir13, args, numFeat, iRanges1, iRanges2 )
-        print numPairs
 
         numJobs = ( numPairs / 1000 )
         if ( numJobs > 500 ): numJobs = 500
