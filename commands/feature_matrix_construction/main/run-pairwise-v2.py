@@ -957,10 +957,10 @@ if __name__ == "__main__":
         if (args.useBC < 1.):
             print "     --> will filter on Bonferonni-corrected p-value with threshold of ", args.useBC
 
-        # first we run post_pwRK2b.py which writes
+        # first we run post-pairwise-v2.py which writes
         # out something that looks like the output from runPWPV
         iOne = index
-        cmdString = "python %s/main/post_pwRK2b.py %s %s %d %g" % (
+        cmdString = "python %s/main/post-pairwise-v2.py %s %s %d %g" % (
             gidgetConfigVars['TCGAFMP_ROOT_DIR'], tmpDir13, tsvFile, iOne, args.useBC)
         print " < %s > " % cmdString
         (status, output) = commands.getstatusoutput(cmdString)
@@ -997,9 +997,9 @@ if __name__ == "__main__":
         if (args.useBC < 1.):
             print "     --> will filter on Bonferonni-corrected p-value with threshold of ", args.useBC
 
-        # first we run post_pwRK2b.py which concatenates them all and writes
+        # first we run post-pairwise-v2.py which concatenates them all and writes
         # out something that looks like the output from runPWPV
-        cmdString = "python %s/main/post_pwRK2b.py %s %s -1 %g" % (
+        cmdString = "python %s/main/post-pairwise-v2.py %s %s -1 %g" % (
             gidgetConfigVars['TCGAFMP_ROOT_DIR'], tmpDir13, tsvFile, args.useBC)
         print " < %s > " % cmdString
         (status, output) = commands.getstatusoutput(cmdString)
@@ -1044,9 +1044,9 @@ if __name__ == "__main__":
         if (args.useBC < 1.):
             print "     --> will filter on Bonferonni-corrected p-value with threshold of ", args.useBC
 
-        # first we run post_pwRK2b.py which concatenates them all and writes
+        # first we run post-pairwise-v2.py which concatenates them all and writes
         # out something that looks like the output from runPWPV
-        cmdString = "python %s/main/post_pwRK2b.py %s %s -1 %g" % (
+        cmdString = "python %s/main/post-pairwise-v2.py %s %s -1 %g" % (
             gidgetConfigVars['TCGAFMP_ROOT_DIR'], tmpDir13, tsvFile, args.useBC)
         print " < %s > " % cmdString
         (status, output) = commands.getstatusoutput(cmdString)
