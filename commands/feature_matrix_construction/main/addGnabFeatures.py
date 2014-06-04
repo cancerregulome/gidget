@@ -233,26 +233,35 @@ def readPathways():
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 
 
-def setFeatBits(rowLabels, featPrefix, doesContain, notContain):
+def setFeatBits(rowLabels, featPrefix, doesContainList, notContainList):
 
     numSet = 0
 
     numRow = len(rowLabels)
     bitVec = numpy.zeros(numRow, dtype=numpy.bool)
+
     for iR in range(numRow):
+
         if (featPrefix != ""):
-            if (not rowLabels[iR].startswith(featPrefix)):
-                continue
-        if (doesContain != ""):
-            if (rowLabels[iR].find(doesContain) < 0):
-                continue
-        if (notContain != ""):
-            if (rowLabels[iR].find(notContain) >= 0):
-                continue
+            if (not rowLabels[iR].startswith(featPrefix)): continue
+
+        if (len(doesContainList) > 0):
+            skipFlag = 1
+            for aStr in doesContainList:
+                if (rowLabels[iR].find(aStr) >= 0): skipFlag = 0
+
+        if (len(notContainList) > 0):
+            skipFlag = 0
+            for aStr in notContainList:
+                if (rowLabels[iR].find(aStr) >= 0): skipFlag = 1
+
+        if (skipFlag): continue
+
+        ## set bit if we get here ...
         bitVec[iR] = 1
         numSet += 1
 
-    print featPrefix, doesContain, notContain, numRow, numSet
+    print featPrefix, doesContainList, notContainList, numRow, numSet
     if (numSet == 0):
         print " numSet=0 ... this is probably a problem ... "
         # sys.exit(-1)
@@ -264,17 +273,21 @@ def setFeatBits(rowLabels, featPrefix, doesContain, notContain):
 # --> B:GNAB:ADAM7:chr8:24298509:24384483:+:y_del_somatic
 
 
-def makeNewFeatureName(curFeatName, oldString, newString):
+def makeNewFeatureName(curFeatName, oldStringList, newStringList):
 
-    i1 = curFeatName.find(oldString)
-    if (i1 < 0 or len(oldString) < 2):
-        print " ERROR in makeNewFeatureName ???? ", curFeatName, oldString, newString
+    for jj in range(len(oldStringList)):
+        oldStr = oldStringList[jj]
+        newStr = newStringList[jj]
 
-    i2 = i1 + len(oldString)
-    newFeatName = curFeatName[:i1] + newString + curFeatName[i2:]
-    # print curFeatName, oldString, newString, newFeatName
+        i1 = curFeatName.find(oldStr)
+        if ( i1 >= 0 ):
+            i2 = i1 + len(oldStr)
+            newFeatName = curFeatName[:i1] + newStr + curFeatName[i2:]
+            return ( newFeatName )
 
-    return (newFeatName)
+    print " ERROR in makeNewFeatureName ???? ", curFeatName, oldStringList, newStringList
+    sys.exit(-1)
+
 
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 
@@ -646,8 +659,14 @@ def combineGnabCnvr(dataD):
     # next, we need to find all of the GNAB features and all of the CNVR
     # features
     print " --> assigning gnab / cnvr flags ... "
-    isGnab = setFeatBits(rowLabels, "B:GNAB:", ":y_n", "")
-    isCnvr = setFeatBits(rowLabels, "N:CNVR:", "", "Gistic")
+
+    gnabFeatIncSubstrings = [ ":y_n", ":code_potential" ]
+    gnabFeatAmpSubstrings = [ ":y_amp", ":cp_amp" ]
+    gnabFeatDelSubstrings = [ ":y_del", ":cp_del" ]
+    cnvrFeatExcSubstrings = [ "Gistic" ]
+
+    isGnab = setFeatBits(rowLabels, "B:GNAB:", gnabFeatIncSubstrings, [])
+    isCnvr = setFeatBits(rowLabels, "N:CNVR:", [], cnvrFeatExcSubstrings)
 
     print len(isGnab), max(isGnab)
     print len(isCnvr), max(isCnvr)
@@ -759,9 +778,11 @@ def combineGnabCnvr(dataD):
     # -------------------------------------------------------------------------
 
     ## cnvrThreshold = 2.
-    cnvrThreshold = 1.
+    ## cnvrThreshold = 1.
+    cnvrAmpThresh =  0.30
+    cnvrDelThresh = -0.46
 
-    print " --> now checking for deletions and amplifications ... ", cnvrThreshold
+    print " --> now checking for deletions and amplifications ... ", cnvrAmpThresh, cnvrDelThresh
     print "     and creating new y_del and y_amp features "
 
     numNewFeat = 0
@@ -775,6 +796,8 @@ def combineGnabCnvr(dataD):
 
         if (isGnab[iR]):
 
+            print " "
+            print " having a look at this feature: "
             print iR, rowLabels[iR], len(mapVec[iR])
             print mapVec[iR]
 
@@ -786,7 +809,7 @@ def combineGnabCnvr(dataD):
             numYesAmp = 0
 
             maxCN = -999.
-            minCN = 999.
+            minCN =  999.
 
             for iCol in range(numCol):
                 mutFlag = 0
@@ -801,9 +824,9 @@ def combineGnabCnvr(dataD):
                         maxCN = dMat[jR][iCol]
                     if (dMat[jR][iCol] < minCN):
                         minCN = dMat[jR][iCol]
-                    if (dMat[jR][iCol] < -cnvrThreshold):
+                    if (dMat[jR][iCol] < cnvrDelThresh):
                         delFlag = 1
-                    if (dMat[jR][iCol] > cnvrThreshold):
+                    if (dMat[jR][iCol] > cnvrAmpThresh):
                         ampFlag = 1
                 numYes += mutFlag
                 numDel += delFlag
@@ -818,13 +841,18 @@ def combineGnabCnvr(dataD):
                 print "             %3d amplifications " % numAmp, maxCN
                 if (numYesDel > 0):
                     if (float(numYesDel - numYes) / float(numCol) > 0.10):
-                        if (float(numYesDel) / float(numCol) > 0.10):
-                            print "                 looks very significant !!! "
+                        if (float(numYesDel - numDel) / float(numCol) > 0.10):
+                            print "                 deletion looks significant "
+                if (numYesAmp > 0):
+                    if (float(numYesAmp - numYes) / float(numCol) > 0.10):
+                        if (float(numYesAmp - numAmp) / float(numCol) > 0.10):
+                            print "                 amplification looks significant "
 
+            ## add the "DEL" feature if appropriate ...
             if (numDel > 1):
                 numNewFeat += 1
                 curFeatName = rowLabels[iR]
-                newFeatName = makeNewFeatureName(curFeatName, ":y_n", ":y_del")
+                newFeatName = makeNewFeatureName(curFeatName, gnabFeatIncSubstrings, gnabFeatDelSubstrings)
                 print "         newFeatName <%s> " % newFeatName
 
                 # make sure that there is not already a feature by this name!!!
@@ -835,8 +863,10 @@ def combineGnabCnvr(dataD):
                         print "             oops ??? <%s> already exists ??? " % aLabel
 
                 if (addFeat):
+                    print "     --> adding this new feature: ", newFeatName
                     newNameVec += [newFeatName]
                     newDataMat += [numpy.zeros(numCol)]
+                    numBitsOn = 0
                     for iCol in range(numCol):
 
                         # we need to start with NA
@@ -846,26 +876,31 @@ def combineGnabCnvr(dataD):
                         # all we need ...
                         if (dMat[iR][iCol] == 1):
                             newDataMat[-1][iCol] = 1
+                            numBitsOn += 1
                             continue
+
                         # if not, then check for deletions ...
                         for jR in mapVec[iR]:
-                            if (dMat[jR][iCol] == NA_VALUE):
-                                continue
-                            if (dMat[jR][iCol] < -cnvrThreshold):
+                            if (dMat[jR][iCol] == NA_VALUE): continue
+                            if (newDataMat[-1][iCol] == 1): continue
+                            if (dMat[jR][iCol] < cnvrDelThresh):
                                 newDataMat[-1][iCol] = 1
+                                numBitsOn += 1
 
                         # if we have set this bit we are done ...
-                        if (newDataMat[-1][iCol] == 1):
-                            continue
+                        if (newDataMat[-1][iCol] == 1): continue
 
                         # and otherwise if we have no mutation, set it to 0
-                        if (dMat[iR][iCol] == 0):
-                            newDataMat[-1][iCol] = 0
+                        if (dMat[iR][iCol] == 0): newDataMat[-1][iCol] = 0
 
+                    print "         number of bits set: ", numBitsOn
+
+
+            ## add the "AMP" feature if appropriate ...
             if (numAmp > 1):
                 numNewFeat += 1
                 curFeatName = rowLabels[iR]
-                newFeatName = makeNewFeatureName(curFeatName, ":y_n", ":y_amp")
+                newFeatName = makeNewFeatureName(curFeatName, gnabFeatIncSubstrings, gnabFeatAmpSubstrings)
                 print "         newFeatName <%s> " % newFeatName
 
                 # make sure that there is not already a feature by this name!!!
@@ -876,8 +911,10 @@ def combineGnabCnvr(dataD):
                         print "             oops ??? <%s> already exists ??? " % aLabel
 
                 if (addFeat):
+                    print "     --> adding this new feature: ", newFeatName
                     newNameVec += [newFeatName]
                     newDataMat += [numpy.zeros(numCol)]
+                    numBitsOn = 0
                     for iCol in range(numCol):
 
                         # we need to start with NA
@@ -887,21 +924,24 @@ def combineGnabCnvr(dataD):
                         # all we need ...
                         if (dMat[iR][iCol] == 1):
                             newDataMat[-1][iCol] = 1
+                            numBitsOn += 1
                             continue
                         # if not, then check for amplifications ...
                         for jR in mapVec[iR]:
-                            if (dMat[jR][iCol] == NA_VALUE):
-                                continue
-                            if (dMat[jR][iCol] > cnvrThreshold):
+                            if (dMat[jR][iCol] == NA_VALUE): continue
+                            if (newDataMat[-1][iCol] == 1): continue
+                            if (dMat[jR][iCol] > cnvrAmpThresh):
                                 newDataMat[-1][iCol] = 1
+                                numBitsOn += 1
 
                         # if we have set this bit we are done ...
-                        if (newDataMat[-1][iCol] == 1):
-                            continue
+                        if (newDataMat[-1][iCol] == 1): continue
 
                         # and otherwise if we have no mutation, set it to 0
-                        if (dMat[iR][iCol] == 0):
-                            newDataMat[-1][iCol] = 0
+                        if (dMat[iR][iCol] == 0): newDataMat[-1][iCol] = 0
+
+                    print "         number of bits set: ", numBitsOn
+
 
     # if ( numNewFeat == 0 ):
     # print " --> NO new features "
@@ -910,14 +950,15 @@ def combineGnabCnvr(dataD):
 
     print " "
     print " --> number of new features : ", numNewFeat
-    if (numNewFeat > 0):
-        print len(newNameVec)
-        print len(newDataMat), len(newDataMat[0])
-        for ii in range(numNewFeat):
-            if (newNameVec[ii].find("CSMD1") > 0):
-                print newNameVec[ii]
-                print newDataMat[ii]
-        print " "
+    if ( 0 ):
+        if (numNewFeat > 0):
+            print len(newNameVec)
+            print len(newDataMat), len(newDataMat[0])
+            for ii in range(numNewFeat):
+                if (newNameVec[ii].find("CSMD1") > 0):
+                    print newNameVec[ii]
+                    print newDataMat[ii]
+            print " "
 
     # now we need to append these new features to the input data matrix
     newRowLabels = [0] * (numRow + numNewFeat)
@@ -948,7 +989,7 @@ if __name__ == "__main__":
             inFile = sys.argv[1]
             outFile = sys.argv[2]
             do_combineGnabCnvr = 1
-            do_pathwayGnab = 1
+            do_pathwayGnab = 0
             do_driverGnab = 0
             driverList = ["TP53", "KRAS", "PIK3CA", "PTEN"]
         else:
