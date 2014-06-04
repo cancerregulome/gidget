@@ -204,7 +204,8 @@ for tumor in $tumors
 
         ## and now run pairwise on this finalClin feature matrix ...
         ## NOTE that this gets run in the background !!!
-        nohup python $TCGAFMP_ROOT_DIR/main/run_pwRK3.py \
+        #### nohup python $TCGAFMP_ROOT_DIR/main/run_pwRK3.py \
+        nohup python $TCGAFMP_ROOT_DIR/main/run-pairwise-v2.py \
                 --pvalue 2. --all --forRE \
                 --tsvFile $TCGAFMP_DATA_DIR/$tumor/$curDate/finalClin.$tumor.$curDate.tsv &
 
