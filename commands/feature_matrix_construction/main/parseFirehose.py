@@ -429,6 +429,7 @@ def parseMutSig_CountsRatesFile(inName, outName):
             done = 1
 
         else:
+
             # they seem to like to change the patient ID here ...
             if (numTokens == 8):
                 patientID = tokenList[1]
@@ -441,13 +442,17 @@ def parseMutSig_CountsRatesFile(inName, outName):
             elif (numTokens == 13):
                 patientID = tokenList[0]
 
+            print " checking that patient ID looks ok ... ", patientID
+
             if (patientID.find("TCGA-") >= 0):
                 i1 = patientID.find("TCGA-")
                 patientID = patientID[i1:]
+                print "     --> (a) change to ", patientID
 
                 if (patientID.find("-Tumor") >= 0):
                     i1 = patientID.find("-Tumor")
                     patientID = patientID[:i1]
+                    print "     --> (b) change to ", patientID
 
             else:
                 i1 = patientID.find("-")
@@ -459,11 +464,13 @@ def parseMutSig_CountsRatesFile(inName, outName):
                     print " ERROR ??? bad patient ID ??? ", patientID
                     sys.exit(-1)
                 patientID = "TCGA" + patientID[i1:]
+                print "     --> (c) change to ", patientID
 
             if (len(patientID) < 15):
                 if (len(patientID) == 12):
                     ## patientID += "-01"
                     patientID = miscTCGA.get_tumor_barcode(patientID)
+                    print "     --> (d) change to ", patientID
                 else:
                     print " ERROR ??? barcode doesn't seem right ??? ", patientID
                     sys.exit(-1)
@@ -489,6 +496,11 @@ def parseMutSig_CountsRatesFile(inName, outName):
                         tumorType = int(patientID[13:15])
                     except:
                         print " ERROR in parseFirehose !!! invalid patientID ??? ", patientID
+
+                print "     --> (e) change to ", patientID
+                if ( len(patientID) > 15 ):
+                    patientID = patientID[:15]
+                    print "     --> (f) change to ", patientID
 
             try:
                 if (numTokens == 8):
