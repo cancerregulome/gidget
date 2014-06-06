@@ -11,6 +11,10 @@ date
 firstDir=`pwd`
 
 cd $TCGAFMP_ROOT_DIR/shscript
+
+echo "===get_metadata==="
+./wget_metadata.sh
+
 echo "===wget_ALL==="
 ./wget_ALL.sh
 
