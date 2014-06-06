@@ -1,5 +1,7 @@
 from gidget_util import gidgetConfigVars
 
+import miscIO
+
 import commands
 from datetime import datetime
 import os.path
@@ -14,6 +16,48 @@ uuidMetadataScript = gidgetConfigVars['TCGAFMP_DCC_REPOSITORIES'] + '/uuids/get_
 uuidMappingFile = gidgetConfigVars['TCGAFMP_DCC_REPOSITORIES'] + '/uuids/metadata.current.txt'
 uuid_re=re.compile('^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$')
 barcodes=re.compile('^TCGA-\w{2}-\w{4}(-\w{2}[a-zA-Z](-\w{2}[a-zA-Z]?(-\w{4}(-[0-9]{2})*)*)*)*$')
+
+#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
+
+def testMappingFile():
+
+    global uuidMappingFile
+
+    print " checking UUID-to-Barcode mapping file <%s> " % uuidMappingFile
+
+    fh = file ( uuidMappingFile, 'r' )
+    numLines = miscIO.num_lines(fh)
+    if ( numLines < 100000 ):
+        print " ERROR ??? seems too small ??? ", numLines
+        sys.exit(-1)
+    aLine = fh.readline()
+    aTokens = aLine.split('\t')
+    if ( not ( looks_like_uuid(aTokens[0]) ) ):
+        print " ERROR ??? not a UUID ??? ", aTokens[0]
+        print aLine
+        sys.exit(-1)
+    if ( not ( looks_like_barcode(aTokens[1]) ) ):
+        print " ERROR ??? not a TCGA barcode ??? ", aTokens[1]
+        print aLine
+        sys.exit(-1)
+
+#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
+
+def setMappingFile ( snapshotName ):
+
+    global uuidMappingFile
+
+    oldFile = uuidMappingFile
+
+    uuidMappingFile = gidgetConfigVars['TCGAFMP_DCC_REPOSITORIES'] \
+                    + '/' + str(snapshotName) + '/metadata.current.txt'
+    print " new uuidMappingFile : <%s> " % uuidMappingFile
+
+    try:
+        testMappingFile()
+    except:
+        uuidMappingFile = oldFile
+        testMappingFile()
 
 #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 def patientLevelCode ( barcode ):
