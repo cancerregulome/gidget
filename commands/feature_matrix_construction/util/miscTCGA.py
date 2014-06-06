@@ -317,45 +317,50 @@ def get_uuid2barcode_dict():
 
     fileName = uuidMappingFile
 
-    tNow = time.ctime()
-    try:
-        tMet = time.ctime(os.path.getmtime(fileName))
-        nowTokens = tNow.split()
-        metTokens = tMet.split()
-        refreshFlag = 0
-        ## nowTokens example: ['Tue', 'Mar', '25', '10:14:44', '2014']
-        ## check year token
-        if (nowTokens[4] > metTokens[4]):
-            refreshFlag = 1
-        ## check month token
-        if (nowTokens[1] != metTokens[1]):
-            refreshFlag = 1
-        ## check day of month token
-        if (int(nowTokens[2]) > int(metTokens[2])):
-            refreshFlag = 1
-        if ( not refreshFlag ):
-            nowHr = nowTokens[3].split(':')
-            metHr = metTokens[3].split(':')
-            ## if we don't need to refresh, it might still be a 
-            ## good idea to pause briefly ...
-            if ( nowHr[0] == metHr[0] ):
-                time.sleep(20)
-    except:
-        refreshFlag = 1
+    if ( 0 ):
+        ## we don't need to do any of this anymore now that
+        ## the metadata file is bundled with the snapshot
 
-    if ( refreshFlag ):
-        cmdString = uuidMetadataScript
-        print " "
-        print " UPDATING METADATA !!! "
-        print "     current time   : ", tNow
+        tNow = time.ctime()
         try:
-            print "     last update at : ", tMet
+            tMet = time.ctime(os.path.getmtime(fileName))
+            nowTokens = tNow.split()
+            metTokens = tMet.split()
+            refreshFlag = 0
+            ## nowTokens example: ['Tue', 'Mar', '25', '10:14:44', '2014']
+            ## check year token
+            if (nowTokens[4] > metTokens[4]):
+                refreshFlag = 1
+            ## check month token
+            if (nowTokens[1] != metTokens[1]):
+                refreshFlag = 1
+            ## check day of month token
+            if (int(nowTokens[2]) > int(metTokens[2])):
+                refreshFlag = 1
+            if ( not refreshFlag ):
+                nowHr = nowTokens[3].split(':')
+                metHr = metTokens[3].split(':')
+                ## if we don't need to refresh, it might still be a 
+                ## good idea to pause briefly ...
+                if ( nowHr[0] == metHr[0] ):
+                    time.sleep(20)
         except:
-            print "     no UUID mapping file available ??? "
-        ( status, output ) = commands.getstatusoutput ( cmdString )
-        print " ... should be done ... "
-        print " "
+            refreshFlag = 1
+    
+        if ( refreshFlag ):
+            cmdString = uuidMetadataScript
+            print " "
+            print " UPDATING METADATA !!! "
+            print "     current time   : ", tNow
+            try:
+                print "     last update at : ", tMet
+            except:
+                print "     no UUID mapping file available ??? "
+            ( status, output ) = commands.getstatusoutput ( cmdString )
+            print " ... should be done ... "
+            print " "
 
+    numFatal = 0
 
     fh = file ( fileName, 'r' )
     for aLine in fh:
@@ -392,9 +397,6 @@ def get_uuid2barcode_dict():
                 shortBarcode = barcode
             barcode2disease_dict[shortBarcode] = diseaseCode
         else:
-            # assume that this check does not need to be done ... it is very slow!
-            # modified from 'not in uuid_dict.keys()' to 'not in uuid_dict', speeds it up! 
-            # --mm 2012-08-25
             if ( uuid not in uuid2barcode_dict ):
                 uuid2barcode_dict[uuid] = barcode
                 barcode2uuid_dict[barcode] = uuid
@@ -405,14 +407,23 @@ def get_uuid2barcode_dict():
                     shortBarcode = barcode
                 barcode2disease_dict[shortBarcode] = diseaseCode
             else:
-                print " FATAL ERROR in get_uuid2barcode_dict ??? "
-                print uuid, uuid2barcode_dict[uuid], barcode
-                sys.exit(-1)
+
+                if ( barcode[:17] != uuid2barcode_dict[uuid][:17] ):
+                    print " FATAL ERROR in get_uuid2barcode_dict ??? "
+                    print uuid, uuid2barcode_dict[uuid], barcode
+                    numFatal += 1
+                else:
+                    print " WARNING: redundant entry in metadata file "
+                    print uuid, uuid2barcode_dict[uuid], barcode
 
         patientBarcode = barcode[:12]
         if ( patientBarcode not in patient_dict.keys() ):
             patient_dict[patientBarcode] = []
         patient_dict[patientBarcode] += [ barcode ]
+
+    if ( numFatal > 0 ):
+        print " %d fata errors ... bailing " % numFatal
+        sys.exit(-1)
 
     print datetime.now(), " done reading UUID to barcode mapping file (%d UUIDs and %d patients) " % ( len(uuid2barcode_dict), len(patient_dict) )
 
