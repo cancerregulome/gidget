@@ -30,41 +30,58 @@ def getMostRecentDir(topDir, cancerList, awgFlag):
     print cancerList, awgFlag
 
     d1 = path.path(topDir)
-    iDates = []
+    genDates = []
+    awgDates = []
+
     for d1Name in d1.dirs():
 
+        ## print "     looking at directory name <%s> " % d1Name
+
         if (d1Name.find("analyses") >= 0):
-            iDates += [getDate(d1Name)]
+            print "         --> adding gen date <%s> " % getDate(d1Name)
+            genDates += [getDate(d1Name)]
 
         if (len(cancerList) == 1):
             if ( awgFlag == "YES" ):
                 if (d1Name.find("awg_") >= 0):
                     if (d1Name.find(cancerList[0]) >= 0):
-                        iDates += [getDate(d1Name)]
+                        awgDates += [getDate(d1Name)]
+                        print "         --> adding awg date <%s> " % getDate(d1Name)
 
-    iDates.sort()
-    print iDates
+    genDates.sort()
+    awgDates.sort()
 
-    lastDate = str(iDates[-1])
-    lastDate = lastDate[0:4] + "_" + lastDate[4:6] + "_" + lastDate[6:8]
-    print lastDate
+    print genDates
+    print awgDates
 
-    lastDir = "NA"
-    for d1Name in d1.dirs():
-        # give first priority to awg specific run ...
-        if (len(cancerList) == 1):
-            if ( awgFlag == "YES" ):
+    ## give priority to an AWG run ...
+    if ( (awgFlag=="YES") and (len(awgDates)>0) ):
+
+        lastDate = str(awgDates[-1])
+        lastDate = lastDate[0:4] + "_" + lastDate[4:6] + "_" + lastDate[6:8]
+        print "     using this awg date : ", lastDate
+
+        lastDir = "NA"
+        for d1Name in d1.dirs():
+            # give first priority to awg specific run ...
+            if (len(cancerList) == 1):
                 if (d1Name.find("awg_") >= 0):
                     if (d1Name.find(cancerList[0]) >= 0):
                         if (d1Name.find(lastDate) >= 0):
                             lastDir = d1Name
+    
+    else:
 
-    if (lastDir == "NA"):
-        for d1Name in d1.dirs():
-            if (d1Name.find("analyses") >= 0):
-                if (d1Name.find(lastDate) >= 0):
-                    lastDir = d1Name
-
+        lastDate = str(genDates[-1])
+        lastDate = lastDate[0:4] + "_" + lastDate[4:6] + "_" + lastDate[6:8]
+        print "     using this gen date : ", lastDate
+    
+        if (lastDir == "NA"):
+            for d1Name in d1.dirs():
+                if (d1Name.find("analyses") >= 0):
+                    if (d1Name.find(lastDate) >= 0):
+                        lastDir = d1Name
+    
     print " using firehose outputs from: ", lastDir
 
     return (lastDir)
