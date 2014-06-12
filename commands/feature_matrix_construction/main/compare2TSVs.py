@@ -147,7 +147,8 @@ def chopOneFeat ( aLabel, labelTokens ):
         return ( labelTokens[0] + ":" + labelTokens[1] + ":" + labelTokens[2] + ":::::" + labelTokens[7] )
 
     if ( aType == "cnvr" ):
-        return ( aLabel )
+        return ( labelTokens[0] + ":" + labelTokens[1] + "::" + labelTokens[3] + ":" \
+               + labelTokens[4] + ":" + labelTokens[5] + "::" + labelTokens[7] )
 
     if ( aType == "meth" ):
         try:
