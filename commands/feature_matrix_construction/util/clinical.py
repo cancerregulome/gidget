@@ -3,7 +3,7 @@ Created on Aug 2, 2012
 
 @author: michael
 '''
-from tcga_fmp_util import tcgaFMPVars
+from gidget_util import gidgetConfigVars
 
 from xml.dom  import minidom
 from xml.dom  import Node
@@ -306,9 +306,13 @@ class clinical(technology_type):
                                         try:
                                             strContent = strContent[len(prefix[0]):]
                                             twoper = prefix[1].split('%')
+                                            # the logic here is getting a little twisted to deal with 'Stage 0a' vs 'Stage 0'.  if more cases come up
+                                            # may need to rethink how to do this --mm 2014-05-23
                                             if twoper[1]:
                                                 if strContent:
                                                     _ = int(strContent)
+                                                elif 'i' == twoper[0]:
+                                                    strContent = twoper[1]
                                                 if 'a' == twoper[0]:
                                                     strContent = twoper[1] + strContent
                                                 elif 'r' == twoper[0]:
@@ -395,7 +399,7 @@ class clinical(technology_type):
         if ( self.featNamesLoaded ):
             return
         try:
-            featureNamesFilename = tcgaFMPVars['TCGAFMP_DCC_REPOSITORIES'] + "/bio_clin/featNames.tsv"
+            featureNamesFilename = gidgetConfigVars['TCGAFMP_DCC_REPOSITORIES'] + "/bio_clin/featNames.tsv"
             fh = file (featureNamesFilename)
             for aLine in fh:
                 tokenList = aLine.split()

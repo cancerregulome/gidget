@@ -288,6 +288,7 @@ if __name__ == "__main__":
                 if ( len(aLine) == 0 ):
                     keepReading = 0
                     continue
+                if ( aLine.startswith("#") ): continue
                 tokenList = aLine.split('\t')
                 if ( len(tokenList)>1 and len(tokenList)<10 ):
                     bailFlag = 1
@@ -388,8 +389,9 @@ if __name__ == "__main__":
                 if (blogP < logP_BC):
                     dqFlag = 1
 
-            if (num < 10):
-                dqFlag = 1
+            if ( 0 ):
+                if (num < 10): dqFlag = 1
+
             if (rhoString != "NA"):
                 if ((logP > 299) and (abs(float(rhoString)) < 0.1)):
                     dqFlag = 1

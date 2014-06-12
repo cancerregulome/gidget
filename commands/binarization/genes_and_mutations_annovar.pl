@@ -1,11 +1,10 @@
 #!/usr/bin/perl
 
-# version 6.1
+(($tt = $ARGV[0]) && ($maf_file = $ARGV[1])) || die "usage: $0 TUMOR_TYPE MAF_FILE\n";
 
-$maf_file = $ARGV[0] || die "usage: $0 MAF_FILE\n";
-
-@elements = split ('\.', $maf_file);
-$tumor_type = $elements[0];
+#@elements = split ('\.', $maf_file);
+#$tumor_type = $elements[0];
+$tumor_type = $tt;
 
 &read_tcga_mutation_data;
 
@@ -62,11 +61,24 @@ sub read_tcga_mutation_data
 					($one, $two, $three) = ($1, $2, $3) if ($mutation =~ /^(\S+?)(\d+)(\S+?)$/);
 					
 					#BLCA    KIAA0090        Silent  TCGA-BL-A0C8    Q8N766  I784I   784     I       I
-					print "$tumor_type\t$hugo_symbol\t$variant_classification\t$tumor_sample_barcode\t$chromo\:$start_position\t$reference_allele\->$tumor_seq_allele1\t$uniprot\t$mutation\t$two\t$one\t$three\n";
+					
+					
+					if ($reference_allele ne $tumor_seq_allele1)
+					{
+						$tumor_allele = $tumor_seq_allele1;
+					}
+					elsif ($reference_allele ne $tumor_seq_allele2)
+					{
+						$tumor_allele = $tumor_seq_allele2;
+					}
+					
+					#print "$tumor_type\t$hugo_symbol\t$variant_classification\t$tumor_sample_barcode\t$chromo\:$start_position\t$reference_allele\->$tumor_allele\t$uniprot\t$mutation\t$two\t$one\t$three\n";
+					print "$hugo_symbol\t$variant_classification\t$tumor_sample_barcode\t$chromo\:$start_position\t$reference_allele\->$tumor_allele\t$uniprot\t$mutation\t$two\t$one\t$three\n";
 					
 					$uniprot_annotation{$hugo_symbol}{$uniprot} = 1;
 					
 					#print "$uniprot $mutation\n";
+					
 					
 					if (($reference_allele ne $tumor_seq_allele1) || ($reference_allele ne $tumor_seq_allele2))
 					{
@@ -145,7 +157,17 @@ sub read_tcga_mutation_data
 								$manual_type = "fs" if (($variant_classification eq	"Frame_Shift_Del") || ($variant_classification eq	"Frame_Shift_Ins"));
 								$manual_type = "X" if ($variant_classification eq	"Nonsense_Mutation");
 								
-								print "$tumor_type\t$hugo_symbol\t$variant_classification\t$tumor_sample_barcode\t$chromo\:$start_position\t$reference_allele\->$tumor_seq_allele1\tUNIPROT_FAIL\tUNIPROT_FAIL\n";
+								if ($reference_allele ne $tumor_seq_allele1)
+								{
+									$tumor_allele = $tumor_seq_allele1;
+								}
+								elsif ($reference_allele ne $tumor_seq_allele2)
+								{
+									$tumor_allele = $tumor_seq_allele2;
+								}
+								
+								#print "$tumor_type\t$hugo_symbol\t$variant_classification\t$tumor_sample_barcode\t$chromo\:$start_position\t$reference_allele\->$tumor_allele\tUNIPROT_FAIL\tUNIPROT_FAIL\n";
+								print "$hugo_symbol\t$variant_classification\t$tumor_sample_barcode\t$chromo\:$start_position\t$reference_allele\->$tumor_allele\tUNIPROT_FAIL\tUNIPROT_FAIL\n";
 								
 								$mutations{$hugo_symbol}{$tumor_sample_barcode}{$position} = 1;
 								$type{$hugo_symbol}{$tumor_sample_barcode}{$position} = $manual_type;

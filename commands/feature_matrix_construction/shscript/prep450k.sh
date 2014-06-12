@@ -2,29 +2,36 @@
 
 # every TCGA FMP script should start with these lines:
 : ${TCGAFMP_ROOT_DIR:?" environment variable must be set and non-empty; defines the path to the TCGA FMP scripts directory"}
-source ${TCGAFMP_ROOT_DIR}/shscript/tcga_fmp_util.sh
+source ${TCGAFMP_ROOT_DIR}/../../gidget/util/gidget_util.sh
 
 
 ## this script should be called with the following parameters:
 ##      one tumor type (eg 'skcm')
 ##      snapshot, either 'dcc-snapshot' (most recent) or, eg, 'dcc-snapshot-29jan13;
-##      (if the snapshotName is not provided, it will default to the most recent)
+##      optionally a 3rd argument that gives the name of a different methylation data file to be used
 
 WRONGARGS=1
-if [[ $# != 2 ]] && [[ $# != 1 ]]
+if [[ $# != 3 ]] && [[ $# != 2 ]]
     then
-        echo " Usage   : `basename $0` <tumorType> <snapshotName>"
+        echo " Usage   : `basename $0` <tumorType> <snapshotName> [meth tsv]"
         echo " Example : `basename $0` skcm dcc-snapshot-06jan14"
-        echo "           the snapshotName is optional and defaults to dcc-snapshot"
+        echo "           for a non-standard methylation data source, use the 3rd argument to specify a path "
+        echo " "
+        echo " ******************************************************************************************* "
+        echo " ** ALSO PLEASE BE FOREWARNED THAT THIS SCRIPT TYPICALLY TAKES ABOUT 12 HOURS to COMPLETE ** "
+        echo " ******************************************************************************************* "
+        echo " "
         exit $WRONGARGS
 fi
 
 tumor=$1
-if [ $# == 1 ]
+snapshotName=$2
+
+if (( $# == 3 ))
     then
-        snapshotName=dcc-snapshot
+        specialMethFile=$3
     else
-        snapshotName=$2
+        specialMethFile=NA
 fi
 
 echo " "
@@ -52,13 +59,22 @@ CONFIG_FILE=$TCGAFMP_ROOT_DIR/config/parse_tcga.all450k.config
 echo " "
 echo " Step #1: parse the 450k, RNAseq and miRNAseq data "
 
-date
-python $TCGAFMP_ROOT_DIR/main/parse_tcga.py \
-    $CONFIG_FILE \
-    jhu-usc.edu/humanmethylation450/methylation/ \
-    $tumor meth450k dcc-snapshot >& level3.meth450.log 
-## at this point, we should have an output file with ~482k rows
-grep "finished in writeTSV_dataMatrix" level3.meth450.log
+if [[ $specialMethFile == "NA" ]]
+    then
+        date
+        python $TCGAFMP_ROOT_DIR/main/parse_tcga.py \
+            $CONFIG_FILE \
+            jhu-usc.edu/humanmethylation450/methylation/ \
+            $tumor meth450k dcc-snapshot >& level3.meth450.log 
+        ## at this point, we should have an output file with ~482k rows
+        grep "finished in writeTSV_dataMatrix" level3.meth450.log
+        methFilename=$tumor.jhu-usc.edu__humanmethylation450__methylation.meth450k.tsv
+    else
+        date
+        echo " skipping parsing of DCC-MIRROR 450k data "
+        methFilename=$specialMethFile
+fi
+echo " methylation data file : " $methFilename
 
 date
 python $TCGAFMP_ROOT_DIR/main/parse_tcga.py \
@@ -103,7 +119,7 @@ python $TCGAFMP_ROOT_DIR/main/annotateTSV.py \
 date
 rm -fr $tumor.meth_gexp_mirn.tsv
 python $TCGAFMP_ROOT_DIR/main/mergeTSV.py \
-    $tumor.jhu-usc.edu__humanmethylation450__methylation.meth450k.tsv \
+    $methFilename \
     $tumor.gexp.annot.tsv \
     $tumor.mirn.annot.tsv \
     $tumor.meth_gexp_mirn.tsv >& $tumor.meth_gexp_mirn.log
@@ -125,7 +141,7 @@ grep "'N:METH': " filtA.log
 ## another type of filtering ... takes ~2h
 date
 python $TCGAFMP_ROOT_DIR/main/highVarTSV.py \
-    $tumor.jhu-usc.edu__humanmethylation450__methylation.meth450k.tsv \
+    $methFilename \
     meth.hv02.tsv 0.02 IDR >& meth.hv02.log 
 grep "'N:METH': " meth.hv02.log
 

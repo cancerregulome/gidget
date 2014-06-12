@@ -1,6 +1,6 @@
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 
-from tcga_fmp_util import tcgaFMPVars
+from gidget_util import gidgetConfigVars
 import chrArms
 import miscMath
 import miscTCGA
@@ -30,41 +30,58 @@ def getMostRecentDir(topDir, cancerList, awgFlag):
     print cancerList, awgFlag
 
     d1 = path.path(topDir)
-    iDates = []
+    genDates = []
+    awgDates = []
+
     for d1Name in d1.dirs():
 
+        ## print "     looking at directory name <%s> " % d1Name
+
         if (d1Name.find("analyses") >= 0):
-            iDates += [getDate(d1Name)]
+            print "         --> adding gen date <%s> " % getDate(d1Name)
+            genDates += [getDate(d1Name)]
 
         if (len(cancerList) == 1):
             if ( awgFlag == "YES" ):
                 if (d1Name.find("awg_") >= 0):
                     if (d1Name.find(cancerList[0]) >= 0):
-                        iDates += [getDate(d1Name)]
+                        awgDates += [getDate(d1Name)]
+                        print "         --> adding awg date <%s> " % getDate(d1Name)
 
-    iDates.sort()
-    print iDates
+    genDates.sort()
+    awgDates.sort()
 
-    lastDate = str(iDates[-1])
-    lastDate = lastDate[0:4] + "_" + lastDate[4:6] + "_" + lastDate[6:8]
-    print lastDate
+    print genDates
+    print awgDates
 
-    lastDir = "NA"
-    for d1Name in d1.dirs():
-        # give first priority to awg specific run ...
-        if (len(cancerList) == 1):
-            if ( awgFlag == "YES" ):
+    ## give priority to an AWG run ...
+    if ( (awgFlag=="YES") and (len(awgDates)>0) ):
+
+        lastDate = str(awgDates[-1])
+        lastDate = lastDate[0:4] + "_" + lastDate[4:6] + "_" + lastDate[6:8]
+        print "     using this awg date : ", lastDate
+
+        lastDir = "NA"
+        for d1Name in d1.dirs():
+            # give first priority to awg specific run ...
+            if (len(cancerList) == 1):
                 if (d1Name.find("awg_") >= 0):
                     if (d1Name.find(cancerList[0]) >= 0):
                         if (d1Name.find(lastDate) >= 0):
                             lastDir = d1Name
+    
+    else:
 
-    if (lastDir == "NA"):
-        for d1Name in d1.dirs():
-            if (d1Name.find("analyses") >= 0):
-                if (d1Name.find(lastDate) >= 0):
-                    lastDir = d1Name
-
+        lastDate = str(genDates[-1])
+        lastDate = lastDate[0:4] + "_" + lastDate[4:6] + "_" + lastDate[6:8]
+        print "     using this gen date : ", lastDate
+    
+        if (lastDir == "NA"):
+            for d1Name in d1.dirs():
+                if (d1Name.find("analyses") >= 0):
+                    if (d1Name.find(lastDate) >= 0):
+                        lastDir = d1Name
+    
     print " using firehose outputs from: ", lastDir
 
     return (lastDir)
@@ -124,6 +141,10 @@ def parseBestClusFiles(lastDir, outDir, zCancer):
     for d2Name in d2.dirs():
 
         if (d2Name.find("Level_4") > 0):
+
+            ## careful never to grab those FFPE-specific runs
+            if ( d2Name.find("FFPE") > 0 ): continue
+
             d3 = path.path(d2Name)
             for fName in d3.files():
                 if (fName.endswith("bestclus.txt")):
@@ -425,6 +446,7 @@ def parseMutSig_CountsRatesFile(inName, outName):
             done = 1
 
         else:
+
             # they seem to like to change the patient ID here ...
             if (numTokens == 8):
                 patientID = tokenList[1]
@@ -437,13 +459,17 @@ def parseMutSig_CountsRatesFile(inName, outName):
             elif (numTokens == 13):
                 patientID = tokenList[0]
 
+            print " checking that patient ID looks ok ... ", patientID
+
             if (patientID.find("TCGA-") >= 0):
                 i1 = patientID.find("TCGA-")
                 patientID = patientID[i1:]
+                print "     --> (a) change to ", patientID
 
                 if (patientID.find("-Tumor") >= 0):
                     i1 = patientID.find("-Tumor")
                     patientID = patientID[:i1]
+                    print "     --> (b) change to ", patientID
 
             else:
                 i1 = patientID.find("-")
@@ -455,11 +481,13 @@ def parseMutSig_CountsRatesFile(inName, outName):
                     print " ERROR ??? bad patient ID ??? ", patientID
                     sys.exit(-1)
                 patientID = "TCGA" + patientID[i1:]
+                print "     --> (c) change to ", patientID
 
             if (len(patientID) < 15):
                 if (len(patientID) == 12):
                     ## patientID += "-01"
                     patientID = miscTCGA.get_tumor_barcode(patientID)
+                    print "     --> (d) change to ", patientID
                 else:
                     print " ERROR ??? barcode doesn't seem right ??? ", patientID
                     sys.exit(-1)
@@ -485,6 +513,11 @@ def parseMutSig_CountsRatesFile(inName, outName):
                         tumorType = int(patientID[13:15])
                     except:
                         print " ERROR in parseFirehose !!! invalid patientID ??? ", patientID
+
+                print "     --> (e) change to ", patientID
+                if ( len(patientID) > 15 ):
+                    patientID = patientID[:15]
+                    print "     --> (f) change to ", patientID
 
             try:
                 if (numTokens == 8):
@@ -818,6 +851,9 @@ def parseMutSigFiles(lastDir, outDir, MSverString):
 
         ## if (d2Name.find("Mutation_Significance.Level_4") > 0 or d2Name.find("MutSigNozzleReport1.5.Level_4") > 0):
         if ( d2Name.find(MSverString) >= 0  and  d2Name.find("Level_4") >= 0 ):
+
+            ## careful never to grab those FFPE-specific runs
+            if ( d2Name.find("FFPE") > 0 ): continue
 
             d3 = path.path(d2Name)
             for fName in d3.files():
@@ -1257,6 +1293,7 @@ def parseGisticFiles(lastDir, outDir):
     d2 = path.path(lastDir)
     for d2Name in d2.dirs():
 
+        # careful not to grab the "CopyNumberLowPass_Gistic2" outputs
         if (d2Name.find("CopyNumber_Gistic2.Level_4") > 0):
 
             d3 = path.path(d2Name)
@@ -1401,6 +1438,9 @@ def buildSampleWhiteList(lastDir, outDir):
 
         if (d2Name.find("Level_4") > 0):
 
+            ## careful never to grab those FFPE-specific runs
+            if ( d2Name.find("FFPE") > 0 ): continue
+
             d3 = path.path(d2Name)
             for fName in d3.files():
 
@@ -1434,7 +1474,7 @@ def getMutSigVersionString ( zCancer ):
     defaultString = "MutSigNozzleReportCV"
 
     try:
-        rootString = tcgaFMPVars['TCGAFMP_DATA_DIR']
+        rootString = gidgetConfigVars['TCGAFMP_DATA_DIR']
     except:
         MSverString = defaultString
         print "     --> defaulting to %s " % defaultString
@@ -1482,7 +1522,7 @@ if __name__ == "__main__":
         'acc',  'blca', 'brca', 'cesc', 'cntl', 'coad', 'dlbc', 'esca', 'gbm',
         'hnsc', 'kich', 'kirc', 'kirp', 'laml', 'lcll', 'lgg',  'lihc', 'lnnh',
         'luad', 'lusc', 'ov',   'paad', 'prad', 'read', 'sarc', 'skcm', 'stad',
-        'thca', 'ucec', 'lcml', 'pcpg']
+        'thca', 'ucec', 'lcml', 'pcpg', 'meso', 'tgct', 'ucs' ]
 
     if (1):
         if (len(sys.argv) != 3):
@@ -1518,7 +1558,7 @@ if __name__ == "__main__":
 
     # 22jun : switching to new firehose analyses that were downloaded using
     # firehose_get -b analyses latest
-    firehoseTopDir = tcgaFMPVars['TCGAFMP_FIREHOSE_MIRROR']+ "/"
+    firehoseTopDir = gidgetConfigVars['TCGAFMP_FIREHOSE_MIRROR']+ "/"
     outDir = "./"
 
     # first thing we have to do is find the most recent top-level directory

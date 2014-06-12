@@ -2,7 +2,7 @@
 
 # every TCGA MAF script should start with these lines:
 : ${TCGAMAF_ROOT_DIR:?" environment variable must be set and non-empty; defines the path to the TCGA MAF directory"}
-source ${TCGAFMP_ROOT_DIR}/bash/tcga_maf_util.sh
+source ${TCGAMAF_ROOT_DIR}/../../gidget/util/gidget_util.sh
 
 
 # Cronjob for downloading reference data against 
@@ -41,10 +41,12 @@ for file in gene2accession gene2refseq Homo_sapiens.gene_info gene_refseq_unipro
 do
 
 	# add file's timestamp to the name as part of the string:
-	newfilename=$file-`stat -c %y $file.gz | cut -d ' ' -f1 | sed 's/-//g'`.gz
-	mv $file.gz $newfilename
+	# newfilename=$file-`stat -c %y $file.gz | cut -d ' ' -f1 | sed 's/-//g'`.gz
+	# mv $file.gz $newfilename
 
-	gunzip $newfilename
+	# gunzip $newfilename
+	echo gunzip $file
+	gunzip $file
 done
 
 
@@ -54,6 +56,7 @@ done
 # TODO: for ease of maintaining archives (which could be downloaded again),
 # do not modify file and look into modifying downstream tools to ignore the header line,
 # instead.
+echo removing first line
 sed -iorig '1d' Homo_sapiens.gene_info
 
 
@@ -70,7 +73,11 @@ curl -O ftp://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebas
 curl -O ftp://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/complete/uniprot_sprot_varsplic.fasta.gz
 curl -O ftp://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/complete/docs/sec_ac.txt
 mv sec_ac.txt uniprot_sec_ac.txt
-cp uniprot_sec_ac.txt uniprot_sec_ac.txt.orig
+cp uniprot_sec_ac.txt uniprot_sec_ac.txt.orig # TODO is this still necessary? probably there for manual version
+# before next line's automation:
+
+# removing header; only printing lines with Secondary AC[accession number]<space(s)>Primary AC
+sed -r -n -i '/^[a-zA-Z0-9]+[ \t]+[a-zA-Z0-9]+$/p' uniprot_sec_ac.txt
 
 # get the uniprot release name
 curl -O ftp://ftp.uniprot.org/pub/databases/uniprot/current_release/relnotes.txt
@@ -80,9 +87,11 @@ rm -f relnotes.txt
 # rename files with uniprot version and uncompress
 for uniprotfile in idmapping_selected.tab uniprot_sprot_human.dat uniprot_trembl_human.dat uniprot_sprot_varsplic.fasta
 do
-	newuniprotfilename=$file-$uniprotversion.gz
-	mv $uniprotfile.gz $newuniprotfilename
-	gunzip $newuniprotfilename
+	#newuniprotfilename=$file-$uniprotversion.gz
+	#mv $uniprotfile.gz $newuniprotfilename
+	#gunzip $newuniprotfilename
+        echo gunzip $uniprotfile.gz
+	gunzip $uniprotfile.gz
 done
 
 

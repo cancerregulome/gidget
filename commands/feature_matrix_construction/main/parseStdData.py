@@ -1,6 +1,6 @@
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 
-from tcga_fmp_util import tcgaFMPVars
+from gidget_util import gidgetConfigVars
 import miscMath
 import miscTCGA
 
@@ -275,8 +275,8 @@ if __name__ == "__main__":
     # list of cancer directory names
     cancerDirNames = [
         'acc', 'blca', 'brca', 'cesc', 'cntl', 'coad', 'dlbc', 'esca', 'gbm', 'hnsc', 'kirc',
-        'kirp', 'laml', 'lcll', 'lgg', 'lihc', 'lnnh', 'luad', 'lusc', 'ov',
-        'paad', 'prad', 'read', 'sarc', 'skcm', 'stad', 'thca', 'ucec', 'lcml', 'pcpg']
+        'kirp', 'laml', 'lcll', 'lgg', 'lihc', 'lnnh', 'luad', 'lusc', 'ov', 'meso', 'tgct',
+        'paad', 'prad', 'read', 'sarc', 'skcm', 'stad', 'thca', 'ucec', 'lcml', 'pcpg', 'ucs' ]
 
     if (1):
         if (len(sys.argv) != 2):
@@ -296,7 +296,7 @@ if __name__ == "__main__":
                 print cancerDirNames
                 sys.exit(-1)
 
-    firehoseTopDir = tcgaFMPVars['TCGAFMP_FIREHOSE_MIRROR']+ "/"
+    firehoseTopDir = gidgetConfigVars['TCGAFMP_FIREHOSE_MIRROR']+ "/"
     outDir = "./"
 
     # first thing we have to do is find the most recent top-level directory

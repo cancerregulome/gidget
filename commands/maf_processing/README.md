@@ -48,7 +48,7 @@ MAF file, so please be patient.
 
 3. post-processing:
     1. copy the output of step #2 (not the "transpose" file) to ```$TCGAFMP_OUTPUTS/<tumor>/gnab/latest.gnab.txt```
-    2. first post-processing step:
+    2. first post-processing step (all this currently does is some minor clean-up and/or re-formatting):
 
         ```
 $ cd $TCGAFMP_ROOT_DIR/shscript

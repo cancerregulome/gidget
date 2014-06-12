@@ -1,8 +1,22 @@
 #!/usr/bin/perl
 
-# version 7.1
+$VERSION = "7.1";
+
+use File::Basename;
+use Cwd qw(abs_path);
+
+use lib dirname(abs_path(__FILE__)) . "/../../gidget/util";
+use gidget_util;
+
 
 $maf_file = $ARGV[0] || die "usage: $0 MAF_FILE\n";
+$databaseDirectory = $gidgetConfigVars{'TCGABINARIZATION_DATABASE_DIR'} || die "did not get config variable\n";
+
+print "\n" . basename(abs_path(__FILE__)) . " version $VERSION\n\n";
+print "using:\n";
+print "  database directory => $gidgetConfigVars{'TCGABINARIZATION_DATABASE_DIR'}\n";
+print "  input MAF file => $maf_file\n";
+print "\n";
 
 &read_tcga_mutation_data;
 
@@ -179,7 +193,7 @@ sub define_dna_binding_domains
 {
 	%interpro_dna_binding_domains = ();
 	$#domain_contents = -1;
-	open (DOMAINS, "< /proj/ilyalab/bbernard/database/TRANSFAC_2010.1/interpro_domains_vaquerizas_nature_2009.txt") || die "cannot read tf list file: $!\n";
+	open (DOMAINS, "< $gidgetConfigVars{'TCGABINARIZATION_DATABASE_DIR'}/TRANSFAC_2010.1/interpro_domains_vaquerizas_nature_2009.txt") || die "cannot read tf list file: $!\n";
 	@domain_contents = <DOMAINS>;
 	close (DOMAINS);
 	foreach $line (@domain_contents)
@@ -208,7 +222,7 @@ sub read_interpro_domain_info
 		#foreach $uniprot_id (sort keys %{$hgnc_to_uniprot{$hugo_symbol}})
 		{
 			$#interpro_contents = -1;
-			open (INTERPRO, "< /proj/ilyalab/bbernard/database/interpro/data/$uniprot_id.txt") || warn "cannot read interpro file for $uniprot_id: $!\n";
+			open (INTERPRO, "< $gidgetConfigVars{'TCGABINARIZATION_DATABASE_DIR'}/interpro/data/$uniprot_id.txt") || warn "cannot read interpro file for $uniprot_id: $!\n";
 			@interpro_contents = <INTERPRO>;
 			close (INTERPRO);
 			
@@ -356,12 +370,12 @@ sub read_interpro_domain_info
 			if ($found_domain < 1)
 			{
 				$#uniprot_contents = -1;
-				unless (-e "/proj/ilyalab/bbernard/database/uniprot/data/$uniprot_id.txt")
+				unless (-e "$gidgetConfigVars{'TCGABINARIZATION_DATABASE_DIR'}/uniprot/data/$uniprot_id.txt")
 				{
 					#print "downloading $uniprot_id from uniprot\n";
-					`wget -q -O "/proj/ilyalab/bbernard/database/uniprot/data/$uniprot_id.txt"  "http://www.uniprot.org/uniprot/$uniprot_id.fasta"`;
+					`wget -q -O "$gidgetConfigVars{'TCGABINARIZATION_DATABASE_DIR'}/uniprot/data/$uniprot_id.txt"  "http://www.uniprot.org/uniprot/$uniprot_id.fasta"`;
 				}
-				open (UNIPROT, "< /proj/ilyalab/bbernard/database/uniprot/data/$uniprot_id.txt") || die "cannot read uniprot file: $!\n";
+				open (UNIPROT, "< $gidgetConfigVars{'TCGABINARIZATION_DATABASE_DIR'}/uniprot/data/$uniprot_id.txt") || die "cannot read uniprot file: $!\n";
 				@uniprot_contents = <UNIPROT>;
 				close (UNIPROT);
 				$head = shift @uniprot_contents;
@@ -399,12 +413,12 @@ sub extract_domain_sequences
 		{
 			$uniprot_id = $target_id if ($single_target == 1);
 			$#uniprot_contents = -1;
-			unless (-e "/proj/ilyalab/bbernard/database/uniprot/data/$uniprot_id.txt")
+			unless (-e "$gidgetConfigVars{'TCGABINARIZATION_DATABASE_DIR'}/uniprot/data/$uniprot_id.txt")
 			{
 				#print "downloading $uniprot_id from uniprot\n";
-				`wget -q -O "/proj/ilyalab/bbernard/database/uniprot/data/$uniprot_id.txt"  "http://www.uniprot.org/uniprot/$uniprot_id.fasta"`;
+				`wget -q -O "$gidgetConfigVars{'TCGABINARIZATION_DATABASE_DIR'}/uniprot/data/$uniprot_id.txt"  "http://www.uniprot.org/uniprot/$uniprot_id.fasta"`;
 			}
-			open (UNIPROT, "< /proj/ilyalab/bbernard/database/uniprot/data/$uniprot_id.txt") || die "cannot read uniprot file: $!\n";
+			open (UNIPROT, "< $gidgetConfigVars{'TCGABINARIZATION_DATABASE_DIR'}/uniprot/data/$uniprot_id.txt") || die "cannot read uniprot file: $!\n";
 			@uniprot_contents = <UNIPROT>;
 			close (UNIPROT);
 			$head = shift @uniprot_contents;

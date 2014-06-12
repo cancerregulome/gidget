@@ -343,7 +343,8 @@ if __name__ == "__main__":
     if (1):
 
         if (len(sys.argv) < 3):
-            print " Usage : %s <input files (at least 2)> <output file> [pruneOrder] [colMaxNAfrac] [rowMaxNAfrac] " % sys.argv[0]
+            print " Usage : %s <input files (at least 1)> <output file> [pruneOrder] [colMaxNAfrac] [rowMaxNAfrac] " % sys.argv[0]
+            print " NOTE  : either all 3 optional arguments must be specified, or none of them "
             print " ERROR in using mergeTSV.py "
             sys.exit(-1)
 
@@ -362,7 +363,8 @@ if __name__ == "__main__":
 
         if (doPrune):
             if (len(sys.argv) < 5):
-                print " Usage : %s <input files (at least 2)> <output file> [pruneOrder] [colMaxNAfrac] [rowMaxNAfrac] " % sys.argv[0]
+                print " Usage : %s <input files (at least 1)> <output file> [pruneOrder] [colMaxNAfrac] [rowMaxNAfrac] " % sys.argv[0]
+                print " NOTE  : either all 3 optional arguments must be specified, or none of them "
                 print " ERROR in using mergeTSV.py "
                 sys.exit(-1)
             inFileList = sys.argv[1:-4]
@@ -589,8 +591,7 @@ if __name__ == "__main__":
     if (pruneOrder != "NA"):
         print " "
         print " now calling pruneTSV_dataMatrix on the merged dataMatrix ... ", pruneOrder
-        outD = tsvIO.pruneTSV_dataMatrix(
-            outD, rowMaxNAfrac, colMaxNAfrac, pruneOrder)
+        outD = tsvIO.pruneTSV_dataMatrix(outD, rowMaxNAfrac, colMaxNAfrac, pruneOrder)
     else:
         print " "
         print " NOT doing any pruning of the merged dataMatrix "

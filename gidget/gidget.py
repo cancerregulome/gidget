@@ -23,6 +23,7 @@ import sys
 import os
 import shlex
 import subprocess
+from subprocess import call
 
 from docopt import docopt
 from ConfigParser import SafeConfigParser
@@ -32,7 +33,7 @@ import gidget_list
 import gidget_describe
 import gidget_add
 import gidget_remove
-import gidget_run
+#import gidget_run
 
 
 if __name__ == '__main__':
@@ -88,7 +89,7 @@ if __name__ == '__main__':
 
     # for "-h" or "--help", docopt prints usage and exits cleanly
     mainArgs = docopt(__doc__,
-                      version = 'gidget version 0.20.2',
+                      version = 'gidget version 0.30.0',
                       options_first = True)
 
 
@@ -121,7 +122,7 @@ if __name__ == '__main__':
     elif subCommandName == 'remove':
         print docopt(gidget_remove.__doc__, argv = subCommandArgs)
     elif subCommandName == 'run':
-        print docopt(gidget_run.__doc__, argv = subCommandArgs)
+        exit(call(['python', 'gidget_run.py'] + subCommandArgs))# + ' '.join(subCommandArgs)]))
     else:
         print "command " + subCommandName + " not recognized."
         print __doc__

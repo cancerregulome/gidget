@@ -8,14 +8,15 @@ approach
 
 '''
 import ConfigParser
-from datetime import datetime
 import os
 import sys
 import traceback
+from   datetime import datetime
 
 import miscIO
+import miscTCGA
 import path
-from technology_type_factory import technology_type_factory
+from   technology_type_factory import technology_type_factory
 
 #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 class NoSamplesException(Exception):
@@ -487,6 +488,8 @@ def initialize(argv):
 
     if 5 < len(argv):
         config.set('technology_type', 'snapshot', argv[5]) 
+        snapshotName = config.get('technology_type', 'snapshot') 
+        miscTCGA.setMappingFile ( snapshotName )
 
     verifyArgs(platformID, tumorTypes)
     

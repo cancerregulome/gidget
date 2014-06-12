@@ -40,3 +40,7 @@ nosetests.xml
 
 # virtualenv
 env/
+
+# WebStorm/IntelliJ
+.idea
+

@@ -2149,6 +2149,7 @@ def readTSV_clinical ( inName ):
         allClinDict[aToken] = [''] * numExamples
 
     ii = 0
+    kk = 0
     done = 0
     # now start reading through the rest of the file
     while not done:

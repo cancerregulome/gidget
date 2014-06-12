@@ -161,9 +161,10 @@ def filterPWPV(pwpvOutFilename):
 
     print " "
     print "     n1 = %9d    n0 = %9d " % (n1, n0)
-    f1 = float(n1) / float(n1 + n0)
-    f0 = float(n0) / float(n1 + n0)
-    print "     f1 = %9.6f    f0 = %9.6f " % (f1, f0)
+    if ( (n1+n0) > 0 ):
+        f1 = float(n1) / float(n1 + n0)
+        f0 = float(n0) / float(n1 + n0)
+        print "     f1 = %9.6f    f0 = %9.6f " % (f1, f0)
     print " "
     print typeCounts
     print " "

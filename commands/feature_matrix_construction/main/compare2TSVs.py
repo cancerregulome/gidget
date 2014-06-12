@@ -133,6 +133,45 @@ def findIndex(rowLabels, aLabel):
 
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 
+def chopOneFeat ( aLabel, labelTokens ):
+
+    aType = labelTokens[1].lower()
+
+    if ( aType == "gexp" ):
+        return ( labelTokens[0] + ":" + labelTokens[1] + ":" + labelTokens[2] + ":::::" + labelTokens[7] )
+
+    if ( aType == "gnab" ):
+        return ( labelTokens[0] + ":" + labelTokens[1] + ":" + labelTokens[2] + ":::::" + labelTokens[7] )
+
+    if ( aType == "mirn" ):
+        return ( labelTokens[0] + ":" + labelTokens[1] + ":" + labelTokens[2] + ":::::" + labelTokens[7] )
+
+    if ( aType == "cnvr" ):
+        return ( labelTokens[0] + ":" + labelTokens[1] + "::" + labelTokens[3] + ":" \
+               + labelTokens[4] + ":" + labelTokens[5] + "::" + labelTokens[7] )
+
+    if ( aType == "meth" ):
+        try:
+            splitLast = labelTokens[7].split('_')
+        except:
+            splitLast = [ '' ]
+        return ( labelTokens[0] + ":" + labelTokens[1] + "::::::" + splitLast[0] )
+
+    if ( aType == "rppa" ):
+        return ( labelTokens[0] + ":" + labelTokens[1] + "::::::" + labelTokens[7] )
+
+    if ( aType == "clin" ):
+        return ( labelTokens[0] + "::" + labelTokens[2] + ":::::" + labelTokens[7] )
+
+    if ( aType == "samp" ):
+        return ( labelTokens[0] + "::" + labelTokens[2] + ":::::" + labelTokens[7] )
+
+    print " in chopOneFeat ... ", aLabel
+    print labelTokens
+    sys.exit(-1)
+
+# -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
+
 if __name__ == "__main__":
 
     if (len(sys.argv) != 3):
@@ -172,30 +211,43 @@ if __name__ == "__main__":
         print " input file B does not exist ??? "
         sys.exit(-1)
 
+    # new approach to comparing feature names ... chop out certain
+    # non-critical portions of the feature to allow for less
+    # stringent matching ...
+    chopFeat = 1
+
     # first take a look at the feature (row) labels ...
 
     rowLabelsA = []
     for aLabel in dataA['rowLabels']:
+        aLabel = aLabel.lower()
         aTokens = aLabel.split(':')
         if ( len(aTokens) > 3 ):
-            if ( aTokens[1].lower()=="clin"  or  aTokens[1].lower()=="samp" ):
-                rowLabelsA += [ aLabel[6:].lower() ]
+            if ( chopFeat ):
+                rowLabelsA += [ chopOneFeat ( aLabel, aTokens ) ]
             else:
-                rowLabelsA += [ aLabel.lower() ]
+                if ( aTokens[1]=="clin"  or  aTokens[1]=="samp" ):
+                    rowLabelsA += [ aLabel[6:] ]
+                else:
+                    rowLabelsA += [ aLabel ]
         else:
-            rowLabelsA += [ aLabel.lower() ]
+            rowLabelsA += [ aLabel ]
     rowLabelsA.sort()
 
     rowLabelsB = []
     for bLabel in dataB['rowLabels']:
+        bLabel = bLabel.lower()
         bTokens = bLabel.split(':')
         if ( len(bTokens) > 3 ):
-            if ( bTokens[1].lower()=="clin"  or  bTokens[1].lower()=="samp" ):
-                rowLabelsB += [ bLabel[6:].lower() ]
+            if ( chopFeat ):
+                rowLabelsB += [ chopOneFeat ( bLabel, bTokens ) ]
             else:
-                rowLabelsB += [ bLabel.lower() ]
+                if ( bTokens[1]=="clin"  or  bTokens[1]=="samp" ):
+                    rowLabelsB += [ bLabel[6:] ]
+                else:
+                    rowLabelsB += [ bLabel ]
         else:
-            rowLabelsB += [ bLabel.lower() ]
+            rowLabelsB += [ bLabel ]
     rowLabelsB.sort()
 
     ## print len(rowLabelsA), len(rowLabelsB)

@@ -187,6 +187,9 @@ if __name__ == "__main__":
     # now read in the input feature matrix ...
     dataD = tsvIO.readTSV(inFile)
 
+    if (len(dataD) == 0):
+        print " in addDiscreteFeat ... no input data ... nothing to do here ... "
+
     # loop over specified features and add a discretized version of each one
     for aFeat in featDict.keys():
 

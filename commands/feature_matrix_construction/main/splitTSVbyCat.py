@@ -193,7 +193,6 @@ def makeDataTypeString(dTypeList, fTypeList):
 
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 
-
 def readSampleListFromFile(sampleFile):
 
     fh = file(sampleFile)
@@ -207,6 +206,54 @@ def readSampleListFromFile(sampleFile):
     fh.close()
 
     return (sampleList)
+
+# -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
+
+def createOutputFileName ( inFile, rowLabel, aCat ):
+
+    ## we want to decide whether or not to include part of the feature
+    ## name in to the output file name ... if the category label is
+    ## sufficiently generic that it might not be very unique/informative
+    nameFlag = 0
+    uCat = str(aCat).upper()
+    if ( uCat in [ "0", "1", "NO", "YES", "MUT", "WT", "ALIVE", "DEAD", "MALE", "FEMALE" ] ):
+        nameFlag = 1
+    if ( len(uCat) == 2 ):
+        if ( uCat[0] in [ "T", "N", "M", "C" ] ):
+            try:
+                iCat = int(uCat[1])
+                nameFlag = 1
+            except:
+                doNothing = 1
+    if ( uCat.find("PRIMARY") > 0 ): nameFlag = 1
+    if ( uCat.find("METASTA") > 0 ): nameFlag = 1
+
+    if ( nameFlag == 0 ):
+        nameStr = ''
+    else:
+        tokenList = rowLabel.split(':')
+        if ( tokenList[2].startswith("I(") ):
+            subName = tokenList[2][2:-1]
+            i1 = subName.find("|")
+            if ( i1 > 0 ): subName = subName[:i1]
+            i1 = subName.find(",")
+            if ( i1 > 0 ): subName = subName[:i1] + "_vs_" + subName[i1+1:]
+        else:
+            subName = tokenList[2]
+        nameStr = subName + "_"
+        try:
+            if ( len(tokenList[7]) > 0 ):
+                nameStr += tokenList[7] + "_"
+        except:
+            doNothing = 1
+        nameStr += "_"
+
+    if (inFile.endswith(".tsv")):
+        outFile = inFile[:-4] + "." + nameStr + str(aCat) + ".tsv"
+    else:
+        outFile = inFile + "." + nameStr + str(aCat) + ".tsv"
+
+    return ( outFile )
 
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 
@@ -373,10 +420,8 @@ if __name__ == "__main__":
                 outD2 = tsvIO.filter_dataMatrix(outD, rmRowList, [])
                 outD = outD2
 
-            if (inFile.endswith(".tsv")):
-                outFile = inFile[:-4] + "." + str(aCat) + ".tsv"
-            else:
-                outFile = inFile + "." + str(aCat) + ".tsv"
+            ## 30apr14 ... changing the way the output file name is created
+            outFile = createOutputFileName ( inFile, rowLabels[iR], aCat )
 
             print " "
             print " calling writeTSV_dataMatrix ... ", outFile

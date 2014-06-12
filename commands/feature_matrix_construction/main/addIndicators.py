@@ -10,6 +10,7 @@ import sys
 NA_VALUE = -999999
 
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
+# -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 # want to make sure that we don't add a feature like:
 # B:SAMP:I(A,B|C)
 # if   B:SAMP:I(B,A|C)
@@ -88,10 +89,13 @@ def checkColonCount(newLabel):
 
     if (numC == 7):
         return (newLabel)
-    else:
+    elif (numC < 7):
         for ii in range(numC, 7):
             newLabel += ':'
         return (newLabel)
+    elif (numC > 7):
+        print " WARNING !!! improper feature label ??? ", newLabel, numC
+        sys.exit(-1)
 
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 
@@ -165,17 +169,23 @@ def addIndicators4oneFeat(aKey, rowLabels, tmpMatrix):
         print " --> building new label ... "
         try:
             if (aKey[1] == ":" and aKey[6] == ":"):
+                # if we get to here, then we must have a feature that starts 
+                # with something like C:GEXP:NOTCH2...
                 i1 = aKey[7:].find(':')
                 if (i1 < 0):
                     i1 = len(aKey)
                     i2 = len(aKey)
                 else:
+                    # if we get here, then a 3rd colon has been found
                     i1 = i1 + 7
                     i2 = aKey[(i1 + 1):].find(':')
                     if (i2 < 0):
                         i2 = len(aKey)
                     else:
-                        i2 = i2 + i1
+                        # and if we get here, then a 4th colon has been found
+                        # BUT I DON'T UNDERSTAND WHY THAT MATTERS ???
+                        #### i2 = i2 + i1
+                        i2 = i1 
                 print aKey, i1, i2, len(aKey)
                 print aKey[7:i1]
                 print aKey[i2:]
@@ -268,7 +278,8 @@ def addIndicators4oneFeat(aKey, rowLabels, tmpMatrix):
                         if (i2 < 0):
                             i2 = len(aKey)
                         else:
-                            i2 = i2 + i1
+                            #### i2 = i2 + i1
+                            i2 = i1 
                     print aKey, i1, i2
                     print aKey[7:i1]
                     print aKey[i2:]
