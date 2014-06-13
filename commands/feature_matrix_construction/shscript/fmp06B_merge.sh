@@ -66,6 +66,7 @@ echo " *******************"
         ## here we build the merged matrix using only sequencing-based data (if it exists)
 	if [ -f $tumor.gexp.seq.tmpData3.tsv ]
 	    then
+                rm -fr tmp.tsv
 		python $TCGAFMP_ROOT_DIR/main/mergeTSV.py \
 			finalClin.$tumor.$curDate.tsv \
 			$tumor.mirn.tmpData3.tsv \
@@ -76,12 +77,16 @@ echo " *******************"
 			$tumor.gexp.seq.tmpData3.tsv \
 			../gnab/$tumor.gnab.tmpData4b.tsv \
 			$auxFiles \
-			$tumor.newMerge.seq.$curDate.tsv >& $tumor.newMerge.seq.$curDate.log 
+			tmp.tsv >& $tumor.newMerge.seq.$curDate.log 
+
+                python $TCGAFMP_ROOT_DIR/main/addDiseaseCode.py \
+                        tmp.tsv $tumor.newMerge.seq.$curDate.tsv
 	fi
 
         ## here we build the merged matrix using only array-based data (if it exists)
 	if [ -f $tumor.gexp.ary.tmpData3.tsv ]
 	    then
+                rm -fr tmp.tsv
 		python $TCGAFMP_ROOT_DIR/main/mergeTSV.py \
 			finalClin.$tumor.$curDate.tsv \
 			$tumor.mirn.tmpData3.tsv \
@@ -92,10 +97,14 @@ echo " *******************"
 			$tumor.gexp.ary.tmpData3.tsv \
 			../gnab/$tumor.gnab.tmpData4b.tsv \
 			$auxFiles \
-			$tumor.newMerge.ary.$curDate.tsv >& $tumor.newMerge.ary.$curDate.log 
+			tmp.tsv >& $tumor.newMerge.ary.$curDate.log 
+
+                python $TCGAFMP_ROOT_DIR/main/addDiseaseCode.py \
+                        tmp.tsv $tumor.newMerge.ary.$curDate.tsv
 	fi
 
         ## here we build the merged matrix using both types of data (whatever exists)
+                rm -fr tmp.tsv
 		python $TCGAFMP_ROOT_DIR/main/mergeTSV.py \
 			finalClin.$tumor.$curDate.tsv \
 			$tumor.mirn.tmpData3.tsv \
@@ -107,8 +116,10 @@ echo " *******************"
 			$tumor.gexp.seq.tmpData3.tsv \
 			../gnab/$tumor.gnab.tmpData4b.tsv \
 			$auxFiles \
-			$tumor.newMerge.all.$curDate.tsv >& $tumor.newMerge.all.$curDate.log 
+			tmp.tsv >& $tumor.newMerge.all.$curDate.log 
 
+                python $TCGAFMP_ROOT_DIR/main/addDiseaseCode.py \
+                        tmp.tsv $tumor.newMerge.all.$curDate.tsv
 
 echo " "
 echo " fmp06B_merge script is FINISHED !!! "
