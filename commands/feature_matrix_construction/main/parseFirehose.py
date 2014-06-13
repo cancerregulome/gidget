@@ -54,6 +54,8 @@ def getMostRecentDir(topDir, cancerList, awgFlag):
     print genDates
     print awgDates
 
+    lastDir = "NA"
+
     ## give priority to an AWG run ...
     if ( (awgFlag=="YES") and (len(awgDates)>0) ):
 
@@ -61,7 +63,6 @@ def getMostRecentDir(topDir, cancerList, awgFlag):
         lastDate = lastDate[0:4] + "_" + lastDate[4:6] + "_" + lastDate[6:8]
         print "     using this awg date : ", lastDate
 
-        lastDir = "NA"
         for d1Name in d1.dirs():
             # give first priority to awg specific run ...
             if (len(cancerList) == 1):
