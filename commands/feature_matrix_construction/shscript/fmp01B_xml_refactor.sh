@@ -68,7 +68,7 @@ for tumor in $tumors
 	rm -fr tmp.sort
 	sort $tumor.clinical.$curDate.tsv >& tmp.sort
 	mv -f tmp.sort $tumor.clinical.$curDate.tsv
-        $TCGAFMP_ROOT_DIR/shscript/fmp00B_hackBarcodes.sh $tumor.clinical.$curDate.tsv
+        ## $TCGAFMP_ROOT_DIR/shscript/fmp00B_hackBarcodes.sh $tumor.clinical.$curDate.tsv
 
 	## ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 	## then we parse the Firehose analyses output files ...
@@ -85,8 +85,8 @@ for tumor in $tumors
             ../aux/MutSigCV.patients.counts_and_rates.forXmlMerge.tsv
         rm -fr gdac.broadinstitute.org_*counts*rates*tsv
 
-        $TCGAFMP_ROOT_DIR/shscript/fmp00B_hackBarcodes.sh \
-            ../aux/MutSigCV.patients.counts_and_rates.forXmlMerge.tsv
+        ## $TCGAFMP_ROOT_DIR/shscript/fmp00B_hackBarcodes.sh \
+        ##     ../aux/MutSigCV.patients.counts_and_rates.forXmlMerge.tsv
 
 	## ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 	## here we want to try to merge Firehose-based outputs into the XML-based clinical matrix
@@ -112,7 +112,7 @@ for tumor in $tumors
         for f in `ls -1d gdac.broad*.tsv`
             do
 		echo "    " $f
-                $TCGAFMP_ROOT_DIR/shscript/fmp00B_hackBarcodes.sh $f
+                ## $TCGAFMP_ROOT_DIR/shscript/fmp00B_hackBarcodes.sh $f
                 echo " " >> gdac.broad.merge.log
                 echo $f >> gdac.broad.merge.log
                 echo " " >> gdac.broad.merge.log

@@ -79,10 +79,10 @@ echo " methylation data file : " $methFilename
 date
 python $TCGAFMP_ROOT_DIR/main/parse_tcga.py \
     $CONFIG_FILE \
-    unc.edu/illuminahiseq_rnaseqv2/rnaseqv2/ \
-    $tumor meth450k dcc-snapshot >& level3.rnaseqv2.log 
+    bcgsc.ca/illuminahiseq_rnaseq/rnaseq/ \
+    $tumor meth450k dcc-snapshot >& level3.rnaseq.log 
 # and here we should have an output file with ~20k rows
-grep "finished in writeTSV_dataMatrix" level3.rnaseqv2.log
+grep "finished in writeTSV_dataMatrix" level3.rnaseq.log
 
 date
 python $TCGAFMP_ROOT_DIR/main/parse_tcga.py \
@@ -106,7 +106,7 @@ echo " Step #2: annotate the RNAseq and miRNAseq feature names "
 
 date
 python $TCGAFMP_ROOT_DIR/main/annotateTSV.py \
-    $tumor.unc.edu__illuminahiseq_rnaseqv2__rnaseqv2.meth450k.tsv \
+    $tumor.bcgsc.ca__illuminahiseq_rnaseq__rnaseq.meth450k.tsv \
     hg19 $tumor.gexp.annot.tsv NO >& $tumor.gexp.annot.log
 
 date
