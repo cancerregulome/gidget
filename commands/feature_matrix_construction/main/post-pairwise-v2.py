@@ -143,7 +143,7 @@ if __name__ == "__main__":
         sys.exit(-1)
 
     print " "
-    print " in post_pwRK2b ... "
+    print " in post-pairwise-v2 ... "
     print "     scratch directory: ", sys.argv[1]
     print "     tsv file: ", sys.argv[2]
     print "     iOne: ", sys.argv[3]
@@ -291,7 +291,7 @@ if __name__ == "__main__":
             else:
                 try:
                     rho = float(tokenList[3])
-                    rhoString = "%.3f" % rho
+                    rhoString = "%.2f" % rho
                 except:
                     rhoString = "NA"
 
