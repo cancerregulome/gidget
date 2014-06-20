@@ -235,8 +235,9 @@ if __name__ == "__main__":
 
         # or if we are definitely only processing one, we are done after one
         # loop
-        if (iFeat == iOne):
-            done = 1
+        #### NOT !!! 20jun2014
+        #### if (iFeat == iOne):
+        ####    done = 1
 
         iFirst = 0
 
@@ -251,8 +252,8 @@ if __name__ == "__main__":
                 continue
 
             # each line should look something like this:
-            # <featA> <featB> <??>  +0.753   186   +9.236   0   -0.000   0   -0.000   <*>
-            # and note that the 4th column could say "nan"
+            # <featA> <featB>  CC   +nan      28   -0.000  77  300.000   0  300.000  R0
+            # <featA> <featB>  CN     NA     295   17.923   0  300.000   0  300.000  -
 
             aLine = aLine.strip()
             tokenList = aLine.split('\t')
@@ -265,7 +266,6 @@ if __name__ == "__main__":
                 print len(tokenList), tokenList
                 print " "
                 continue
-
 
             aFeat = tokenList[0]
             bFeat = tokenList[1]
@@ -287,6 +287,8 @@ if __name__ == "__main__":
                     # print iF, jF
 
             if (tokenList[3].find("nan") >= 0):
+                rhoString = "NA"
+            elif (tokenList[3].find("NA") >= 0):
                 rhoString = "NA"
             else:
                 try:
@@ -325,9 +327,12 @@ if __name__ == "__main__":
             if ( 0 ):
                 if (num < 10): dqFlag = 1
 
-            if (rhoString != "NA"):
-                if ((logP > 299) and (abs(float(rhoString)) < 0.1)):
-                    dqFlag = 1
+            if ( 0 ):
+                # removing this on 20jun2014
+                if (rhoString != "NA"):
+                    if ((logP > 299) and (abs(float(rhoString)) < 0.1)):
+                        dqFlag = 1
+
             # added this on 12jun13 ...
             # --> made some modifications on 05sep13 ...
             if (rhoString != "NA"):
@@ -337,6 +342,7 @@ if __name__ == "__main__":
                     # an "interesting" pair -- specifically if it is a GNAB/GNAB pair
                     # or if it involves a CLIN or SAMP feature
                     # ~except~ if it is a mutation feature and the two genes are different
+
                     if (aType == "BGNAB" and bType == "BGNAB"):
                         aTokens = aFeat.split(':')
                         bTokens = bFeat.split(':')
@@ -380,8 +386,8 @@ if __name__ == "__main__":
                          logBonf, blogP, nB, pB, nA, pA, abDist)
 
                 fhOut.write("%s" % outString)
-                if (iOne == -1):
-                    subFh[iF][jF].write("%s" % outString)
+                if (iOne == -1): subFh[iF][jF].write("%s" % outString)
+
                 numLinesOut += 1
                 if (numLinesOut % 1000000 == 0):
                     print "     number of output pairs : ", numLinesOut
