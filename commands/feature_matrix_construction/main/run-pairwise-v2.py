@@ -604,11 +604,11 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description='Create runlist for pairwise')
     parser.add_argument('--min-ct-cell', '-minct',
-                        action='store', default=5, type=int)
+                        action='store', default=3, type=int)
     parser.add_argument('--min-mx-cell', '-minmx',
-                        action='store', default=5, type=int)
+                        action='store', default=3, type=int)
     parser.add_argument('--min-samples', '-M',
-                        action='store', default=20, type=int)
+                        action='store', default=11, type=int)
     parser.add_argument('--pvalue', '-p', action='store',
                         default=0.000001, type=float)
     parser.add_argument('--adjP', '-a', action='store_true')
@@ -846,7 +846,7 @@ if __name__ == "__main__":
         outName = tmpDir13 + "/%d.pw" % iJob
         listFile = tmpDir13 + "/%d.list" % iJob
 
-        cmdString = "1 ignoreThree.py " + gidgetConfigVars['TCGAFMP_PAIRWISE_ROOT'] + "/pairwise-2.0.0rc-rel"
+        cmdString = "1 ignoreThree.py " + gidgetConfigVars['TCGAFMP_PAIRWISE_ROOT'] + "/pairwise-2.0.0rc3-rel"
         cmdString += " --by-index %s " % listFile
         ## cmdString += " --dry-run "
         cmdString += " --p-value %g " % args.pvalue
