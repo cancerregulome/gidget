@@ -17,16 +17,37 @@ fi
 ##      tsvExtension, eg: 'TP.tsv'
 
 WRONGARGS=1
-if [ $# != 3 ]
+if [[ $# != 3 ]] && [[ $# != 4 ]]
     then
-        echo " Usage   : `basename $0` <curDate> <tumorType> <tsvExtension> "
+        echo " "
+        echo " Usage   : `basename $0` <curDate> <tumorType> <tsvExtension> [config-file] "
         echo " Example : `basename $0` 28oct13  brca  TP.tsv "
+        echo " "
+        echo " NOTE that the config-file is optional and by default will be obtained from "
+        echo " either <tumorType>/aux/PairProcess_config.csv or from the root shscript directory. "
+        echo " If you do want to use a specific config-file, put it in the <tumorType>/aux/ directory. "
+        echo " "
         exit $WRONGARGS
 fi
 
 curDate=$1
 tumor=$2
 tsvExt=$3
+if (( $# == 4 ))
+    then
+        cFile=$TCGAFMP_DATA_DIR/$tumor/aux/$4
+    else
+        if [ -f $TCGAFMP_DATA_DIR/$tumor/aux/PairProcess_config.csv ]
+            then
+                cFile=$TCGAFMP_DATA_DIR/$tumor/aux/PairProcess_config.csv
+            else
+                cFile=$TCGAFMP_ROOT_DIR/shscript/PairProcess_config.csv
+        fi
+fi
+
+echo " "
+echo " using config file " $cFile
+echo " "
 
 FNF=2
 tsvFile=$TCGAFMP_DATA_DIR/$tumor/$curDate/$tumor.seq.$curDate.$tsvExt
@@ -52,17 +73,6 @@ echo " h = " $h
 rm -fr $h.????.????.pwpv
 rm -fr $h.????.????.pwpv.forRE
 
-echo " "
-echo " "
-
-if [ -f $TCGAFMP_DATA_DIR/$tumor/aux/PairProcess_config.csv ]
-    then
-        cFile=$TCGAFMP_DATA_DIR/$tumor/aux/PairProcess_config.csv
-    else
-        cFile=$TCGAFMP_ROOT_DIR/shscript/PairProcess_config.csv
-    fi
-
-echo " using config file " $cFile
 echo " "
 echo " "
 
