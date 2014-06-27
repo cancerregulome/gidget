@@ -830,8 +830,6 @@ if __name__ == "__main__":
         print " failed to open output file <%s>, exiting ... " % runFile
         sys.exit(-1)
 
-    pythonbin = sys.executable
-
     golempwd = "PASSWD_HERE"
     fhC = file (gidgetConfigVars['TCGAFMP_CLUSTER_SCRATCH'] + "/config", 'r' )
     aLine = fhC.readline()
@@ -846,7 +844,7 @@ if __name__ == "__main__":
         outName = tmpDir13 + "/%d.pw" % iJob
         listFile = tmpDir13 + "/%d.list" % iJob
 
-        cmdString = "1 ignoreThree.py " + gidgetConfigVars['TCGAFMP_PAIRWISE_ROOT'] + "/pairwise-2.0.0rc3-rel"
+        cmdString = "1 ignoreThree.py " + gidgetConfigVars['TCGAFMP_PAIRWISE_ROOT'] + "/pairwise-2.0.0rc4-rel"
         cmdString += " --by-index %s " % listFile
         ## cmdString += " --dry-run "
         cmdString += " --p-value %g " % args.pvalue
