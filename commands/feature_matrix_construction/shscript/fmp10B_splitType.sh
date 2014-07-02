@@ -10,15 +10,24 @@ source ${TCGAFMP_ROOT_DIR}/../../gidget/util/gidget_util.sh
 ##      one tumor type, eg 'ucec'
 
 WRONGARGS=1
-if [ $# != 2 ]
+if [[ $# != 2 ]] && [[ $# != 3 ]]
     then
-        echo " Usage   : `basename $0` <curDate> <tumorType> "
-        echo " Example : `basename $0` 28oct13  brca "
+        echo " Usage   : `basename $0` <curDate> <tumorType>  [auxName] "
+        echo " Example : `basename $0` 28oct13  brca  aux "
+        echo " "
+        echo " Note that the new auxName option at the end is optional and will default to simply aux "
         exit $WRONGARGS
 fi
 
 curDate=$1
 tumor=$2
+
+if (( $# == 3 ))
+    then
+        auxName=$3
+    else
+        auxName=aux
+fi
 
 echo " "
 echo " "
@@ -27,10 +36,6 @@ echo `date`
 echo " *" $curDate
 echo " *******************"
 
-args=("$@")
-for ((i=1; i<$#; i++))
-    do
-        tumor=${args[$i]}
 
 	cd $TCGAFMP_DATA_DIR/$tumor
 
@@ -41,7 +46,7 @@ for ((i=1; i<$#; i++))
 
 	cd $curDate
 
-	s=$(<../aux/splitType.txt)
+	s=$(<../$auxName/splitType.txt)
 	if [ -z "$s" ]
 	    then
 	        echo " no splitType specified "
@@ -69,15 +74,15 @@ for ((i=1; i<$#; i++))
                 python $TCGAFMP_ROOT_DIR/main/addIndicators.py $f tmpf1a.tsv >> final.addI.log
 
                 echo " adding discrete features ... "
-                python $TCGAFMP_ROOT_DIR/main/addDiscreteFeat.py tmpf1a.tsv tmpf1.tsv ../aux/$tumor.addDiscreteFeat_List.txt >> final.addI.log
+                python $TCGAFMP_ROOT_DIR/main/addDiscreteFeat.py tmpf1a.tsv tmpf1.tsv ../$auxName/$tumor.addDiscreteFeat_List.txt >> final.addI.log
 
                 echo " filtering features and samples ... "
                 python $TCGAFMP_ROOT_DIR/main/filterTSVbyFeatList.py \
                             tmpf1.tsv tmpf2.tsv \
-                            ../aux/$tumor.features.blacklist.loose.tsv  black loose \
-                            ../aux/$tumor.features.blacklist.strict.tsv black strict \
-                            ../aux/$tumor.features.whitelist.loose.tsv  white loose \
-                            ../aux/$tumor.features.whitelist.strict.tsv white strict \
+                            ../$auxName/$tumor.features.blacklist.loose.tsv  black loose \
+                            ../$auxName/$tumor.features.blacklist.strict.tsv black strict \
+                            ../$auxName/$tumor.features.whitelist.loose.tsv  white loose \
+                            ../$auxName/$tumor.features.whitelist.strict.tsv white strict \
                             >> filterFeat.log
 
                 echo " log-transform all GEXP and MIRN features "
@@ -86,10 +91,10 @@ for ((i=1; i<$#; i++))
                 python $TCGAFMP_ROOT_DIR/main/filterTSVbySampList.py \
                             tmpf2b.tsv $k \
                             $tumor.blacklist.samples.tsv black loose \
-                            ../aux/$tumor.blacklist.loose.tsv  black loose \
-                            ../aux/$tumor.blacklist.strict.tsv black strict \
-                            ../aux/$tumor.whitelist.loose.tsv  white loose \
-                            ../aux/$tumor.whitelist.strict.tsv white strict \
+                            ../$auxName/$tumor.blacklist.loose.tsv  black loose \
+                            ../$auxName/$tumor.blacklist.strict.tsv black strict \
+                            ../$auxName/$tumor.whitelist.loose.tsv  white loose \
+                            ../$auxName/$tumor.whitelist.strict.tsv white strict \
                             >> filterFeat.log
 
                 echo " get summary information on this file ... "
@@ -136,7 +141,6 @@ for ((i=1; i<$#; i++))
 
 	    done
 
-    done
 
 echo " "
 echo " fmp10B_splitType script is FINISHED !!! "

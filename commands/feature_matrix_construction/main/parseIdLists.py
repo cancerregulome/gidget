@@ -61,12 +61,16 @@ def getSampleList(fName):
 if __name__ == "__main__":
 
     if (1):
-        if (len(sys.argv) == 3):
+        if ( (len(sys.argv)==3) or (len(sys.argv)==4) ):
             tumorString = sys.argv[1]
             dateString = sys.argv[2]
+            if ( len(sys.argv) == 4 ):
+                auxName = sys.argv[3]
+            else:
+                auxName = "aux"
         else:
             print " "
-            print " Usage: %s <tumorString> <dateString> "
+            print " Usage: %s <tumorString> <dateString> [auxName] "
             print " "
             sys.exit(-1)
 
@@ -104,8 +108,7 @@ if __name__ == "__main__":
     print len(uList)
 
     # ok and now we can write out the indicator features ...
-    outFile = "%s/%s/aux/namedLists.forXmlMerge.tsv" % (
-        gidgetConfigVars['TCGAFMP_DATA_DIR'], tumorString)
+    outFile = "%s/%s/$s/namedLists.forXmlMerge.tsv" % ( gidgetConfigVars['TCGAFMP_DATA_DIR'], tumorString, auxName )
     fh = file(outFile, 'w')
 
     outLine = "bcr_patient_barcode"

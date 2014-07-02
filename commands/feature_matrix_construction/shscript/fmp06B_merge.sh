@@ -10,16 +10,26 @@ source ${TCGAFMP_ROOT_DIR}/../../gidget/util/gidget_util.sh
 ##      one tumor type, eg 'ucec'
 
 WRONGARGS=1
-if [ $# != 3 ]
+if [[ $# != 3 ]] && [[ $# != 4 ]]
     then
-        echo " Usage   : `basename $0` <curDate> <tumorType> <public/private> "
-        echo " Example : `basename $0` 28oct13  brca  private "
+        echo " Usage   : `basename $0` <curDate> <tumorType> <public/private> [auxName] "
+        echo " Example : `basename $0` 28oct13  brca  private  aux "
+        echo " "
+        echo " Note that the new auxName option at the end is optional and will default to simply aux "
         exit $WRONGARGS
 fi
 
 curDate=$1
 tumor=$2
 ppString=$3
+
+if (( $# == 4 ))
+    then
+        auxName=$4
+    else
+        auxName=aux
+fi
+
 
 echo " "
 echo " "
@@ -53,7 +63,7 @@ echo " *******************"
         auxFiles=''
         if [ "$ppString" = 'private' ]
             then
-                auxFiles=`ls ../aux/*.forTSVmerge.tsv`
+                auxFiles=`ls ../$auxName/*.forTSVmerge.tsv`
             fi
 
         echo " "

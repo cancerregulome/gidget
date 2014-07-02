@@ -12,10 +12,12 @@ source ${TCGAFMP_ROOT_DIR}/../../gidget/util/gidget_util.sh
 ##	config, eg 'parse_tcga.config', relative to $TCGAFMP_ROOT_DIR/config
 
 WRONGARGS=1
-if [ $# != 5 ]
+if [[ $# != 5 ]] && [[ $# != 6 ]]
     then
-        echo " Usage   : `basename $0` <curDate> <snapshotName> <tumorType> <config> <public/private> "
-        echo " Example : `basename $0` 28oct13  dcc-snapshot-28oct13  brca  parse_tcga.27_450k.config  private "
+        echo " Usage   : `basename $0` <curDate> <snapshotName> <tumorType> <config> <public/private> [auxName] "
+        echo " Example : `basename $0` 28oct13  dcc-snapshot-28oct13  brca  parse_tcga.27_450k.config  private  aux "
+        echo " "
+        echo " Note that the new auxName option at the end is optional and will default to simply aux "
         exit $WRONGARGS
 fi
 
@@ -24,6 +26,13 @@ snapshotName=$2
 tumors=$(echo $3 | tr "," "\n")
 config=$4
 ppString=$5
+
+if (( $# == 6 ))
+    then
+        auxName=$6
+    else
+        auxName=aux
+fi
 
 echo " "
 echo " "
@@ -76,17 +85,17 @@ for tumor in $tumors
 	rm -fr parseFirehose.$curDate.log
 	rm -fr gdac.broadinstitute.org_*.tsv
         rm -fr gdac.broadinstitute.org_*.txt
-	python $TCGAFMP_ROOT_DIR/main/parseFirehose.py $tumor $ppString >& parseFirehose.$curDate.log
+	python $TCGAFMP_ROOT_DIR/main/parseFirehose.py $tumor $ppString $auxName >& parseFirehose.$curDate.log
 
         ## the patients.counts_and_rates files do not differ across multiple subsets
         ## so we can concatenate all of these ...
-        rm -fr ../aux/MutSigCV.patients.counts_and_rates.forXmlMerge.tsv
+        rm -fr ../$auxName/MutSigCV.patients.counts_and_rates.forXmlMerge.tsv
         cat gdac.broadinstitute.org_*counts*rates*tsv | sort | uniq >& \
-            ../aux/MutSigCV.patients.counts_and_rates.forXmlMerge.tsv
+            ../$auxName/MutSigCV.patients.counts_and_rates.forXmlMerge.tsv
         rm -fr gdac.broadinstitute.org_*counts*rates*tsv
 
         ## $TCGAFMP_ROOT_DIR/shscript/fmp00B_hackBarcodes.sh \
-        ##     ../aux/MutSigCV.patients.counts_and_rates.forXmlMerge.tsv
+        ##     ../$auxName/MutSigCV.patients.counts_and_rates.forXmlMerge.tsv
 
 	## ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 	## here we want to try to merge Firehose-based outputs into the XML-based clinical matrix
@@ -139,7 +148,7 @@ for tumor in $tumors
         if [ "$ppString" = 'private' ]
             then
                 echo " incorporating forXmlMerge files from aux directory ... "
-        	for f in `ls ../aux/*.forXmlMerge.tsv`
+        	for f in `ls ../$auxName/*.forXmlMerge.tsv`
         	    do
         		echo "    " $f 
         		echo "    " >> forXmlMerge.log
@@ -173,7 +182,7 @@ for tumor in $tumors
 	## informative features, but it is also adding binary indicator features and so
 	## the output matrix is actually typically quite a bit larger than the input ...
 	rm -fr cleanClin.$curDate.log
-	python $TCGAFMP_ROOT_DIR/main/cleanClinTSV.py clinical.temp.tsv cleanClin.$curDate.tsv >& cleanClin.$curDate.log
+	python $TCGAFMP_ROOT_DIR/main/cleanClinTSV.py clinical.temp.tsv cleanClin.$curDate.tsv $auxName >& cleanClin.$curDate.log
 	## rm -fr clinical.temp.tsv
 
 	## but it still needs some cleaning up ;-)
@@ -197,9 +206,9 @@ for tumor in $tumors
 	python $TCGAFMP_ROOT_DIR/main/filterTSVbySampList.py \
 		cTmp.tsv finalClin.$tumor.$curDate.tsv \
 		$tumor.blacklist.samples.tsv black loose \
-                ../aux/$tumor.blacklist.loose.tsv black loose \
-                ../aux/$tumor.whitelist.loose.tsv white loose \
-                ../aux/$tumor.whitelist.strict.tsv white strict \
+                ../$auxName/$tumor.blacklist.loose.tsv black loose \
+                ../$auxName/$tumor.whitelist.loose.tsv white loose \
+                ../$auxName/$tumor.whitelist.strict.tsv white strict \
                 >& filterSamp.clin.$curDate.log
 
         ## and now run pairwise on this finalClin feature matrix ...

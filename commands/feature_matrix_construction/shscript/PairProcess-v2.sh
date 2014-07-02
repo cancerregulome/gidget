@@ -25,7 +25,7 @@ if [[ $# != 3 ]] && [[ $# != 4 ]]
         echo " "
         echo " NOTE that the config-file is optional and by default will be obtained from "
         echo " either <tumorType>/aux/PairProcess_config.csv or from the root shscript directory. "
-        echo " If you do want to use a specific config-file, put it in the <tumorType>/aux/ directory. "
+        echo " If you want to use a different config-file, then give the complete path-name as a command-line option. "
         echo " "
         exit $WRONGARGS
 fi
@@ -35,7 +35,8 @@ tumor=$2
 tsvExt=$3
 if (( $# == 4 ))
     then
-        cFile=$TCGAFMP_DATA_DIR/$tumor/aux/$4
+        ## cFile=$TCGAFMP_DATA_DIR/$tumor/aux/$4
+        cFile=$4
     else
         if [ -f $TCGAFMP_DATA_DIR/$tumor/aux/PairProcess_config.csv ]
             then
