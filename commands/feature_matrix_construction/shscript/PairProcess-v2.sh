@@ -108,6 +108,7 @@ echo " ***************************** "
 
 cd $TCGAFMP_DATA_DIR/$tumor/$curDate/
 echo " now working in: " `pwd`
+curDir=`pwd`
 
 tsvFile=$tumor.seq.$curDate.$tsvExt
 f=${tsvFile/.tsv/}
@@ -148,3 +149,30 @@ date
 echo " "
 
 
+## now we are going to create a META file if one does not already exist ...
+cd $TCGAFMP_DATA_DIR/$tumor/$curDate
+if [ ! -d "META" ]
+    then
+        mkdir META
+        chmod g+w META
+fi
+cd META
+rm -fr t1?
+cp $TCGAFMP_ROOT_DIR/config/META.sample t1
+
+tsvFile=$TCGAFMP_DATA_DIR/$tumor/$curDate/$tumor.seq.$curDate.$tsvExt
+sed -e 's,FULL_TSV_PATH_NAME_HERE,'"$tsvFile"',g' t1 >& t2
+
+pwName=${tsvFile/.tsv/.pwpv.forRE}
+sed -e 's,FULL_PATH_TO_PWPV_FOR_RE_FILE_HERE,'"$pwName"',g' t2 >& t3
+
+dsName=$tumor.$curDate.$tsvExt
+sed -e 's,DATA_SET_LABEL_HERE,'"$dsName"',g' t3 >& t4
+
+utName=`echo $tumor | tr [:lower:] [:upper:]`
+sed -e 's,TUMOR_TYPE_HERE,'"$utName"',g' t4 >& t5
+
+mv t5 META.$tumor.$curDate.$tsvExt
+rm -fr t?
+
+cd $curDir
