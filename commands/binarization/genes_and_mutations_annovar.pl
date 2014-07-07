@@ -57,9 +57,18 @@ sub read_tcga_mutation_data
 					}
 					
 					#print "$uniprot\t$line\n";
-					
-					($one, $two, $three) = ($1, $2, $3) if ($mutation =~ /^(\S+?)(\d+)(\S+?)$/);
-					
+
+					# one: original aa
+					# two: position
+					# three: new aa
+					if ($mutation =~ /^(\d+)_(\d+)del$/) {
+					    $one = $three = "";
+					    $two = $1;
+					}
+					else {
+					    ($one, $two, $three) = ($1, $2, $3) if ($mutation =~ /^(\S+?)(\d+)(\S+?)$/);
+					}
+
 					#BLCA    KIAA0090        Silent  TCGA-BL-A0C8    Q8N766  I784I   784     I       I
 					
 					
