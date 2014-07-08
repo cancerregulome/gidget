@@ -2,6 +2,7 @@ acc
 blca
 brca
 cesc
+chol
 coad
 dlbc
 esca
@@ -11,8 +12,10 @@ kich
 kirc
 kirp
 laml
+lcml
 lgg
 lihc
+lnnh
 luad
 lusc
 meso
@@ -26,5 +29,7 @@ skcm
 stad
 tgct
 thca
-ucs
+thym
 ucec
+ucs
+uvm
