@@ -1,16 +1,6 @@
-# Changelog for the IlyaLab gidget project
+# gidget changelog
 
 ## 0.4.0
-
-* Added new setting for high color contrast and reduced transparency
-* Improve problem submission process
-* Improve contact us by email feature
-* Changed minimum iOS version to 6.0
-* Upgraded TestFlight SDK, updated event tracking
-* Enhanced back button path for StopInfo
-* Improved memory management
-* General cleanup
-
 
 ### release notes for gidget/commands/feature_matrix_construction
 
@@ -32,7 +22,7 @@
 
 
 ### release notes for gidget/commands/binarization
-*  Mutation summary generaation: Updated to parse MAF protein change codes for in-frame deletions.  'AA pos' output column takes the first position mentioned in the deletion; "to aa" and "from a a" are left blank in this case.
+*  Mutation summary generation: Updated to parse MAF protein change codes for in-frame deletions.  'AA pos' output column takes the first position mentioned in the deletion; "to aa" and "from a a" are left blank in this case.
 
 ### release notes for gidget/commands/maf_processing
 (no significant updates)
