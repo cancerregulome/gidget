@@ -8,7 +8,7 @@ source ${TCGAFMP_ROOT_DIR}/../../gidget/util/gidget_util.sh
 # =============================================================================
 
 # outer loop is over center
-for c in broad.mit.edu genome.wustl.edu hgsc.bcm.edu ucsc.edu
+for c in bcgsc.ca broad.mit.edu genome.wustl.edu hgsc.bcm.edu ucsc.edu
     do
         echo " "
         echo " "
