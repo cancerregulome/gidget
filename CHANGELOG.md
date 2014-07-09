@@ -21,7 +21,7 @@
 * CNVR features are now never annotated with a gene symbol, always with the locus (in the past, if the segment overlapped only one gene it was annotated with that gene symbol, but in order to have a more uniform approach they are now annotated only with a locus -- obtaining the mapping from segment to gene symbol(s) must be done using a secondary look-up table)
 
 ### gidget/commands/binarization
-*  Mutation summary generation: Updated to parse MAF protein change codes for in-frame deletions.  'AA pos' output column takes the first position mentioned in the deletion; "to aa" and "from a a" are left blank in this case.
+*  Mutation summary generation: Updated to parse MAF protein change codes for in-frame deletions.  'AA pos' output column takes the first position mentioned in the deletion; "to aa" and "from aa" are left blank in this case.
 
 ### gidget/commands/maf_processing
 * additional user documentation for manually running the pipeline
