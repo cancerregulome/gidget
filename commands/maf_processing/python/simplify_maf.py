@@ -63,7 +63,7 @@ def main(argv):
         bNum = record["NCBI_Build"]
         if (build_number is not None) and (bNum != build_number):
             raise Exception(
-                "Inconsistent NCBI_Build values; cleave table first")
+                "Inconsistent NCBI_Build values (prev: %s; current: %s); cleave table first" % (str(build_number), str(bNum)))
         build_number = bNum
 
         # TSV rows can't be written into, only read. thus...
