@@ -15,15 +15,24 @@ source ${TCGAFMP_ROOT_DIR}/../../gidget/util/gidget_util.sh
 ##      one tumor type, eg 'ucec'
 
 WRONGARGS=1
-if [ $# != 2 ]
+if [[ $# != 2 ]] && [[ $# != 3 ]]
     then
-        echo " Usage   : `basename $0` <curDate> <tumorType> "
-        echo " Example : `basename $0` 28oct13  brca "
+        echo " Usage   : `basename $0` <curDate> <tumorType> [auxName] "
+        echo " Example : `basename $0` 28oct13  brca  aux "
+        echo " "
+        echo " Note that the new auxName option at the end is optional and will default to simply aux "
         exit $WRONGARGS
 fi
 
 curDate=$1
 tumor=$2
+
+if (( $# == 3 ))
+    then
+        auxName=$3
+    else
+        auxName=aux
+fi
 
 echo " "
 echo " "
@@ -32,10 +41,7 @@ echo `date`
 echo " *" $curDate
 echo " *******************"
 
-args=("$@")
-for ((i=1; i<$#; i++))
 
-    do
         tumor=${args[$i]}
 
         echo " "
@@ -74,7 +80,7 @@ for ((i=1; i<$#; i++))
                         ./SurvivalPVal.sh \
                                 -f $TCGAFMP_DATA_DIR/$tumor/$curDate/$tumor.all.$curDate.$st.tsv \
                                 -c $TCGAFMP_DATA_DIR/$tumor/$curDate/Survival.CVars.txt \
-                                -m $TCGAFMP_DATA_DIR/$tumor/aux/survival.feat.txt \
+                                -m $TCGAFMP_DATA_DIR/$tumor/$auxName/survival.feat.txt \
                                 -o $TCGAFMP_DATA_DIR/$tumor/$curDate/SurvivalPVal.$st.tmp >& $TCGAFMP_DATA_DIR/$tumor/scratch/SurvivalPVal.all.$st.log
                         grep -v "	NA" $TCGAFMP_DATA_DIR/$tumor/$curDate/SurvivalPVal.$st.tmp | sort -gk 2 | grep -v "vital" \
                                 >& $TCGAFMP_DATA_DIR/$tumor/$curDate/SurvivalPVal.all.$st.tsv
@@ -110,7 +116,7 @@ for ((i=1; i<$#; i++))
                 ./SurvivalPVal.sh \
                         -f $TCGAFMP_DATA_DIR/$tumor/$curDate/$tumor.all.$curDate.tsv \
                         -c $TCGAFMP_DATA_DIR/$tumor/$curDate/Survival.CVars.txt \
-                        -m $TCGAFMP_DATA_DIR/$tumor/aux/survival.feat.txt \
+                        -m $TCGAFMP_DATA_DIR/$tumor/$auxName/survival.feat.txt \
                         -o $TCGAFMP_DATA_DIR/$tumor/$curDate/SurvivalPVal.tmp >& $TCGAFMP_DATA_DIR/$tumor/scratch/SurvivalPVal.all.log
                 grep -v "	NA" $TCGAFMP_DATA_DIR/$tumor/$curDate/SurvivalPVal.tmp | sort -gk 2 | grep -v "vital" \
                         >& $TCGAFMP_DATA_DIR/$tumor/$curDate/SurvivalPVal.all.tsv
@@ -125,7 +131,6 @@ for ((i=1; i<$#; i++))
             fi
 
                 
-    done ## loop over tumor
 
 echo " "
 echo " fmp15B_survival script is FINISHED !!! "

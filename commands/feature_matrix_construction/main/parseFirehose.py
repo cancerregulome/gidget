@@ -54,6 +54,8 @@ def getMostRecentDir(topDir, cancerList, awgFlag):
     print genDates
     print awgDates
 
+    lastDir = "NA"
+
     ## give priority to an AWG run ...
     if ( (awgFlag=="YES") and (len(awgDates)>0) ):
 
@@ -61,7 +63,6 @@ def getMostRecentDir(topDir, cancerList, awgFlag):
         lastDate = lastDate[0:4] + "_" + lastDate[4:6] + "_" + lastDate[6:8]
         print "     using this awg date : ", lastDate
 
-        lastDir = "NA"
         for d1Name in d1.dirs():
             # give first priority to awg specific run ...
             if (len(cancerList) == 1):
@@ -1469,7 +1470,7 @@ def buildSampleWhiteList(lastDir, outDir):
 
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 
-def getMutSigVersionString ( zCancer ):
+def getMutSigVersionString ( zCancer, auxName ):
 
     defaultString = "MutSigNozzleReportCV"
 
@@ -1479,7 +1480,7 @@ def getMutSigVersionString ( zCancer ):
         MSverString = defaultString
         print "     --> defaulting to %s " % defaultString
 
-    fName = rootString + "/" + zCancer.lower() + "/aux/MutSigversion.txt"
+    fName = rootString + "/" + zCancer.lower() + "/" + auxName + "/MutSigversion.txt"
     try:
         fh = file ( fName, 'r' )
         print "     checking file %s for MutSig version specification " % fName
@@ -1525,18 +1526,19 @@ if __name__ == "__main__":
         'thca', 'ucec', 'lcml', 'pcpg', 'meso', 'tgct', 'ucs' ]
 
     if (1):
-        if (len(sys.argv) != 3):
-            print " Usage: %s <tumorType> <public/private> " % sys.argv[0]
+        if ( (len(sys.argv)!=3) and (len(sys.argv)!=4) ):
+            print " Usage: %s <tumorType> <public/private> [auxName] " % sys.argv[0]
             print " Notes: a single tumor type can be specified, eg brca "
             print "        the public/private option indicates whether an awg-specific "
             print "        firehose run should be used if available "
             sys.exit(-1)
+
         else:
+
             tumorType = sys.argv[1].lower()
             if (tumorType == "all"):
                 print " this option is no longer allowed "
                 sys.exit(-1)
-                print " --> processing all tumor types: ", cancerDirNames
             elif (tumorType in cancerDirNames):
                 print " --> processing a single tumor type: ", tumorType
                 cancerDirNames = [tumorType]
@@ -1555,6 +1557,11 @@ if __name__ == "__main__":
             else:
                 print " invalid public/private string ", ppString
                 sys.exit(-1)
+
+            if ( len(sys.argv) == 4 ):
+                auxName = sys.argv[3]
+            else:
+                auxName = "aux"
 
     # 22jun : switching to new firehose analyses that were downloaded using
     # firehose_get -b analyses latest
@@ -1580,7 +1587,7 @@ if __name__ == "__main__":
         # next we process files that come out of the MutSig module
         # ( but first we ask which version of MutSig is supposed to be 
         #   used for this tumor type )
-        MSverString = getMutSigVersionString ( zCancer )
+        MSverString = getMutSigVersionString ( zCancer, auxName )
         parseMutSigFiles(lastDir, outDir, MSverString)
 
         # next we process the files that come out of Gistic

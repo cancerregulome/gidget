@@ -11,19 +11,21 @@ source ${TCGAFMP_ROOT_DIR}/../../gidget/util/gidget_util.sh
 ##      one or more tumor types, eg: 'prad thca skcm stad'
 
 WRONGARGS=1
-if [ $# != 1 ]
+if [[ $# != 1 ]] && [[ $# != 2 ]]
     then
-        echo " Usage   : `basename $0` <tumorType> "
-        echo " Example : `basename $0` brca "
+        echo " Usage   : `basename $0` <tumorType> [auxName] "
+        echo " Example : `basename $0` brca  aux "
         exit $WRONGARGS
 fi
 
 tumor=$1
+if (( $# == 2 ))
+    then
+        auxName=$6
+    else
+        auxName=aux
+fi
 
-args=("$@")
-for ((i=0; i<$#; i++))
-    do
-        tumor=${args[$i]}
 
 	cd $TCGAFMP_DATA_DIR/$tumor
 
@@ -105,13 +107,13 @@ for ((i=0; i<$#; i++))
 	## filter the MAF file based on the blacklist ...
 
 	## NEW (temporary?) removing this line:
-	## 	../aux/$tumor.whitelist.pancan.tsv white strict
+	## 	../$auxName/$tumor.whitelist.pancan.tsv white strict
 	python $TCGAFMP_ROOT_DIR/main/filterTSVbySampList.py \
 		$tumor.gnab.tmpData2.tsv \
 		$tumor.gnab.tmpData3.tsv \
-		../aux/$tumor.blacklist.loose.tsv black loose \
-		../aux/$tumor.whitelist.loose.tsv white loose \
-                ../aux/$tumor.whitelist.strict.tsv white strict \
+		../$auxName/$tumor.blacklist.loose.tsv black loose \
+		../$auxName/$tumor.whitelist.loose.tsv white loose \
+                ../$auxName/$tumor.whitelist.strict.tsv white strict \
 		>& filterSamp.gnab.tmpA.log
 
 	## ----------------------------------------------------------------------------
@@ -123,7 +125,6 @@ for ((i=0; i<$#; i++))
 	cd ..
 
 
-    done
 
 echo " "
 echo " fmp03B_gnab script is FINISHED !!! "

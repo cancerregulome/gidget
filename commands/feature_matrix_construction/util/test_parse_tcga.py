@@ -2,7 +2,7 @@
 Created on May 9, 2013
 
 for the different platforms, run the feature matrix current production script 
-and then the refactored and compare the results.  read from the configuration
+and then the developed and compare the results.  read from the configuration
 file which cancers to batch together for each platform
 
 @author: michael
@@ -26,16 +26,13 @@ class globalVars():
         '''
         self.tag = config.get('main', 'tag')
         self.out_dir = config.get('main', 'out_dir')
+        self.curpath = config.get('main', 'curpath')
         self.curcmd = config.get('main', 'curcmd')
-        self.cursnpcmd = config.get('main', 'cursnpcmd')
-        self.curmirnacmd = config.get('main', 'curmirnacmd')
-        self.curclincmd = config.get('main', 'curclincmd')
+        self.newpath = config.get('main', 'newpath')
         self.newcmd = config.get('main', 'newcmd')
         self.curfilename = config.get('main', 'curfilename')
-        self.curclinfilename = config.get('main', 'curclinfilename')
         self.newfilename = config.get('main', 'newfilename')
         self.diffcmd = config.get('main', 'diffcmd')
-        self.diffclincmd = config.get('main', 'diffclincmd')
         self.extended_all = config.get('main', 'extended_all')
         self.runwhich = config.get('main', 'runwhich') if config.has_option('main', 'runwhich') else 'all'
 
@@ -67,19 +64,9 @@ def _runTest(config, platformID, tumor, globalVars):
             try:
                 start_cur = datetime.now()
                 print '\t\t', start_cur, 'starting current'
-                if 'clinical' in platformID.lower():
-                    deleteFile(globalVars.curclinfilename.format(globalVars.tag, tumor))
-                    oldCmdString = globalVars.curclincmd.format(globalVars.out_dir, tumor, globalVars.tag, 'clinical_', tumor, snapshot)
-                elif 'snp' in platformID.lower():
-                    deleteFile(globalVars.curfilename.format(tumor, platformID[:-1].replace('/', "__"), globalVars.tag))
-                    oldCmdString = globalVars.cursnpcmd.format(globalVars.out_dir, platformID, tumor, globalVars.tag, platformID.replace('/', "_"), tumor, snapshot)
-                elif 'mirna' in platformID.lower() and not '8x15k' in platformID.lower():
-                    deleteFile(globalVars.curfilename.format(tumor, platformID[:-1].replace('/', "__"), globalVars.tag))
-                    oldCmdString = globalVars.curmirnacmd.format(globalVars.out_dir, platformID, tumor, globalVars.tag, platformID.replace('/', "_"), tumor, snapshot)
-                else:
-                    deleteFile(globalVars.curfilename.format(tumor, platformID[:-1].replace('/', "__"), globalVars.tag))
-                    oldCmdString = globalVars.curcmd.format(globalVars.out_dir, platformID, tumor, globalVars.tag, platformID.replace('/', "_"), tumor, snapshot)
-    
+                deleteFile(globalVars.curfilename.format(tumor, platformID[:-1].replace('/', "__"), globalVars.tag))
+                oldCmdString = globalVars.curcmd.format(globalVars.out_dir, platformID, tumor, globalVars.tag, platformID.replace('/', "_"), tumor, 
+                                                        config.get('main', 'parse_config'), globalVars.curpath)
                 status, output = commands.getstatusoutput(oldCmdString)
                 end_cur = datetime.now()
                 total_cur = end_cur - start_cur
@@ -92,30 +79,28 @@ def _runTest(config, platformID, tumor, globalVars):
                 print 'problem executing current %s\n' % (output)
                 raise e
 
-        if globalVars.runwhich in ['all', 'refactor']:
+        if globalVars.runwhich in ['all', 'develop']:
             try:
                 start_new = datetime.now()
-                print '\t\t', start_new, 'starting refactor'
+                print '\t\t', start_new, 'starting develop'
                 deleteFile(globalVars.newfilename.format(tumor, platformID[:-1].replace('/', "__"), globalVars.tag))
-                newCmdString = globalVars.newcmd.format(globalVars.out_dir, platformID, tumor, globalVars.tag, platformID.replace('/', "_"), tumor, config.get('main', 'parse_config'))
+                newCmdString = globalVars.newcmd.format(globalVars.out_dir, platformID, tumor, globalVars.tag, platformID.replace('/', "_"), tumor, 
+                                                        config.get('main', 'parse_config'), globalVars.newpath)
                 status, output = commands.getstatusoutput(newCmdString)
                 end_new = datetime.now()
                 total_new = end_new - start_new
-                print '\t\t', end_new, "result of running refactored script: %s %s %s\n" % (status, total_new, newCmdString)
+                print '\t\t', end_new, "result of running developed script: %s %s %s\n" % (status, total_new, newCmdString)
                 if 0 == status:
                     reSuccess += 1
             except Exception as e:
                 total_new = datetime.now() - start_new
                 traceback.print_exc()
-                print 'problem executing refactor: %s' % (output)
+                print 'problem executing develop: %s' % (output)
                 raise e
 
         if globalVars.runwhich == 'all':
             try:
-                if 'clinical' in platformID.lower():
-                    diffCmdString = globalVars.diffclincmd.format(globalVars.out_dir, tumor, platformID[:-1].replace('/', "__"), globalVars.tag, tumor)
-                else:
-                    diffCmdString = globalVars.diffcmd.format(globalVars.out_dir, tumor, platformID[:-1].replace('/', "__"), globalVars.tag, tumor)
+                diffCmdString = globalVars.diffcmd.format(globalVars.out_dir, tumor, platformID[:-1].replace('/', "__"), globalVars.tag, tumor)
                 status, output = commands.getstatusoutput(diffCmdString)
                 print "\t\tresult of running diff: %s %s" % (status, diffCmdString)
                 if 0 == status:
@@ -127,7 +112,7 @@ def _runTest(config, platformID, tumor, globalVars):
     except:
         traceback.print_exc()
     if globalVars.runwhich == 'all':
-        print '\t', '%s: refactored code was %.2f times faster (%s secs for refactor, %s secs for current)' % \
+        print '\t', '%s: developed code was %.2f times faster (%s secs for develop, %s secs for current)' % \
             (platformID + ':' + tumor, total_cur.total_seconds() / total_new.total_seconds(), total_new.total_seconds(), total_cur.total_seconds())
     print '\t', datetime.now(), 'ending run for %s: %s' % (platformID, tumor)
     return curSuccess, reSuccess, diffSuccess
@@ -154,7 +139,7 @@ def _run(argv):
                 totalCurSuccess += curSuccess
                 totalReSuccess += reSuccess
                 totalDiffSuccess += diffSuccess
-    print 'overall results:\n\tcurrent success: %i/%i\n\trefactored success: %i/%i\n\tdiff success: %i/%i' % (totalCurSuccess, total, totalReSuccess, total, totalDiffSuccess, total)
+    print 'overall results:\n\tcurrent success: %i/%i\n\tdeveloped success: %i/%i\n\tdiff success: %i/%i' % (totalCurSuccess, total, totalReSuccess, total, totalDiffSuccess, total)
 
 if __name__ == '__main__':
 # example cmdline: python -u ../<python path>/util/test_parse_tcga.py ../<python path>/config/test_parse_tcga.config

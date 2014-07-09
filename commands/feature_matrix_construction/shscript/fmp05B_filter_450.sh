@@ -10,15 +10,26 @@ source ${TCGAFMP_ROOT_DIR}/../../gidget/util/gidget_util.sh
 ##      one tumor type, eg 'ucec'
 
 WRONGARGS=1
-if [ $# != 2 ]
+if [[ $# != 2 ]] && [[ $# != 3 ]]
     then
-        echo " Usage   : `basename $0` <curDate> <tumorType> "
-        echo " Example : `basename $0` 28oct13  brca "
+        echo " Usage   : `basename $0` <curDate> <tumorType> [auxName] "
+        echo " Example : `basename $0` 28oct13  brca  aux "
+        echo " "
+        echo " Note that the new auxName option at the end is optional and will default to simply aux "
         exit $WRONGARGS
 fi
 
 curDate=$1
 tumor=$2
+
+if (( $# == 3 ))
+    then
+        auxName=$3
+    else
+        auxName=aux
+fi
+
+
 
 echo " "
 echo " "
@@ -27,10 +38,6 @@ echo `date`
 echo " *" $curDate
 echo " *******************"
 
-args=("$@")
-for ((i=1; i<$#; i++))
-    do
-        tumor=${args[$i]}
 
 	cd $TCGAFMP_DATA_DIR/$tumor
 
@@ -66,17 +73,17 @@ for ((i=1; i<$#; i++))
 		$tumor.bcgsc.ca__illuminahiseq_mirnaseq__mirnaseq.$curDate.tsv \
 		$tumor.mirn.tmpA.tsv \
 		$tumor.blacklist.samples.tsv black loose \
-                ../aux/$tumor.blacklist.loose.tsv black loose \
-                ../aux/$tumor.whitelist.loose.tsv white loose \
-                ../aux/$tumor.whitelist.strict.tsv white strict \
+                ../$auxName/$tumor.blacklist.loose.tsv black loose \
+                ../$auxName/$tumor.whitelist.loose.tsv white loose \
+                ../$auxName/$tumor.whitelist.strict.tsv white strict \
                 >& filterSamp.mirn.tmpA.log
 	python $TCGAFMP_ROOT_DIR/main/filterTSVbySampList.py \
 		$tumor.bcgsc.ca__illuminaga_mirnaseq__mirnaseq.$curDate.tsv \
 		$tumor.mirn.tmpB.tsv \
 		$tumor.blacklist.samples.tsv black loose \
-                ../aux/$tumor.blacklist.loose.tsv black loose \
-                ../aux/$tumor.whitelist.loose.tsv white loose \
-                ../aux/$tumor.whitelist.strict.tsv white strict \
+                ../$auxName/$tumor.blacklist.loose.tsv black loose \
+                ../$auxName/$tumor.whitelist.loose.tsv white loose \
+                ../$auxName/$tumor.whitelist.strict.tsv white strict \
                 >& filterSamp.mirn.tmpB.log
 
 	## a) merge 
@@ -114,9 +121,9 @@ for ((i=1; i<$#; i++))
 			$tumor.broad.mit.edu__genome_wide_snp_6__snp.$curDate.tsv \
 			$tumor.cnvr.tmpData1.tsv \
 			$tumor.blacklist.samples.tsv black loose \
-                        ../aux/$tumor.blacklist.loose.tsv black loose \
-                        ../aux/$tumor.whitelist.loose.tsv white loose \
-                        ../aux/$tumor.whitelist.strict.tsv white strict \
+                        ../$auxName/$tumor.blacklist.loose.tsv black loose \
+                        ../$auxName/$tumor.whitelist.loose.tsv white loose \
+                        ../$auxName/$tumor.whitelist.strict.tsv white strict \
                         >& filterSamp.cnvr.log
 	    else
 		if [ -f $tumor.genome.wustl.edu__genome_wide_snp_6__snp.$curDate.tsv ]
@@ -126,9 +133,9 @@ for ((i=1; i<$#; i++))
 				$tumor.genome.wustl.edu__genome_wide_snp_6__snp.$curDate.tsv \
 				$tumor.cnvr.tmpData1.tsv \
 				$tumor.blacklist.samples.tsv black loose \
-                                ../aux/$tumor.blacklist.loose.tsv black loose \
-                                ../aux/$tumor.whitelist.loose.tsv white loose \
-                                ../aux/$tumor.whitelist.strict.tsv white strict \
+                                ../$auxName/$tumor.blacklist.loose.tsv black loose \
+                                ../$auxName/$tumor.whitelist.loose.tsv white loose \
+                                ../$auxName/$tumor.whitelist.strict.tsv white strict \
                                 >& filterSamp.cnvr.log
 		fi
 	fi
@@ -154,9 +161,9 @@ for ((i=1; i<$#; i++))
                 ../meth450k/$tumor.meth_gexp_mirn.plus.annot.tsv \
                 $tumor.meth.tmpData3.tsv \
                 $tumor.blacklist.samples.tsv black loose \
-                ../aux/$tumor.blacklist.loose.tsv black loose \
-                ../aux/$tumor.whitelist.loose.tsv white loose \
-                ../aux/$tumor.whitelist.strict.tsv white strict \
+                ../$auxName/$tumor.blacklist.loose.tsv black loose \
+                ../$auxName/$tumor.whitelist.loose.tsv white loose \
+                ../$auxName/$tumor.whitelist.strict.tsv white strict \
                 >& filterSamp.meth.tmpA.log
 
         ## the typical steps a) b) and c) are no longer needed here
@@ -171,9 +178,9 @@ for ((i=1; i<$#; i++))
 		$tumor.mdanderson.org__mda_rppa_core__protein_exp.$curDate.tsv \
 		$tumor.rppa.tmpData1.tsv \
 		$tumor.blacklist.samples.tsv black loose \
-                ../aux/$tumor.blacklist.loose.tsv black loose \
-                ../aux/$tumor.whitelist.loose.tsv white loose \
-                ../aux/$tumor.whitelist.strict.tsv white strict \
+                ../$auxName/$tumor.blacklist.loose.tsv black loose \
+                ../$auxName/$tumor.whitelist.loose.tsv white loose \
+                ../$auxName/$tumor.whitelist.strict.tsv white strict \
                 >& filterSamp.rppa.log
 
 	rm -fr annotate.rppa.$curDate.log
@@ -202,25 +209,25 @@ for ((i=1; i<$#; i++))
 		$tumor.unc.edu__agilentg4502a_07_3__transcriptome.$curDate.tsv \
 		$tumor.gexp.ary.tmpA.tsv \
 		$tumor.blacklist.samples.tsv black loose \
-                ../aux/$tumor.blacklist.loose.tsv black loose \
-                ../aux/$tumor.whitelist.loose.tsv white loose \
-                ../aux/$tumor.whitelist.strict.tsv white strict \
+                ../$auxName/$tumor.blacklist.loose.tsv black loose \
+                ../$auxName/$tumor.whitelist.loose.tsv white loose \
+                ../$auxName/$tumor.whitelist.strict.tsv white strict \
                 >& filterSamp.gexp.ary.tmpA.log
 	python $TCGAFMP_ROOT_DIR/main/filterTSVbySampList.py \
 		$tumor.unc.edu__agilentg4502a_07_2__transcriptome.$curDate.tsv \
 		$tumor.gexp.ary.tmpB.tsv \
 		$tumor.blacklist.samples.tsv black loose \
-                ../aux/$tumor.blacklist.loose.tsv black loose \
-                ../aux/$tumor.whitelist.loose.tsv white loose \
-                ../aux/$tumor.whitelist.strict.tsv white strict \
+                ../$auxName/$tumor.blacklist.loose.tsv black loose \
+                ../$auxName/$tumor.whitelist.loose.tsv white loose \
+                ../$auxName/$tumor.whitelist.strict.tsv white strict \
                 >& filterSamp.gexp.ary.tmpB.log
 	python $TCGAFMP_ROOT_DIR/main/filterTSVbySampList.py \
 		$tumor.unc.edu__agilentg4502a_07_1__transcriptome.$curDate.tsv \
 		$tumor.gexp.ary.tmpC.tsv \
 		$tumor.blacklist.samples.tsv black loose \
-                ../aux/$tumor.blacklist.loose.tsv black loose \
-                ../aux/$tumor.whitelist.loose.tsv white loose \
-                ../aux/$tumor.whitelist.strict.tsv white strict \
+                ../$auxName/$tumor.blacklist.loose.tsv black loose \
+                ../$auxName/$tumor.whitelist.loose.tsv white loose \
+                ../$auxName/$tumor.whitelist.strict.tsv white strict \
                 >& filterSamp.gexp.ary.tmpC.log
 
 	## a) merge 
@@ -267,49 +274,49 @@ for ((i=1; i<$#; i++))
 		$tumor.unc.edu__illuminaga_rnaseqv2__rnaseqv2.$curDate.tsv \
 		$tumor.gexp.seq.tmpF.tsv \
 		$tumor.blacklist.samples.tsv black loose \
-                ../aux/$tumor.blacklist.loose.tsv black loose \
-                ../aux/$tumor.whitelist.loose.tsv white loose \
-                ../aux/$tumor.whitelist.strict.tsv white strict \
+                ../$auxName/$tumor.blacklist.loose.tsv black loose \
+                ../$auxName/$tumor.whitelist.loose.tsv white loose \
+                ../$auxName/$tumor.whitelist.strict.tsv white strict \
                 >& filterSamp.gexp.seq.tmpF.log
 	python $TCGAFMP_ROOT_DIR/main/filterTSVbySampList.py \
 		$tumor.unc.edu__illuminahiseq_rnaseqv2__rnaseqv2.$curDate.tsv \
 		$tumor.gexp.seq.tmpA.tsv \
 		$tumor.blacklist.samples.tsv black loose \
-                ../aux/$tumor.blacklist.loose.tsv black loose \
-                ../aux/$tumor.whitelist.loose.tsv white loose \
-                ../aux/$tumor.whitelist.strict.tsv white strict \
+                ../$auxName/$tumor.blacklist.loose.tsv black loose \
+                ../$auxName/$tumor.whitelist.loose.tsv white loose \
+                ../$auxName/$tumor.whitelist.strict.tsv white strict \
                 >& filterSamp.gexp.seq.tmpA.log
 	python $TCGAFMP_ROOT_DIR/main/filterTSVbySampList.py \
 		$tumor.unc.edu__illuminahiseq_rnaseq__rnaseq.$curDate.tsv \
 		$tumor.gexp.seq.tmpB.tsv \
 		$tumor.blacklist.samples.tsv black loose \
-                ../aux/$tumor.blacklist.loose.tsv black loose \
-                ../aux/$tumor.whitelist.loose.tsv white loose \
-                ../aux/$tumor.whitelist.strict.tsv white strict \
+                ../$auxName/$tumor.blacklist.loose.tsv black loose \
+                ../$auxName/$tumor.whitelist.loose.tsv white loose \
+                ../$auxName/$tumor.whitelist.strict.tsv white strict \
                 >& filterSamp.gexp.seq.tmpB.log
 	python $TCGAFMP_ROOT_DIR/main/filterTSVbySampList.py \
 		$tumor.unc.edu__illuminaga_rnaseq__rnaseq.$curDate.tsv \
 		$tumor.gexp.seq.tmpC.tsv \
 		$tumor.blacklist.samples.tsv black loose \
-                ../aux/$tumor.blacklist.loose.tsv black loose \
-                ../aux/$tumor.whitelist.loose.tsv white loose \
-                ../aux/$tumor.whitelist.strict.tsv white strict \
+                ../$auxName/$tumor.blacklist.loose.tsv black loose \
+                ../$auxName/$tumor.whitelist.loose.tsv white loose \
+                ../$auxName/$tumor.whitelist.strict.tsv white strict \
                 >& filterSamp.gexp.seq.tmpC.log
 	python $TCGAFMP_ROOT_DIR/main/filterTSVbySampList.py \
 		$tumor.bcgsc.ca__illuminahiseq_rnaseq__rnaseq.$curDate.tsv \
 		$tumor.gexp.seq.tmpD.tsv \
 		$tumor.blacklist.samples.tsv black loose \
-                ../aux/$tumor.blacklist.loose.tsv black loose \
-                ../aux/$tumor.whitelist.loose.tsv white loose \
-                ../aux/$tumor.whitelist.strict.tsv white strict \
+                ../$auxName/$tumor.blacklist.loose.tsv black loose \
+                ../$auxName/$tumor.whitelist.loose.tsv white loose \
+                ../$auxName/$tumor.whitelist.strict.tsv white strict \
                 >& filterSamp.gexp.seq.tmpD.log
 	python $TCGAFMP_ROOT_DIR/main/filterTSVbySampList.py \
 		$tumor.bcgsc.ca__illuminaga_rnaseq__rnaseq.$curDate.tsv \
 		$tumor.gexp.seq.tmpE.tsv \
 		$tumor.blacklist.samples.tsv black loose \
-                ../aux/$tumor.blacklist.loose.tsv black loose \
-                ../aux/$tumor.whitelist.loose.tsv white loose \
-                ../aux/$tumor.whitelist.strict.tsv white strict \
+                ../$auxName/$tumor.blacklist.loose.tsv black loose \
+                ../$auxName/$tumor.whitelist.loose.tsv white loose \
+                ../$auxName/$tumor.whitelist.strict.tsv white strict \
                 >& filterSamp.gexp.seq.tmpE.log
 
 	## a) merge 
@@ -359,7 +366,6 @@ for ((i=1; i<$#; i++))
 		python $TCGAFMP_ROOT_DIR/main/quickLook.py $f | grep -i "summary"
 	    done
 
-    done
 
 echo " "
 echo " fmp05B_filter script is FINISHED !!! "

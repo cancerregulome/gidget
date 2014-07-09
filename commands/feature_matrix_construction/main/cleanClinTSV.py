@@ -1957,7 +1957,7 @@ def addNumericalFeatures(allClinDict):
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 
 
-def getMappingDict(featName):
+def getMappingDict(featName, auxName):
 
     mapDict = {}
 
@@ -1969,7 +1969,7 @@ def getMappingDict(featName):
         tmpFeatName = featName
 
     try:
-        mapFilename = "../aux/" + tmpFeatName + ".map"
+        mapFilename = "../" + auxName + "/" + tmpFeatName + ".map"
         fh = file(mapFilename)
         firstLine = 1
         for aLine in fh:
@@ -2002,7 +2002,7 @@ def getMappingDict(featName):
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 
 
-def addDerivedFeatures(allClinDict):
+def addDerivedFeatures(allClinDict, auxName):
 
     print " "
     print " "
@@ -2033,7 +2033,7 @@ def addDerivedFeatures(allClinDict):
                 if (1):
                     print " considering this categorical feature ... ", aKey, keyType, nCard, labelList, labelCount
 
-                    (mapDict, newNames) = getMappingDict(aKey)
+                    (mapDict, newNames) = getMappingDict(aKey, auxName)
 
                     # if there is no mapping file, then we won't be making any
                     # new features ...
@@ -2392,12 +2392,16 @@ def addPairwiseIndicatorFeatures(allClinDict):
 
 if __name__ == "__main__":
 
-    if (len(sys.argv) != 3):
-        print " Usage : %s <input TSV> <output TSV> " % sys.argv[0]
+    if ( (len(sys.argv)!=3) and (len(sys.argv)!=4) ):
+        print " Usage : %s <input TSV> <output TSV> [auxName] " % sys.argv[0]
         sys.exit(-1)
 
     tsvNameIn = sys.argv[1]
     tsvNameOut = sys.argv[2]
+    if ( len(sys.argv) == 4 ):
+        auxName = sys.argv[3]
+    else:
+        auxName = "aux"
 
     # test out readTSV ...
     ## tsvName = "coad_read_clinical.27jan.tsv"
@@ -2488,7 +2492,7 @@ if __name__ == "__main__":
 
     # new 09Jan2013 : try to add numeric features that map the non-binary categorical features ...
     ## allClinDict = addNumericalFeatures ( allClinDict )
-    allClinDict = addDerivedFeatures(allClinDict)
+    allClinDict = addDerivedFeatures(allClinDict, auxName)
 
     # look at pairwise MI ...
     if (0):

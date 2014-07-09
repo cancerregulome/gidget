@@ -54,12 +54,9 @@ def is_in_list(tmpLabel, featNameList, aFlag):
             if (lowerA == lowerT):
                 return (1)
         else:
-            # if the matching is to be 'loose', then the featNameList
-            # could, for example, simply say "N:GEXP:" and then
-            # all existing features that start with that could either
-            # be kept ('white') or removed ('black')
-            if (lowerT.startswith(lowerA)):
-                return (1)
+            # if the matching is "loose", then allow substring matching...
+            if (lowerT.find(lowerA)>=0): return (1)
+            if (lowerT.startswith(lowerA)): return (1)
 
     return (0)
 

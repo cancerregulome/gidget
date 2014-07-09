@@ -313,7 +313,7 @@ def get_uuid2barcode_dict():
     global barcode2uuid_dict
     global barcode2disease_dict
 
-    print datetime.now(), " reading metadata file for UUID to barcode mapping "
+    print datetime.now(), " reading metadata file for UUID to barcode mapping ", uuidMappingFile
 
     fileName = uuidMappingFile
 

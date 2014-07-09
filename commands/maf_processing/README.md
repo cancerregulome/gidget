@@ -38,16 +38,38 @@ MAF file, so please be patient.
 
 ### Ok, so now that you have a new MAF file, what do you need to do next?
 
-1. run Lisa's script(s)
-	* TODO
+1. run MAF annotation scripts, the manual way.  For kicks, let's assume you're doing the processing in a separate directory.
+	* Link in your original (downloaded) MAF:
+	* ```ln -s <original MAF> .```
+	* create a little file to describe which file will be processed:
+	* ```touch maf_file_list```
+	* ```echo <original MAF filename> > maf_file_list```
+	* set required environmental variables.  Currently, these are set as bash shell variables.  You can ask the project author for her working file. For example, call the file ```set_gidget_env_vars.sh```.  Copy and edit this as appropriate.  Note, there may be currently-used variables for development.  Then source the file (NOT execute):
+	* ```source set_gidget_env_vars.sh```
+	* update your current data directory:
+	* ```export TCGAMAF_DATA_DIR=`pwd -P````
+	* run the annotation:
+	* ```${GIDGET_SOURCE_ROOT}/commands/maf_processing/bash/updateMAF.sh```
+	* if success, the main output file is (the annotated MAF): ```<maf filename>.ncm.with_uniprot```
+	* run some addition file reporting:
+	* ```${GIDGET_SOURCE_ROOT}/commands/maf_processing/bash/final_maf_diagnostics.sh <maf filename>.ncm.with_uniprot```
 
-2. run Brady's script(s)
-	* TODO
-	* The output from the binarization step is a very large tsv file containing binarized information about all mutated genes for all tumor samples referenced in the MAF file.
 
 
-3. post-processing:
-    1. copy the output of step #2 (not the "transpose" file) to ```$TCGAFMP_OUTPUTS/<tumor>/gnab/latest.gnab.txt```
+
+2. run the binarization scripts.  Again, let's assume you're doing the processing in a separate directory.
+	* * Link in your annotated MAF:
+	* ```ln -s <annotated MAF, the ncm.with_uniprot file> .```
+	* bring in the scripts: doing it this way helps with some relative path issues (TBD)
+	* ```ln -s ${GIDGET_SOURCE_ROOT}/commands/binarization/genes_and_mutations_annovar.pl```
+	* ```ln -s ${GIDGET_SOURCE_ROOT}/commands/binarization/mutation_binarization_annovar.pl```
+	* run the mutation summary:
+	* ```./genes_and_mutations_annovar.pl <TUMOR SHORT CODE, for ex ‘STAD’> <maf filename>.ncm.with_uniprot > mutation_summary_dd_.mm.yyyy.txt```
+	* The major output from the binarization step is a very large tsv file containing binarized information about all mutated genes for all tumor samples referenced in the MAF file.  This step can take quite a while:
+	* ```./mutation_binarization_annovar.pl <maf filename>.ncm.with_uniprot > mut_bin_mm.dd.yyyy.txt```
+
+3. post-processing; NOTE: perhaps open a fresh terminal, or at least be aware that you've set a bunch of gidget environmental variables and review them:
+    1. copy the output of step #2 (```mut_bin_mm.dd.yyyy.txt```, not the "transpose" file) to ```$TCGAFMP_OUTPUTS/<tumor>/gnab/latest.gnab.txt```
     2. first post-processing step (all this currently does is some minor clean-up and/or re-formatting):
 
         ```

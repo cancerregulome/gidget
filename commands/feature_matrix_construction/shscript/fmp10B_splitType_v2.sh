@@ -120,7 +120,7 @@ echo " *******************"
 		    then
 
 			h=${f/.tsv/.score.log}
-			python $TCGAFMP_ROOT_DIR/main/scoreCatFeat.py \
+			python $TCGAFMP_ROOT_DIR/main/scoreCatFeat-v2.py \
 			    --tsvFile $TCGAFMP_DATA_DIR/$tumor/$curDate/$f >& $h
 	
 			h=${f/.tsv/.split.log}

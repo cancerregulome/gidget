@@ -142,6 +142,14 @@ if __name__ == "__main__":
         print " Usage : %s <scratch-dir> <tsv-File> <iOne> <BC_threshold> " % sys.argv[0]
         sys.exit(-1)
 
+    print " "
+    print " in post_pwRK2b ... "
+    print "     scratch directory: ", sys.argv[1]
+    print "     tsv file: ", sys.argv[2]
+    print "     iOne: ", sys.argv[3]
+    print "     BC_threshold: ", sys.argv[4]
+    print " "
+
     sDir = sys.argv[1]
     if (sDir[-1] != "/"):
         sDir += "/"
@@ -358,7 +366,8 @@ if __name__ == "__main__":
             else:
                 try:
                     rho = float(tokenList[3])
-                    rhoString = "%.3f" % rho
+                    rhoString = "%.2f" % rho
+                    rho = float(rhoString)
                 except:
                     rhoString = "NA"
 

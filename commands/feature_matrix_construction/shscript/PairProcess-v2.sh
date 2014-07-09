@@ -17,16 +17,38 @@ fi
 ##      tsvExtension, eg: 'TP.tsv'
 
 WRONGARGS=1
-if [ $# != 3 ]
+if [[ $# != 3 ]] && [[ $# != 4 ]]
     then
-        echo " Usage   : `basename $0` <curDate> <tumorType> <tsvExtension> "
+        echo " "
+        echo " Usage   : `basename $0` <curDate> <tumorType> <tsvExtension> [config-file] "
         echo " Example : `basename $0` 28oct13  brca  TP.tsv "
+        echo " "
+        echo " NOTE that the config-file is optional and by default will be obtained from "
+        echo " either <tumorType>/aux/PairProcess_config.csv or from the root shscript directory. "
+        echo " If you want to use a different config-file, then give the complete path-name as a command-line option. "
+        echo " "
         exit $WRONGARGS
 fi
 
 curDate=$1
 tumor=$2
 tsvExt=$3
+if (( $# == 4 ))
+    then
+        ## cFile=$TCGAFMP_DATA_DIR/$tumor/aux/$4
+        cFile=$4
+    else
+        if [ -f $TCGAFMP_DATA_DIR/$tumor/aux/PairProcess_config.csv ]
+            then
+                cFile=$TCGAFMP_DATA_DIR/$tumor/aux/PairProcess_config.csv
+            else
+                cFile=$TCGAFMP_ROOT_DIR/shscript/PairProcess_config.csv
+        fi
+fi
+
+echo " "
+echo " using config file " $cFile
+echo " "
 
 FNF=2
 tsvFile=$TCGAFMP_DATA_DIR/$tumor/$curDate/$tumor.seq.$curDate.$tsvExt
@@ -52,17 +74,6 @@ echo " h = " $h
 rm -fr $h.????.????.pwpv
 rm -fr $h.????.????.pwpv.forRE
 
-echo " "
-echo " "
-
-if [ -f $TCGAFMP_DATA_DIR/$tumor/aux/PairProcess_config.csv ]
-    then
-        cFile=$TCGAFMP_DATA_DIR/$tumor/aux/PairProcess_config.csv
-    else
-        cFile=$TCGAFMP_ROOT_DIR/shscript/PairProcess_config.csv
-    fi
-
-echo " using config file " $cFile
 echo " "
 echo " "
 
@@ -97,6 +108,7 @@ echo " ***************************** "
 
 cd $TCGAFMP_DATA_DIR/$tumor/$curDate/
 echo " now working in: " `pwd`
+curDir=`pwd`
 
 tsvFile=$tumor.seq.$curDate.$tsvExt
 f=${tsvFile/.tsv/}
@@ -137,3 +149,30 @@ date
 echo " "
 
 
+## now we are going to create a META file if one does not already exist ...
+cd $TCGAFMP_DATA_DIR/$tumor/$curDate
+if [ ! -d "META" ]
+    then
+        mkdir META
+        chmod g+w META
+fi
+cd META
+rm -fr t1?
+cp $TCGAFMP_ROOT_DIR/config/META.sample t1
+
+tsvFile=$TCGAFMP_DATA_DIR/$tumor/$curDate/$tumor.seq.$curDate.$tsvExt
+sed -e 's,FULL_TSV_PATH_NAME_HERE,'"$tsvFile"',g' t1 >& t2
+
+pwName=${tsvFile/.tsv/.pwpv.forRE}
+sed -e 's,FULL_PATH_TO_PWPV_FOR_RE_FILE_HERE,'"$pwName"',g' t2 >& t3
+
+dsName=$tumor.$curDate.$tsvExt
+sed -e 's,DATA_SET_LABEL_HERE,'"$dsName"',g' t3 >& t4
+
+utName=`echo $tumor | tr [:lower:] [:upper:]`
+sed -e 's,TUMOR_TYPE_HERE,'"$utName"',g' t4 >& t5
+
+mv t5 META.$tumor.$curDate.$tsvExt
+rm -fr t?
+
+cd $curDir

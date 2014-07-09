@@ -12,11 +12,11 @@ use gidget_util;
 $maf_file = $ARGV[0] || die "usage: $0 MAF_FILE\n";
 $databaseDirectory = $gidgetConfigVars{'TCGABINARIZATION_DATABASE_DIR'} || die "did not get config variable\n";
 
-print "\n" . basename(abs_path(__FILE__)) . " version $VERSION\n\n";
-print "using:\n";
-print "  database directory => $gidgetConfigVars{'TCGABINARIZATION_DATABASE_DIR'}\n";
-print "  input MAF file => $maf_file\n";
-print "\n";
+#print "\n" . basename(abs_path(__FILE__)) . " version $VERSION\n\n";
+#print "using:\n";
+#print "  database directory => $gidgetConfigVars{'TCGABINARIZATION_DATABASE_DIR'}\n";
+#print "  input MAF file => $maf_file\n";
+#print "\n";
 
 &read_tcga_mutation_data;
 
