@@ -21,7 +21,7 @@ We will use this SKCM MAF file as an example:
 $TCGAFMP_DCC_REPOSITORIES/dcc-mirror/public/tumor/skcm/gsc/broad.mit.edu/illuminaga_dnaseq/mutations/broad.mit.edu_SKCM.IlluminaGA_DNASeq.Level_2.1.5.0/skcm_clean_pairs.aggregated.capture.tcga.uuid.somatic.maf
 ```
 
-If you want to see some basic information about  this MAF such as the number of samples, the most frequently mutated genes, etc, there is a simple script called ```$TCGAFMP_ROOT_DIR/shscript/qMaf``` that you can use.  On this particular MAF file, it will report, for example, that the most frequently mutated genes (and the counts) are:
+If you want to see some basic information about  this MAF such as the number of samples, the most frequently mutated genes, etc, there is a simple script called ```$TCGAFMP_ROOT_DIR/shscript/qMaf.sh``` that you can use.  On this particular MAF file, it will report, for example, that the most frequently mutated genes (and the counts) are:
 
 ```
         1794 TTN
