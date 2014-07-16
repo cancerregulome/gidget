@@ -58,7 +58,7 @@ def addSampleType(dataD):
         curSample = colLabels[iCol]
 
         # 01 --> tumor primary		TP
-        # 02 --> tumor recurrding	TR
+        # 02 --> tumor recurring	TR
         # 06 --> tumor metastatic	TM
         # 11 --> normal tissue		NT
         # 20 --> control cell-line	CELLC
