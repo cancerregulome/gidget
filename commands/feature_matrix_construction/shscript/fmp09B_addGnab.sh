@@ -27,10 +27,6 @@ echo `date`
 echo " *" $curDate
 echo " *******************"
 
-args=("$@")
-for ((i=1; i<$#; i++))
-    do
-        tumor=${args[$i]}
 
 	cd $TCGAFMP_DATA_DIR/$tumor
 
@@ -58,8 +54,6 @@ for ((i=1; i<$#; i++))
 		fi
 
 	    done
-
-    done
 
 echo " "
 echo " fmp09B_addGnab script is FINISHED !!! "
