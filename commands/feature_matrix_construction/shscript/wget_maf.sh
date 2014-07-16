@@ -17,9 +17,9 @@ for c in bcgsc.ca broad.mit.edu genome.wustl.edu hgsc.bcm.edu ucsc.edu
         echo " CENTER " $c
 
         # next loop is over platform / pipeline
-        for p in illuminaga_dnaseq illuminaga_dnaseq_automated illuminaga_dnaseq_curated \
+        for p in abi illuminaga_dnaseq illuminaga_dnaseq_automated illuminaga_dnaseq_curated \
                  illuminahiseq_dnaseq illuminahiseq_dnaseq_automated illuminahiseq_dnaseq_curated \
-                 mixed_dnaseq_curated
+                 mixed_dnaseq_curated solid_dnaseq
             do
                 echo "     PLATFORM " $p
                 
