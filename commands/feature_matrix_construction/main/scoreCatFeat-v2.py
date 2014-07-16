@@ -314,6 +314,9 @@ def makeOutFileName(tsvFile):
     # but it will start with "featScores_" and end with ".txt" rather
     # than ".tsv"
     outName = tsvFile[:ii] + '/' + "featScoresV2_" + tsvFile[ii + 1:-3] + "txt"
+
+    # NEW:
+    outName = tsvFile[:-4] + ".featScoresV2.txt"
     return (outName)
 
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
