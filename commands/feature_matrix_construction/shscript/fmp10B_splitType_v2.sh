@@ -112,16 +112,31 @@ echo " *******************"
 
 	    done
 
-	## now, for all tumor-only files
-	for f in $tumor.???.$curDate.T?.tsv
+	## now, for the top-level files ...
+	for f in $tumor.seq.$curDate.tsv
 	    do
 
 		if [ -f $f ]
 		    then
 
 			h=${f/.tsv/.score.log}
-			python $TCGAFMP_ROOT_DIR/main/scoreCatFeat-v2.py \
-			    --tsvFile $TCGAFMP_DATA_DIR/$tumor/$curDate/$f >& $h
+			nohup python $TCGAFMP_ROOT_DIR/main/scoreCatFeat-v2.py \
+			    --tsvFile $TCGAFMP_DATA_DIR/$tumor/$curDate/$f >& $h &
+	
+		fi
+            done
+
+
+	## now, for all tumor-only files
+	for f in $tumor.seq.$curDate.T?.tsv
+	    do
+
+		if [ -f $f ]
+		    then
+
+			h=${f/.tsv/.score.log}
+			nohup python $TCGAFMP_ROOT_DIR/main/scoreCatFeat-v2.py \
+			    --tsvFile $TCGAFMP_DATA_DIR/$tumor/$curDate/$f >& $h &
 	
 			h=${f/.tsv/.split.log}
 	
