@@ -166,13 +166,23 @@ sed -e 's,FULL_TSV_PATH_NAME_HERE,'"$tsvFile"',g' t1 >& t2
 pwName=${tsvFile/.tsv/.pwpv.forRE}
 sed -e 's,FULL_PATH_TO_PWPV_FOR_RE_FILE_HERE,'"$pwName"',g' t2 >& t3
 
-dsName=$tumor.$curDate.$tsvExt
+##dsName=$tumor.$curDate.$tsvExt
+justExt=${tsvExt/.tsv/}
+if [ "$justExt"="tsv" ]
+    then
+        dsName=$tumor"_"$curDate
+    else
+        dsName=$tumor"_"$curDate"_"$justExt
+fi
 sed -e 's,DATA_SET_LABEL_HERE,'"$dsName"',g' t3 >& t4
 
 utName=`echo $tumor | tr [:lower:] [:upper:]`
 sed -e 's,TUMOR_TYPE_HERE,'"$utName"',g' t4 >& t5
 
-mv t5 META.$tumor.$curDate.$tsvExt
+fsName=${tsvFile/.tsv/.featScoresV2.txt}
+sed -e 's,PATH_TO_SCORES_FILE_HERE,'"$fsName"',g' t5 >& t6
+
+mv t6 META.$tumor.$curDate.$tsvExt
 rm -fr t?
 
 cd $curDir

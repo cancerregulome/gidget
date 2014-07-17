@@ -21,11 +21,6 @@ fi
 tumor=$1
 
 
-args=("$@")
-for ((i=0; i<$#; i++))
-    do
-        tumor=${args[$i]}
-
 	cd $TCGAFMP_DATA_DIR/$tumor
 
 	echo " "
@@ -124,7 +119,6 @@ for ((i=0; i<$#; i++))
 	cd ..
 
 
-    done
 
 echo " "
 echo " fmp03B_gnab script is FINISHED !!! "

@@ -890,7 +890,7 @@ def parseMutSigFiles(lastDir, outDir, MSverString):
     print " "
     print " DONE: parsing MutSig files from firehose outputs (%d files) " % numGot
     if (numGot == 0):
-        print " ERROR ??? no bestclus.txt files found ??? "
+        print " ERROR ??? no MutSig files found ??? "
     print " "
 
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
@@ -1333,7 +1333,7 @@ def parseGisticFiles(lastDir, outDir):
     print " "
     print " DONE: parsing Gistic files from firehose outputs (%d files) " % numGot
     if (numGot == 0):
-        print " ERROR ??? no bestclus.txt files found ??? "
+        print " ERROR ??? no Gistic files found ??? "
     print " "
 
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#

@@ -10,6 +10,7 @@ quantile_features=CNVR
 ## pwpv file name
 associations=FULL_PATH_TO_PWPV_FOR_RE_FILE_HERE
 afm_description=DESCRIPTION_TEXT_HERE
+interesting_scores=PATH_TO_SCORES_FILE_HERE
 ## the 'comment' can be blank
 comment=COMMENT_TEXT_HERE
 dataset_label=DATA_SET_LABEL_HERE
