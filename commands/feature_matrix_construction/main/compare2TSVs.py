@@ -96,39 +96,23 @@ def lookAtLine(aLine):
 
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 
-
 def findIndex(rowLabels, aLabel):
 
     ## print " in findIndex ... ", aLabel
     ## print rowLabels[:5]
-
-    if ( aLabel[1]==':' and aLabel[6]==':' ):
-        if ( aLabel[2:6].lower()=="clin"  or  aLabel[2:6].lower()=="samp" ):
-            aLabel2 = aLabel[6:].lower()
-        else:
-            aLabel2 = aLabel.lower()
-    else:
-        aLabel2 = aLabel.lower()
+    aLabel2 = aLabel.lower()
 
     for ii in range(len(rowLabels)):
+        rLabel = oneBetterLabel ( rowLabels[ii] ) 
+        rLabel2 = rLabel.lower()
+        ## print "         %4d  comparing <%s> and <%s> " % ( ii, rLabel2, aLabel2 )
+        if ( rLabel2 == aLabel2 ): return (ii)
 
-        rLabel = rowLabels[ii]
-        if ( rLabel[1]==':' and rLabel[6]==':' ):
-            if ( rLabel[2:6].lower()=="clin"  or  rLabel[2:6].lower()=="samp" ):
-                rLabel2 = rLabel[6:].lower()
-            else:
-                rLabel2 = rLabel.lower()
-        else:
-            rLabel2 = rLabel.lower()
-
-        ## print "         comparing <%s> and <%s> " % ( rLabel2, aLabel2 )
-        if ( rLabel2 == aLabel2 ):
-            return (ii)
-
-    if (0):
+    if ( not aLabel.startswith("TCGA-") ):
         print " ??? not found ??? ", aLabel
         print rowLabels[:5]
         print rowLabels[-5:]
+        sys.exit(-1)
     return (-1)
 
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
@@ -172,6 +156,41 @@ def chopOneFeat ( aLabel, labelTokens ):
 
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 
+def oneBetterLabel ( oldLabel ):
+
+    if ( 1 ):
+        aLabel = oldLabel.lower()
+        aTokens = aLabel.split(':')
+        if ( len(aTokens) > 3 ):
+            if ( 1 ):
+                newLabel = chopOneFeat ( aLabel, aTokens ) 
+                ## print " from this label <%s> to this: <%s> " % ( aLabel, newLabel )
+            else:
+                if ( aTokens[1]=="clin"  or  aTokens[1]=="samp" ):
+                    newLabel = aLabel[6:]
+                    ## print " from this label <%s> to this: <%s> " % ( aLabel, newLabel )
+                else:
+                    ## print " (a) not changing this label <%s> " % ( aLabel )
+                    newLabel = aLabel
+        else:
+            ## print " (b) not changing this label <%s> " % ( aLabel )
+            newLabel = aLabel
+
+    return ( newLabel )
+
+# -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
+
+def makeBetterLabels ( originalLabels ):
+
+    betterLabels = []
+    for aLabel in originalLabels:
+        betterLabels += [ oneBetterLabel ( aLabel ) ]
+    betterLabels.sort()
+
+    return ( betterLabels )
+
+# -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
+
 if __name__ == "__main__":
 
     if (len(sys.argv) != 3):
@@ -211,44 +230,9 @@ if __name__ == "__main__":
         print " input file B does not exist ??? "
         sys.exit(-1)
 
-    # new approach to comparing feature names ... chop out certain
-    # non-critical portions of the feature to allow for less
-    # stringent matching ...
-    chopFeat = 1
-
     # first take a look at the feature (row) labels ...
-
-    rowLabelsA = []
-    for aLabel in dataA['rowLabels']:
-        aLabel = aLabel.lower()
-        aTokens = aLabel.split(':')
-        if ( len(aTokens) > 3 ):
-            if ( chopFeat ):
-                rowLabelsA += [ chopOneFeat ( aLabel, aTokens ) ]
-            else:
-                if ( aTokens[1]=="clin"  or  aTokens[1]=="samp" ):
-                    rowLabelsA += [ aLabel[6:] ]
-                else:
-                    rowLabelsA += [ aLabel ]
-        else:
-            rowLabelsA += [ aLabel ]
-    rowLabelsA.sort()
-
-    rowLabelsB = []
-    for bLabel in dataB['rowLabels']:
-        bLabel = bLabel.lower()
-        bTokens = bLabel.split(':')
-        if ( len(bTokens) > 3 ):
-            if ( chopFeat ):
-                rowLabelsB += [ chopOneFeat ( bLabel, bTokens ) ]
-            else:
-                if ( bTokens[1]=="clin"  or  bTokens[1]=="samp" ):
-                    rowLabelsB += [ bLabel[6:] ]
-                else:
-                    rowLabelsB += [ bLabel ]
-        else:
-            rowLabelsB += [ bLabel ]
-    rowLabelsB.sort()
+    rowLabelsA = makeBetterLabels ( dataA['rowLabels'] )
+    rowLabelsB = makeBetterLabels ( dataB['rowLabels'] )
 
     ## print len(rowLabelsA), len(rowLabelsB)
     ## print rowLabelsA[:5], rowLabelsA[-5:]
@@ -362,11 +346,12 @@ if __name__ == "__main__":
     print " now checking data values, feature by feature ... "
     print " (based on features in A that are also in B) "
 
-
     ## print rowLabelsA[:5]
     ## print featLabelsAnotB[:5]
 
     for aLabel in rowLabelsA:
+
+        ## print " aLabel = <%s> " % aLabel
 
         # skip this feature if it is in the A-not-B list ...
         if (aLabel in featLabelsAnotB):
@@ -382,10 +367,13 @@ if __name__ == "__main__":
         iB = findIndex(dataB['rowLabels'], aLabel)
         ## print " (a) ", aLabel, iA, iB
 
+
         # grab the data vector from each matrix ...
         dataVecA = dataA['dataMatrix'][iA]
         dataVecB = dataB['dataMatrix'][iB]
-        # print dataVecA, dataVecB
+        ## print " the two data vectors : "
+        ## print dataVecA
+        ## print dataVecB
 
         numDiff = 0
         numNotNA = 0
@@ -424,9 +412,7 @@ if __name__ == "__main__":
                         doNothing = 1
 
                     elif (str(dataVecA[jA]).lower() != str(dataVecB[jB]).lower()):
-                        # print " values are different for sample <%s> : <%s>
-                        # vs <%s> " % ( sampleA, str(dataVecA[jA]),
-                        # str(dataVecB[jB]) )
+                        ## print " values are different for sample <%s> : <%s> # vs <%s> " % ( sampleA, str(dataVecA[jA]), str(dataVecB[jB]) )
                         numDiff += 1
                         try:
                             diffVal = float (dataVecA[jA] ) - \
