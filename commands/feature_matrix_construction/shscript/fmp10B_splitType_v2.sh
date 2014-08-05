@@ -134,6 +134,12 @@ echo " *******************"
 		if [ -f $f ]
 		    then
 
+                        echo $f
+                        echo " get summary information on this file ... "
+                        smry=${f/.tsv/.summary}
+                        python $TCGAFMP_ROOT_DIR/main/quickLook.py $f >& $smry
+
+                        echo " run scoreCatFeat-v2 on this file ... "
 			h=${f/.tsv/.score.log}
 			nohup python $TCGAFMP_ROOT_DIR/main/scoreCatFeat-v2.py \
 			    --tsvFile $TCGAFMP_DATA_DIR/$tumor/$curDate/$f >& $h &
