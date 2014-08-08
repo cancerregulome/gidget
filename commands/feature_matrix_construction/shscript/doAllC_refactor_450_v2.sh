@@ -58,10 +58,13 @@ $TCGAFMP_ROOT_DIR/shscript/fmp06B_merge.sh      $curDate $oneTumor $ppString $au
 $TCGAFMP_ROOT_DIR/shscript/fmp07B_misc.sh       $curDate $oneTumor >& $TCGAFMP_DATA_DIR/$oneTumor/scratch/fmp07B.$curDate.$oneTumor.log
 $TCGAFMP_ROOT_DIR/shscript/fmp08B_checkMeth.sh  $curDate $oneTumor >& $TCGAFMP_DATA_DIR/$oneTumor/scratch/fmp08B.$curDate.$oneTumor.log
 $TCGAFMP_ROOT_DIR/shscript/fmp09B_addGnab.sh    $curDate $oneTumor >& $TCGAFMP_DATA_DIR/$oneTumor/scratch/fmp09B.$curDate.$oneTumor.log
-$TCGAFMP_ROOT_DIR/shscript/fmp10B_splitType_v2.sh  $curDate $oneTumor $auxName >& $TCGAFMP_DATA_DIR/$oneTumor/scratch/fmp10B.$curDate.$oneTumor.log
+$TCGAFMP_ROOT_DIR/shscript/fmp10B_splitType_v2.sh  $curDate $oneTumor $ppString $auxName >& $TCGAFMP_DATA_DIR/$oneTumor/scratch/fmp10B.$curDate.$oneTumor.log
 ## $TCGAFMP_ROOT_DIR/shscript/fmp11B_mergeNT.sh    $curDate $oneTumor >& $TCGAFMP_DATA_DIR/$oneTumor/scratch/fmp11B.$curDate.$oneTumor.log
 
-$TCGAFMP_ROOT_DIR/shscript/fmp15B_survival.sh     $curDate $oneTumor $auxName >& $TCGAFMP_DATA_DIR/$oneTumor/scratch/fmp15B.$curDate.$oneTumor.log
+if [ "$ppString" = 'private' ]
+    then
+        $TCGAFMP_ROOT_DIR/shscript/fmp15B_survival.sh     $curDate $oneTumor $auxName >& $TCGAFMP_DATA_DIR/$oneTumor/scratch/fmp15B.$curDate.$oneTumor.log
+fi
 
 ## $TCGAFMP_ROOT_DIR/shscript/fmp16B_finalFilter.sh  $curDate $oneTumor >& $TCGAFMP_DATA_DIR/$oneTumor/scratch/fmp16B.$curDate.$oneTumor.log
 
