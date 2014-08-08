@@ -2392,14 +2392,15 @@ def addPairwiseIndicatorFeatures(allClinDict):
 
 if __name__ == "__main__":
 
-    if ( (len(sys.argv)!=3) and (len(sys.argv)!=4) ):
-        print " Usage : %s <input TSV> <output TSV> [auxName] " % sys.argv[0]
+    if ( (len(sys.argv)!=4) and (len(sys.argv)!=5) ):
+        print " Usage : %s <input TSV> <output TSV> <public/private> [auxName] " % sys.argv[0]
         sys.exit(-1)
 
     tsvNameIn = sys.argv[1]
     tsvNameOut = sys.argv[2]
-    if ( len(sys.argv) == 4 ):
-        auxName = sys.argv[3]
+    ppString = sys.argv[3]
+    if ( len(sys.argv) == 5 ):
+        auxName = sys.argv[4]
     else:
         auxName = "aux"
 
@@ -2491,8 +2492,9 @@ if __name__ == "__main__":
         allClinDict = addPairwiseIndicatorFeatures(allClinDict)
 
     # new 09Jan2013 : try to add numeric features that map the non-binary categorical features ...
-    ## allClinDict = addNumericalFeatures ( allClinDict )
-    allClinDict = addDerivedFeatures(allClinDict, auxName)
+    # as of 06Aug2014, this is only done for "private" runs
+    if ( ppString == "private" ):
+        allClinDict = addDerivedFeatures(allClinDict, auxName)
 
     # look at pairwise MI ...
     if (0):
