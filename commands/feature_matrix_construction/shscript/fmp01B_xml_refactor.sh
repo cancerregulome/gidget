@@ -182,7 +182,7 @@ for tumor in $tumors
 	## informative features, but it is also adding binary indicator features and so
 	## the output matrix is actually typically quite a bit larger than the input ...
 	rm -fr cleanClin.$curDate.log
-	python $TCGAFMP_ROOT_DIR/main/cleanClinTSV.py clinical.temp.tsv cleanClin.$curDate.tsv $auxName >& cleanClin.$curDate.log
+	python $TCGAFMP_ROOT_DIR/main/cleanClinTSV.py clinical.temp.tsv cleanClin.$curDate.tsv $ppString $auxName >& cleanClin.$curDate.log
 	## rm -fr clinical.temp.tsv
 
 	## but it still needs some cleaning up ;-)
