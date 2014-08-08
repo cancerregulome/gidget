@@ -7,8 +7,6 @@ source ${TCGAFMP_ROOT_DIR}/../../gidget/util/gidget_util.sh
 
 ## this script should be called with the following parameters:
 ##      date, eg '12jul13' or 'test'
-##      snapshot name, either 'dcc-snapshot' or 'dcc-snapshot-28jun13'
-##      one tumor type, eg 'ucec'
 
 WRONGARGS=1
 if [ $# != 1 ]
