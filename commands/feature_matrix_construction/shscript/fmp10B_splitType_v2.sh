@@ -10,10 +10,10 @@ source ${TCGAFMP_ROOT_DIR}/../../gidget/util/gidget_util.sh
 ##      one tumor type, eg 'ucec'
 
 WRONGARGS=1
-if [[ $# != 2 ]] && [[ $# != 3 ]]
+if [[ $# != 3 ]] && [[ $# != 4 ]]
     then
-        echo " Usage   : `basename $0` <curDate> <tumorType>  [auxName] "
-        echo " Example : `basename $0` 28oct13  brca  aux "
+        echo " Usage   : `basename $0` <curDate> <tumorType> <public/private>  [auxName] "
+        echo " Example : `basename $0` 28oct13  brca  private  aux "
         echo " "
         echo " Note that the new auxName option at the end is optional and will default to simply aux "
         exit $WRONGARGS
@@ -21,10 +21,11 @@ fi
 
 curDate=$1
 tumor=$2
+ppString=$3
 
-if (( $# == 3 ))
+if (( $# == 4 ))
     then
-        auxName=$3
+        auxName=$4
     else
         auxName=aux
 fi
@@ -46,13 +47,17 @@ echo " *******************"
 
 	cd $curDate
 
-	s=$(<../$auxName/splitType.txt)
-	if [ -z "$s" ]
-	    then
-	        echo " no splitType specified "
-	    else
-		echo " splitType is $s"
-	fi
+        s=''
+        if [ "$ppString" = 'private' ]
+            then
+        	s=$(<../$auxName/splitType.txt)
+        	if [ -z "$s" ]
+        	    then
+        	        echo " no splitType specified "
+        	    else
+        		echo " splitType is $s"
+        	fi
+        fi
 
         rm -fr filterFeat.log
         rm -fr final.addI.log
@@ -73,8 +78,13 @@ echo " *******************"
                 echo " adding indicator features ... "
                 python $TCGAFMP_ROOT_DIR/main/addIndicators.py $f tmpf1a.tsv >> final.addI.log
 
-                echo " adding discrete features ... "
-                python $TCGAFMP_ROOT_DIR/main/addDiscreteFeat.py tmpf1a.tsv tmpf1.tsv ../$auxName/$tumor.addDiscreteFeat_List.txt >> final.addI.log
+                if [ "$ppString" = 'private' ]
+                    then
+                        echo " adding discrete features ... "
+                        python $TCGAFMP_ROOT_DIR/main/addDiscreteFeat.py tmpf1a.tsv tmpf1.tsv ../$auxName/$tumor.addDiscreteFeat_List.txt >> final.addI.log
+                    else
+                        mv tmpf1a.tsv tmpf1.tsv
+                fi
 
                 echo " filtering features and samples ... "
                 python $TCGAFMP_ROOT_DIR/main/filterTSVbyFeatList.py \
