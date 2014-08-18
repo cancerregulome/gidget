@@ -130,9 +130,19 @@ def chopOneFeat ( aLabel, labelTokens ):
     if ( aType == "mirn" ):
         return ( labelTokens[0] + ":" + labelTokens[1] + ":" + labelTokens[2] + ":::::" + labelTokens[7] )
 
+    ## some of the gene-level CNVR features that we got from the Broad
+    ## could not get annotated for whatever reason, and so they 
+    ## do not have position information and need to rely on the gene symbol
+    ## eg:         N:CNVR:ARPM1:::::Gistic
+    ## instead of  N:CNVR:AATK:chr17:79091095:79139877:-:Gistic
+    ##             0 1    2    3     4        5        6 7
+    ## if there is no position information for a CNVR feature, then keep the whole label
     if ( aType == "cnvr" ):
-        return ( labelTokens[0] + ":" + labelTokens[1] + "::" + labelTokens[3] + ":" \
-               + labelTokens[4] + ":" + labelTokens[5] + "::" + labelTokens[7] )
+        if ( labelTokens[3] == '' ):
+            return ( aLabel )
+        else:
+            return ( labelTokens[0] + ":" + labelTokens[1] + "::" + labelTokens[3] + ":" \
+                   + labelTokens[4] + ":" + labelTokens[5] + "::" + labelTokens[7] )
 
     if ( aType == "meth" ):
         try:
@@ -191,6 +201,60 @@ def makeBetterLabels ( originalLabels ):
 
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 
+def fixBarcodes ( colLabelsA, colLabelsB ):
+
+    ## what are the lengths of the barcodes ?
+    aLen = len(colLabelsA[0])
+    bLen = len(colLabelsB[0])
+
+    ## make sure that they are consistent
+    aConsistent = 1
+    for ii in range(len(colLabelsA)):
+        if ( len(colLabelsA[ii]) != aLen ):
+            aConsistent = 0
+
+    bConsistent = 1
+    for ii in range(len(colLabelsB)):
+        if ( len(colLabelsB[ii]) != bLen ):
+            bConsistent = 0
+
+    ## if they are not consistent, then bail ...
+    if ( (aConsistent + bConsistent) != 2 ): return ( colLabelsA, colLabelsB )
+
+    ## if they are consistent, then make them comparable if necessary
+    if ( aLen == bLen ): return ( colLabelsA, colLabelsB )
+
+    ## TCGA-BI-A0VS-01
+    ## 012345678901234
+    changeA = 0
+    changeB = 0
+    new_aLen = aLen
+    new_bLen = bLen
+
+    if ( aLen > bLen ):
+        if ( bLen >= 15 ): 
+            changeA = 1
+            new_aLen = bLen
+
+    if ( bLen > aLen ):
+        if ( aLen >= 15 ): 
+            changeB = 1
+            new_bLen = aLen
+
+    print " change flags : ", changeA, changeB, aLen, bLen, new_aLen, new_bLen
+
+    if ( changeA ):
+        for ii in range(len(colLabelsA)):
+            colLabelsA[ii] = colLabelsA[ii][:new_aLen]
+
+    if ( changeB ):
+        for ii in range(len(colLabelsB)):
+            colLabelsB[ii] = colLabelsB[ii][:new_aLen]
+
+    return ( colLabelsA, colLabelsB )
+
+# -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
+
 if __name__ == "__main__":
 
     if (len(sys.argv) != 3):
@@ -234,9 +298,14 @@ if __name__ == "__main__":
     rowLabelsA = makeBetterLabels ( dataA['rowLabels'] )
     rowLabelsB = makeBetterLabels ( dataB['rowLabels'] )
 
-    ## print len(rowLabelsA), len(rowLabelsB)
-    ## print rowLabelsA[:5], rowLabelsA[-5:]
-    ## print rowLabelsB[:5], rowLabelsB[-5:]
+    # and also take a look at the sample (column) labels ...
+    ( dataA['colLabels'], dataB['colLabels'] ) = fixBarcodes ( dataA['colLabels'], dataB['colLabels'] )
+
+    print len(rowLabelsA), len(rowLabelsB)
+    print rowLabelsA[:2], rowLabelsA[-2:]
+    print rowLabelsB[:2], rowLabelsB[-2:]
+    print dataA['colLabels'][:2], dataA['colLabels'][-2:]
+    print dataB['colLabels'][:2], dataB['colLabels'][-2:]
 
     numAinB = 0
     featLabelsAnotB = []
