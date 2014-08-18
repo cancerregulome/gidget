@@ -308,6 +308,16 @@ remapDict["axillary_lymph_node_stage_method_type"]["other_(specify)"] = "NA"
 
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 
+def stringInList_CaseInsens ( aString, aList ):
+
+    for s in aList:
+        u = s.upper()
+        if ( aString.upper() == u ): return ( 1 )
+
+    return ( 0 )
+
+# -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
+
 
 def remapCategoricalFeatures(allClinDict):
 
@@ -463,6 +473,16 @@ def addTag2Key ( aKey, aTag ):
             newKey += "_" + aTag
         
     return ( newKey )
+
+# -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
+
+def checkBarcodes(allClinDict):
+    zKey = findProperKey (allClinDict, "bcr_patient_barcode" )
+    numClin = getNumPatients(allClinDict)
+    for ii in range(numClin):
+        if ( allClinDict[zKey][ii].find("_") >= 0 ):
+            print " BAD barcode !!! ", ii, allClinDict[zKey][ii]
+            sys.exit(-1)
 
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 # fields of interest:
@@ -927,6 +947,9 @@ def testTumorStage(reported, computed):
 
 def getTumorStage(T, N, M):
 
+    print " WARNING ... this function should NOT be called ... "
+    sys.exit(-1)
+
     T = T.upper()
     N = N.upper()
     M = M.upper()
@@ -1150,19 +1173,23 @@ def checkTumorStage(allClinDict):
     mKey = getProperKey ( allClinDict, "distant_metastasis_pathologic_spread" )
 
     for ii in range(numClin):
+
         aCode = allClinDict[pKey][ii]
         curTumorStage = allClinDict[sKey][ii]
         curT = allClinDict[tKey][ii]
         curN = allClinDict[nKey][ii]
         curM = allClinDict[mKey][ii]
+
         # print " checking tumor stage for <%s> <%s> <%s> <%s> <%s> " % (
         # aCode, curTumorStage, curN, curM, curT )
 
-        curTumorStage = curTumorStage.upper()
-        curTumorStage = curTumorStage.strip()
-        if (curTumorStage != "NA"):
-            if (not curTumorStage.startswith("STAGE ")):
-                curTumorStage = "STAGE " + curTumorStage
+        ## removing this 15aug2014 ...
+        if ( 0 ):
+            curTumorStage = curTumorStage.upper()
+            curTumorStage = curTumorStage.strip()
+            if (curTumorStage != "NA"):
+                if (not curTumorStage.startswith("STAGE ")):
+                    curTumorStage = "STAGE " + curTumorStage
 
         # as of 09nov12, NOT attempting to derive tumor stage from T, N, and M
         if (0):
@@ -1213,21 +1240,21 @@ def checkVitalStatus(allClinDict):
 
         doChange = 1
         try:
-            newStatus = curStatus.upper()
+            newStatus = curStatus
             if (curStatus.upper() == "ALIVE"):
-                newStatus = "LIVING"
+                newStatus = "Living"
                 numLC += 1
             if (curStatus.upper() == "DEAD"):
-                newStatus = "DECEASED"
+                newStatus = "Deceased"
                 numDC += 1
 
         except:
             try:
                 if (curStatus == 0):
-                    newStatus = "LIVING"
+                    newStatus = "Living"
                     numLC += 1
                 elif (curStatus == 1):
-                    newStatus = "DECEASED"
+                    newStatus = "Deceased"
                     numDC += 1
             except:
                 doChange = 0
@@ -1362,15 +1389,15 @@ def removeSpecialChars(oneKey):
 
         # for now, we are just checking for 'grade' strings that are sometimes
         # 'grade_3' and sometimes just '3'
-        if (aString.startswith("grade_")):
+        if (aString.lower().startswith("grade_")):
             for ii in range(len(oneKey)):
                 aLabel = str(oneKey[ii])
                 if (aLabel.upper() == "NA"):
                     continue
-                if (not aLabel.startswith("grade_")):
+                if (not aLabel.lower().startswith("grade_")):
                     try:
                         iVal = int(aLabel)
-                        aString = "grade_%d" % iVal
+                        aString = "Grade_%d" % iVal
                         oneKey[ii] = aString
                     except:
                         print "     FAILED to prepend grade ??? ", aLabel
@@ -1622,10 +1649,14 @@ def abbrevCategStrings(allClinDict):
 
     for aKey in keyList:
 
-        if (aKey == "bcr_patient_barcode"):
+        if (aKey.find("bcr_patient_barcode") >= 0): 
+            print " all barcodes : "
+            print allClinDict[aKey]
+            print " done "
             continue
-        (keyType, nCount, nNA, nCard, labelList,
-         labelCount) = miscClin.lookAtKey(allClinDict[aKey])
+
+        (keyType, nCount, nNA, nCard, labelList, labelCount) = miscClin.lookAtKey(allClinDict[aKey])
+        print aKey, keyType, nCount, nNA
 
         if (keyType == "NOMINAL"):
 
@@ -1706,8 +1737,8 @@ def checkPrefix(labelList, aPrefix):
         if (bLabel.startswith(aPrefix)):
             nHas += 1
 
-    if ((nHas + 2) >= nLabel):
-        return (1)
+    if ((nHas + 2) >= nLabel): return (1)
+
     return (0)
 
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
@@ -1974,7 +2005,7 @@ def getMappingDict(featName, auxName):
         firstLine = 1
         for aLine in fh:
             aLine = aLine.strip()
-            aLine = aLine.upper()
+            ## aLine = aLine.upper()
             tokenList = aLine.split('\t')
             if (firstLine):
                 if (tokenList[0].upper() == tmpFeatName.upper()):
@@ -1998,6 +2029,19 @@ def getMappingDict(featName, auxName):
         return (mapDict, newNames)
     except:
         return (mapDict, [])
+
+# -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
+
+def getMapping ( mapDict, curV, ii ):
+
+    for k in mapDict.keys():
+        if ( k.lower() == curV.lower() ):
+            return ( mapDict[k][ii] )
+
+    print " FAILED TO GET MAPPING ??? ", curV, ii
+    print mapDict
+
+    sys.exit(-1)
 
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 
@@ -2043,7 +2087,7 @@ def addDerivedFeatures(allClinDict, auxName):
                     # sanity check ...
                     if (0):
                         for bKey in mapDict.keys():
-                            if (bKey.upper() not in labelList):
+                            if ( stringInList_CaseInsens ( bKey, labelList ) ):
                                 print " ERROR ??? mapping does not match this feature ??? "
                                 print mapDict
                                 print labelList
@@ -2051,7 +2095,7 @@ def addDerivedFeatures(allClinDict, auxName):
                     if (1):
                         for bLabel in labelList:
                             try:
-                                if (bLabel.upper() not in mapDict.keys()):
+                                if ( not stringInList_CaseInsens ( bLabel, mapDict.keys() ) ):
                                     print " ************************************************** "
                                     print " ERROR ??? feature value not in mapDict ??? ", bLabel
                                     print " labelList : ", labelList
@@ -2061,21 +2105,7 @@ def addDerivedFeatures(allClinDict, auxName):
                                     continue
                                     # sys.exit(-1)
                             except:
-                                if (bLabel not in mapDict.keys()):
-                                    print " ************************************************** "
-                                    print " ERROR ??? feature value not in mapDict ??? ", bLabel
-                                    print " labelList : ", labelList
-                                    print " mapDict   : ", mapDict
-                                    print " --> WILL NOT ADD ANY DERIVED FEATURES AT THIS TIME "
-                                    print " ************************************************** "
-                                    continue
-
-                                if (0):
-                                    print " ERROR ??? why am I here ??? "
-                                    print bLabel
-                                    print labelList
-                                    print mapDict
-                                    sys.exit(-1)
+                                doNothing = 1
 
                     # if there is no mapping file, then we won't be making any
                     # new features ...
@@ -2096,8 +2126,8 @@ def addDerivedFeatures(allClinDict, auxName):
                             curVal = mapDict[bKey][ithName]
                             if (curVal == "NA"):
                                 continue
-                            if (curVal.upper() not in uVec):
-                                uVec += [curVal.upper()]
+                            if ( stringInList_CaseInsens ( curVal, uVec ) ):
+                                uVec += [curVal]
                             try:
                                 fVal = float(curVal)
                             except:
@@ -2137,11 +2167,11 @@ def addDerivedFeatures(allClinDict, auxName):
                                 tmpV[kk] = "NA"
                             else:
                                 try:
-                                    tmpV[kk] = mapDict[curV[kk]
-                                                       .upper()][ithName]
+                                    tmpV[kk] = getMapping ( mapDict, curV[kk], ithName )
+                                    ## tmpV[kk] = mapDict[curV[kk]][ithName]
                                 except:
                                     print " ERROR ??? failed to map ??? setting to NA but MUST FIX !!! "
-                                    print kk, curV[kk].upper(), ithName
+                                    print kk, curV[kk], ithName
                                     print mapDict
                                     if (1):
                                         tmpV[kk] = "NA"
@@ -2410,6 +2440,8 @@ if __name__ == "__main__":
     print " ****************************************************************** "
     print " reading input file <%s> " % tsvNameIn
     allClinDict = tsvIO.readTSV(tsvNameIn)
+    print " A "
+    checkBarcodes(allClinDict)
 
     # take a look ...
     (naCounts, otherCounts) = miscClin.lookAtClinDict(allClinDict)
@@ -2417,46 +2449,67 @@ if __name__ == "__main__":
     if (1):
         # remove constant-value keys ...
         allClinDict = miscClin.removeConstantKeys(allClinDict)
+        print " B "
+        checkBarcodes(allClinDict)
 
     if (1):
         # remove uninformative keys ...
         allClinDict = miscClin.removeUninformativeKeys(allClinDict)
+        print " C "
+        checkBarcodes(allClinDict)
 
     # check the tumor stage based on the other T/N/M definitions, update if possible
     # (and if the original setting was "NA")
     if (1):
         allClinDict = checkTumorStage(allClinDict)
+        print " D "
+        checkBarcodes(allClinDict)
 
     # new as of 16aug13 ... vital_status strings are inconsistent between
     # 'living' or 'alive' or 'deceased' or 'dead' ...
     if (1):
         allClinDict = checkVitalStatus(allClinDict)
+        print " E "
+        checkBarcodes(allClinDict)
 
     # new as of 13sep13 ... makig 'age' a continuous feature that
     # exactly matches the days_to_birth ...
     if (1):
         allClinDict = updateAge(allClinDict)
+        print " F "
+        checkBarcodes(allClinDict)
 
     # remap some categorical features to numerical features ...
-    if (1):
+    # oh, this shouldn't still be here, should it ??? 15aug2014
+    if (0):
         allClinDict = remapCategoricalFeatures(allClinDict)
+        print " G "
+        checkBarcodes(allClinDict)
 
     # add the lymphnodes_positive fraction ...
     allClinDict = computeLymphnodesFraction(allClinDict)
+    print " H "
+    checkBarcodes(allClinDict)
 
     # fill in some missing information that we have collected from elsewhere
     # ...
     if (0):
         allClinDict = addMissingInfo(allClinDict)
+        print " I "
+        checkBarcodes(allClinDict)
 
     # NEW: look at some of the "days_to_" fields and do some fix-ups ...
     if (1):
         allClinDict = addFollowupInfo(allClinDict)
+        print " J "
+        checkBarcodes(allClinDict)
 
     # new as of 04dec13 ... checking that vital_status and various days_to_???
     # features are consistent ...
     if (1):
         allClinDict = checkFollowupInfo(allClinDict)
+        print " K "
+        checkBarcodes(allClinDict)
 
     # take a look at the updated dictionary ...
     (naCounts, otherCounts) = miscClin.lookAtClinDict(allClinDict)
@@ -2464,6 +2517,8 @@ if __name__ == "__main__":
     if (1):
         # remove constant-value keys ...
         allClinDict = miscClin.removeConstantKeys(allClinDict)
+        print " L "
+        checkBarcodes(allClinDict)
 
     if (0):
         # removing this ... 02Feb2012 SMR
@@ -2480,21 +2535,31 @@ if __name__ == "__main__":
                                               numerical_naFracThresh,
                                               classSize_minFracThresh,
                                               classSize_maxFracThresh)
+        print " M "
+        checkBarcodes(allClinDict)
 
     # try to abbreviate clinical feature strings
     allClinDict = abbrevCategStrings(allClinDict)
+    print " N "
+    checkBarcodes(allClinDict)
 
     if (0):
         # automatically generate indicator features for remaining categorical
         # features
         allClinDict = addIndicatorFeatures(allClinDict)
+        print " O "
+        checkBarcodes(allClinDict)
         # new 10Feb2012 : add pairwise indicator features
         allClinDict = addPairwiseIndicatorFeatures(allClinDict)
+        print " P "
+        checkBarcodes(allClinDict)
 
     # new 09Jan2013 : try to add numeric features that map the non-binary categorical features ...
     # as of 06Aug2014, this is only done for "private" runs
     if ( ppString == "private" ):
         allClinDict = addDerivedFeatures(allClinDict, auxName)
+        print " Q "
+        checkBarcodes(allClinDict)
 
     # look at pairwise MI ...
     if (0):
