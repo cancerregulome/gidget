@@ -408,11 +408,15 @@ if __name__ == "__main__":
         outD2 = tsvIO.filter_dataMatrix(outD, skipRowList, [])
         outD = outD2
 
-    # print " "
-    # print " calling writeTSV_dataMatrix ... ", outFile
+    # set up sorting options ...
     sortRowFlag = 0
     sortColFlag = 0
-    tsvIO.writeTSV_dataMatrix(outD, sortRowFlag, sortColFlag, outFile)
+    rowOrder = []
+    colOrder = []
+
+    # print " "
+    # print " calling writeTSV_dataMatrix ... ", outFile
+    tsvIO.writeTSV_dataMatrix(outD, sortRowFlag, sortColFlag, outFile, rowOrder, colOrder)
 
     print " "
     print " DONE "
