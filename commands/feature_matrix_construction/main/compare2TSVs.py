@@ -259,6 +259,7 @@ if __name__ == "__main__":
 
     if (len(sys.argv) != 3):
         print ' Usage : %s <input TSV #1> <input TSV #2> ' % sys.argv[0]
+        print " ERROR -- bad command line arguments "
         sys.exit(-1)
 
     inFileA = sys.argv[1]

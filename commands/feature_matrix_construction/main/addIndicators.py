@@ -407,6 +407,7 @@ if __name__ == "__main__":
 
     if (len(sys.argv) != 3):
         print " Usage : %s <input TSV> <output TSV> " % sys.argv[0]
+        print " ERROR -- bad command line arguments "
         sys.exit(-1)
 
     tsvNameIn = sys.argv[1]

@@ -394,6 +394,7 @@ if __name__ == "__main__":
         print "     #11  (same as col #9 but for feature B) "
         print "     #12  genomic distance between features A and B (or 500000000) "
         print " "
+        print " ERROR -- bad command line arguments "
 
     args = parser.parse_args()
     print args

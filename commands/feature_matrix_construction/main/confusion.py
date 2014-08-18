@@ -98,6 +98,7 @@ if __name__ == "__main__":
 
     if (len(sys.argv) != 4):
         print ' Usage : %s <TSV filename> <feat1> <feat2> ' % sys.argv[0]
+        print " ERROR -- bad command line arguments "
         sys.exit(-1)
 
     inFilename = sys.argv[1]

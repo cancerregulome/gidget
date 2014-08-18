@@ -18,6 +18,7 @@ if __name__ == "__main__":
     if (1):
         if (len(sys.argv) != 3):
             print " Usage : %s <input file> <output file> " % sys.argv[0]
+            print " ERROR -- bad command line arguments "
             sys.exit(-1)
         inFile = sys.argv[1]
         outFile = sys.argv[2]

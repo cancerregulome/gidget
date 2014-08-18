@@ -517,6 +517,7 @@ if __name__ == "__main__":
         print "       as a *.forTSVmerge.tsv file, so you might want to include that "
         print "       suffix in the output-filename on the command line "
         print " "
+        print " ERROR -- bad command line arguments "
         sys.exit(-1)
 
     mafFilename = sys.argv[1]

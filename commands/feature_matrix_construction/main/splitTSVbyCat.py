@@ -263,6 +263,7 @@ if __name__ == "__main__":
         # there must be exactly 3 arguments ...
         if (len(sys.argv) != 3):
             print " Usage : %s <input file> <categorical feature> " % sys.argv[0]
+            print " ERROR -- bad command line arguments "
             sys.exit(-1)
 
         inFile = sys.argv[1]
@@ -426,7 +427,9 @@ if __name__ == "__main__":
             print " "
             print " calling writeTSV_dataMatrix ... ", outFile
             sortRowFlag = 0
+            ### sortRowFlag = 1 # just for TESTING 16aug14
             sortColFlag = 0
+            ### sortColFlag = 1 # just for TESTING 16aug14
             tsvIO.writeTSV_dataMatrix(
                 outD, sortRowFlag, sortColFlag, outFile)
 

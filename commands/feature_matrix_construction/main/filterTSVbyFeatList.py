@@ -90,6 +90,7 @@ if __name__ == "__main__":
             print "         STRICT filtering means that an exact match to the feature name is required "
             print "         from the input file, and this is generally done with LOOSE filtering "
             print " "
+            print " ERROR -- bad command line arguments "
             sys.exit(-1)
 
         inFile = sys.argv[1]

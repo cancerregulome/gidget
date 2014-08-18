@@ -281,6 +281,7 @@ if __name__ == "__main__":
     if (1):
         if (len(sys.argv) != 2):
             print " Usage: %s <tumorType> " % sys.argv[0]
+            print " ERROR -- bad command line arguments "
             sys.exit(-1)
         else:
             tumorType = sys.argv[1].lower()

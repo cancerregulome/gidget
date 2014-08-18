@@ -96,6 +96,7 @@ if __name__ == "__main__":
 
     if (len(sys.argv) != 2 and len(sys.argv) != 3):
         print ' Usage : %s <filename> [hist-file] ' % sys.argv[0]
+        print " ERROR -- bad command line arguments "
         sys.exit(-1)
 
     inFilename = sys.argv[1]

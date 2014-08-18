@@ -339,6 +339,7 @@ if __name__ == "__main__":
     if (len(sys.argv) != 4):
         print " Usage : %s <old input TSV> <new input TSV> <output merged TSV> " % sys.argv[0]
         print "         ", sys.argv
+        print " ERROR -- bad command line arguments "
         sys.exit(-1)
 
     tsvName1 = sys.argv[1]

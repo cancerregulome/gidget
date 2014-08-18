@@ -259,6 +259,8 @@ if __name__ == "__main__":
             print "         if the methylation data from a particular sample is in the white list, that "
             print "         does not necessarily mean that the microRNA data from the same sample can "
             print "         automatically be included as well -- it must be listed explicitly. "
+            print " "
+            print " ERROR -- bad command line arguments "
             sys.exit(-1)
 
         inFile = sys.argv[1]

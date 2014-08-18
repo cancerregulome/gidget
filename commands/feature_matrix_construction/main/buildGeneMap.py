@@ -336,6 +336,7 @@ if __name__ == "__main__":
             print sys.argv
             print len(sys.argv)
             print " "
+            print " ERROR -- bad command line arguments "
             sys.exit(-1)
 
     # open the output file

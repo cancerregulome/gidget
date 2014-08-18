@@ -526,6 +526,7 @@ if __name__ == "__main__":
     if (1):
         if (len(sys.argv) > 4 or len(sys.argv) < 3):
             print " Usage: %s <tumorType> <outSuffix> [snapshot-name] "
+            print " ERROR -- bad command line arguments "
             sys.exit(-1)
         else:
 
