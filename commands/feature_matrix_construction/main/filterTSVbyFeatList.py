@@ -24,6 +24,7 @@ def readFeatureListFromFile(featNameFile):
 
     for aLine in fh:
         aLine = aLine.strip()
+        if ( len(aLine) < 1 ): continue
         if ( aLine.startswith ("#") ): continue
         if ( aLine.find('\t') > 0 ):
             aTokens = aLine.split()
@@ -59,6 +60,18 @@ def is_in_list(tmpLabel, featNameList, aFlag):
             if (lowerT.startswith(lowerA)): return (1)
 
     return (0)
+
+# -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
+
+def get_strict_name ( tmpLabel, featNameList ):
+
+    lowerT = tmpLabel.lower()
+    for aSample in featNameList:
+        lowerA = aSample.lower()
+        if ( lowerT.find(lowerA)>=0 ): return ( aSample )
+        if ( lowerT.startswith(lowerA) ): return ( aSample )
+
+    return ( '' )
 
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 
@@ -108,8 +121,12 @@ if __name__ == "__main__":
 
     tsvIO.lookAtDataD(dataD)
 
+    # as we read in the white lists (if any), build up an ordered list
+    # of the feature names ...
+    orderedWhiteList = []
+
     print " "
-    print " reading feature name list ... "
+    print " reading feature name lists ... "
     numLists = len(listInfo)
     listDetails = [0] * numLists
     listBW = [0] * numLists
@@ -126,7 +143,19 @@ if __name__ == "__main__":
             if (listLS[iList] == "strict"):
                 print "             --> NO strict filtering can/will be applied "
 
-    # now we need to figure out which features we will keep/remove ...
+
+        print " "
+        print iList
+        print listDetails[iList][:3]
+        print listBW[iList]
+        print listLS[iList]
+
+        orderedWhiteList += listDetails[iList]
+
+    print " length of ordered white list : ", len(orderedWhiteList)
+
+    # now we start the real work ...
+
     rowLabels = dataD['rowLabels']
     dataMatrix = dataD['dataMatrix']
     numRow = len(dataMatrix)
@@ -204,15 +233,67 @@ if __name__ == "__main__":
         print " "
         # sys.exit(-1)
 
-    # print " "
-    # print " calling filter_dataMatrix ... "
+    print " "
+    print " calling filter_dataMatrix ... "
     outD = tsvIO.filter_dataMatrix(dataD, skipRowList, [])
 
-    # print " "
-    # print " calling writeTSV_dataMatrix ... ", outFile
-    sortRowFlag = 0
+    # now build up the list of actual features that we have ... 
+    curRowLabels = outD['rowLabels']
+    numRow = len(curRowLabels)
+    print " now we have %d output features " % numRow
+
+    # and put together a new ordered list for the output ...
+    # (here we need the 'strict' feature names)
+    print " building up new outputOrder vector "
+    outputOrder = []
+    for jRow in range(len(orderedWhiteList)):
+        aFeat = orderedWhiteList[jRow]
+        if ( is_in_list ( aFeat, curRowLabels, 'strict' ) ):
+            outputOrder += [ aFeat ]
+        elif ( is_in_list ( aFeat, curRowLabels, 'loose' ) ):
+            sName = get_strict_name ( aFeat, curRowLabels ) 
+            if ( sName != '' ):
+                outputOrder += [ sName ]
+        else:
+            doNothing = 1
+            print " <%s> will not be in the output " % aFeat
+
+    print " --> length = %d " % len(outputOrder)
+
+    # any features that are not in the ordered white list will just be
+    # tacked on at the end in whatever order we come across them ...
+    for iRow in range(numRow):
+        if ( curRowLabels[iRow] not in outputOrder ):
+            outputOrder += [ curRowLabels[iRow] ]
+    print " --> length = %d " % len(outputOrder)
+
+    # sanity check ...
+    if ( len(outputOrder) != numRow ):
+        print " ERROR ??? length of ordered list is wrong ??? "
+        print len(outputOrder), numRow
+        sys.exit(-1)
+    
+    # and now we need to build up the output rowOrder ...
+    print " setting up index-mapping for output order "
+    sortRowFlag = 1
+    rowOrder = [0] * numRow
+    for newPos in range(numRow):
+        ## print " "
+        ## print newPos, outputOrder[newPos]
+        oldPos = curRowLabels.index(outputOrder[newPos])
+        ## print oldPos, curRowLabels[oldPos]
+        rowOrder[newPos] = oldPos
+
+    print " --> the new rowOrder vector : "
+    print rowOrder[:5], rowOrder[-5:]
+        
+    # set up sorting options ...
     sortColFlag = 0
-    tsvIO.writeTSV_dataMatrix(outD, sortRowFlag, sortColFlag, outFile)
+    colOrder = []
+
+    print " "
+    print " calling writeTSV_dataMatrix ... ", outFile
+    tsvIO.writeTSV_dataMatrix(outD, sortRowFlag, sortColFlag, outFile, rowOrder, colOrder)
 
     print " "
     print " DONE "
