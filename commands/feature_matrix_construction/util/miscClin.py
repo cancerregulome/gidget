@@ -1702,7 +1702,7 @@ def removeConstantKeys(allClinDict):
             print "         removing key %s : only non-NA value is %s " % (aKey, otherValues[0])
             removeFlags[ii] = 1
         elif (len(otherValues) == 0):
-            print "         removing key %s : only NA values !!! "
+            print "         removing key %s : only NA values !!! " % aKey
             removeFlags[ii] = 1
 
     print " "
