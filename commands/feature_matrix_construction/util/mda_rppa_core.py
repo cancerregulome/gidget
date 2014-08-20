@@ -3,6 +3,7 @@ Created on Jun 20, 2012
 
 @author: michael
 '''
+from gidget_util import gidgetConfigVars
 import miscTCGA
 from technology_type import technology_type
 
@@ -110,3 +111,98 @@ class mdanderson_org_mda_rppa_core(technology_type):
                     dataMatrix[row][sampleIndex] = self.NA_VALUE
                 else:
                     raise ValueError('ERROR converting token to float ??? %s: token length: %i tokens: %s', (str(self), len(tokens), tokens), e)
+
+class rppa_firehose(technology_type):
+    '''
+    the firehose parser for RPPA technology type
+    '''
+    def __init__(self):
+        '''
+        Constructor
+        '''
+        self.geneAntibodyMap = None
+
+    def getGeneAntibodyMap(self):
+    
+        geneAntibodyMap = {}
+    
+        fh = file( gidgetConfigVars['TCGAFMP_BIOINFORMATICS_REFERENCES'] + "/tcga_platform_genelists/MDA_antibody_annotation_2014_03_04.txt" )
+        for aLine in fh:
+            aLine = aLine.strip()
+            tokenList = aLine.split('\t')
+            token0 = tokenList[0].strip()
+            token1 = tokenList[1].strip()
+    
+            if (token0 != "Gene Name"):
+                geneAntibodyMap[token1] = token0
+    
+        fh.close()
+        return (geneAntibodyMap)
+
+    def getFeatureName(self, aList):
+        try:
+            geneName = self.geneAntibodyMap[aList[0]]
+        except:
+            print " ERROR ??? could not get antibody <%s> to gene mapping ??? " % aList[0]
+            sys.exit(-1)
+        return "N:RPPA:" + geneName + ":::::" + aList[0]
+    
+# -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
+
+# for the RPPA data we could either grab data form
+# gdac.broadinstitute.org_THCA-TP.RPPA_AnnotateWithGene.Level_3.2013071400.0.0
+# where the file is called THCA-TP.rppa.txt and has row labels like
+# EIF4EBP1|4E-BP1_pT70
+# TP53BP1|53BP1
+# ARAF|A-Raf_pS299
+# ACACA|ACC1
+# ACACA ACACB|ACC_pS79
+
+# or
+# gdac.broadinstitute.org_THCA-TP.Merge_protein_exp__mda_rppa_core__mdanderson_org__Level_3__protein_normalization__data.Level_3.2013071400.0.0
+# where the file is called THCA-TP.protein_exp__mda_rppa_core__mdanderson_org__Level_3__protein_normalization__data.data.txt
+# and the row labels are like
+# 14-3-3_epsilon
+# 4E-BP1
+# 4E-BP1_pS65
+# 4E-BP1_pT37_T46
+# 53BP1
+# ACC_pS79
+# ACC1
+# Akt
+
+# the problem is that in both of these files, apparently it is ok for the barcode
+# to end in -TP rather than -01 (at least that is what I am seeing in the THCA run
+# from July but not from the SKCM run in October)
+
+
+    def parseDataFiles(self, config, fName, outdir):
+        # --------------------------------------
+        # figure out the name of the output file based on the name of the input file
+        # SKCM.mirnaseq__illuminahiseq_mirnaseq__bcgsc_ca__Level_3__miR_gene_expression__data.data.txt
+        if (fName.find("protein_exp__mda_rppa_core") > 0):
+            outFile = outdir + config['zCancer'] + ".mdanderson.org__mda_rppa_core__protein_exp." + \
+                config['suffixString'] + ".tsv"
+            try:
+                print " opening output file : ", outFile
+                fhOut = file(outFile, 'w')
+                platformName = "MDA_RPPA_Core"
+                numCol = 1
+                iCol = 1
+            except:
+                print " ERROR ??? failed to open output file ??? "
+                print outFile
+                sys.exit(-1)
+        else:
+            print " new data type ??? "
+            print fName
+            sys.exit(-1)
+
+        self.geneAntibodyMap = self.getGeneAntibodyMap()
+        # --------------------------------------
+        # ok, time to parse the input file and write the
+        # output file
+        print " >>> ready to parse input file and write output file "
+        print " >>> %s " % fName
+        self.parseFirehoseFile(fName, fhOut, iCol, numCol, platformName, "N:RPPA", "C:SAMP:rppaPlatform", True, config['zCancer'])
+        fhOut.close()

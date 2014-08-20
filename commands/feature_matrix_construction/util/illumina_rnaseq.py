@@ -8,6 +8,7 @@ from gidget_util import gidgetConfigVars
 import commands
 from datetime import datetime
 import os
+import sys
 
 import miscIO
 import path
@@ -465,4 +466,208 @@ class unc_edu_illuminahiseq_rnaseqv2(illumina_rnaseq):
 
     def _addGeneName(self, tokens):
         self._addGeneNameForRNA(tokens)
+        
+class mrna_firehose(technology_type):
+    '''
+    the firehose parser for mRNA technology type
+    '''
+    # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 
+
+    def getFeatureName(self, aList):
+        # there is a very troublesome gene label that starts out like this:
+        # Em:AC008101.5|?_calculated
+        # so then it gets split into [ 'Em:AC008101.5',
+        # '?_calculated' ]
+        geneTokens = aList[0].split('|')
+        # fiddle around with these gene tokens a little
+        # bit ...
+        if (len(geneTokens) < 2):
+            print " ERROR ???? assuming / expecting at least two tokens here ??? ", geneTokens
+        if (geneTokens[-1].endswith("?_calculated")):
+            geneTokens[-1] = geneTokens[-1][:-12]
+        elif (geneTokens[-1].endswith("_calculated")):
+            geneTokens[-1] = geneTokens[-1][:-11]
+        if (geneTokens[-1] == ""):
+            geneTokens = geneTokens[:-1]
+        if (len(geneTokens) == 3):
+            if (geneTokens[1] != '?'):
+                geneTokens[2] = geneTokens[1] + ',' + geneTokens[2]
+        # 17sep13 ... added 'cleanString' call here because of this
+        # pesky gene name: Em:AC008101.5|?_calculated (which is supposedly
+        # also ESR1 or some variant of it ???)
+        if (geneTokens[0] == "?"):
+            if (len(geneTokens) < 2):
+                print " ERROR ??? no information about this gene ??? "
+                print geneTokens
+                sys.exit(-1)
+            geneTokens[-1] = self._cleanString(geneTokens[-1])
+            ## aFeature = "N:GEXP:" + geneTokens[-1] + ":::::" + geneTokens[-1]
+            aFeature = "N:GEXP:" + geneTokens[-1] + ":::::"
+        else:
+            geneTokens[0] = self._cleanString(geneTokens[0])
+            if (len(geneTokens) == 1):
+                aFeature = "N:GEXP:" + geneTokens[0] + ":::::"
+            else:
+                geneTokens[-1] = self._cleanString(geneTokens[-1])
+                aFeature = "N:GEXP:" + geneTokens[0] + ":::::" + geneTokens[-1]
+        # print aFeature
+        return aFeature
+
+    def parseDataFiles(self, config, fName, outdir):
+        # --------------------------------------
+        # figure out the name of the output file based on the name of the input file
+        # SKCM.mirnaseq__illuminahiseq_mirnaseq__bcgsc_ca__Level_3__miR_gene_expression__data.data.txt
+        if (fName.find("illuminahiseq_rnaseqv2") > 0):
+            outFile = config['zCancer'] + ".unc.edu__illuminahiseq_rnaseqv2__rnaseqv2." + \
+                config['suffixString'] + ".tsv"
+            try:
+                print " opening output file : ", outFile
+                fhOut = file(outFile, 'w')
+                platformName = "IlluminaHiSeq_RNASeqV2"
+                # in this file the only column is called
+                # "normalized_count"
+                numCol = 1
+                iCol = 1
+            except:
+                print " ERROR ??? failed to open output file ??? "
+                print outFile
+                sys.exit(-1)
+
+        elif (fName.find("illuminaga_rnaseq_") > 0):
+            outFile = config['zCancer'] + ".bcgsc.ca__illuminaga_rnaseq__rnaseq." + \
+                config['suffixString'] + ".tsv"
+            try:
+                print " opening output file : ", outFile
+                fhOut = file(outFile, 'w')
+                platformName = "IlluminaGA_RNASeq"
+                # NOTE: the 3 columns are raw_counts,
+                # median_length_normalized, and RPKM
+                numCol = 3
+                iCol = 3
+            except:
+                print " ERROR ??? failed to open output file ??? "
+                print outFile
+                sys.exit(-1)
+
+        elif (fName.find("illuminahiseq_rnaseq_") > 0):
+            outFile = config['zCancer'] + ".bcgsc.ca__illuminahiseq_rnaseq__rnaseq." + \
+                config['suffixString'] + ".tsv"
+            try:
+                print " opening output file : ", outFile
+                fhOut = file(outFile, 'w')
+                platformName = "IlluminaHiSeq_RNASeq"
+                numCol = 3
+                iCol = 3
+            except:
+                print " ERROR ??? failed to open output file ??? "
+                print outFile
+                sys.exit(-1)
+
+        else:
+            print " new data type ??? "
+            print fName
+            sys.exit(-1)
+
+        # --------------------------------------
+        # ok, time to parse the input file and write the
+        # output file
+        self.parseFirehoseFile(fName, fhOut, iCol, numCol, platformName, "N:GEXP", "C:SAMP:gexpPlatform")
+
+class mirna_firehose(technology_type):
+    '''
+    the firehose parser for miRNA technology type
+    '''
+    # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
+
+    def getFeatureName(self, aList):
+        return "N:MIRN:" + aList[0] + ":::::"
+
+    def parseDataFiles(self, config, fName, outdir):
+        # --------------------------------------
+        # figure out the name of the output file based on the name of the input file
+        # SKCM.mirnaseq__illuminahiseq_mirnaseq__bcgsc_ca__Level_3__miR_gene_expression__data.data.txt
+        if (fName.find("illuminahiseq_mirnaseq__bcgsc") > 0):
+            outFile = outdir + config['zCancer'] + ".bcgsc.ca__illuminahiseq_mirnaseq__mirnaseq." + \
+                config['suffixString'] + ".tsv"
+            try:
+                print " opening output file : ", outFile
+                fhOut = file(outFile, 'w')
+                platformName = "IlluminaHiSeq_miRNASeq"
+                numCol = 3
+                iCol = 2
+            except:
+                print " ERROR ??? failed to open output file ??? "
+                print outFile
+                sys.exit(-1)
+    
+        elif (fName.find("illuminaga_mirnaseq__bcgsc") > 0):
+            outFile = outdir + config['zCancer'] + ".bcgsc.ca__illuminaga_mirnaseq__mirnaseq." + \
+                config['suffixString'] + ".tsv"
+            try:
+                print " opening output file : ", outFile
+                fhOut = file(outFile, 'w')
+                platformName = "IlluminaGA_miRNASeq"
+                numCol = 3
+                iCol = 2
+            except:
+                print " ERROR ??? failed to open output file ??? "
+                print outFile
+                sys.exit(-1)
+    
+        else:
+            print " new data type ??? "
+            print fName
+            sys.exit(-1)
+    
+        # --------------------------------------
+        # ok, time to parse the input file and write the
+        # output file
+        self.parseFirehoseFile(fName, fhOut, iCol, numCol, platformName, "N:MIRN", "C:SAMP:mirnPlatform")
+        fhOut.close()
+        
+class mature_mirna_firehose(technology_type):
+    '''
+    the firehose parser for mature miRNA technology type
+    '''
+    # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
+
+    def getFeatureName(self, aList):
+        aSplit = aList[0].split('|')
+
+        aFeature = "N:MIRN:" + \
+            aSplit[0] + ":::::" + aSplit[1]
+        print aFeature
+        return aFeature
+
+    def parseDataFiles(self, config, fName, outdir):
+        # --------------------------------------
+        # figure out the name of the output file based on the name of the input file
+        # SKCM-All_Samples.miRseq_mature_PKM_log2.txt
+        if (fName.find("miRseq_mature_PKM") > 0):
+            # note that this name is not quite correct, but leaving it anyway
+            # because it won't break the subsequent
+            # pipeline steps ...
+            outFile = outdir + config['zCancer'] + ".bcgsc.ca__illuminahiseq_mirnaseq__mirnaseq." + \
+                config['suffixString'] + ".tsv"
+            try:
+                print " opening output file : ", outFile
+                fhOut = file(outFile, 'w')
+                platformName = "miRNASeq_mature_PKM"
+                numCol = 1
+                iCol = 1
+            except:
+                print " ERROR ??? failed to open output file ??? "
+                print outFile
+                sys.exit(-1)
+
+        else:
+            print " new data type ??? "
+            print fName
+            sys.exit(-1)
+
+        # --------------------------------------
+        # ok, time to parse the input file and write the
+        # output file
+        self.parseFirehoseFile(fName, fhOut, iCol, numCol, platformName, "N:MIRN", "C:SAMP:mirnPlatform", headerCount=1)
+        fhOut.close()

@@ -29,14 +29,15 @@ class technology_type(object):
     tokenDatumIndex = -1
     
     #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
-    def __init__(self, config, platformID):
+    def __init__(self, config = None, platformID = None):
         '''
         Constructor
         '''
-        self.configuration = dict(config.items('technology_type'))
-        self.platformID = platformID
-        self.genename2geneinfo = {}
-        self.myGeneList = []
+        if config:
+            self.configuration = dict(config.items('technology_type'))
+            self.platformID = platformID
+            self.genename2geneinfo = {}
+            self.myGeneList = []
         
     #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 
@@ -644,4 +645,56 @@ class technology_type(object):
 
         tsvIO.writeTSV_dataMatrix (matrixParams, matrixParams['sortRowFlag'], matrixParams['sortColFlag'], outFilename)
         print datetime.now(), 'finished writing out data matrix\n'
+
+# class technology_type(object):
+    '''
+    base class for firehosetechnology subclasses to specialize
+    '''
+    #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
+    # used by the firehose parse classes 
+    def parseFirehoseFile(self, fName, fhOut, iCol, numCol, platformName, headerFeature, platformFeature, fixBarcode = False, zCancer="", headerCount=2):
+        print '\t\t', datetime.now(), 'in parseFirehoseFile(%s)' % (fName)
+        with open(fName) as fh:
+            hdr1Line = fh.readline()
+            hdr1Line = hdr1Line.strip()
+            hdr1Tokens = hdr1Line.split('\t')
+            if 2 == headerCount:
+                fh.readline()
+            outLine1 = headerFeature
+            outLine2 = platformFeature
+            for kk in range(iCol, len(hdr1Tokens), numCol):
+                if fixBarcode:
+                    outLine1 += "\t" + miscTCGA.fixTCGAbarcode(hdr1Tokens[kk], zCancer)
+                else:
+                    outLine1 += "\t" + hdr1Tokens[kk]
+                outLine2 += "\t" + platformName
+            
+            fhOut.write("%s\n" % outLine1)
+            fhOut.write("%s\n" % outLine2)
+            print " # of header tokens : ", len(hdr1Tokens)
+            numData = (len(hdr1Tokens) - 1) / numCol
+            print " # of data columns : ", numData
+            done = 0
+            iLine = 1
+            while not done:
+                aLine = fh.readline()
+                aLine = aLine.strip()
+                aList = aLine.split('\t')
+                if (len(aList) < 5):
+                    done = 1
+                    continue
+                iLine += 1
+                if ((iLine % 10000) == 0):
+                    print '\t\t%s' % (iLine)
+                outLine = self.getFeatureName(aList)
+                if not outLine:
+                    continue
+                for kk in range(iCol, len(aList), numCol):
+                    if (aList[kk] == "NA"):
+                        outLine += "\t" + "NA"
+                    else:
+                        outLine += "\t" + "%.3f" % (float(aList[kk]))
+                
+                fhOut.write("%s\n" % outLine)
+        print '\t\t', datetime.now(), 'finished parseFirehoseFile(%s)' % (fName)
         

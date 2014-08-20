@@ -5,6 +5,7 @@ Created on Jun 21, 2012
 '''
 import traceback
 
+from gidget_util import gidgetConfigVars
 from technology_type import technology_type
 
 class humanmethylation(technology_type):
@@ -137,3 +138,76 @@ class jhu_usc_edu_humanmethylation450(humanmethylation):
             humanmethylation.setConfiguration(self, hdrTokens)
         else:
             raise ValueError("unexpected number of tokens for jhu_usc_edu_humanmethylation450: " + str(numTokens))
+
+class methylation_firehose(technology_type):
+    '''
+    the firehose parser for humanmethylation technology type
+    '''
+    def getMetaDataInfo(self, metaFilename):
+        metaData = {}
+        with open(metaFilename) as fh:
+            for aLine in fh:
+                aLine = aLine.strip()
+                tokenList = aLine.split('\t')
+                probeID = tokenList[0]
+                featName = tokenList[1]
+                metaData[probeID] = featName
+    
+        return metaData
+
+    # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
+
+    def getFeatureName(self, aList):
+        if not aList[0] in self.metaData:
+            # print " SKIPPING !!! "
+            return None
+
+        return self.metaData[aList[0]]
+
+    def parseDataFiles(self, config, fName, outdir):
+        # --------------------------------------
+        # figure out the name of the output file based on the name of the input file
+        # SKCM.methylation__humanmethylation450__jhu_usc_edu__Level_3__within_bioassay_data_set_function__data.data.txt
+        if (fName.find("humanmethylation450") > 0):
+            outFile = outdir + config['zCancer'] + ".jhu-usc.edu__humanmethylation450__methylation." + \
+                config['suffixString'] + ".tsv"
+            try:
+                print " opening output file : ", outFile
+                fhOut = open(outFile, 'w')
+                platformName = "HumanMethylation450"
+                numCol = 4
+                iCol = 1
+            except:
+                print " ERROR ??? failed to open output file ??? "
+                print outFile
+                sys.exit(-1)
+
+        elif (fName.find("humanmethylation27") > 0):
+            outFile = config['zCancer'] + ".jhu-usc.edu__humanmethylation27__methylation." + \
+                config['suffixString'] + ".tsv"
+            try:
+                print " opening output file : ", outFile
+                fhOut = open(outFile, 'w')
+                platformName = "HumanMethylation27"
+                numCol = 4
+                iCol = 1
+            except:
+                print " ERROR ??? failed to open output file ??? "
+                print outFile
+                sys.exit(-1)
+
+        else:
+            print " new data type ??? "
+            print fName
+            sys.exit(-1)
+
+        # --------------------------------------
+        # do we need some metadata?
+        self.metaData = self.getMetaDataInfo(gidgetConfigVars['TCGAFMP_FIREHOSE_MIRROR'] + "/metadata/meth.probes.15oct13.txt")
+
+        # --------------------------------------
+        # ok, time to parse the input file and write the
+        # output file
+        self.parseFirehoseFile(fName, fhOut, iCol, numCol, platformName, "N:METH", "C:SAMP:methPlatform")
+
+        fhOut.close()

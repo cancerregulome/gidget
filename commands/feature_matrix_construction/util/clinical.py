@@ -654,3 +654,198 @@ class clinical(technology_type):
     
         logFile.close()
         print datetime.now(), 'finished writing out data matrix\n'
+
+class clinical_firehose(technology_type):
+    '''
+    the class for parsing clinical firehose files
+    '''
+    # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
+
+    def readNameMapDict(self):
+        name_map_dict = {}
+        with open(gidgetConfigVars['TCGAFMP_FIREHOSE_MIRROR'] + "/metadata/name_map.tsv") as fh:
+            for aLine in fh:
+                aLine = aLine.strip()
+                tokenList = aLine.split('\t')
+                if (len(tokenList) == 2):
+                    name_map_dict[tokenList[0]] = tokenList[1]
+                    print "\t\tsetting up mapping from <%s> to <%s> " % (tokenList[0], tokenList[1])
+                else:
+                    print "\t\tbad input line in name_map file ??? ", len(tokenList)
+                    print "\t\t" + tokenList
+        return name_map_dict
+    
+    # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
+    
+    def makeFeatureName(self, config, featName, dataType):
+        if (0):
+            if (dataType == "STRING"):
+                newFeatName = "C:CLIN:"
+            else:
+                newFeatName = "N:CLIN:"
+        else:
+            newFeatName = ""
+    
+        if (1):
+            newFeatName = featName
+            newFeatName2 = newFeatName
+    
+        if (not config['name_map_dict']):
+            config['name_map_dict'] = self.readNameMapDict()
+        name_map_dict = config['name_map_dict']
+        
+        try:
+            tmpName1 = name_map_dict[newFeatName]
+        except:
+            print "\t\tNOTE: name not in name_map_dict <%s> " % newFeatName
+            tmpName1 = newFeatName
+    
+        try:
+            tmpName2 = name_map_dict[newFeatName2]
+        except:
+            print "\t\tNOTE: name not in name_map_dict <%s> " % newFeatName2
+            tmpName2 = newFeatName2
+    
+        return (tmpName1, tmpName2)
+    
+    # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
+    
+    def lookAtData(self, dataVec):
+        numSamples = len(dataVec)
+        numNA = 0
+        isFloat = 1
+        isInt = 1
+    
+        for ii in range(numSamples):
+            if (dataVec[ii] == "NA"):
+                numNA += 1
+                continue
+            try:
+                xFloat = float(dataVec[ii])
+                try:
+                    xInt = int(dataVec[ii])
+                    if (abs(xInt - xFloat) > 0.1):
+                        isInt = 0
+                except:
+                    isInt = 0
+            except:
+                isFloat = 0
+                isInt = 0
+                dataVec[ii] = self._cleanString(dataVec[ii])
+    
+        uVec = []
+        for ii in range(numSamples):
+            if (dataVec[ii] == "NA"):
+                continue
+            if (dataVec[ii] not in uVec):
+                uVec += [dataVec[ii]]
+    
+        if (isInt):
+            dataType = "INT"
+        elif (isFloat):
+            dataType = "FLOAT"
+        else:
+            dataType = "STRING"
+    
+        # print dataType, uVec
+        fracNA = float(numNA) / float(numSamples)
+    
+        return (dataType, len(uVec), fracNA, dataVec)
+    
+    # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
+    
+    def parseDataFiles(self, config, fName, outdir):
+        # --------------------------------------
+        # figure out the name of the output file based on the name of the input file
+        # SKCM.clin.merged.txt
+        outFile = outdir + config['zCancer'] + ".firehose__clin_merged." + \
+            config['suffixString'] + ".tsv"
+        try:
+            print "\t\topening output file : ", outFile
+            fhOut = open(outFile, 'w')
+        except:
+            print " ERROR ??? failed to open output file ??? "
+            print outFile
+            sys.exit(-1)
+
+        # --------------------------------------
+        # ok, time to parse the input file and write the
+        # output file
+
+        # first I need to get the patient barcodes ...
+        numPatients = 0
+        outLine = "M:CLIN"
+        with open(fName) as fh:
+            for aLine in fh:
+                if (aLine.startswith("Hybridization REF")):
+                    aLine = aLine.strip()
+                    tokenList = aLine.split('\t')
+                    for ii in range(1, len(tokenList)):
+                        # we need to turn these patient barcodes into tumor
+                        # sample barcodes
+                        numPatients += 1
+                        outLine += "\t%s" % miscTCGA.get_tumor_barcode(tokenList[ii])
+                    print "\t\t" + outLine
+                    break
+        fhOut.write("%s\n" % outLine)
+
+        # we need to make sure that we are generating
+        # unique feature names
+        uniqNames = set()
+
+        # and now we read all of the other data ...
+        fh = file(fName)
+        with open(fName) as fh:
+            for aLine in fh:
+    
+                if (aLine.startswith("Composite Element REF")):
+                    continue
+                if ("dccupload" in aLine):
+                    continue
+    
+                aLine = aLine.strip()
+                tokenList = aLine.split('\t')
+    
+                # take a look at the feature name ...
+                featName = tokenList[0].replace('.', '_')
+    
+                # and at the data ...
+                dataVec = tokenList[1:]
+                (dataType, dataCard, fracNA, dataVec) = self.lookAtData(dataVec)
+                print "\t\t" + featName, dataType, dataCard, fracNA
+    
+                (newFeatName1, newFeatName2) = self.makeFeatureName(config, featName, dataType)
+                print "\t\tfeature name mapping : ", featName, newFeatName1, newFeatName2
+    
+                if ((newFeatName1 not in config['protectedFeatures']) and
+                        (newFeatName2 not in config['protectedFeatures'])):
+                    if (dataCard < 2):
+                        if (featName not in config['protectedFeatures']):
+                            print "\t\t--> skipping uninformative feature ", featName
+                            continue
+                    if (fracNA > 0.90):
+                        print "\t\t--> skipping feature with too many NAs (%.2f) " % fracNA, featName
+                        continue
+    
+                if (newFeatName1 in uniqNames):
+                    if (newFeatName2 in uniqNames):
+                        print "\t\tERROR !!! ??? repeated feature name <%s> <%s> " % (newFeatName2, newFeatName1)
+                        print "\t\t--> skipping "
+                        continue
+                        # sys.exit(-1)
+                    else:
+                        print "\t\tNOTE ... using <%s> instead of <%s> " % (newFeatName2, newFeatName1)
+                        newFeatName = newFeatName2
+                else:
+                    print "\t\tusing primary feature name <%s> " % newFeatName1
+                    newFeatName = newFeatName1
+    
+                uniqNames.add(newFeatName)
+    
+                outLine = newFeatName
+                for iP in range(numPatients):
+                    outLine += "\t%s" % dataVec[iP]
+                fhOut.write("%s\n" % outLine)
+
+        fhOut.close()
+

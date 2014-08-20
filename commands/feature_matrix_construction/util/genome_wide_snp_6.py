@@ -3,10 +3,12 @@ Created on Jun 20, 2012
 
 @author: michael
 '''
-from technology_type import technology_type
+import commands
 from datetime import datetime
+from gidget_util import gidgetConfigVars
 import miscTCGA
 import resegment
+from technology_type import technology_type
 
 #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 # from Timo's resegmentation code:
@@ -45,7 +47,7 @@ class genome_wide_snp_6(technology_type):
         self.chr2data = {}
         self.chr2maxcoord = {}
         for index in range(1, 25):
-            chrom = self._unifychr(str(index))
+            chrom = self.unifychr(str(index))
             self.chr2data[chrom] = AutoVivification()
             self.chr2maxcoord[chrom] = 0
         resegment.NA_VALUE = int(self.configuration['na_value'])
@@ -73,7 +75,7 @@ class genome_wide_snp_6(technology_type):
 
     #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
     #Unifies the naming convention for X and Y chromosomes, and removes possible 'hs' and 'chr' prefixes
-    def _unifychr(self, chromName):
+    def unifychr(self, chromName):
         for prefix in self.stripPrefixes:
             if str(chromName).startswith(prefix):
                 chromName = chromName[len(prefix):]
@@ -105,7 +107,7 @@ class genome_wide_snp_6(technology_type):
         
         numSamples = len(sampleList)
         
-        chrNames = [self._unifychr(str(x)) for x in range(1, 25)]
+        chrNames = [self.unifychr(str(x)) for x in range(1, 25)]
         chr2data = dict([pair for pair in self.chr2data.iteritems()])
         self.chr2data = None
         chr2maxcoord = dict([pair for pair in self.chr2maxcoord.iteritems()])
@@ -134,7 +136,7 @@ class genome_wide_snp_6(technology_type):
 
     #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
     def _readDatumDetails(self, info, tokens, dataMatrix, sampleIndex):
-        aChr = self._unifychr(tokens[1])
+        aChr = self.unifychr(tokens[1])
         iStart = int(tokens[2])
         try:
             iStop = int(tokens[3])
@@ -197,3 +199,22 @@ class genome_wustl_edu_genome_wide_snp_6(genome_wide_snp_6):
         '''
         genome_wide_snp_6.__init__(self, config, platformID)
         self.configuration.update(config.items('genome_wustl_edu_genome_wide_snp_6'))
+
+class snp_firehose(technology_type):
+    '''
+    the firehose parser for miRNA technology type
+    '''
+    # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
+    def parseDataFiles(self, config, fName, outdir):
+        inputFile = fName
+        outputFile = config['zCancer'] + ".broad.mit.edu__genome_wide_snp_6__snp." + config['suffixString'] + ".tsv"
+        cmdString = "python " + gidgetConfigVars['TCGAFMP_ROOT_DIR'] + "/main/snp_firehose_Level3_matrix.py " + \
+            inputFile + " " + outputFile
+        print " running command : "
+        print cmdString
+        (status, output) = commands.getstatusoutput(cmdString)
+        print " "
+        print " status "
+        print status
+        print " output "
+        print output

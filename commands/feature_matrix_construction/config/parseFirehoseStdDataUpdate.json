@@ -1,0 +1,110 @@
+{
+  "outDir": "./",
+  "cancerDirNames": [
+    "acc",
+    "blca",
+    "brca",
+    "cesc",
+    "cntl",
+    "coad",
+    "dlbc",
+    "esca",
+    "gbm",
+    "hnsc",
+    "kich",
+    "kirc",
+    "kirp",
+    "laml",
+    "lcll",
+    "lgg",
+    "lihc",
+    "lnnh",
+    "luad",
+    "lusc",
+    "ov",
+    "paad",
+    "prad",
+    "read",
+    "sarc",
+    "skcm",
+    "stad",
+    "thca",
+    "ucec",
+    "lcml",
+    "pcpg",
+    "meso",
+    "tgct",
+    "ucs"
+  ],
+  "platforms": {
+    "clinical": {
+      "function": "parseClinicalDataFiles",
+      "execute": true,
+      "d2substring_accept": ["Clinical_Pick_Tier1", ".Level_4."],
+      "d3substring_accept": "",
+      "d3substring_ending": "%sclin.merged.picked.txt",
+      "d3add_subsetName": true,
+      "protectedFeatures": [
+        "disease_code", "tumor_tissue_site",
+        "days_to_additional_surgery_metastatic_procedure",
+        "days_to_birth", "days_to_death",
+        "days_to_initial_pathologic_diagnosis",
+        "days_to_last_followup",
+        "days_to_new_tumor_event_after_initial_treatment",
+        "days_to_submitted_specimen_dx",
+        "new_tumor_event_after_initial_treatment",
+        "tumor_type", "tumor_tissue_site"
+      ],
+      "name_map_dict": ""
+    },
+    "methylation": {
+      "function": "parseMethylationDataFiles",
+      "execute": true,
+      "d2substring_accept": ["Merge_methylation__", "__data.Level_3."],
+      "d3substring_accept": "methylation__humanmethylation",
+      "d3substring_ending": ".data.txt",
+      "d3add_subsetName": false
+    },
+    "rppa": {
+      "function": "parseRPPADataFiles",
+      "execute": true,
+      "d2substring_accept": ["rppa_core__"],
+      "d3substring_accept": "rppa_core__",
+      "d3substring_ending": ".data.txt",
+      "d3add_subsetName": false
+    },
+    "mrna": {
+      "function": "parseRNAseqDataFiles",
+      "execute": true,
+      "d2substring_accept": ["Merge_rnaseq"],
+      "d2substring_cont": [["__unc_edu__", "RSEM_genes_normalized__data.Level_3."], ["__bcgsc_ca__", "gene_expression__data.Level_3."]],
+      "d3substring_accept": ".rnaseq",
+      "d3substring_ending": ".data.txt",
+      "d3add_subsetName": false
+    },
+    "mirna": {
+      "function": "parseMicroRNADataFiles",
+      "execute": false,
+      "d2substring_accept": ["Merge_mirnaseq__", "gene_expression__data.Level_3."],
+      "d3substring_accept": "mirnaseq__",
+      "d3substring_ending": ".data.txt",
+      "d3add_subsetName": false
+    },
+    "mature_mirna": {
+      "function": "parseMatureMicroRNADataFiles",
+      "execute": true,
+      "d2substring_accept": ["miRseq_Mature_Preprocess", ".Level_4."],
+      "d3substring_accept": "miRseq_mature",
+      "d3substring_ending": "_log2.txt",
+      "d3add_subsetName": false
+    },
+    "snp": {
+      "function": "parseSNP6dataFiles",
+      "execute": true,
+      "d2substring_accept": ["Merge_snp__", "segmented_scna_minus_germline_cnv_hg19__seg.Level_3."],
+      "d3substring_accept": "",
+      "d3substring_ending": "hg19__seg.seg.txt",
+      "d3add_subsetName": false
+    }
+  }
+}
