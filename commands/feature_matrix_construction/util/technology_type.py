@@ -646,10 +646,6 @@ class technology_type(object):
         tsvIO.writeTSV_dataMatrix (matrixParams, matrixParams['sortRowFlag'], matrixParams['sortColFlag'], outFilename)
         print datetime.now(), 'finished writing out data matrix\n'
 
-# class technology_type(object):
-    '''
-    base class for firehosetechnology subclasses to specialize
-    '''
     #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
     # used by the firehose parse classes 
     def parseFirehoseFile(self, fName, fhOut, iCol, numCol, platformName, headerFeature, platformFeature, fixBarcode = False, zCancer="", headerCount=2):
@@ -686,6 +682,7 @@ class technology_type(object):
                 iLine += 1
                 if ((iLine % 10000) == 0):
                     print '\t\t%s' % (iLine)
+                # call back method to subclasses
                 outLine = self.getFeatureName(aList)
                 if not outLine:
                     continue
