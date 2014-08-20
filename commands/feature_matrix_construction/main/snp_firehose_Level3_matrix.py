@@ -7,13 +7,35 @@ import argparse
 from datetime import datetime
 
 import miscTCGA
-import new_Level3_matrix_MM28may13
 import resegment
 import tsvIO
 
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 # this is Timo's resegmentation code(mostly) with numpy improvements by mm
 
+class AutoVivification(dict):
+
+    """Implementation of perl's autovivification feature."""
+
+    def __getitem__(self, item):
+        try:
+            return dict.__getitem__(self, item)
+        except KeyError:
+            value = self[item] = type(self)()
+            return value
+
+# Unifies the naming convention for X and Y chromosomes, and removes
+# possible 'hs' and 'chr' prefixes
+def unifychr(chr):
+    if chr[0:2] == 'hs':
+        chr = chr[2:]
+    elif chr[0:3] == 'chr':
+        chr = chr[3:]
+    if (chr == '23'):
+        chr = 'X'
+    elif (chr == '24'):
+        chr = 'Y'
+    return chr
 
 def _resegmentCNdata(sampleList, chr2data, chr2maxcoord, steplength=1000, cutFrac=0.01):
     # when we get to this point, we have:
@@ -34,7 +56,7 @@ def _resegmentCNdata(sampleList, chr2data, chr2maxcoord, steplength=1000, cutFra
 
     numSamples = len(sampleList)
 
-    chrNames = [new_Level3_matrix_MM28may13.unifychr(str(x))
+    chrNames = [unifychr(str(x))
                 for x in range(1, 25)]
     segList, barcodeList, newMatrix = resegment._resegmentChromosomes(
         chrNames, chr2data, chr2maxcoord, sampleList,
@@ -63,7 +85,7 @@ def _resegmentCNdata(sampleList, chr2data, chr2maxcoord, steplength=1000, cutFra
 
 
 def _readDatumDetails(tokens, sampleIndex, chr2data, chr2maxcoord, steplength):
-    aChr = new_Level3_matrix_MM28may13.unifychr(tokens[1])
+    aChr = unifychr(tokens[1])
     iStart = int(tokens[2])
     try:
         iStop = int(tokens[3])
@@ -136,8 +158,8 @@ def main():
     chr2data = {}
     chr2maxcoord = {}
     for index in range(1, 25):
-        chrom = new_Level3_matrix_MM28may13.unifychr(str(index))
-        chr2data[chrom] = new_Level3_matrix_MM28may13.AutoVivification()
+        chrom = unifychr(str(index))
+        chr2data[chrom] = AutoVivification()
         chr2maxcoord[chrom] = 0
 
     steplength = 1000
