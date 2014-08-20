@@ -832,6 +832,7 @@ if __name__ == "__main__":
             print " Usage: %s <input TSV file> <hg18 or hg19> <output TSV file> [nameChangeFlag=NO/YES] "
             print "        note that nameChangeFlag will default to NO "
             print " "
+            print " ERROR -- bad command line arguments "
             sys.exit(-1)
             tumorType = 'gbm'
 

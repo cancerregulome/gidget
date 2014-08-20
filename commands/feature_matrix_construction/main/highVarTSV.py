@@ -36,6 +36,8 @@ if __name__ == "__main__":
             print " "
             print " New options: if the 3rd parameter is negative, and the method is NZC, then the "
             print " absolute value of the numeric parameter is assumed to be the minimun NZC threshold to use "
+            print " "
+            print " ERROR -- bad command line arguments "
             sys.exit(-1)
 
         inFile = sys.argv[1]

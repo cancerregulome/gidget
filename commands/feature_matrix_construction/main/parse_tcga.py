@@ -460,6 +460,7 @@ def checkUsage(argv):
     if ( len(argv) < 2 or len(argv) > 6):
         print " Usage: %s <config file>[ <platform>[ <tumor,[...]*>[ <tag>][ <snapshot>]*]*]*]*" % argv[0]
         print "saw %s" % argv
+        print " ERROR -- bad command line arguments "
         sys.exit(-1)
     
     print 'checking %s for validity from %s' % (argv[1], path.path.getcwd())

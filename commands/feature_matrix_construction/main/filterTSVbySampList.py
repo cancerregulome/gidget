@@ -259,6 +259,8 @@ if __name__ == "__main__":
             print "         if the methylation data from a particular sample is in the white list, that "
             print "         does not necessarily mean that the microRNA data from the same sample can "
             print "         automatically be included as well -- it must be listed explicitly. "
+            print " "
+            print " ERROR -- bad command line arguments "
             sys.exit(-1)
 
         inFile = sys.argv[1]
@@ -408,11 +410,15 @@ if __name__ == "__main__":
         outD2 = tsvIO.filter_dataMatrix(outD, skipRowList, [])
         outD = outD2
 
-    # print " "
-    # print " calling writeTSV_dataMatrix ... ", outFile
+    # set up sorting options ...
     sortRowFlag = 0
     sortColFlag = 0
-    tsvIO.writeTSV_dataMatrix(outD, sortRowFlag, sortColFlag, outFile)
+    rowOrder = []
+    colOrder = []
+
+    # print " "
+    # print " calling writeTSV_dataMatrix ... ", outFile
+    tsvIO.writeTSV_dataMatrix(outD, sortRowFlag, sortColFlag, outFile, rowOrder, colOrder)
 
     print " "
     print " DONE "

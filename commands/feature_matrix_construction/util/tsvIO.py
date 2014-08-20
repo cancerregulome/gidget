@@ -38,21 +38,27 @@ def replaceBlanks ( aString, newChr ):
         newString = newString[:ii] + newString[ii+1:]
         ii = newString.find(doubleChr)
 
-    # HACK ... if this is a microRNA feature, then correct the case ...
-    # N:MIRN:hsa-let-7a
-    # N:MIRN:hsa-mir-99a
-    # 09dec13 ... hopefully this is not needed anymore ... ???
-    if ( 0 ):
-        if (newString[2:6] == "MIRN"):
-            ## hopefully this is not needed anymore ??? case fixes ... FIXME
-            tmpString = newString[:6] + newString[6:].lower()
-            i1 = tmpString.find("mimat")
-            if (i1 > 0):
-                newString = tmpString[:i1] + "MIMAT" + tmpString[i1 + 5:]
-            else:
-                newString = tmpString
-
     return ( newString )
+
+#------------------------------------------------------------------------------
+
+def simpleName ( featName ):
+    tokenList = featName.split(':')
+    if ( len(tokenList) < 3 ): return ( featName )
+
+    if ( tokenList[1] == "CLIN" ):
+        return ( tokenList[1]+":"+tokenList[2] )
+    elif ( tokenList[1] == "SAMP" ):
+        return ( tokenList[1]+":"+tokenList[2] )
+    elif ( tokenList[1] == "GEXP" ):
+        return ( tokenList[1]+":"+tokenList[2]+":"+tokenList[7] )
+    elif ( tokenList[1] == "GNAB" ):
+        return ( tokenList[1]+":"+tokenList[2]+":"+tokenList[7] )
+    elif ( tokenList[1] == "METH" ):
+        return ( tokenList[1]+":"+tokenList[2]+":"+tokenList[7] )
+    else:
+        return ( featName )
+        
 
 #------------------------------------------------------------------------------
 
@@ -1503,7 +1509,12 @@ def uniqueFeatureLabels ( fLabels, dataMatrix ):
 
 #------------------------------------------------------------------------------
 
-def writeTSV_dataMatrix ( dataD, sortRowFlag,  sortColFlag, outFilename ):
+def writeTSV_dataMatrix ( dataD, sortRowFlag, sortColFlag, outFilename, \
+                          rowOrder=[], colOrder=[], simpleNames=0 ):
+
+    if ( sortColFlag or sortRowFlag ):
+        print " in writeTSV_dataMatrix ... sorting is ON !!! "
+
     try:
         rowLabels  = dataD['rowLabels']
         colLabels  = dataD['colLabels']
@@ -1519,6 +1530,16 @@ def writeTSV_dataMatrix ( dataD, sortRowFlag,  sortColFlag, outFilename ):
         return ( )
 
     print datetime.now(), "in writeTSV_dataMatrix ... ", outFilename, len(rowLabels), len(colLabels)
+    print sortRowFlag, len(rowOrder)
+    try:
+        print rowOrder[:5], rowOrder[-5:]
+    except:
+        doNothing = 1
+    print sortColFlag, len(colOrder)
+    try:
+        print colOrder[:5], colOrder[-5:]
+    except:
+        doNothing = 1
 
     for kk in range(len(colLabels)):
         colName = colLabels[kk]
@@ -1553,14 +1574,35 @@ def writeTSV_dataMatrix ( dataD, sortRowFlag,  sortColFlag, outFilename ):
     # and 'gene' labels ...
     # print " --> reordering sample names and gene (or probe) names ... "
 
+    # sanity checks ...
+    if ( len(colOrder) > 0 ):
+        if ( len(colOrder) != numCol ):
+            print " WARNING: a colOrder vector was supplied but it is not of the correct length ??? "
+            print len(colOrder), numCol
+
+    if ( len(rowOrder) > 0 ):
+        if ( len(rowOrder) != numRow ):
+            print " WARNING: a rowOrder vector was supplied but it is not of the correct length ??? "
+            print len(rowOrder), numRow
+
+    # FIRST work on the columns ... make a temporary list of the names
     tmpColList = []
     for aSample in colLabels:
         tmpColList += [ aSample ]
 
-    newColOrder = [0] * len(colLabels)
+    # and create an 'order' vector that will either change nothing
+    newColOrder = [0] * numCol
     if ( not sortColFlag ):
-        for index in range(len(colLabels)):
+        for index in range(numCol):
             newColOrder[index] = index
+
+    # or make use of the order provided on input (which must be
+    # of the correct length)
+    elif ( len(colOrder) == len(tmpColList) ):
+        print " USING supplied colOrder "
+        newColOrder = colOrder
+
+    # or just go with an alphabetic sorting...
     else:
         tmpColList.sort()
         print '        sorted list of samples:', tmpColList[0], tmpColList[-1]
@@ -1573,21 +1615,33 @@ def writeTSV_dataMatrix ( dataD, sortRowFlag,  sortColFlag, outFilename ):
             origIndex = label2index[label]
             newColOrder[index] = origIndex
                 
-    # make sure that the rowLabels are unique!
-    # this takes WAY TOOOOO looooong ...
+    # NEXT work on the rows ...
+
+    # this may or may not actually be necessary, but it's probably still a good
+    # idea ... make sure that the rowLabels are unique!
     if ( 1 ):
-        print " calling uniqueFeatureLabels ... ", len(rowLabels), rowLabels[0], rowLabels[-1]
+        print " calling uniqueFeatureLabels ... ", numRow, rowLabels[0], rowLabels[-1]
         rowLabels = uniqueFeatureLabels ( rowLabels, dataMatrix )
 
+    # make a temporary list of the feature names
     tmpRowList = []
     for aLabel in rowLabels:
         tmpRowList += [ aLabel ]
 
-    newRowOrder = [0] * len(rowLabels)
+    # and create an 'order' vector that will either change nothing
+    newRowOrder = [0] * numRow
     if ( not sortRowFlag ):
-        for index in range(len(rowLabels)):
+        for index in range(numRow):
             newRowOrder[index] = index
+
+    # or make use of the order provided on input
+    elif ( len(rowOrder) == len(tmpRowList) ):
+        print " USING supplied rowOrder "
+        newRowOrder = rowOrder
+
+    # or just go with an alphabetic sorting ...
     else:
+        print " SORTING tmpRowList !!! "
         tmpRowList.sort()
         print '        sorted list of features:', tmpRowList[0], tmpRowList[-1]
         label2index = {}
@@ -1633,30 +1687,39 @@ def writeTSV_dataMatrix ( dataD, sortRowFlag,  sortColFlag, outFilename ):
     numNA = 0
     numNot = 0
 
-    print '     (d) TIME ', datetime.now()
+    print '     (d) TIME ', datetime.now() 
+    print '             newRowOrder : ', newRowOrder[:5]
+    print '             newColOrder : ', newColOrder[:5]
+    print ' '
+    ## print '             tmpRowList : ', tmpRowList[:5]
+    ## print '             tmpColList : ', tmpColList[:5]
+    ## print ' '
+    
     for iG in range(numRow):
         jG = newRowOrder[iG]
+        ## print "     looping iG=%d  --> jG=%d " % ( iG, jG )
         numGout += 1
-        # OLD, with quotes: aLine = '"%s"' % tmpRowList[iG]
-        ## aLine = '%s' % tmpRowList[iG]
-        aLine = "%s" % ( replaceBlanks ( tmpRowList[iG], '_' ) )
-        tokenList = tmpRowList[iG].split(':')
-        # print " CHECK: ", tokenList, iG, tmpRowList[iG]
+        curRowName = rowLabels[jG]
+        if ( simpleNames ):
+            aLine = "%s" % ( simpleName ( replaceBlanks ( curRowName, '_' ) ) )
+        else:
+            aLine = "%s" % ( replaceBlanks ( curRowName, '_' ) )
+        ## print "         ", aLine
+        tokenList = curRowName.split(':')
         fType = "%s:%s" % ( tokenList[0], tokenList[1] )
         if ( fType not in fTypeDict.keys() ):
             fTypeDict[fType] = 0
         fTypeDict[fType] += 1
-        # sanity check:
-        if ( tmpRowList[iG] != rowLabels[jG] ):
-            print " G : ERROR ??? shouldn't these match ??? "
-            print iG, tmpRowList[iG], jG, rowLabels[jG]
-            sys.exit(-1)
+
         for iS in range(numCol):
             jS = newColOrder[iS]
             if ( dataMatrix[jG][jS] == "" ):
                 print " ERROR ??? blank token in dataMatrix ??? ", jG, jS
                 sys.exit(-1)
-            if ( dataMatrix[jG][jS] != NA_VALUE ):
+
+            ## print iG, jG, iS, jS, tokenList, dataMatrix[jG][jS]
+
+            if ( dataMatrix[jG][jS] != NA_VALUE  and  dataMatrix[jG][jS] != "NA" ):
                 if ( tokenList[0] == "N" ):
                     if ( dataMatrix[jG][jS] >= 0 ):
                         iVal = int ( dataMatrix[jG][jS] + 0.1 )

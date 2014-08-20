@@ -280,6 +280,7 @@ if __name__ == "__main__":
         if (len(sys.argv) != 4):
             print " Usage : %s <input feature matrix> <output feature matrix> <featType> " % sys.argv[0]
             print "         to avoid filtering on featType, use ANY "
+            print " ERROR -- bad command line arguments "
             sys.exit(-1)
         inFile = sys.argv[1]
         outFile = sys.argv[2]

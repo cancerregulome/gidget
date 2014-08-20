@@ -1531,13 +1531,14 @@ if __name__ == "__main__":
             print " Notes: a single tumor type can be specified, eg brca "
             print "        the public/private option indicates whether an awg-specific "
             print "        firehose run should be used if available "
+            print " ERROR -- bad command line arguments "
             sys.exit(-1)
 
         else:
 
             tumorType = sys.argv[1].lower()
             if (tumorType == "all"):
-                print " this option is no longer allowed "
+                print " FATAL ERROR ... this option is no longer allowed "
                 sys.exit(-1)
             elif (tumorType in cancerDirNames):
                 print " --> processing a single tumor type: ", tumorType
@@ -1555,7 +1556,7 @@ if __name__ == "__main__":
                 awgFlag = "YES"
                 print " --> WILL use awg-specific firehose anlaysese IF available "
             else:
-                print " invalid public/private string ", ppString
+                print " FATAL ERROR ... invalid public/private string ", ppString
                 sys.exit(-1)
 
             if ( len(sys.argv) == 4 ):
