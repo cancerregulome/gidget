@@ -5,6 +5,7 @@ import miscMath
 import miscTCGA
 
 import commands
+from datetime import datetime
 import numpy
 import path
 import sys
@@ -295,7 +296,7 @@ def parseClinicalDataFiles(lastDir, outDir, zCancer, subsetName, suffixString):
 
     print " "
     print " "
-    print " in parseCinicalDataFiles ... "
+    print datetime.now(),  " in parseCinicalDataFiles ... "
     print " lastDir = <%s> " % lastDir
     print " outDir = <%s> " % outDir
 
@@ -436,7 +437,7 @@ def parseClinicalDataFiles(lastDir, outDir, zCancer, subsetName, suffixString):
                             fh.close()
                             fhOut.close()
 
-    print " DONE with parseClinicalDataFiles "
+    print datetime.now(),  " DONE with parseClinicalDataFiles "
 
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 
@@ -445,7 +446,7 @@ def parseMethylationDataFiles(lastDir, outDir, zCancer, subsetName, suffixString
 
     print " "
     print " "
-    print " in parseMethylationDataFiles ... "
+    print datetime.now(),  " in parseMethylationDataFiles ... "
     print " lastDir = <%s> " % lastDir
     print " outDir = <%s> " % outDir
 
@@ -572,7 +573,7 @@ def parseMethylationDataFiles(lastDir, outDir, zCancer, subsetName, suffixString
 
                             fhOut.close()
 
-    print " DONE with parseMethylationDataFiles "
+    print datetime.now(),  " DONE with parseMethylationDataFiles "
 
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 
@@ -581,7 +582,7 @@ def parseMicroRNADataFiles(lastDir, outDir, zCancer, subsetName, suffixString):
 
     print " "
     print " "
-    print " in parseMicroRNADataFiles ... "
+    print datetime.now(),  " in parseMicroRNADataFiles ... "
     print " lastDir = <%s> " % lastDir
     print " outDir = <%s> " % outDir
 
@@ -700,7 +701,7 @@ def parseMicroRNADataFiles(lastDir, outDir, zCancer, subsetName, suffixString):
 
                             fhOut.close()
 
-    print " DONE with parseMicroRNADataFiles "
+    print datetime.now(),  " DONE with parseMicroRNADataFiles "
 
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 
@@ -709,7 +710,7 @@ def parseMatureMicroRNADataFiles(lastDir, outDir, zCancer, subsetName, suffixStr
 
     print " "
     print " "
-    print " in parseMatureMicroRNADataFiles ... "
+    print datetime.now(),  " in parseMatureMicroRNADataFiles ... "
     print " lastDir = <%s> " % lastDir
     print " outDir = <%s> " % outDir
 
@@ -821,7 +822,7 @@ def parseMatureMicroRNADataFiles(lastDir, outDir, zCancer, subsetName, suffixStr
 
                             fhOut.close()
 
-    print " DONE with parseMatureMicroRNADataFiles "
+    print datetime.now(),  " DONE with parseMatureMicroRNADataFiles "
 
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 
@@ -876,7 +877,7 @@ def parseRPPADataFiles(lastDir, outDir, zCancer, subsetName, suffixString):
 
     print " "
     print " "
-    print " in parseRPPADataFiles ... "
+    print datetime.now(),  " in parseRPPADataFiles ... "
     print " lastDir = <%s> " % lastDir
     print " outDir = <%s> " % outDir
 
@@ -997,7 +998,7 @@ def parseRPPADataFiles(lastDir, outDir, zCancer, subsetName, suffixString):
 
                             fhOut.close()
 
-    print " DONE with parseRPPADataFiles "
+    print datetime.now(),  " DONE with parseRPPADataFiles "
 
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 
@@ -1010,7 +1011,7 @@ def parseRNAseqDataFiles(lastDir, outDir, zCancer, subsetName, suffixString):
 
     print " "
     print " "
-    print " in parseRNAseqDataFiles ... "
+    print datetime.now(),  " in parseRNAseqDataFiles ... "
     print " lastDir = <%s> " % lastDir
     print " outDir = <%s> " % outDir
 
@@ -1211,7 +1212,7 @@ def parseRNAseqDataFiles(lastDir, outDir, zCancer, subsetName, suffixString):
 
                             fhOut.close()
 
-    print " DONE with parseRNAseqDataFiles "
+    print datetime.now(),  " DONE with parseRNAseqDataFiles "
 
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 # this just calls the snp_firehose_level3_matrix.py script ...
@@ -1221,7 +1222,7 @@ def parseSNP6dataFiles(lastDir, outDir, zCancer, subsetName, suffixString):
 
     print " "
     print " "
-    print " in parseSNP6dataFiles "
+    print datetime.now(),  " in parseSNP6dataFiles "
 
     d2 = path.path(lastDir)
     for d2Name in d2.dirs():
@@ -1261,7 +1262,7 @@ def parseSNP6dataFiles(lastDir, outDir, zCancer, subsetName, suffixString):
 
     print " "
     print " "
-    print " DONE with parseSNP6dataFiles "
+    print datetime.now(),  " DONE with parseSNP6dataFiles "
 
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 # MAIN PROGRAM STARTS HERE
@@ -1321,7 +1322,7 @@ if __name__ == "__main__":
     # outer loop over tumor types
     for zCancer in cancerDirNames:
         print ' '
-        print ' PROCESSING FIREHOSE STDDATA FOR CANCER TYPE ', zCancer
+        print datetime.now(),  ' PROCESSING FIREHOSE STDDATA FOR CANCER TYPE ', zCancer
 
         lastDir = getCancerDir(topDir, zCancer)
 
@@ -1337,7 +1338,7 @@ if __name__ == "__main__":
 
         # and then the microRNA data file(s)
         if (1):
-            ## parseMicroRNADataFiles ( lastDir, outDir, zCancer, subsetName, suffixString )
+            # parseMicroRNADataFiles ( lastDir, outDir, zCancer, subsetName, suffixString )
             parseMatureMicroRNADataFiles(
                 lastDir, outDir, zCancer, subsetName, suffixString)
 
