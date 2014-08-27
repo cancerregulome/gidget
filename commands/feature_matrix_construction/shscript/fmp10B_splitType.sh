@@ -73,6 +73,9 @@ echo " *******************"
 
 		echo " "
                 date
+                echo " operating on intermediate file " $f
+
+                ## delete scratch files that might have been left over from before ...
                 rm -fr tmpf1.tsv tmpf2.tsv
 
                 echo " adding indicator features ... "
