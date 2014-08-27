@@ -1523,7 +1523,7 @@ if __name__ == "__main__":
         'acc',  'blca', 'brca', 'cesc', 'cntl', 'coad', 'dlbc', 'esca', 'gbm',
         'hnsc', 'kich', 'kirc', 'kirp', 'laml', 'lcll', 'lgg',  'lihc', 'lnnh',
         'luad', 'lusc', 'ov',   'paad', 'prad', 'read', 'sarc', 'skcm', 'stad',
-        'thca', 'ucec', 'lcml', 'pcpg', 'meso', 'tgct', 'ucs' ]
+        'thca', 'ucec', 'lcml', 'pcpg', 'meso', 'tgct', 'ucs', 'uvm', 'thym' ]
 
     if (1):
         if ( (len(sys.argv)!=3) and (len(sys.argv)!=4) ):
