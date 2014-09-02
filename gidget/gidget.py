@@ -10,11 +10,6 @@ Options:
     --version
 
 gidget commands are:
-    help
-    list
-    describe
-    add
-    remove
     run
 
 """
@@ -29,47 +24,51 @@ from docopt import docopt
 from ConfigParser import SafeConfigParser
 
 import gidget_help
-import gidget_list
-import gidget_describe
-import gidget_add
-import gidget_remove
+#import gidget_list
+#import gidget_describe
+#import gidget_add
+#import gidget_remove
 #import gidget_run
 
+from gidget_util import gidgetConfigVars
 
 if __name__ == '__main__':
 
 
+
+
+    gidgetSubCommandsPath = gidgetConfigVars['GIDGET_SOURCE_ROOT'] + '/gidget'
+    gidgetPythonExecutable = sys.executable
+
     # environment for subprocesses:
     # parent environment plus info from config file to environment
-    subEnv = os.environ
-
-    configParserDefaults = {}
-    gidgetCommandsPath = os.path.realpath(os.getcwd() + '/../commands')
-    gidgetPythonExecutable = sys.executable
-    print "command path: " + gidgetCommandsPath
-    config = SafeConfigParser(defaults = {
-        'gidget_commands_dir':gidgetCommandsPath,
-        'gidget_python_executable':gidgetPythonExecutable})
+    # TODO: uncomment for config file processing
+    #subEnv = os.environ
+    # configParserDefaults = {}
+    # config = SafeConfigParser(defaults = {
+    #     'gidget_commands_dir':gidgetCommandsPath,
+    #     'gidget_python_executable':gidgetPythonExecutable})
 
     # TODO: make config file location an optional command-line flag
     # TODO: error checking on file existence
     # TODO: error checking on sucessful config parsing
     # TODO: check file permissions and warn or error if not private
     
-    config.read('.gidgetconfig')
-    gidgetConfigDefaults = {}
-    gidgetConfigSections = config.sections()
-    for section in gidgetConfigSections:
-        sectionOptions = config.options(section)
-        for option in sectionOptions:
-            # TODO: for now, sections are disregarded and everything is thrown
-            # into one dictionary object; break this out per section?
-            gidgetConfigDefaults[option] = config.get(section, option)
-            if section == 'MAF_PROCESSING':
-                # TODO: warn if this overwrites some existing envvars
-                # export env vars as uppercase, per convention;
-                # ConfigParser converts to lower.
-                subEnv[('gidget_'+option).upper()] = gidgetConfigDefaults[option]
+    # TODO: uncomment for config file processing
+    # config.read('.gidgetconfig')
+    # gidgetConfigDefaults = {}
+    # gidgetConfigSections = config.sections()
+    # for section in gidgetConfigSections:
+    #     sectionOptions = config.options(section)
+    #     for option in sectionOptions:
+    #         # TODO: for now, sections are disregarded and everything is thrown
+    #         # into one dictionary object; break this out per section?
+    #         gidgetConfigDefaults[option] = config.get(section, option)
+    #         if section == 'MAF_PROCESSING':
+    #             # TODO: warn if this overwrites some existing envvars
+    #             # export env vars as uppercase, per convention;
+    #             # ConfigParser converts to lower.
+    #             subEnv[('gidget_'+option).upper()] = gidgetConfigDefaults[option]
 
 
     # print "== gidget options =="
@@ -101,28 +100,31 @@ if __name__ == '__main__':
 
     # subcommands are:
 
+    # run
+
+    # TODO
     # help
     # list
     # describe
     # add
     # remove
-    # run
+
 
     # contruct an 'args' for the subcommand
     subCommandArgs = [subCommandName] + subCommandArgs
 
     if subCommandName == 'help':
         gidget_help.parse(subCommandArgs)
-    elif subCommandName == 'list':
-        print docopt(gidget_list.__doc__, argv = subCommandArgs)
-    elif subCommandName == 'describe':
-        print docopt(gidget_describe.__doc__, argv = subCommandArgs)
-    elif subCommandName == 'add':
-        print docopt(gidget_add.__doc__, argv = subCommandArgs)
-    elif subCommandName == 'remove':
-        print docopt(gidget_remove.__doc__, argv = subCommandArgs)
+    # elif subCommandName == 'list':
+    #     print docopt(gidget_list.__doc__, argv = subCommandArgs)
+    # elif subCommandName == 'describe':
+    #     print docopt(gidget_describe.__doc__, argv = subCommandArgs)
+    # elif subCommandName == 'add':
+    #     print docopt(gidget_add.__doc__, argv = subCommandArgs)
+    # elif subCommandName == 'remove':
+    #     print docopt(gidget_remove.__doc__, argv = subCommandArgs)
     elif subCommandName == 'run':
-        exit(call(['python', 'gidget_run.py'] + subCommandArgs))# + ' '.join(subCommandArgs)]))
+        exit(call(['python', gidgetSubCommandsPath+'/gidget_run.py'] + subCommandArgs))# + ' '.join(subCommandArgs)]))
     else:
         print "command " + subCommandName + " not recognized."
         print __doc__

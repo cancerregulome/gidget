@@ -9,6 +9,8 @@ from gidget_util import gidgetConfigVars
 
 from docopt import docopt
 
+import subprocess
+from subprocess import call
 import os
 
 if __name__ == '__main__':
@@ -16,17 +18,15 @@ if __name__ == '__main__':
 
 
     pipelineName = mainArgs['<pipelinename>']
-    pipelineArgs = mainArgs['<args>']
-
-    print "If I did anything, I'd run %s!" % pipelineName
+    pipelineArgs = mainArgs['<pipelineargs>']
 
     gidgetRootPath = gidgetConfigVars['GIDGET_SOURCE_ROOT']
-    pipelineFilePath = gidgetRootPath + '/pipelines/' + pipelineName + ".py"
+    pipelineFilePath = gidgetRootPath + '/pipelines/' + pipelineName + ".sh"
     if os.path.isfile(pipelineFilePath):
-        print "%s pipeline found!" % pipelineName
+        print "calling %s pipeline!" % pipelineName
+        exit(call(['bash', pipelineFilePath] + pipelineArgs))
     else:
         print "%s pipeline not found (expected file %s)" % (pipelineName, pipelineFilePath)
-        exit(call(['python', pipelineFilePath] + pipelineArgs))
         exit(-1)
 
 
