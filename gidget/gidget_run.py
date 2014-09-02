@@ -20,13 +20,11 @@ if __name__ == '__main__':
     pipelineName = mainArgs['<pipelinename>']
     pipelineArgs = mainArgs['<pipelineargs>']
 
-    print "If I did anything, I'd run %s!" % pipelineName
-
     gidgetRootPath = gidgetConfigVars['GIDGET_SOURCE_ROOT']
     pipelineFilePath = gidgetRootPath + '/pipelines/' + pipelineName + ".sh"
     if os.path.isfile(pipelineFilePath):
-        print "%s pipeline found!" % pipelineName
-        exit(call(['python', pipelineFilePath] + pipelineArgs))
+        print "calling %s pipeline!" % pipelineName
+        exit(call(['bash', pipelineFilePath] + pipelineArgs))
     else:
         print "%s pipeline not found (expected file %s)" % (pipelineName, pipelineFilePath)
         exit(-1)
