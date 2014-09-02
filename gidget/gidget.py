@@ -35,37 +35,41 @@ from gidget_util import gidgetConfigVars
 if __name__ == '__main__':
 
 
-    # environment for subprocesses:
-    # parent environment plus info from config file to environment
-    subEnv = os.environ
 
-    configParserDefaults = {}
+
     gidgetCommandsPath = os.path.realpath(os.getcwd() + '/../commands')
     gidgetPythonExecutable = sys.executable
     print "command path: " + gidgetCommandsPath
-    config = SafeConfigParser(defaults = {
-        'gidget_commands_dir':gidgetCommandsPath,
-        'gidget_python_executable':gidgetPythonExecutable})
+
+    # environment for subprocesses:
+    # parent environment plus info from config file to environment
+    # TODO: uncomment for config file processing
+    #subEnv = os.environ
+    # configParserDefaults = {}
+    # config = SafeConfigParser(defaults = {
+    #     'gidget_commands_dir':gidgetCommandsPath,
+    #     'gidget_python_executable':gidgetPythonExecutable})
 
     # TODO: make config file location an optional command-line flag
     # TODO: error checking on file existence
     # TODO: error checking on sucessful config parsing
     # TODO: check file permissions and warn or error if not private
     
-    config.read('.gidgetconfig')
-    gidgetConfigDefaults = {}
-    gidgetConfigSections = config.sections()
-    for section in gidgetConfigSections:
-        sectionOptions = config.options(section)
-        for option in sectionOptions:
-            # TODO: for now, sections are disregarded and everything is thrown
-            # into one dictionary object; break this out per section?
-            gidgetConfigDefaults[option] = config.get(section, option)
-            if section == 'MAF_PROCESSING':
-                # TODO: warn if this overwrites some existing envvars
-                # export env vars as uppercase, per convention;
-                # ConfigParser converts to lower.
-                subEnv[('gidget_'+option).upper()] = gidgetConfigDefaults[option]
+    # TODO: uncomment for config file processing
+    # config.read('.gidgetconfig')
+    # gidgetConfigDefaults = {}
+    # gidgetConfigSections = config.sections()
+    # for section in gidgetConfigSections:
+    #     sectionOptions = config.options(section)
+    #     for option in sectionOptions:
+    #         # TODO: for now, sections are disregarded and everything is thrown
+    #         # into one dictionary object; break this out per section?
+    #         gidgetConfigDefaults[option] = config.get(section, option)
+    #         if section == 'MAF_PROCESSING':
+    #             # TODO: warn if this overwrites some existing envvars
+    #             # export env vars as uppercase, per convention;
+    #             # ConfigParser converts to lower.
+    #             subEnv[('gidget_'+option).upper()] = gidgetConfigDefaults[option]
 
 
     # print "== gidget options =="
