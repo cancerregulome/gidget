@@ -23,7 +23,7 @@ if __name__ == '__main__':
     print "If I did anything, I'd run %s!" % pipelineName
 
     gidgetRootPath = gidgetConfigVars['GIDGET_SOURCE_ROOT']
-    pipelineFilePath = gidgetRootPath + '/pipelines/' + pipelineName + ".py"
+    pipelineFilePath = gidgetRootPath + '/pipelines/' + pipelineName + ".sh"
     if os.path.isfile(pipelineFilePath):
         print "%s pipeline found!" % pipelineName
         exit(call(['python', pipelineFilePath] + pipelineArgs))
