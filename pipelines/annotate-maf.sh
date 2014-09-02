@@ -2,6 +2,7 @@
 
 # every TCGA FMP script should start with these lines:
 : ${TCGAFMP_ROOT_DIR:?" environment variable must be set and non-empty; defines the path to the TCGA FMP scripts directory"}
+
 source ${TCGAFMP_ROOT_DIR}/../gidget/util/gidget_util.sh
 
 
@@ -27,8 +28,10 @@ pathToOriginalMAF=$2
 echo using tumor code: $tumorType and input file: $pathToOriginalMAF
 
 thisDir=`pwd`
-
 mafDirectory=$thisDir/$tumorType
+
+
+
 echo `date`
 echo creating maf directory $mafDirectory
 mkdir $mafDirectory
@@ -44,7 +47,6 @@ echo
 
 
 
-
 echo `date`
 echo annotating MAF
 cd $mafDirectory
@@ -53,6 +55,8 @@ ${TCGAMAF_SCRIPTS_DIR}/bash/updateMAF.sh > updateMAF.log 2>&1
 outputMAF=`ls -1 *.ncm.with_uniprot`
 echo MAF annotated: output maf is $outputMAF!
 echo
+
+
 
 echo `date`
 echo running stats
@@ -65,7 +69,10 @@ echo "Done with MAF annotation pipeline"
 echo done
 echo
 
+
 cd $thisDir
+
+
 
 echo; echo
 
