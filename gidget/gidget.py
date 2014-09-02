@@ -37,9 +37,8 @@ if __name__ == '__main__':
 
 
 
-    gidgetCommandsPath = gidgetConfigVars['GIDGET_SOURCE_ROOT'] + '/../commands'
+    gidgetSubCommandsPath = gidgetConfigVars['GIDGET_SOURCE_ROOT'] + '/gidget'
     gidgetPythonExecutable = sys.executable
-    print "command path: " + gidgetCommandsPath
 
     # environment for subprocesses:
     # parent environment plus info from config file to environment
@@ -125,7 +124,7 @@ if __name__ == '__main__':
     # elif subCommandName == 'remove':
     #     print docopt(gidget_remove.__doc__, argv = subCommandArgs)
     elif subCommandName == 'run':
-        exit(call(['python', 'gidget_run.py'] + subCommandArgs))# + ' '.join(subCommandArgs)]))
+        exit(call(['python', gidgetSubCommandsPath+'/gidget_run.py'] + subCommandArgs))# + ' '.join(subCommandArgs)]))
     else:
         print "command " + subCommandName + " not recognized."
         print __doc__
