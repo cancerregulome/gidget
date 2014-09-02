@@ -34,13 +34,13 @@ binarizationDirectory=$thisDir/$tumorType
 echo `date`
 echo creating binarization directory $binarizationDirectory
 mkdir $binarizationDirectory
-echo setting up maf directory $binarizationDirectory
+echo "setting up binarization directory $binarizationDirectory"
 
 cd $binarizationDirectory
 echo $tumorType > tumorCode.txt
 echo $pathToAnnotatedMAF > annotatedMafFilePath.txt
 ln -s $pathToAnnotatedMAF .
-$annotatedMAFFileName=`basename $pathToOriginalMAF`
+annotatedMAFFileName=`basename $pathToAnnotatedMAF`
 cd ..
 echo
 
@@ -49,17 +49,18 @@ echo
 echo `date`
 echo processing annotated MAF -- binarization
 cd $binarizationDirectory
-$datecode=`date "+%m.%d.%Y"`
-$binarizationOutputName="mut_bin_${datecode}.txt"
-${GIDGET_SOURCE_ROOT}/commands/binarization/mutation_binarization_annovar.pl $annotatedMAFFileName > $binarizationOutputName
-echo "done: output filename is $binarizationOutputName"
+datecode=`date "+%m.%d.%Y"`
+binarizationOutputName="mut_bin_${datecode}.txt"
+${GIDGET_SOURCE_ROOT}/commands/binarization/mutation_binarization_annovar.pl $annotatedMAFFileName > ${binarizationOutputName}
+
+echo "done: output filename is ${binarizationOutputName}"
 echo
 
 
 
 echo `date`
 echo processing annotated MAF -- mutation summary
-$mutationSummaryOutputFilename="mut_summary_${datecode}.txt"
+mutationSummaryOutputFilename="mut_summary_${datecode}.txt"
 ${GIDGET_SOURCE_ROOT}/commands/binarization/genes_and_mutations_annovar.pl $tumorType $annotatedMAFFileName > $mutationSummaryOutputFilename
 echo $done
 echo
