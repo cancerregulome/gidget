@@ -37,7 +37,7 @@ if __name__ == '__main__':
 
 
 
-    gidgetCommandsPath = os.path.realpath(os.getcwd() + '/../commands')
+    gidgetCommandsPath = gidgetConfigVars['GIDGET_SOURCE_ROOT'] + '/../commands'
     gidgetPythonExecutable = sys.executable
     print "command path: " + gidgetCommandsPath
 
