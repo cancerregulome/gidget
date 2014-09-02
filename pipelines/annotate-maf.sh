@@ -1,9 +1,9 @@
 #!/bin/bash
 
-# every TCGA FMP script should start with these lines:
-: ${TCGAFMP_ROOT_DIR:?" environment variable must be set and non-empty; defines the path to the TCGA FMP scripts directory"}
+# every TCGA script should start with these lines:
+: ${GIDGET_SOURCE_ROOT:?" environment variable must be set and non-empty; defines the path to the local code for the gidget project"}
 
-source ${TCGAFMP_ROOT_DIR}/../gidget/util/gidget_util.sh
+source ${GIDGET_SOURCE_ROOT}/gidget/util/gidget_util.sh
 
 
 ## runs the MAF annotation pipeline
