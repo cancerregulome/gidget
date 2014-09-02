@@ -16,7 +16,7 @@ source ${GIDGET_SOURCE_ROOT}/gidget/util/gidget_util.sh
 if [ $# != 2 ]
     then
         echo " Usage   : `basename $0` <tumorType> <fullAnnotatedMafPath>"
-        echo " Example : `basename $0` brca full-path-to-annotated-brca-maf"
+        echo " Example : `basename $0` brca full-path-to-brca-maf.ncm.with_uniprot"
         exit $WRONGARGS
 fi
 
@@ -40,14 +40,28 @@ cd $binarizationDirectory
 echo $tumorType > tumorCode.txt
 echo $pathToAnnotatedMAF > annotatedMafFilePath.txt
 ln -s $pathToAnnotatedMAF .
+$annotatedMAFFileName=`basename $pathToOriginalMAF`
 cd ..
 echo
 
 
 
 echo `date`
-echo processing annotated MAF
+echo processing annotated MAF -- binarization
 cd $binarizationDirectory
+$datecode=`date "+%m.%d.%Y"`
+$binarizationOutputName="mut_bin_${datecode}.txt"
+${GIDGET_SOURCE_ROOT}/commands/binarization/mutation_binarization_annovar.pl $annotatedMAFFileName > $binarizationOutputName
+echo "done: output filename is $binarizationOutputName"
+echo
+
+
+
+echo `date`
+echo processing annotated MAF -- mutation summary
+$mutationSummaryOutputFilename="mut_summary_${datecode}.txt"
+${GIDGET_SOURCE_ROOT}/commands/binarization/genes_and_mutations_annovar.pl $tumorType $annotatedMAFFileName > $mutationSummaryOutputFilename
+echo $done
 echo
 
 
