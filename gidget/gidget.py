@@ -10,11 +10,6 @@ Options:
     --version
 
 gidget commands are:
-    help
-    list
-    describe
-    add
-    remove
     run
 
 """
@@ -29,12 +24,13 @@ from docopt import docopt
 from ConfigParser import SafeConfigParser
 
 import gidget_help
-import gidget_list
-import gidget_describe
-import gidget_add
-import gidget_remove
+#import gidget_list
+#import gidget_describe
+#import gidget_add
+#import gidget_remove
 #import gidget_run
 
+from gidget_util import gidgetConfigVars
 
 if __name__ == '__main__':
 
@@ -101,26 +97,29 @@ if __name__ == '__main__':
 
     # subcommands are:
 
+    # run
+
+    # TODO
     # help
     # list
     # describe
     # add
     # remove
-    # run
+
 
     # contruct an 'args' for the subcommand
     subCommandArgs = [subCommandName] + subCommandArgs
 
     if subCommandName == 'help':
         gidget_help.parse(subCommandArgs)
-    elif subCommandName == 'list':
-        print docopt(gidget_list.__doc__, argv = subCommandArgs)
-    elif subCommandName == 'describe':
-        print docopt(gidget_describe.__doc__, argv = subCommandArgs)
-    elif subCommandName == 'add':
-        print docopt(gidget_add.__doc__, argv = subCommandArgs)
-    elif subCommandName == 'remove':
-        print docopt(gidget_remove.__doc__, argv = subCommandArgs)
+    # elif subCommandName == 'list':
+    #     print docopt(gidget_list.__doc__, argv = subCommandArgs)
+    # elif subCommandName == 'describe':
+    #     print docopt(gidget_describe.__doc__, argv = subCommandArgs)
+    # elif subCommandName == 'add':
+    #     print docopt(gidget_add.__doc__, argv = subCommandArgs)
+    # elif subCommandName == 'remove':
+    #     print docopt(gidget_remove.__doc__, argv = subCommandArgs)
     elif subCommandName == 'run':
         exit(call(['python', 'gidget_run.py'] + subCommandArgs))# + ' '.join(subCommandArgs)]))
     else:
