@@ -1933,7 +1933,7 @@ def makeData ( dataType, numRow, numCol ):
 
 def readTSV_dataMatrix ( inName ):
 
-    print " in readTSV_dataMatrix ... ", inName
+    ## print " in readTSV_dataMatrix ... ", inName
 
     outDict = {}
 
@@ -2257,6 +2257,7 @@ def readTSV_clinical ( inName ):
     if ( 1 ):
         print " double-checking that we don't have any blank fields ... "
         for aToken in hdrTokens:
+            aTokens = aToken.strip()
             print " aToken : <%s> " % aToken
             for kk in range(len(allClinDict[aToken])):
                 if ( allClinDict[aToken][kk] == "" ):
