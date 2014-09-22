@@ -620,6 +620,7 @@ if __name__ == "__main__":
     parser.add_argument('--verbosity', '-v',
                         action='store', default=0, type=int)
     parser.add_argument('--tsvFile', '-f', action='store', required=True)
+    parser.add_argument('--outFile', '-o', action='store')
     parser.add_argument('--forRE', '-R', action='store_true')
     parser.add_argument('--forLisa', '-L', action='store_true')
     parser.add_argument('--useBC', '-B', action='store',
@@ -981,9 +982,11 @@ if __name__ == "__main__":
         (status, output) = commands.getstatusoutput(cmdString)
         print status, output
 
-        cmdString = "mv %s/%d.all.pwpv.sort %s.%d.all.pwpv.sort" % (tmpDir13,
-                                                                    iOne, tsvFile[:-4], iOne)
-        print " < %s > " % cmdString
+        if ( args.outFile ):
+            cmdString = "mv %s/%d.all.pwpv.sort %s" % (tmpDir13, iOne, args.outFile)
+        else:
+            cmdString = "mv %s/%d.all.pwpv.sort %s.%d.all.pwpv.sort" % (tmpDir13, iOne, tsvFile[:-4], iOne)
+        print " MOVING OUTPUT FILE < %s > " % cmdString
         (status, output) = commands.getstatusoutput(cmdString)
         print status, output
 
