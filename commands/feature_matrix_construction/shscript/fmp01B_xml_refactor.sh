@@ -38,9 +38,12 @@ echo " "
 echo " "
 echo " *******************"
 echo `date`
-echo " *" $curDate 
-echo " *" $snapshotName
-echo " *" $config
+echo " * run id ........... " $curDate 
+echo " * snapshot name .... " $snapshotName
+echo " * tumor ............ " $tumor
+echo " * config ........... " $config
+echo " * public/private ... " $ppString
+echo " * aux dir .......... " $auxName
 echo " *******************"
 
 args=("$@")
@@ -79,6 +82,18 @@ for tumor in $tumors
 	mv -f tmp.sort $tumor.clinical.$curDate.tsv
         ## $TCGAFMP_ROOT_DIR/shscript/fmp00B_hackBarcodes.sh $tumor.clinical.$curDate.tsv
 
+        ## if the tumor type is CESC, then call the new code ...
+        if [ "$tumor" == "cesc" ]
+            then
+                echo " calling special CESC-specific reParseClin_CESC.py ... "
+                python $TCGAFMP_ROOT_DIR/main/reParseClin_CESC.py $tumor $curDate ../$auxName/reParse-feature-list.txt
+                mv $tumor.clinical.$curDate.tsv $tumor.clinical.$curDate.old.tsv
+                cp $tumor.clinical.$curDate.cesc.tsv $tumor.clinical.$curDate.tsv
+                head $tumor.clinical.$curDate.tsv | cut -f1-10
+            else
+                echo " NOT calling the CESC-specific reParseClin_CESC.py ... "
+        fi
+
 	## ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 	## then we parse the Firehose analyses output files ...
         echo " parsing Firehose analyses outputs ... "
@@ -89,13 +104,12 @@ for tumor in $tumors
 
         ## the patients.counts_and_rates files do not differ across multiple subsets
         ## so we can concatenate all of these ...
+        echo " creating new MutSig counts and rates file in aux directory "
         rm -fr ../$auxName/MutSigCV.patients.counts_and_rates.forXmlMerge.tsv
+        rm -fr ../$auxName/MutSig.patients.counts_and_rates.forXmlMerge.tsv
         cat gdac.broadinstitute.org_*counts*rates*tsv | sort | uniq >& \
-            ../$auxName/MutSigCV.patients.counts_and_rates.forXmlMerge.tsv
+            ../$auxName/MutSig.patients.counts_and_rates.forXmlMerge.tsv
         rm -fr gdac.broadinstitute.org_*counts*rates*tsv
-
-        ## $TCGAFMP_ROOT_DIR/shscript/fmp00B_hackBarcodes.sh \
-        ##     ../$auxName/MutSigCV.patients.counts_and_rates.forXmlMerge.tsv
 
 	## ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 	## here we want to try to merge Firehose-based outputs into the XML-based clinical matrix
@@ -147,7 +161,7 @@ for tumor in $tumors
 	rm -fr forXmlMerge.log
         if [ "$ppString" = 'private' ]
             then
-                echo " incorporating forXmlMerge files from aux directory ... "
+                echo " incorporating forXmlMerge files from specified aux directory ... " $auxName
         	for f in `ls ../$auxName/*.forXmlMerge.tsv`
         	    do
         		echo "    " $f 
@@ -171,6 +185,8 @@ for tumor in $tumors
         			echo " "
         		fi
         	    done
+                else
+                    echo " NOT incorporating forXmlMrege files from aux directory ... "
             fi
 
 	rm -fr merge_temp?.tsv
