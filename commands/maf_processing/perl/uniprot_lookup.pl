@@ -250,14 +250,14 @@ while (<ANNOVAR_OUTPUT>) {
     m/^line\d+/ or die "Error: invalid record found in exonic_variant_function file $annovar_output_file (line number expected): <$_>\n";
     my @field = split (/\t/, $_);
     if($field[1] =~ m/^unknown/) {
-	$field[2].="NO UNIPROT MATCH";
+	$field[2].=",NO UNIPROT MATCH";
 	print_fields(@field);
 	$bad_line++;
 	next;
     }
 
     if($field[2] =~ m/^\w+:(\w+):wholegene/) {
-	$field[2].="NO UNIPROT MATCH";
+	$field[2].=",NO UNIPROT MATCH";
 	print_fields(@field);
 	$bad_line++;
 	next;
@@ -493,19 +493,27 @@ while (<ANNOVAR_OUTPUT>) {
 		print_fields(@field);
 		next;
 		
-	    #if you have reached this point, that means there was no isoform match
+	    #if you have reached this point, that means there was no isoform match or there was a deletion
 	    }else {
 
 		my @filtered_transcript_list=generate_filtered_transcript_list(\%keep_this_transcript, \@all_transcripts);
-		push(@filtered_transcript_list, "NO ISOFORM MATCH");
-		$field[2]=join(",", @filtered_transcript_list);
-		print_fields(@field);
-		$bad_line++;
+
+		#NEW ADDITION:7/2/14
+		#need to flag true no isoform matches and not deletions
+		if($result{"match"}==-1 && $result{"isoform"}) {
+		    print_fields(@field);
+		}else {    
+		    push(@filtered_transcript_list, "NO ISOFORM MATCH");
+		    $field[2]=join(",", @filtered_transcript_list);
+		    print_fields(@field);
+		    $bad_line++;
 		
+		}
 	    }
 	}
     }
 }
+
 close ANNOVAR_OUTPUT;
 
 #print"There are $bad_line lines which were not processed.\n";
@@ -590,9 +598,25 @@ sub isoform_filter {
 	my $annovar_position;
 	if($annovar_protein =~/^\D(\d+)(\D)+$/) {
 	   $annovar_position=$1;	
+
+	   #NEW ADDITION:7/2/14
+	   #check delins but set del as -1
+        }elsif($annovar_protein=~/^\D(\d+)_/) {
+	    $annovar_position=$1;
+	    #print "DASH:$annovar_protein:amino acid position is $annovar_position\n";
+	    
+
+	}elsif($annovar_protein=~/^\d+_\d+del/) {
+	    $overall_result{"match"}=-1;
+	    #print "$annovar_protein: has a deletion\n";
+	    $overall_result{"isoform"}=$isoform_match;
+	    return %overall_result;
+    
 	}else {
-	    #print "$line\tNo amino acid position\n";
+	    #print "$annovar_protein:DID NOT PROCESS\n";
 	}
+
+
 
 	#then check wildtype amino acid against amino acid in default isoform	
 	foreach my $isoform (@default_isoform) {
