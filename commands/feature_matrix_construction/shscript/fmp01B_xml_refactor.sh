@@ -12,12 +12,14 @@ source ${TCGAFMP_ROOT_DIR}/../../gidget/util/gidget_util.sh
 ##	config, eg 'parse_tcga.config', relative to $TCGAFMP_ROOT_DIR/config
 
 WRONGARGS=1
-if [[ $# != 5 ]] && [[ $# != 6 ]]
+if [[ $# != 5 ]] && [[ $# != 7 ]]
     then
-        echo " Usage   : `basename $0` <curDate> <snapshotName> <tumorType> <config> <public/private> [auxName] "
-        echo " Example : `basename $0` 28oct13  dcc-snapshot-28oct13  brca  parse_tcga.27_450k.config  private  aux "
+        echo " Usage   : `basename $0` <curDate> <snapshotName> <tumorType> <config> <public/private> [auxName] [ignoreAM=yes/no] "
+        echo " Example : `basename $0` 28oct13  dcc-snapshot-28oct13  brca  parse_tcga.27_450k.config  private  aux  no "
         echo " "
         echo " Note that the new auxName option at the end is optional and will default to simply aux "
+        echo " Note that the ignoreAM (ignore annotations-manager) option is also optional and will default to no "
+        echo " However, if you want to use either of these two optional command-line arguments, you MUST use BOTH "
         exit $WRONGARGS
 fi
 
@@ -27,11 +29,13 @@ tumors=$(echo $3 | tr "," "\n")
 config=$4
 ppString=$5
 
-if (( $# == 6 ))
+if (( $# == 7 ))
     then
         auxName=$6
+        ignoreAM=$7
     else
         auxName=aux
+        ignoreAM=no
 fi
 
 echo " "
@@ -81,18 +85,6 @@ for tumor in $tumors
 	sort $tumor.clinical.$curDate.tsv >& tmp.sort
 	mv -f tmp.sort $tumor.clinical.$curDate.tsv
         ## $TCGAFMP_ROOT_DIR/shscript/fmp00B_hackBarcodes.sh $tumor.clinical.$curDate.tsv
-
-        ## if the tumor type is CESC, then call the new code ...
-        if [ "$tumor" == "cesc" ]
-            then
-                echo " calling special CESC-specific reParseClin_CESC.py ... "
-                python $TCGAFMP_ROOT_DIR/main/reParseClin_CESC.py $tumor $curDate ../$auxName/reParse-feature-list.txt
-                mv $tumor.clinical.$curDate.tsv $tumor.clinical.$curDate.old.tsv
-                cp $tumor.clinical.$curDate.cesc.tsv $tumor.clinical.$curDate.tsv
-                head $tumor.clinical.$curDate.tsv | cut -f1-10
-            else
-                echo " NOT calling the CESC-specific reParseClin_CESC.py ... "
-        fi
 
 	## ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 	## then we parse the Firehose analyses output files ...
@@ -186,11 +178,26 @@ for tumor in $tumors
         		fi
         	    done
                 else
-                    echo " NOT incorporating forXmlMrege files from aux directory ... "
+                    echo " NOT incorporating forXmlMerge files from aux directory ... "
             fi
 
 	rm -fr merge_temp?.tsv
 	rm -fr merge_temp?.log
+
+        cp clinical.temp.tsv $tumor.clinical.$curDate.tsv
+
+        ## if the tumor type is CESC, then call the new code ...
+        if [ "$tumor" == "cesc" ]
+            then
+                echo " calling special CESC-specific reParseClin_CESC.py ... "
+                python $TCGAFMP_ROOT_DIR/main/reParseClin_CESC.py $tumor $curDate ../$auxName/reParse-feature-list.txt
+                mv $tumor.clinical.$curDate.tsv $tumor.clinical.$curDate.old.tsv
+                cp $tumor.clinical.$curDate.cesc.tsv $tumor.clinical.$curDate.tsv
+                cp $tumor.clinical.$curDate.tsv clinical.temp.tsv
+                head $tumor.clinical.$curDate.tsv | cut -f1-10
+            else
+                echo " NOT calling the CESC-specific reParseClin_CESC.py ... "
+        fi
 
 	## ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 	## here we "clean up" the clinical file and also "flip" it
@@ -214,8 +221,12 @@ for tumor in $tumors
 	## ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 	## NEW as of 01 nov 2012 ... get the blacklist of patients and samples from the TCGA
 	## annotations manager
-	$TCGAFMP_ROOT_DIR/shscript/Item_Blacklist.sh $tumor $TCGAFMP_ROOT_DIR/shscript/blacklist.spec >& Item_Blacklist.$curDate.log
-	#### ./Item_Blacklist.sh $tumor blacklist
+        if [ "$ignoreAM" = 'no' ]
+            then
+	        $TCGAFMP_ROOT_DIR/shscript/Item_Blacklist.sh $tumor $TCGAFMP_ROOT_DIR/shscript/blacklist.spec >& Item_Blacklist.$curDate.log
+            else
+                rm -fr $tumor.blacklist.samples.tsv
+            fi
 	rm -fr cTmp.tsv
 	cp finalClin.$tumor.$curDate.tsv cTmp.tsv
 	rm -fr filterSamp.clin.$curDate.log
