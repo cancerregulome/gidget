@@ -42,8 +42,10 @@ def findKey ( allClinDict, keyStr ):
     keyStr = keyStr.lower()
     for aKey in allClinDict.keys():
         bKey = aKey.lower()
-        if ( bKey.find(keyStr) >= 0 ): print aKey
+        if ( bKey.find(keyStr) >= 0 ): 
+            print " possible match: ", aKey
 
+    print " ERROR !!! bailing out of reParseClin_CESC ... in findKey "
     sys.exit(-1)
 
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
@@ -183,10 +185,12 @@ def checkCancerStatus ( allClinDict ):
         if ( allClinDict[nteKey][ii] == "YES" ):
 
             siteStr = allClinDict[siteKey][ii]
-            if ( siteStr == "Other_specify" ):
-                siteStr = allClinDict[textKey][ii]
-            elif ( siteStr == "NA" ):
-                siteStr = allClinDict[textKey][ii]
+
+            if ( 1 ):
+                if ( siteStr == "Other_specify" ):
+                    siteStr = allClinDict[textKey][ii]
+                elif ( siteStr == "NA" ):
+                    siteStr = allClinDict[textKey][ii]
 
             if ( siteStr != "NA" ): siteStr = siteStr.lower()
             newSite += [ siteStr ]
@@ -343,17 +347,18 @@ def checkClinicalStage ( allClinDict ):
             print " "
             print ii, allClinDict[barcodeKey][ii], allClinDict[stageKey][ii], allClinDict[TstageKey][ii]
 
-    ## as of 13aug ... there is stage info for 225 patients, and the counts
+    ## as of 22sep ... there is stage info for 240 patients, and the counts
     ## look like this:
-    ##          65  IB1
+    ##          70  IB1
     ##          35  IB
     ##          34  IB2
-    ##          30  IIIB
-    ##          21  IIB
-    ##           8  IIA2
-    ##           6  IVB
+    ##          33  IIIB
+    ##          26  IIB
+    ##           7  IIA2
+    ##           7  IIA
+    ##           5  IVB
     ##          etc
-    ## after grouping, we get 141 stage I, 44 stage II, and 40 stage III,IV
+    ## after grouping, we get 147 stage I (61%), 49 stage II (20%), and 44 stage III,IV (18%)
 
     keyString = "C:CLIN:clinStage:::::"
     allClinDict[keyString] = newStage
@@ -382,7 +387,6 @@ def checkLymphNodes ( allClinDict ):
     LNEcountKey = findKey ( allClinDict, "lymph_node_examined_count" )
     LNEposHEkey = findKey ( allClinDict, "number_of_lymphnodes_positive_by_he" )
     LNEposIHCkey = findKey ( allClinDict, "number_of_lymphnodes_positive_by_ihc" )
-    LVSIkey = findKey ( allClinDict, "lymphovascular_invasion_indicator" )
 
     numP = len(allClinDict[hysTypeKey])
 
@@ -394,7 +398,7 @@ def checkLymphNodes ( allClinDict ):
             print " patient index ", ii, allClinDict[barKey][ii]
 
         if ( allClinDict[hysTypeKey][ii] == "NA" and allClinDict[hysTextKey][ii] == "NA" ):
-            newHyst += [ "NO" ]
+            newHyst += [ "NO_or_NA" ]
         else:
             newHyst += [ "YES" ]
 
@@ -404,12 +408,15 @@ def checkLymphNodes ( allClinDict ):
         if ( allClinDict[LNEposIHCkey][ii] != "NA" ):
             numPos += allClinDict[LNEposIHCkey][ii]
 
-        numLNpos += [ numPos ]
-        if ( numPos == 0 ):
-            tfLNpos += [ "FALSE" ]
+        if ( (allClinDict[LNEposHEkey][ii] == "NA") and (allClinDict[LNEposIHCkey][ii] == "NA") ):
+            numLNpos += [ "NA" ]
+            tfLNpos  += [ "NA" ]
         else:
-            tfLNpos += [ "TRUE" ]
-
+            numLNpos += [ numPos ]
+            if ( numPos == 0 ):
+                tfLNpos += [ "FALSE" ]
+            else:
+                tfLNpos += [ "TRUE" ]
 
         if ( 0 ):
             if ( allClinDict[hysTypeKey][ii] == "NA" ):
@@ -421,7 +428,9 @@ def checkLymphNodes ( allClinDict ):
     
             print " hysTypeKey  : ", allClinDict[hysTypeKey][ii]
             print " hysTextKey  : ", allClinDict[hysTextKey][ii]
-            print " lymph nodes : ", allClinDict[LNEcountKey][ii], allClinDict[LNEposHEkey][ii], allClinDict[LNEposIHCkey][ii], allClinDict[LVSIkey][ii]
+            print " lymph nodes : ", allClinDict[LNEcountKey][ii], \
+                                     allClinDict[LNEposHEkey][ii], \
+                                     allClinDict[LNEposIHCkey][ii]
 
     keyString = "C:CLIN:hysterectomy:::::"
     allClinDict[keyString] = newHyst
@@ -439,6 +448,85 @@ def checkLymphNodes ( allClinDict ):
     allClinDict[keyString] = numLNpos
     ( keyType, nCount, naCount, cardCount, labelList, labelCount ) = miscClin.lookAtKey ( allClinDict[keyString] )
     print " %s  N=%d  NA=%d  not-NA=%d  card=%d " % ( keyType, nCount, naCount, (nCount-naCount), cardCount ), labelCount
+
+    return ( allClinDict )
+
+# -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
+
+def makeMergedDx ( allClinDict ):
+
+    print " in makeMergedDx ... "
+    print " "
+
+    mergeDx = []
+    epcReview = []
+
+    histTypeKey = findKey ( allClinDict, "histological_type" )
+    epcDxKey = findKey ( allClinDict, "C:CLIN:Dx_EPC" )
+
+    barKey = findKey ( allClinDict, "bcr_patient_barcode" )
+
+    numP = len(allClinDict[histTypeKey])
+
+    for ii in range(numP):
+
+        if ( 1 ):
+            print " "
+            print " "
+            print " patient index ", ii, allClinDict[barKey][ii], allClinDict[histTypeKey][ii], allClinDict[epcDxKey][ii]
+
+        ## expected possible values for the histological_type field:
+        ##      206 Cervical_Squamous_Cell_Carcinoma
+        ##       23 Endocervical_Type_of_Adenocarcinoma
+        ##        6 Mucinous_Adenocarcinoma_of_Endocervical_Type
+        ##        5 Adenosquamous
+        ##        4 Endometrioid_Adenocarcinoma_of_Endocervix
+        ##        4 Endocervical_Adenocarcinoma_of_the_Usual_Type
+        ##       70 NA
+
+        ## expected values for Dx_EPC field:
+        ##       99 Squamous_Cell_Carcinoma
+        ##       27 Endocervical_Adenocarcinoma
+        ##        4 Adenosquamous_Carcinoma
+        ##      188 NA
+
+        if ( allClinDict[epcDxKey][ii] != "NA" ): 
+            epcReview += [ "TRUE" ]
+        else:
+            epcReview += [ "FALSE" ]
+
+        if ( allClinDict[epcDxKey][ii] != "NA" ):
+            mergeDx += [ allClinDict[epcDxKey][ii] ]
+        else:
+            if ( allClinDict[histTypeKey][ii] == "Cervical_Squamous_Cell_Carcinoma" ):
+                mergeDx += [ "Squamous_Cell_Carcinoma" ]
+            elif ( allClinDict[histTypeKey][ii] == "Endocervical_Type_of_Adenocarcinoma" ):
+                mergeDx += [ "Endocervical_Adenocarcinoma" ]
+            elif ( allClinDict[histTypeKey][ii] == "Mucinous_Adenocarcinoma_of_Endocervical_Type" ):
+                mergeDx += [ "Endocervical_Adenocarcinoma" ]
+            elif ( allClinDict[histTypeKey][ii] == "Adenosquamous" ):
+                mergeDx += [ "Adenosquamous_Carcinoma" ]
+            elif ( allClinDict[histTypeKey][ii] == "Endometrioid_Adenocarcinoma_of_Endocervix" ):
+                mergeDx += [ "Endocervical_Adenocarcinoma" ]
+            elif ( allClinDict[histTypeKey][ii] == "Endocervical_Adenocarcinoma_of_the_Usual_Type" ):
+                mergeDx += [ "Endocervical_Adenocarcinoma" ]
+            elif ( allClinDict[histTypeKey][ii] == "NA" ):
+                mergeDx += [ "NA" ]
+            else:
+                print " ERROR ??? we should not be here ... ", ii, allClinDict[barKey][ii], \
+                    allClinDict[histTypeKey][ii], allClinDict[epcDxKey][ii]
+            
+    keyString = "C:CLIN:Dx_merged:::::"
+    allClinDict[keyString] = mergeDx
+    ( keyType, nCount, naCount, cardCount, labelList, labelCount ) = miscClin.lookAtKey ( allClinDict[keyString] )
+    print " %s  N=%d  NA=%d  not-NA=%d  card=%d " % ( keyType, nCount, naCount, (nCount-naCount), cardCount ), labelCount
+    print labelList
+
+    keyString = "C:CLIN:EPC_review:::::"
+    allClinDict[keyString] = epcReview
+    ( keyType, nCount, naCount, cardCount, labelList, labelCount ) = miscClin.lookAtKey ( allClinDict[keyString] )
+    print " %s  N=%d  NA=%d  not-NA=%d  card=%d " % ( keyType, nCount, naCount, (nCount-naCount), cardCount ), labelCount
+    print labelList
 
     return ( allClinDict )
 
@@ -503,6 +591,9 @@ if __name__ == "__main__":
     allClinDict = checkHistologicGrade ( allClinDict )
     allClinDict = checkClinicalStage ( allClinDict )
     allClinDict = checkLymphNodes ( allClinDict )
+    allClinDict = makeMergedDx ( allClinDict )
+
+    print " FINISHED creating and modifying CESC features ... "
 
     # now we're ready to re-write this ...
     (naCounts, otherCounts) = miscClin.lookAtClinDict(allClinDict)
