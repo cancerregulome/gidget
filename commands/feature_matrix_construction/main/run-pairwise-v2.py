@@ -833,7 +833,7 @@ if __name__ == "__main__":
         sys.exit(-1)
 
     golempwd = "PASSWD_HERE"
-    fhC = file (gidgetConfigVars['TCGAFMP_CLUSTER_SCRATCH'] + "/config", 'r' )
+    fhC = file (gidgetConfigVars['TCGAFMP_CLUSTER_HOME'] + "/GOLEMPW", 'r' )
     aLine = fhC.readline()
     fhC.close()
     aLine = aLine.strip()
