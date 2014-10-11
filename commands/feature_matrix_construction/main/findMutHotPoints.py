@@ -536,6 +536,7 @@ if __name__ == "__main__":
     tumorList = getTumorBarcodes(mafFilename)
     print " --> %d tumor samples in MAF file " % (len(tumorList))
     tThresh = max(len(tumorList) / 25, 5)
+    tThresh = max(len(tumorList) / 50, 5)
     print " --> threshold will be %d " % (tThresh)
 
     mutDict = getMutDictFromMaf(mafFilename, geneList)
@@ -588,6 +589,7 @@ if __name__ == "__main__":
     ## now we walk along this cumulative histogram and keep track
     ## of when we have more than maxN hot-points ...
     maxN = 20
+    maxN = 50
     for iCount in range(len(cumHist)):
         jCount = len(cumHist) - 1 - iCount
         if ( cumHist[jCount] < maxN ):
