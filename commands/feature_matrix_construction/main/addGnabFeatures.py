@@ -834,22 +834,39 @@ def combineGnabCnvr(dataD):
                 if (mutFlag or delFlag): numYesDel += 1
                 if (mutFlag or ampFlag): numYesAmp += 1
 
+            addDelFeat = 0
+            addAmpFeat = 0
+            fThresh = 0.025
             if (numYes + numAmp + numDel > 0):
                 print "         --> %3d mutations (%3d mut or del, %3d mut or amp) " % \
                                 ( numYes, numYesDel, numYesAmp )
                 print "             %3d deletions " % numDel, minCN
                 print "             %3d amplifications " % numAmp, maxCN
                 if (numYesDel > 0):
-                    if (float(numYesDel - numYes) / float(numCol) > 0.10):
-                        if (float(numYesDel - numDel) / float(numCol) > 0.10):
-                            print "                 deletion looks significant "
+                    delFrac1 = float(numYesDel-numYes)/float(numCol)
+                    delFrac2 = float(numYesDel-numDel)/float(numCol)
+                    delFrac3 = 0
+                    if ( numYes > 0 ): delFrac3 += float(numYesDel/numYes)
+                    if ( numDel > 0 ): delFrac3 += float(numYesDel/numDel)
+                    if ( delFrac1>fThresh and delFrac2>fThresh ):
+                        print "                 deletion looks significant      ", numYesDel, numYes, numDel, numCol, delFrac1, delFrac2, delFrac3
+                        addDelFeat = 1
+                    else:
+                        print "                 deletion does not seem significant (?) ", numYesDel, numYes, numDel, numCol, delFrac1, delFrac2, delFrac3
                 if (numYesAmp > 0):
-                    if (float(numYesAmp - numYes) / float(numCol) > 0.10):
-                        if (float(numYesAmp - numAmp) / float(numCol) > 0.10):
-                            print "                 amplification looks significant "
+                    ampFrac1 = float(numYesAmp-numYes)/float(numCol)
+                    ampFrac2 = float(numYesAmp-numAmp)/float(numCol)
+                    ampFrac3 = 0
+                    if ( numYes > 0 ): ampFrac3 += float(numYesAmp/numYes)
+                    if ( numAmp > 0 ): ampFrac3 += float(numYesAmp/numAmp)
+                    if ( ampFrac1>fThresh and ampFrac2>fThresh ):
+                        print "                 amplification looks significant ", numYesAmp, numYes, numAmp, numCol, ampFrac1, ampFrac2, ampFrac3
+                        addAmpFeat = 1
+                    else:
+                        print "                 amplification does not seem significant (?) ", numYesAmp, numYes, numAmp, numCol, ampFrac1, ampFrac2, ampFrac3
 
             ## add the "DEL" feature if appropriate ...
-            if (numDel > 1):
+            if ( addDelFeat ):
                 numNewFeat += 1
                 curFeatName = rowLabels[iR]
                 newFeatName = makeNewFeatureName(curFeatName, gnabFeatIncSubstrings, gnabFeatDelSubstrings)
@@ -897,7 +914,7 @@ def combineGnabCnvr(dataD):
 
 
             ## add the "AMP" feature if appropriate ...
-            if (numAmp > 1):
+            if ( addAmpFeat ):
                 numNewFeat += 1
                 curFeatName = rowLabels[iR]
                 newFeatName = makeNewFeatureName(curFeatName, gnabFeatIncSubstrings, gnabFeatAmpSubstrings)
@@ -989,7 +1006,7 @@ if __name__ == "__main__":
             inFile = sys.argv[1]
             outFile = sys.argv[2]
             do_combineGnabCnvr = 1
-            do_combineGnabCnvr = 0
+            ## do_combineGnabCnvr = 0
             do_pathwayGnab = 0
             do_driverGnab = 0
             driverList = ["TP53", "KRAS", "PIK3CA", "PTEN"]
@@ -1006,6 +1023,7 @@ if __name__ == "__main__":
 
     # read in the input feature matrix first, just in case there
     # actually isn't one yet available ...
+    print " --> reading in feature matrix ... "
     testD = tsvIO.readTSV(inFile)
     try:
         print len(testD['rowLabels']), len(testD['colLabels'])
@@ -1015,11 +1033,13 @@ if __name__ == "__main__":
 
     # we want to come up with a 'merged' mutation OR deletion feature
     if (do_combineGnabCnvr):
+        print "         calling combineGnabCnvr ... "
         newD = combineGnabCnvr(testD)
         testD = newD
 
     # and then pathway level mutation features
     if (do_pathwayGnab):
+        print "         calling pathwayGnab ... "
         pwDict = readPathways()
         newD = pathwayGnab(testD, pwDict)
         testD = newD
@@ -1027,10 +1047,12 @@ if __name__ == "__main__":
     # and then a 'driverMut' feature based on the driverList above
     # (which is just 4 hardcoded genes for now)
     if (do_driverGnab):
+        print "         calling driverGnab ... "
         newD = driverGnab(testD, driverList)
         testD = newD
 
     # and finally write it out ...
+    print " --> writing out output feature matrix "
     tsvIO.writeTSV_dataMatrix(testD, 0, 0, outFile)
 
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
