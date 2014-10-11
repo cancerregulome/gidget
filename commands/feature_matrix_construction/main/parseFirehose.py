@@ -16,8 +16,12 @@ import sys
 def getDate(dName):
 
     dateString = dName[-10:]
-    iDate = int(dateString[0:4]) * 10000 + \
-        int(dateString[5:7]) * 100 + int(dateString[8:10])
+    try:
+        iDate = int(dateString[0:4]) * 10000 + \
+                int(dateString[5:7]) * 100 + int(dateString[8:10])
+    except:
+        print " ERROR extracting date from <%s> ??? " % dName, dateString
+        iDate = 0
     return (iDate)
 
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
@@ -68,7 +72,7 @@ def getMostRecentDir(topDir, cancerList, awgFlag):
             if (len(cancerList) == 1):
                 if (d1Name.find("awg_") >= 0):
                     if (d1Name.find(cancerList[0]) >= 0):
-                        if (d1Name.find(lastDate) >= 0):
+                        if (d1Name.endswith(lastDate)):
                             lastDir = d1Name
     
     else:
@@ -80,7 +84,7 @@ def getMostRecentDir(topDir, cancerList, awgFlag):
         if (lastDir == "NA"):
             for d1Name in d1.dirs():
                 if (d1Name.find("analyses") >= 0):
-                    if (d1Name.find(lastDate) >= 0):
+                    if (d1Name.endswith(lastDate)):
                         lastDir = d1Name
     
     print " using firehose outputs from: ", lastDir
