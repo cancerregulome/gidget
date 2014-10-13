@@ -45,7 +45,7 @@ def findKey ( allClinDict, keyStr ):
         if ( bKey.find(keyStr) >= 0 ): 
             print " possible match: ", aKey
 
-    print " ERROR !!! bailing out of reParseClin_CESC ... in findKey "
+    print " WARNING !!! failed to findKey in reParseClin_CESC "
     sys.exit(-1)
 
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
@@ -583,15 +583,51 @@ if __name__ == "__main__":
 
 
     # now we need to do some massaging and computing ...
-    allClinDict = addBMI ( allClinDict )
-    allClinDict = checkMenopause ( allClinDict )
-    allClinDict = addAgeSplits ( allClinDict )
-    allClinDict = checkCancerStatus ( allClinDict )
-    allClinDict = checkTumorStatus ( allClinDict )
-    allClinDict = checkHistologicGrade ( allClinDict )
-    allClinDict = checkClinicalStage ( allClinDict )
-    allClinDict = checkLymphNodes ( allClinDict )
-    allClinDict = makeMergedDx ( allClinDict )
+    try:
+        allClinDict = addBMI ( allClinDict )
+    except:
+        print " addBMI function failed "
+
+    try:
+        allClinDict = checkMenopause ( allClinDict )
+    except:
+        print " checkMenopause function failed "
+
+    try:
+        allClinDict = addAgeSplits ( allClinDict )
+    except:
+        print " addAgeSplits function failed "
+
+    try:
+        allClinDict = checkCancerStatus ( allClinDict )
+    except:
+        print " checkCancerStatus function failed "
+
+    try:
+        allClinDict = checkTumorStatus ( allClinDict )
+    except:
+        print " checkTumorStatus function failed "
+
+    try:
+        allClinDict = checkHistologicalGrade ( allClinDict )
+    except:
+        print " checkHistologicalGrade function failed "
+
+    try:
+        allClinDict = checkClinicalStage ( allClinDict )
+    except:
+        print " checkClinicalStage function failed "
+
+    try:
+        allClinDict = checkLymphNodes ( allClinDict )
+    except:
+        print " checkLymphNodes function failed "
+
+    try:
+        allClinDict = makeMergeDx ( allClinDict )
+    except:
+        print " makeMergeDx function failed "
+
 
     print " FINISHED creating and modifying CESC features ... "
 
