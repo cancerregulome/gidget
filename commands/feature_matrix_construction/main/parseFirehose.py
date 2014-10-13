@@ -19,8 +19,9 @@ def getDate(dName):
     try:
         iDate = int(dateString[0:4]) * 10000 + \
                 int(dateString[5:7]) * 100 + int(dateString[8:10])
+        print " extracting date from <%s> <%s> %d " % ( dName, dateString, iDate )
     except:
-        print " ERROR extracting date from <%s> ??? " % dName, dateString
+        print " WARNING ... failed to extract date from <%s> ??? " % dName, dateString
         iDate = 0
     return (iDate)
 
@@ -40,6 +41,7 @@ def getMostRecentDir(topDir, cancerList, awgFlag):
     for d1Name in d1.dirs():
 
         ## print "     looking at directory name <%s> " % d1Name
+        if ( d1Name.endswith("__bkp") ): continue
 
         if (d1Name.find("analyses") >= 0):
             print "         --> adding gen date <%s> " % getDate(d1Name)
