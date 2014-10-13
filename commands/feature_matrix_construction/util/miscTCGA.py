@@ -496,7 +496,7 @@ def uuid_to_barcode ( uuid ):
             # if that didn't work and we have already constructed
             # the UUID dictionary then we have a problem
             if ( len(uuid2barcode_dict) > 0 ):
-                print " FATAL ERROR in uuid_to_barcode ??? <%s> <%s> " % ( uuid, uuid.lower() )
+                print " Failed to match uuid_to_barcode ??? <%s> <%s> " % ( uuid, uuid.lower() )
                 return ( "NA" )
                 # sys.exit(-1)
             else:
@@ -529,7 +529,7 @@ def barcode_to_uuid ( barcode ):
             # if that didn't work and we have already constructed
             # the dictionary then we have a problem
             if ( len(barcode2uuid_dict) > 0 ):
-                print " FATAL ERROR in barcode_to_uuid ??? <%s> <%s> " % ( barcode, barcode.lower() )
+                print " Failed to match barcode_to_uuid ??? <%s> <%s> " % ( barcode, barcode.lower() )
                 return ( "NA" )
                 # sys.exit(-1)
             else:
@@ -567,7 +567,7 @@ def barcode_to_disease ( barcode ):
             # if that didn't work and we have already constructed
             # the dictionary then we have a problem
             if ( len(barcode2disease_dict) > 0 ):
-                print " FATAL ERROR in barcode_to_disease ??? <%s> <%s> " % ( shortBarcode, shortBarcode.lower() )
+                print " Failed to match barcode_to_disease ??? <%s> <%s> " % ( shortBarcode, shortBarcode.lower() )
                 return ( "NA" )
                 # sys.exit(-1)
             else:
