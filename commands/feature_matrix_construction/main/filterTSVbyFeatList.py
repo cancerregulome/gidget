@@ -151,7 +151,7 @@ if __name__ == "__main__":
         print listBW[iList]
         print listLS[iList]
 
-        orderedWhiteList += listDetails[iList]
+        if ( listBW[iList] == "white" ): orderedWhiteList += listDetails[iList]
 
     print " length of ordered white list : ", len(orderedWhiteList)
 
