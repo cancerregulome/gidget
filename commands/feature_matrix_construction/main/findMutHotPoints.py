@@ -536,7 +536,7 @@ if __name__ == "__main__":
     tumorList = getTumorBarcodes(mafFilename)
     print " --> %d tumor samples in MAF file " % (len(tumorList))
     tThresh = max(len(tumorList) / 25, 5)
-    tThresh = max(len(tumorList) / 50, 5)
+    tThresh = max(len(tumorList) / 50, 3)
     print " --> threshold will be %d " % (tThresh)
 
     mutDict = getMutDictFromMaf(mafFilename, geneList)
