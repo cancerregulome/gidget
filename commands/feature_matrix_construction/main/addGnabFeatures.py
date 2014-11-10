@@ -1005,8 +1005,8 @@ if __name__ == "__main__":
         if (len(sys.argv) == 3):
             inFile = sys.argv[1]
             outFile = sys.argv[2]
-            do_combineGnabCnvr = 1
-            ## do_combineGnabCnvr = 0
+            ## do_combineGnabCnvr = 1
+            do_combineGnabCnvr = 0
             do_pathwayGnab = 0
             do_driverGnab = 0
             driverList = ["TP53", "KRAS", "PIK3CA", "PTEN"]
