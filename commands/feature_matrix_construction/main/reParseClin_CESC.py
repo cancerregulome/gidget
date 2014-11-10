@@ -561,6 +561,9 @@ if __name__ == "__main__":
     allClinDict = tsvIO.readTSV ( clin1name )
 
     # find out which features are interesting ...
+
+    # BUT IS THIS REALLY COMPLETELY NOT NECESSARY ??? 
+    # was this just for debugging purposes ???
     fList = getFeatList ( featureList )
 
     for aF in fList:
@@ -609,9 +612,9 @@ if __name__ == "__main__":
         print " checkTumorStatus function failed "
 
     try:
-        allClinDict = checkHistologicalGrade ( allClinDict )
+        allClinDict = checkHistologicGrade ( allClinDict )
     except:
-        print " checkHistologicalGrade function failed "
+        print " checkHistologicGrade function failed "
 
     try:
         allClinDict = checkClinicalStage ( allClinDict )
@@ -624,9 +627,9 @@ if __name__ == "__main__":
         print " checkLymphNodes function failed "
 
     try:
-        allClinDict = makeMergeDx ( allClinDict )
+        allClinDict = makeMergedDx ( allClinDict )
     except:
-        print " makeMergeDx function failed "
+        print " makeMergedDx function failed "
 
 
     print " FINISHED creating and modifying CESC features ... "
