@@ -216,7 +216,7 @@ def createOutputFileName ( inFile, rowLabel, aCat ):
     ## sufficiently generic that it might not be very unique/informative
     nameFlag = 0
     uCat = str(aCat).upper()
-    if ( uCat in [ "0", "1", "NO", "YES", "MUT", "WT", "ALIVE", "DEAD", "MALE", "FEMALE" ] ):
+    if ( uCat in [ "0", "1", "NO", "YES", "FALSE", "TRUE", "MUT", "WT", "ALIVE", "DEAD", "MALE", "FEMALE" ] ):
         nameFlag = 1
     if ( len(uCat) == 2 ):
         if ( uCat[0] in [ "T", "N", "M", "C" ] ):
