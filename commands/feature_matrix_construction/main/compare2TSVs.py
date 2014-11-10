@@ -447,6 +447,7 @@ if __name__ == "__main__":
 
         numDiff = 0
         numNotNA = 0
+        numChangeNA = 0
 
         sumDiff = 0.
         sumDiff2 = 0.
@@ -458,12 +459,12 @@ if __name__ == "__main__":
             sampleA = dataA['colLabels'][jA]
             ## print jA, sampleA, dataVecA[jA]
 
+            flag_AisNA = 0
             if (str(dataVecA[jA]) == "NA" or str(dataVecA[jA]) == "-999999"):
                 ## print " (NA) "
-                continue
+                flag_AisNA = 1
 
             else:
-                numNotNA += 1
 
                 jB = findIndex(dataB['colLabels'], sampleA)
                 if (jB < 0):
@@ -478,25 +479,42 @@ if __name__ == "__main__":
                     ## print jA, jB
                     ## print dataVecA[jA], dataVecB[jB]
 
+                    flag_BisNA = 0
                     if (str(dataVecB[jB]) == "NA" or str(dataVecB[jB]) == "-999999"):
+                        flag_BisNA = 1
+
+                    if ( flag_AisNA and flag_BisNA ):
+                        ## if both of them are NA, then there is nothing to do ...
                         doNothing = 1
 
-                    elif (str(dataVecA[jA]).lower() != str(dataVecB[jB]).lower()):
-                        ## print " values are different for sample <%s> : <%s> # vs <%s> " % ( sampleA, str(dataVecA[jA]), str(dataVecB[jB]) )
-                        numDiff += 1
-                        try:
-                            diffVal = float (dataVecA[jA] ) - \
-                                float(dataVecB[jB])
-                            if (abs(diffVal) > 99999):
-                                print " ERROR ??? using NA value ??? !!! ", jA, dataVecA[jA], jB, dataVecB[jB]
-                            sumDiff += diffVal
-                            sumDiff2 += (diffVal * diffVal)
-                            sumN += 1
-                        except:
-                            doNothing = 1
+                    elif ( flag_AisNA ):
+                        ## if A is NA but B is not ... then something has changed ...
+                        numChangeNA += 1
+                        print " NANA : A is NA but B is not ... ", aLabel, jA, jB, iA, iB, sampleA, dataVecA[jA], dataVecB[jB]
+
+                    elif ( flag_BisNA ):
+                        numChangeNA += 1
+                        print " NANA : B is NA but A is not ... ", aLabel, jA, jB, iA, iB, sampleA, dataVecA[jA], dataVecB[jB]
+                        
+                    else:
+                        numNotNA += 1
+
+                        if (str(dataVecA[jA]).lower() != str(dataVecB[jB]).lower()):
+                            ## print " values are different for sample <%s> : <%s> # vs <%s> " % ( sampleA, str(dataVecA[jA]), str(dataVecB[jB]) )
+                            numDiff += 1
+                            try:
+                                diffVal = float (dataVecA[jA] ) - \
+                                    float(dataVecB[jB])
+                                if (abs(diffVal) > 99999):
+                                    print " ERROR ??? using NA value ??? !!! ", jA, dataVecA[jA], jB, dataVecB[jB]
+                                sumDiff += diffVal
+                                sumDiff2 += (diffVal * diffVal)
+                                sumN += 1
+                            except:
+                                doNothing = 1
 
         if (numDiff == 0):
-            print " all %4d non-NA values are the same <%s> (%d) " % (numNotNA, aLabel, len(dataVecA))
+            print " all %4d non-NA values are the same <%s> (%d) {%d} " % (numNotNA, aLabel, len(dataVecA), numChangeNA)
         else:
             if (sumN > 3):
                 meanDiff = float(sumDiff) / float(sumN)
@@ -504,15 +522,15 @@ if __name__ == "__main__":
                 sigmDiff = math.sqrt(
                     max((meanDiff2 - (meanDiff * meanDiff)), 0.))
                 if (abs(meanDiff) > 0.02 or sigmDiff > 0.02):
-                    print " %4d out of %4d non-NA values are different <%s> (%d) [%d,%.2f,%.2f] " % \
+                    print " %4d out of %4d non-NA values are different <%s> (%d) {%d} [%d,%.2f,%.2f] " % \
                         (numDiff, numNotNA, aLabel,
-                         len(dataVecA), sumN, meanDiff, sigmDiff)
+                         len(dataVecA), numChangeNA, sumN, meanDiff, sigmDiff)
                 else:
-                    print " %4d out of %4d non-NA values are different <%s> (%d) -- but not significantly [%d,%.2f,%.2f] " % \
+                    print " %4d out of %4d non-NA values are different <%s> (%d) {%d} -- but not significantly [%d,%.2f,%.2f] " % \
                         (numDiff, numNotNA, aLabel,
-                         len(dataVecA), sumN, meanDiff, sigmDiff)
+                         len(dataVecA), numChangeNA, sumN, meanDiff, sigmDiff)
             else:
-                print " %4d out of %4d non-NA values are different <%s> (%d) " % (numDiff, numNotNA, aLabel, len(dataVecA))
+                print " %4d out of %4d non-NA values are different <%s> (%d) {%d} " % (numDiff, numNotNA, aLabel, len(dataVecA), numChangeNA)
 
 
     print " "
