@@ -135,7 +135,13 @@ class genome_wide_snp_6(technology_type):
     #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
     def _readDatumDetails(self, info, tokens, dataMatrix, sampleIndex):
         aChr = self._unifychr(tokens[1])
-        iStart = int(tokens[2])
+        try:
+            iStart = int(tokens[3])
+        except:
+            try:
+                iStart = int(float(tokens[3]))
+            except Exception as e:
+                raise ValueError("FATAL ERROR: failed to parse segment stop position from <%s> " % tokens[3], e)
         try:
             iStop = int(tokens[3])
         except:
