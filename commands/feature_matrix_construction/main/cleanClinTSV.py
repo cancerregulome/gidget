@@ -863,9 +863,9 @@ def checkFollowupInfo(allClinDict):
                 print bKey, allClinDict[bKey][kk]
                 print cKey, allClinDict[cKey][kk]
                 print dKey, allClinDict[dKey][kk]
-                print " UPDATING vital_status to LIVING ... "
+                print " UPDATING vital_status to Living ... "
                 print " "
-                allClinDict[dKey][kk] = "LIVING"
+                allClinDict[dKey][kk] = "Living"
 
         if (str(allClinDict[dKey][kk]).upper() == "LIVING"):
             if (str(allClinDict[aKey][kk]).upper() == "NA"):
