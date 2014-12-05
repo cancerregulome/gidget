@@ -64,11 +64,11 @@ def similarFeatureExists(newLabel, rowLabels):
                 tstB = "none"
                 tstC = tstTokens[2][i2 + 1:i3]
 
-            if (givenC == tstC):
-                if (labelA == tstA and labelB == tstB):
+            if (givenC.lower() == tstC.lower()):
+                if (labelA.lower() == tstA.lower() and labelB.lower() == tstB.lower()):
                     print newLabel, tstLabel
                     return (1)
-                elif (labelA == tstB and labelB == tstA):
+                elif (labelA.lower() == tstB.lower() and labelB.lower() == tstA.lower()):
                     print newLabel, tstLabel
                     print " AHA !!! found one of these :-) "
                     # sys.exit(-1)
@@ -135,8 +135,14 @@ def addIndicators4oneFeat(aKey, rowLabels, tmpMatrix):
         curVal = tmpVec[iCol]
         if (curVal != "NA" and curVal != NA_VALUE):
             strVal = str(curVal)
-            if (strVal not in uVec):
-                uVec += [str(curVal)]
+
+            if ( 0 ):
+                if (strVal not in uVec): uVec += [str(curVal)]
+            else:
+                uFound = 0
+                for uVal in uVec:
+                    if ( strVal.lower() == uVal.lower() ): uFound = 1
+                if ( not uFound ): uVec += [str(curVal)]
 
     curV = tmpVec
 
