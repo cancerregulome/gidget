@@ -324,17 +324,22 @@ if __name__ == "__main__":
     print " "
     print " building up skipColList ... "
     skipColList = []
+
+    ## first, we loop over the black-lists and check each column
+    ## label to see if it should be added to the skipColList ...
+    numSkip = 0
+    print " "
+    print " FIRST checking black lists ... "
     for iList in range(numLists):
+        bwFlag = listBW[iList]
+        if ( bwFlag != "black" ): continue
 
         sampleList = listDetails[iList]
-        if (len(sampleList) == 0):
-            continue
+        if (len(sampleList) == 0): continue
 
-        bwFlag = listBW[iList]
         lsFlag = listLS[iList]
         print "         examining list #%d (%d,%s,%s) " % ((iList + 1), len(sampleList), bwFlag, lsFlag)
 
-        numSkip = 0
         for iCol in range(numCol):
             # print colLabels[iCol], sampleList[1:5]
             tmpLabel = colLabels[iCol]
@@ -346,18 +351,50 @@ if __name__ == "__main__":
                 print "     <%s> is ALREADY in the skip-list (list #%d) " % (tmpLabel, (iList + 1))
                 continue
 
-            # NEW:
-            if (bwFlag == "black"):
-                if (is_in_list(tmpLabel, sampleList, lsFlag)):
-                    skipColList += [iCol]
-                    numSkip += 1
-
-            else:
-                if (not is_in_list(tmpLabel, sampleList, lsFlag)):
-                    skipColList += [iCol]
-                    numSkip += 1
+            if (is_in_list(tmpLabel, sampleList, lsFlag)):
+                skipColList += [iCol]
+                numSkip += 1
 
         print "         --> %d additional samples to be skipped " % numSkip, listInfo[iList][0], bwFlag, lsFlag
+
+    ## now we're going to loop over the column labels and see if they
+    ## are in any of the white lists ...
+    print " "
+    print " NOW checking white lists ... "
+    for iCol in range(numCol):
+        tmpLabel = colLabels[iCol]
+
+        ## initialize the isWhite flag to TRUE
+        isWhite = 1
+
+        for iList in range(numLists):
+            bwFlag = listBW[iList]
+            if ( bwFlag == "black" ): continue
+
+            sampleList = listDetails[iList]
+            if (len(sampleList) == 0): continue
+
+            ## if we get to here, then we have at least one white list
+            ## so reset the isWhite flag to FALSE
+            isWhite = 0
+
+            lsFlag = listLS[iList]
+            print "         examining list #%d (%d,%s,%s) " % ((iList + 1), len(sampleList), bwFlag, lsFlag)
+
+            if (is_in_list(tmpLabel, sampleList, lsFlag)):
+                isWhite = 1
+
+        ## once we get back to here, if isWhite is FALSE, then add to skipColList
+        if ( iCol in skipColList):
+            print "     <%s> is ALREADY in the skip-list (list #%d) " % (tmpLabel, (iList + 1))
+            continue
+
+        if ( isWhite == 0 ):
+            skipColList += [iCol]
+            numSkip += 1
+
+    print "         --> %d additional samples to be skipped " % numSkip
+
     # print skipColList
 
     print " "
