@@ -855,7 +855,7 @@ def checkFollowupInfo(allClinDict):
 
     # range of days_to_last_known_alive is typically something like [0,3196]
     for kk in range(numClin):
-        if (str(allClinDict[dKey][kk]).upper() == "DECEASED"):
+        if (str(allClinDict[dKey][kk]).upper() == "DEAD"):
             if (str(allClinDict[cKey][kk]).upper() == "NA"):
                 print " ERROR !!! need to know when this person died !!! ", allClinDict[zKey][kk]
                 print kk
@@ -863,11 +863,11 @@ def checkFollowupInfo(allClinDict):
                 print bKey, allClinDict[bKey][kk]
                 print cKey, allClinDict[cKey][kk]
                 print dKey, allClinDict[dKey][kk]
-                print " UPDATING vital_status to Living ... "
+                print " UPDATING vital_status to Alive ... "
                 print " "
-                allClinDict[dKey][kk] = "Living"
+                allClinDict[dKey][kk] = "Alive"
 
-        if (str(allClinDict[dKey][kk]).upper() == "LIVING"):
+        if (str(allClinDict[dKey][kk]).upper() == "ALIVE"):
             if (str(allClinDict[aKey][kk]).upper() == "NA"):
                 if (str(allClinDict[bKey][kk]).upper() == "NA"):
                     print " ERROR !!! no information about follow-up ??? ", allClinDict[zKey][kk]
@@ -1241,20 +1241,14 @@ def checkVitalStatus(allClinDict):
         doChange = 1
         try:
             newStatus = curStatus
-            if (curStatus.upper() == "ALIVE"):
-                newStatus = "Living"
-                numLC += 1
-            if (curStatus.upper() == "DEAD"):
-                newStatus = "Deceased"
-                numDC += 1
 
         except:
             try:
                 if (curStatus == 0):
-                    newStatus = "Living"
+                    newStatus = "Alive"
                     numLC += 1
                 elif (curStatus == 1):
-                    newStatus = "Deceased"
+                    newStatus = "Dead"
                     numDC += 1
             except:
                 doChange = 0
@@ -2468,6 +2462,7 @@ if __name__ == "__main__":
 
     # new as of 16aug13 ... vital_status strings are inconsistent between
     # 'living' or 'alive' or 'deceased' or 'dead' ...
+    #           --> standard should be "Alive" or "Dead"
     if (1):
         allClinDict = checkVitalStatus(allClinDict)
         print " E "
