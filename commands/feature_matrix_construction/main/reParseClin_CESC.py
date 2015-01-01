@@ -485,10 +485,10 @@ def makeMergedDx ( allClinDict ):
         ##       70 NA
 
         ## expected values for Dx_EPC field:
-        ##       99 Squamous_Cell_Carcinoma
-        ##       27 Endocervical_Adenocarcinoma
-        ##        4 Adenosquamous_Carcinoma
-        ##      188 NA
+        ##      4 Adenosquamous
+        ##     27 Endocervical_Adeno
+        ##    123 NA
+        ##     99 Squamous
 
         if ( allClinDict[epcDxKey][ii] != "NA" ): 
             epcReview += [ "TRUE" ]
@@ -499,17 +499,17 @@ def makeMergedDx ( allClinDict ):
             mergeDx += [ allClinDict[epcDxKey][ii] ]
         else:
             if ( allClinDict[histTypeKey][ii] == "Cervical_Squamous_Cell_Carcinoma" ):
-                mergeDx += [ "Squamous_Cell_Carcinoma" ]
+                mergeDx += [ "Squamous" ]
             elif ( allClinDict[histTypeKey][ii] == "Endocervical_Type_of_Adenocarcinoma" ):
-                mergeDx += [ "Endocervical_Adenocarcinoma" ]
+                mergeDx += [ "Endocervical_Adeno" ]
             elif ( allClinDict[histTypeKey][ii] == "Mucinous_Adenocarcinoma_of_Endocervical_Type" ):
-                mergeDx += [ "Endocervical_Adenocarcinoma" ]
+                mergeDx += [ "Endocervical_Adeno" ]
             elif ( allClinDict[histTypeKey][ii] == "Adenosquamous" ):
-                mergeDx += [ "Adenosquamous_Carcinoma" ]
+                mergeDx += [ "Adenosquamous" ]
             elif ( allClinDict[histTypeKey][ii] == "Endometrioid_Adenocarcinoma_of_Endocervix" ):
-                mergeDx += [ "Endocervical_Adenocarcinoma" ]
+                mergeDx += [ "Endocervical_Adeno" ]
             elif ( allClinDict[histTypeKey][ii] == "Endocervical_Adenocarcinoma_of_the_Usual_Type" ):
-                mergeDx += [ "Endocervical_Adenocarcinoma" ]
+                mergeDx += [ "Endocervical_Adeno" ]
             elif ( allClinDict[histTypeKey][ii] == "NA" ):
                 mergeDx += [ "NA" ]
             else:
