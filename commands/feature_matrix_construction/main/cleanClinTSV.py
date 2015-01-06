@@ -1411,10 +1411,11 @@ def removeSpecialChars(oneKey):
                     doNothing = 1
 
         elif (aString not in okExceptions):
-            print " this is weird, no ??? ", aInt, aString
-            print oneKey
-            return ([])
-            sys.exit(-1)
+            if ( 1 ):
+                print " WARNING ... something odd about this feature ... ", aInt, aString
+                print oneKey
+                ## return ([])
+                ## sys.exit(-1)
 
     origUniqList = []
     newUniqList = []
@@ -1659,12 +1660,12 @@ def abbrevCategStrings(allClinDict):
             allClinDict[aKey] = removeSpecialChars(allClinDict[aKey])
 
             # if we get nothing back, then skip ...
-            if (allClinDict[aKey] == []):
+            if (allClinDict[aKey] == []): 
+                print " WARNING ... got nothing back ??? ", aKey
                 continue
 
             # otherwise, look at cardinality, type, etc ...
-            (keyType, nCount, nNA, nCard, labelList,
-             labelCount) = miscClin.lookAtKey(allClinDict[aKey])
+            (keyType, nCount, nNA, nCard, labelList, labelCount) = miscClin.lookAtKey(allClinDict[aKey])
 
             maxLen = 0
             skipFlag = 0
