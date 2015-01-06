@@ -369,19 +369,24 @@ def checkClinicalStage ( allClinDict ):
     return ( allClinDict )
 
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
+# this started out as a function to deal with lymph-node features but then
+# was augmented to handle hysterectomy- and diagnosis-related features ...
 
-def checkLymphNodes ( allClinDict ):
+def checkLymphNodes_HystDx ( allClinDict ):
 
-    print " in checkLymphNodes ... "
+    print " in checkLymphNodes_HystDx ... "
     print " "
 
     newHyst = []
+    newDxM = []
     numLNpos = []
     tfLNpos = []
 
     ## here we have 138 'radical', 6 'simple', and 5 'other'
     hysTypeKey = findKey ( allClinDict, "hysterectomy_performed_type" )
     hysTextKey = findKey ( allClinDict, "hysterectomy_performed_text" )
+    dxMeth1Key = findKey ( allClinDict, "initial_pathologic_diagnosis_method" )
+    dxMeth2Key = findKey ( allClinDict, "init_pathology_dx_method_other" )
 
     barKey = findKey ( allClinDict, "bcr_patient_barcode" )
     LNEcountKey = findKey ( allClinDict, "lymph_node_examined_count" )
@@ -401,6 +406,51 @@ def checkLymphNodes ( allClinDict ):
             newHyst += [ "NO_or_NA" ]
         else:
             newHyst += [ "YES" ]
+
+        ## here we want to figure out what method was used for diagnosis ...
+        newDxM += [ "NA" ]
+        dxMethod = "NA"
+
+        if ( allClinDict[hysTypeKey][ii].lower().find("hysterect") >= 0 ):
+            if ( allClinDict[hysTypeKey][ii].lower().find("radical") >= 0 ):
+                dxMethod = "radical_hysterectomy"
+            elif ( allClinDict[hysTypeKey][ii].lower().find("simple") >= 0 ):
+                dxMethod = "simple_hysterectomy"
+            elif ( allClinDict[hysTypeKey][ii].lower().find("total_abd") >= 0 ):
+                dxMethod = "total_abdominal_hysterectomy"
+        if ( allClinDict[hysTextKey][ii].lower().find("hysterect") >= 0 ):
+            if ( allClinDict[hysTextKey][ii].lower().find("radical") >= 0 ):
+                dxMethod = "radical_hysterectomy"
+            elif ( allClinDict[hysTextKey][ii].lower().find("simple") >= 0 ):
+                dxMethod = "simple_hysterectomy"
+            elif ( allClinDict[hysTextKey][ii].lower().find("total_abd") >= 0 ):
+                dxMethod = "total_abdominal_hysterectomy"
+
+        if ( dxMethod == "NA" ):
+            if ( allClinDict[dxMeth1Key][ii].lower().find("cone") >= 0 ):
+                dxMethod = "cone_biopsy"
+        if ( dxMethod == "NA" ):
+            if ( allClinDict[dxMeth2Key][ii].lower().find("cone") >= 0 ):
+                dxMethod = "cone_biopsy"
+
+        if ( dxMethod == "NA" ):
+            if ( allClinDict[dxMeth1Key][ii].lower().find("biops") >= 0 ):
+                dxMethod = "biopsy"
+        if ( dxMethod == "NA" ):
+            if ( allClinDict[dxMeth2Key][ii].lower().find("biops") >= 0 ):
+                dxMethod = "biopsy"
+
+        if ( dxMethod == "NA" ):
+            if ( allClinDict[hysTypeKey][ii] != "NA" ): dxMethod = "other"
+            if ( allClinDict[hysTextKey][ii] != "NA" ): dxMethod = "other"
+            if ( allClinDict[dxMeth1Key][ii] != "NA" ): dxMethod = "other"
+            if ( allClinDict[dxMeth2Key][ii] != "NA" ): dxMethod = "other"
+            if ( dxMethod == "other" ): print " setting dxMethod to OTHER ", ii, \
+                        allClinDict[hysTypeKey][ii], allClinDict[hysTextKey][ii], \
+                        allClinDict[dxMeth1Key][ii], allClinDict[dxMeth2Key][ii]
+        
+        newDxM[-1] = dxMethod
+
 
         numPos = 0
         if ( allClinDict[LNEposHEkey][ii] != "NA" ):
@@ -432,22 +482,38 @@ def checkLymphNodes ( allClinDict ):
                                      allClinDict[LNEposHEkey][ii], \
                                      allClinDict[LNEposIHCkey][ii]
 
+    print " done working through each patient ... "
+    print len(newHyst), len(newDxM), len(tfLNpos), len(numLNpos)
+    print " "
+
     keyString = "C:CLIN:hysterectomy:::::"
     allClinDict[keyString] = newHyst
+    print " (a) ", keyString, newHyst
+    ( keyType, nCount, naCount, cardCount, labelList, labelCount ) = miscClin.lookAtKey ( allClinDict[keyString] )
+    print " %s  N=%d  NA=%d  not-NA=%d  card=%d " % ( keyType, nCount, naCount, (nCount-naCount), cardCount ), labelCount
+    print labelList
+
+    keyString = "C:CLIN:dx_method:::::"
+    allClinDict[keyString] = newDxM
+    print " (b) ", keyString, newDxM
     ( keyType, nCount, naCount, cardCount, labelList, labelCount ) = miscClin.lookAtKey ( allClinDict[keyString] )
     print " %s  N=%d  NA=%d  not-NA=%d  card=%d " % ( keyType, nCount, naCount, (nCount-naCount), cardCount ), labelCount
     print labelList
 
     keyString = "C:CLIN:LNposTF:::::"
     allClinDict[keyString] = tfLNpos
+    print " (c) ", keyString, tfLNpos
     ( keyType, nCount, naCount, cardCount, labelList, labelCount ) = miscClin.lookAtKey ( allClinDict[keyString] )
     print " %s  N=%d  NA=%d  not-NA=%d  card=%d " % ( keyType, nCount, naCount, (nCount-naCount), cardCount ), labelCount
     print labelList
 
     keyString = "N:CLIN:numLNpos:::::"
     allClinDict[keyString] = numLNpos
+    print " (3) ", keyString, numLNpos
     ( keyType, nCount, naCount, cardCount, labelList, labelCount ) = miscClin.lookAtKey ( allClinDict[keyString] )
     print " %s  N=%d  NA=%d  not-NA=%d  card=%d " % ( keyType, nCount, naCount, (nCount-naCount), cardCount ), labelCount
+
+    print " DONE DONE DONE "
 
     return ( allClinDict )
 
@@ -622,9 +688,9 @@ if __name__ == "__main__":
         print " checkClinicalStage function failed "
 
     try:
-        allClinDict = checkLymphNodes ( allClinDict )
+        allClinDict = checkLymphNodes_HystDx ( allClinDict )
     except:
-        print " checkLymphNodes function failed "
+        print " checkLymphNodes_HystDx function failed "
 
     try:
         allClinDict = makeMergedDx ( allClinDict )
@@ -636,6 +702,7 @@ if __name__ == "__main__":
 
     # now we're ready to re-write this ...
     (naCounts, otherCounts) = miscClin.lookAtClinDict(allClinDict)
+    print "     --> getting bestKeyOrder ... "
     bestKeyOrder = miscClin.getBestKeyOrder(allClinDict, naCounts)
 
     outName = topDir + "/" + "%s.clinical.%s.cesc.tsv" % ( tumorString, dateString )
