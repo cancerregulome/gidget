@@ -355,6 +355,8 @@ if __name__ == "__main__":
         doNothing = 1
 
     # check some basic mutation counts ...
+    print " "
+    print " checking mutation counts for TP53 and TTN ... "
     aType = "B:GNAB"
     if (aType in keyList):
         for iRow in range(numRow):
@@ -374,7 +376,11 @@ if __name__ == "__main__":
                     print " "
 
     # check cardinality of categorical features ...
+    print " "
+    print " checking for high cardinality categorical features ... "
     highCard = 0
+    maxCard = 0
+    maxName = "NA"
     for iRow in range(numRow):
         featName = dataMatrix[0][iRow]
         if (featName.startswith("C:")):
@@ -387,18 +393,24 @@ if __name__ == "__main__":
                 else:
                     if (curVal not in uVec):
                         uVec += [curVal]
+            if ( maxCard < len(uVec) ): 
+                maxCard = len(uVec)
+                maxName = featName
             if (len(uVec) > 25):
-                print " WARNING ... high cardinality feature !!! ", featName, len(uVec), uVec
+                print " WARNING ... VERY high cardinality feature !!! ", featName, len(uVec), uVec
                 print " "
                 highCard = 1
+    print " --> highest cardinality feature found: ", maxCard, maxName
 
-    if (highCard):
-        print " "
-        print " "
-        sys.exit(-1)
+    if ( 0 ):
+        if (highCard):
+            print " "
+            print " "
+            sys.exit(-1)
 
     # sys.exit(-1)
     # get information about data values for each data type ...
+    print " "
     print " now trying to get some information about the actual data values ... "
 
     # nz_byDataType = {}	# number of zeros by data type
@@ -455,15 +467,15 @@ if __name__ == "__main__":
 
     if (not noHist):
         fh = file(histFilename, 'w')
-        fh.write("\n\n")
-        fh.write("Histogram of NA counts by feature: \n\n")
-        for ii in range(maxNA + 1):
-            if (numNAhist[ii] > 0):
-                fh.write(" %4d : %8d \n" % (ii, numNAhist[ii]))
-        fh.write("\n\n")
+        if ( 0 ):
+            fh.write("\n\n")
+            fh.write("Histogram of NA counts by feature: \n\n")
+            for ii in range(maxNA + 1):
+                if (numNAhist[ii] > 0): fh.write(" %4d : %8d \n" % (ii, numNAhist[ii]))
+            fh.write("\n\n")
         for iRow in range(numRow):
             fh.write("%4d  %s \n" % (numNAbyRow[iRow], dataMatrix[0][iRow]))
-        fh.write("\n\n")
+        ## fh.write("\n\n")
         fh.close()
 
     sys.exit(-1)
