@@ -738,12 +738,12 @@ def filterClinDict(allClinDict,
         if (aKey.find("radiationtype") >= 0):
             print " HACK : tossing this key <%s> " % aKey
             continue
-        if (aKey.find("diagnosismethod") >= 0):
-            print " HACK : tossing this key <%s> " % aKey
-            continue
-        if (aKey.find("diagnosis_method") >= 0):
-            print " HACK : tossing this key <%s> " % aKey
-            continue
+        ## if (aKey.find("diagnosismethod") >= 0):
+        ##     print " HACK : tossing this key <%s> " % aKey
+        ##     continue
+        ## if (aKey.find("diagnosis_method") >= 0):
+        ##     print " HACK : tossing this key <%s> " % aKey
+        ##     continue
 
         tmpKey = aKey
         if (len(tmpKey) > 50):
@@ -1742,7 +1742,9 @@ def removeUninformativeKeys(allClinDict):
     # (removed HPV_type_var on 9/29)
     magicKeepStrings = [
         "bcr_patient_barcode", "disease_code",
-        "iCluster_Adeno_k2", "nte_site" ]
+        "iCluster_Adeno_k2", "nte_site", 
+        "initial_pathologic_diagnosis_method",
+        "init_pathology_dx_method_other" ]
 
     print " in removeUninformativeKeys ... "
 
@@ -1904,6 +1906,11 @@ def lookAtKey(clinVec):
                     labelList += [aVal]
                     labelDict[aVal] = 0
                 labelDict[aVal] += 1
+
+    # check that there is something ???
+    if ( (nCount-nNA) == 0 ):
+        keyType = 'NA'
+        return (keyType, nCount, nNA, 0, [], [])
 
     nCard = len(labelList)
     # print allNumeric, nCount, nNA, nCard
