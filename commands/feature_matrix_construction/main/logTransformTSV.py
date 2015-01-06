@@ -95,6 +95,7 @@ if __name__ == "__main__":
             print " "
             print " Usage: %s <input TSV file> <output TSV file> <featType1> [featType2] [featType3] ... "
             print " "
+            print " ERROR -- bad command line arguments "
             sys.exit(-1)
 
     print " "

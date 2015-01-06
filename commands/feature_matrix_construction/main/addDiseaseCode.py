@@ -48,8 +48,11 @@ def updateDiseaseCode(dataD):
                 print " updating disease code from NA to %s " % diseaseCode
             else:
                 if ( dataMatrix[keepRow][iCol] != diseaseCode ):
-                    print " ERROR ??? disease codes do not match ??? !!! ", dataMatrix[keepRow][iCol], diseaseCode
-                    sys.exit(-1)
+                    print " WARNING ??? disease codes do not match ??? !!! ", dataMatrix[keepRow][iCol], diseaseCode
+                    print "         current value in disease_code feature : ", dataMatrix[keepRow][iCol]
+                    print "         based on the barcode to disease map   : ", diseaseCode
+                    print "         leaving as is ... "
+                    ## sys.exit(-1)
             
 
     newD = {}
@@ -128,6 +131,7 @@ if __name__ == "__main__":
             print " "
             print " Usage: %s <input TSV file> <output TSV file> "
             print " "
+            print " ERROR -- bad command line arguments "
             sys.exit(-1)
 
     print " "

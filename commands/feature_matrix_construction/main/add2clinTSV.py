@@ -40,7 +40,6 @@ def fixCode(aCode):
 
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 
-
 def findCode(codeVec, zCode):
 
     aCode = codeVec[0]
@@ -67,12 +66,15 @@ def findCode(codeVec, zCode):
         ## print " %s --> %s " % ( zCode, newCode )
         zCode = newCode
 
+    ##print aCode, codeVec[:5], zCode
+
     for ii in range(len(codeVec)):
+        ## print ii, codeVec[ii], zCode
         if (codeVec[ii].lower() == zCode.lower()):
             ## print " returning %d " % ii
             return (ii)
         if (len(zCode) < len(codeVec[ii])):
-            if (codeVec[ii][:len(zCode).lower()] == zCode.lower()):
+            if (codeVec[ii][:len(zCode)].lower() == zCode.lower()):
                 ## print " returning %d " % ii
                 return (ii)
 
@@ -254,9 +256,13 @@ def mergeClinDict(aDict, bDict):
     # if there are any missing samples in the aDict for which we
     # have information in the bDict, then we want to add them in ...
     print " checking for barcode IDs from bDict in aDict ... ", len(aDict[aKey]), len(bDict[keepKey])
+    # print aKey, aDict[aKey]
+    # print keepKey, bDict[keepKey]
     for ii in range(len(bDict[keepKey])):
         bCode = bDict[keepKey][ii]
+        # print ii, bCode
         jj = findCode(aDict[aKey], bCode)
+        # print jj
         if (jj < 0):
             aDict[aKey] += [fixCode(bCode)]
             print " adding barcode <%s> " % (bCode)
@@ -333,6 +339,7 @@ if __name__ == "__main__":
     if (len(sys.argv) != 4):
         print " Usage : %s <old input TSV> <new input TSV> <output merged TSV> " % sys.argv[0]
         print "         ", sys.argv
+        print " ERROR -- bad command line arguments "
         sys.exit(-1)
 
     tsvName1 = sys.argv[1]

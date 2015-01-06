@@ -22,15 +22,15 @@ date
 echo " wget_maf "
 ./wget_maf.sh
 
-cd $TCGAFMP_ROOT_DIR/shscript
-date
-echo " wget_maf_prot "
-./wget_maf_prot.sh
+### cd $TCGAFMP_ROOT_DIR/shscript
+### date
+### echo " wget_maf_prot "
+### ./wget_maf_prot.sh
 
-cd $TCGAFMP_ROOT_DIR/shscript
-date
-echo " wget_msat_prot "
-./wget_msat_prot.sh
+### cd $TCGAFMP_ROOT_DIR/shscript
+### date
+### echo " wget_msat_prot "
+### ./wget_msat_prot.sh
 
 cd $TCGAFMP_ROOT_DIR/shscript
 date

@@ -22,10 +22,6 @@ tumor=$1
 
 curwd=`pwd`
 
-args=("$@")
-for ((i=0; i<$#; i++))
-    do
-        tumor=${args[$i]}
 
 	cd $TCGAFMP_DATA_DIR/$tumor
 
@@ -106,7 +102,6 @@ for ((i=0; i<$#; i++))
 	cd ..
 	cd ..
 
-    done
 
 echo " "
 echo " fmp03B_gnab_new script is FINISHED !!! "

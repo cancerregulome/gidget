@@ -96,39 +96,23 @@ def lookAtLine(aLine):
 
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 
-
 def findIndex(rowLabels, aLabel):
 
     ## print " in findIndex ... ", aLabel
     ## print rowLabels[:5]
-
-    if ( aLabel[1]==':' and aLabel[6]==':' ):
-        if ( aLabel[2:6].lower()=="clin"  or  aLabel[2:6].lower()=="samp" ):
-            aLabel2 = aLabel[6:].lower()
-        else:
-            aLabel2 = aLabel.lower()
-    else:
-        aLabel2 = aLabel.lower()
+    aLabel2 = aLabel.lower()
 
     for ii in range(len(rowLabels)):
+        rLabel = oneBetterLabel ( rowLabels[ii] ) 
+        rLabel2 = rLabel.lower()
+        ## print "         %4d  comparing <%s> and <%s> " % ( ii, rLabel2, aLabel2 )
+        if ( rLabel2 == aLabel2 ): return (ii)
 
-        rLabel = rowLabels[ii]
-        if ( rLabel[1]==':' and rLabel[6]==':' ):
-            if ( rLabel[2:6].lower()=="clin"  or  rLabel[2:6].lower()=="samp" ):
-                rLabel2 = rLabel[6:].lower()
-            else:
-                rLabel2 = rLabel.lower()
-        else:
-            rLabel2 = rLabel.lower()
-
-        ## print "         comparing <%s> and <%s> " % ( rLabel2, aLabel2 )
-        if ( rLabel2 == aLabel2 ):
-            return (ii)
-
-    if (0):
+    if ( not aLabel.startswith("TCGA-") ):
         print " ??? not found ??? ", aLabel
         print rowLabels[:5]
         print rowLabels[-5:]
+        sys.exit(-1)
     return (-1)
 
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
@@ -146,9 +130,19 @@ def chopOneFeat ( aLabel, labelTokens ):
     if ( aType == "mirn" ):
         return ( labelTokens[0] + ":" + labelTokens[1] + ":" + labelTokens[2] + ":::::" + labelTokens[7] )
 
+    ## some of the gene-level CNVR features that we got from the Broad
+    ## could not get annotated for whatever reason, and so they 
+    ## do not have position information and need to rely on the gene symbol
+    ## eg:         N:CNVR:ARPM1:::::Gistic
+    ## instead of  N:CNVR:AATK:chr17:79091095:79139877:-:Gistic
+    ##             0 1    2    3     4        5        6 7
+    ## if there is no position information for a CNVR feature, then keep the whole label
     if ( aType == "cnvr" ):
-        return ( labelTokens[0] + ":" + labelTokens[1] + "::" + labelTokens[3] + ":" \
-               + labelTokens[4] + ":" + labelTokens[5] + "::" + labelTokens[7] )
+        if ( labelTokens[3] == '' ):
+            return ( aLabel )
+        else:
+            return ( labelTokens[0] + ":" + labelTokens[1] + "::" + labelTokens[3] + ":" \
+                   + labelTokens[4] + ":" + labelTokens[5] + "::" + labelTokens[7] )
 
     if ( aType == "meth" ):
         try:
@@ -172,10 +166,100 @@ def chopOneFeat ( aLabel, labelTokens ):
 
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 
+def oneBetterLabel ( oldLabel ):
+
+    if ( 1 ):
+        aLabel = oldLabel.lower()
+        aTokens = aLabel.split(':')
+        if ( len(aTokens) > 3 ):
+            if ( 1 ):
+                newLabel = chopOneFeat ( aLabel, aTokens ) 
+                ## print " from this label <%s> to this: <%s> " % ( aLabel, newLabel )
+            else:
+                if ( aTokens[1]=="clin"  or  aTokens[1]=="samp" ):
+                    newLabel = aLabel[6:]
+                    ## print " from this label <%s> to this: <%s> " % ( aLabel, newLabel )
+                else:
+                    ## print " (a) not changing this label <%s> " % ( aLabel )
+                    newLabel = aLabel
+        else:
+            ## print " (b) not changing this label <%s> " % ( aLabel )
+            newLabel = aLabel
+
+    return ( newLabel )
+
+# -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
+
+def makeBetterLabels ( originalLabels ):
+
+    betterLabels = []
+    for aLabel in originalLabels:
+        betterLabels += [ oneBetterLabel ( aLabel ) ]
+    betterLabels.sort()
+
+    return ( betterLabels )
+
+# -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
+
+def fixBarcodes ( colLabelsA, colLabelsB ):
+
+    ## what are the lengths of the barcodes ?
+    aLen = len(colLabelsA[0])
+    bLen = len(colLabelsB[0])
+
+    ## make sure that they are consistent
+    aConsistent = 1
+    for ii in range(len(colLabelsA)):
+        if ( len(colLabelsA[ii]) != aLen ):
+            aConsistent = 0
+
+    bConsistent = 1
+    for ii in range(len(colLabelsB)):
+        if ( len(colLabelsB[ii]) != bLen ):
+            bConsistent = 0
+
+    ## if they are not consistent, then bail ...
+    if ( (aConsistent + bConsistent) != 2 ): return ( colLabelsA, colLabelsB )
+
+    ## if they are consistent, then make them comparable if necessary
+    if ( aLen == bLen ): return ( colLabelsA, colLabelsB )
+
+    ## TCGA-BI-A0VS-01
+    ## 012345678901234
+    changeA = 0
+    changeB = 0
+    new_aLen = aLen
+    new_bLen = bLen
+
+    if ( aLen > bLen ):
+        if ( bLen >= 15 ): 
+            changeA = 1
+            new_aLen = bLen
+
+    if ( bLen > aLen ):
+        if ( aLen >= 15 ): 
+            changeB = 1
+            new_bLen = aLen
+
+    print " change flags : ", changeA, changeB, aLen, bLen, new_aLen, new_bLen
+
+    if ( changeA ):
+        for ii in range(len(colLabelsA)):
+            colLabelsA[ii] = colLabelsA[ii][:new_aLen]
+
+    if ( changeB ):
+        for ii in range(len(colLabelsB)):
+            colLabelsB[ii] = colLabelsB[ii][:new_aLen]
+
+    return ( colLabelsA, colLabelsB )
+
+# -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
+
 if __name__ == "__main__":
 
     if (len(sys.argv) != 3):
         print ' Usage : %s <input TSV #1> <input TSV #2> ' % sys.argv[0]
+        print " ERROR -- bad command line arguments "
         sys.exit(-1)
 
     inFileA = sys.argv[1]
@@ -211,48 +295,18 @@ if __name__ == "__main__":
         print " input file B does not exist ??? "
         sys.exit(-1)
 
-    # new approach to comparing feature names ... chop out certain
-    # non-critical portions of the feature to allow for less
-    # stringent matching ...
-    chopFeat = 1
-
     # first take a look at the feature (row) labels ...
+    rowLabelsA = makeBetterLabels ( dataA['rowLabels'] )
+    rowLabelsB = makeBetterLabels ( dataB['rowLabels'] )
 
-    rowLabelsA = []
-    for aLabel in dataA['rowLabels']:
-        aLabel = aLabel.lower()
-        aTokens = aLabel.split(':')
-        if ( len(aTokens) > 3 ):
-            if ( chopFeat ):
-                rowLabelsA += [ chopOneFeat ( aLabel, aTokens ) ]
-            else:
-                if ( aTokens[1]=="clin"  or  aTokens[1]=="samp" ):
-                    rowLabelsA += [ aLabel[6:] ]
-                else:
-                    rowLabelsA += [ aLabel ]
-        else:
-            rowLabelsA += [ aLabel ]
-    rowLabelsA.sort()
+    # and also take a look at the sample (column) labels ...
+    ( dataA['colLabels'], dataB['colLabels'] ) = fixBarcodes ( dataA['colLabels'], dataB['colLabels'] )
 
-    rowLabelsB = []
-    for bLabel in dataB['rowLabels']:
-        bLabel = bLabel.lower()
-        bTokens = bLabel.split(':')
-        if ( len(bTokens) > 3 ):
-            if ( chopFeat ):
-                rowLabelsB += [ chopOneFeat ( bLabel, bTokens ) ]
-            else:
-                if ( bTokens[1]=="clin"  or  bTokens[1]=="samp" ):
-                    rowLabelsB += [ bLabel[6:] ]
-                else:
-                    rowLabelsB += [ bLabel ]
-        else:
-            rowLabelsB += [ bLabel ]
-    rowLabelsB.sort()
-
-    ## print len(rowLabelsA), len(rowLabelsB)
-    ## print rowLabelsA[:5], rowLabelsA[-5:]
-    ## print rowLabelsB[:5], rowLabelsB[-5:]
+    print len(rowLabelsA), len(rowLabelsB)
+    print rowLabelsA[:2], rowLabelsA[-2:]
+    print rowLabelsB[:2], rowLabelsB[-2:]
+    print dataA['colLabels'][:2], dataA['colLabels'][-2:]
+    print dataB['colLabels'][:2], dataB['colLabels'][-2:]
 
     numAinB = 0
     featLabelsAnotB = []
@@ -362,11 +416,12 @@ if __name__ == "__main__":
     print " now checking data values, feature by feature ... "
     print " (based on features in A that are also in B) "
 
-
     ## print rowLabelsA[:5]
     ## print featLabelsAnotB[:5]
 
     for aLabel in rowLabelsA:
+
+        ## print " aLabel = <%s> " % aLabel
 
         # skip this feature if it is in the A-not-B list ...
         if (aLabel in featLabelsAnotB):
@@ -382,13 +437,17 @@ if __name__ == "__main__":
         iB = findIndex(dataB['rowLabels'], aLabel)
         ## print " (a) ", aLabel, iA, iB
 
+
         # grab the data vector from each matrix ...
         dataVecA = dataA['dataMatrix'][iA]
         dataVecB = dataB['dataMatrix'][iB]
-        # print dataVecA, dataVecB
+        ## print " the two data vectors : "
+        ## print dataVecA
+        ## print dataVecB
 
         numDiff = 0
         numNotNA = 0
+        numChangeNA = 0
 
         sumDiff = 0.
         sumDiff2 = 0.
@@ -400,12 +459,12 @@ if __name__ == "__main__":
             sampleA = dataA['colLabels'][jA]
             ## print jA, sampleA, dataVecA[jA]
 
+            flag_AisNA = 0
             if (str(dataVecA[jA]) == "NA" or str(dataVecA[jA]) == "-999999"):
                 ## print " (NA) "
-                continue
+                flag_AisNA = 1
 
             else:
-                numNotNA += 1
 
                 jB = findIndex(dataB['colLabels'], sampleA)
                 if (jB < 0):
@@ -420,27 +479,42 @@ if __name__ == "__main__":
                     ## print jA, jB
                     ## print dataVecA[jA], dataVecB[jB]
 
+                    flag_BisNA = 0
                     if (str(dataVecB[jB]) == "NA" or str(dataVecB[jB]) == "-999999"):
+                        flag_BisNA = 1
+
+                    if ( flag_AisNA and flag_BisNA ):
+                        ## if both of them are NA, then there is nothing to do ...
                         doNothing = 1
 
-                    elif (str(dataVecA[jA]).lower() != str(dataVecB[jB]).lower()):
-                        # print " values are different for sample <%s> : <%s>
-                        # vs <%s> " % ( sampleA, str(dataVecA[jA]),
-                        # str(dataVecB[jB]) )
-                        numDiff += 1
-                        try:
-                            diffVal = float (dataVecA[jA] ) - \
-                                float(dataVecB[jB])
-                            if (abs(diffVal) > 99999):
-                                print " ERROR ??? using NA value ??? !!! ", jA, dataVecA[jA], jB, dataVecB[jB]
-                            sumDiff += diffVal
-                            sumDiff2 += (diffVal * diffVal)
-                            sumN += 1
-                        except:
-                            doNothing = 1
+                    elif ( flag_AisNA ):
+                        ## if A is NA but B is not ... then something has changed ...
+                        numChangeNA += 1
+                        print " NANA : A is NA but B is not ... ", aLabel, jA, jB, iA, iB, sampleA, dataVecA[jA], dataVecB[jB]
+
+                    elif ( flag_BisNA ):
+                        numChangeNA += 1
+                        print " NANA : B is NA but A is not ... ", aLabel, jA, jB, iA, iB, sampleA, dataVecA[jA], dataVecB[jB]
+                        
+                    else:
+                        numNotNA += 1
+
+                        if (str(dataVecA[jA]).lower() != str(dataVecB[jB]).lower()):
+                            ## print " values are different for sample <%s> : <%s> # vs <%s> " % ( sampleA, str(dataVecA[jA]), str(dataVecB[jB]) )
+                            numDiff += 1
+                            try:
+                                diffVal = float (dataVecA[jA] ) - \
+                                    float(dataVecB[jB])
+                                if (abs(diffVal) > 99999):
+                                    print " ERROR ??? using NA value ??? !!! ", jA, dataVecA[jA], jB, dataVecB[jB]
+                                sumDiff += diffVal
+                                sumDiff2 += (diffVal * diffVal)
+                                sumN += 1
+                            except:
+                                doNothing = 1
 
         if (numDiff == 0):
-            print " all %4d non-NA values are the same <%s> (%d) " % (numNotNA, aLabel, len(dataVecA))
+            print " all %4d non-NA values are the same <%s> (%d) {%d} " % (numNotNA, aLabel, len(dataVecA), numChangeNA)
         else:
             if (sumN > 3):
                 meanDiff = float(sumDiff) / float(sumN)
@@ -448,15 +522,15 @@ if __name__ == "__main__":
                 sigmDiff = math.sqrt(
                     max((meanDiff2 - (meanDiff * meanDiff)), 0.))
                 if (abs(meanDiff) > 0.02 or sigmDiff > 0.02):
-                    print " %4d out of %4d non-NA values are different <%s> (%d) [%d,%.2f,%.2f] " % \
+                    print " %4d out of %4d non-NA values are different <%s> (%d) {%d} [%d,%.2f,%.2f] " % \
                         (numDiff, numNotNA, aLabel,
-                         len(dataVecA), sumN, meanDiff, sigmDiff)
+                         len(dataVecA), numChangeNA, sumN, meanDiff, sigmDiff)
                 else:
-                    print " %4d out of %4d non-NA values are different <%s> (%d) -- but not significantly [%d,%.2f,%.2f] " % \
+                    print " %4d out of %4d non-NA values are different <%s> (%d) {%d} -- but not significantly [%d,%.2f,%.2f] " % \
                         (numDiff, numNotNA, aLabel,
-                         len(dataVecA), sumN, meanDiff, sigmDiff)
+                         len(dataVecA), numChangeNA, sumN, meanDiff, sigmDiff)
             else:
-                print " %4d out of %4d non-NA values are different <%s> (%d) " % (numDiff, numNotNA, aLabel, len(dataVecA))
+                print " %4d out of %4d non-NA values are different <%s> (%d) {%d} " % (numDiff, numNotNA, aLabel, len(dataVecA), numChangeNA)
 
 
     print " "

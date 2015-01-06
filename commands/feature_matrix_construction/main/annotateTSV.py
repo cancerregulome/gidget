@@ -778,26 +778,30 @@ def annotateFeatures ( dataD, geneInfoDict, synMapDict, \
     print " "
     print " "
 
-    # before we assign the new row labels, make sure that they
-    # are unique !!
-    numIdent = 0
-    for ii in range(len(newRowLabels)):
-        for jj in range(ii + 1, len(newRowLabels)):
-            if (newRowLabels[ii] == newRowLabels[jj]):
-                print " WARNING !!! identical labels ??? tacking on dup "
-                print ii, newRowLabels[ii]
-                print jj, newRowLabels[jj]
-                if (newRowLabels[jj][-1] == ":"):
-                    newRowLabels[jj] += "dup"
-                else:
-                    newRowLabels[jj] += "_dup"
-                print "     --> ", jj, newRowLabels[jj]
-                numIdent += 1
-    if (0):
-        if (numIdent > 0):
-            sys.exit(-1)
+    if ( 0 ):
+        # before we assign the new row labels, make sure that they
+        # are unique !!
+        numIdent = 0
+        print " checking for label uniqueness ... ", len(newRowLabels)
+        for ii in range(len(newRowLabels)):
+            if ( (ii%10000) == 0 ): print ii, len(newRowLabels)
+            for jj in range(ii + 1, len(newRowLabels)):
+                if (newRowLabels[ii] == newRowLabels[jj]):
+                    print " WARNING !!! identical labels ??? tacking on dup "
+                    print ii, newRowLabels[ii]
+                    print jj, newRowLabels[jj]
+                    if (newRowLabels[jj][-1] == ":"):
+                        newRowLabels[jj] += "dup"
+                    else:
+                        newRowLabels[jj] += "_dup"
+                    print "     --> ", jj, newRowLabels[jj]
+                    numIdent += 1
+        if (0):
+            if (numIdent > 0):
+                sys.exit(-1)
 
     print " "
+    print " OK ... "
     print " "
 
     if (len(newRowLabels) == len(rowLabels)):
@@ -832,6 +836,7 @@ if __name__ == "__main__":
             print " Usage: %s <input TSV file> <hg18 or hg19> <output TSV file> [nameChangeFlag=NO/YES] "
             print "        note that nameChangeFlag will default to NO "
             print " "
+            print " ERROR -- bad command line arguments "
             sys.exit(-1)
             tumorType = 'gbm'
 

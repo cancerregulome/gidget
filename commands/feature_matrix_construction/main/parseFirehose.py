@@ -16,8 +16,13 @@ import sys
 def getDate(dName):
 
     dateString = dName[-10:]
-    iDate = int(dateString[0:4]) * 10000 + \
-        int(dateString[5:7]) * 100 + int(dateString[8:10])
+    try:
+        iDate = int(dateString[0:4]) * 10000 + \
+                int(dateString[5:7]) * 100 + int(dateString[8:10])
+        print " extracting date from <%s> <%s> %d " % ( dName, dateString, iDate )
+    except:
+        print " WARNING ... failed to extract date from <%s> ??? " % dName, dateString
+        iDate = 0
     return (iDate)
 
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
@@ -36,6 +41,7 @@ def getMostRecentDir(topDir, cancerList, awgFlag):
     for d1Name in d1.dirs():
 
         ## print "     looking at directory name <%s> " % d1Name
+        if ( d1Name.endswith("__bkp") ): continue
 
         if (d1Name.find("analyses") >= 0):
             print "         --> adding gen date <%s> " % getDate(d1Name)
@@ -68,7 +74,7 @@ def getMostRecentDir(topDir, cancerList, awgFlag):
             if (len(cancerList) == 1):
                 if (d1Name.find("awg_") >= 0):
                     if (d1Name.find(cancerList[0]) >= 0):
-                        if (d1Name.find(lastDate) >= 0):
+                        if (d1Name.endswith(lastDate)):
                             lastDir = d1Name
     
     else:
@@ -80,7 +86,7 @@ def getMostRecentDir(topDir, cancerList, awgFlag):
         if (lastDir == "NA"):
             for d1Name in d1.dirs():
                 if (d1Name.find("analyses") >= 0):
-                    if (d1Name.find(lastDate) >= 0):
+                    if (d1Name.endswith(lastDate)):
                         lastDir = d1Name
     
     print " using firehose outputs from: ", lastDir
@@ -1523,7 +1529,7 @@ if __name__ == "__main__":
         'acc',  'blca', 'brca', 'cesc', 'cntl', 'coad', 'dlbc', 'esca', 'gbm',
         'hnsc', 'kich', 'kirc', 'kirp', 'laml', 'lcll', 'lgg',  'lihc', 'lnnh',
         'luad', 'lusc', 'ov',   'paad', 'prad', 'read', 'sarc', 'skcm', 'stad',
-        'thca', 'ucec', 'lcml', 'pcpg', 'meso', 'tgct', 'ucs' ]
+        'thca', 'ucec', 'lcml', 'pcpg', 'meso', 'tgct', 'ucs', 'uvm', 'thym' ]
 
     if (1):
         if ( (len(sys.argv)!=3) and (len(sys.argv)!=4) ):
@@ -1531,13 +1537,14 @@ if __name__ == "__main__":
             print " Notes: a single tumor type can be specified, eg brca "
             print "        the public/private option indicates whether an awg-specific "
             print "        firehose run should be used if available "
+            print " ERROR -- bad command line arguments "
             sys.exit(-1)
 
         else:
 
             tumorType = sys.argv[1].lower()
             if (tumorType == "all"):
-                print " this option is no longer allowed "
+                print " FATAL ERROR ... this option is no longer allowed "
                 sys.exit(-1)
             elif (tumorType in cancerDirNames):
                 print " --> processing a single tumor type: ", tumorType
@@ -1555,7 +1562,7 @@ if __name__ == "__main__":
                 awgFlag = "YES"
                 print " --> WILL use awg-specific firehose anlaysese IF available "
             else:
-                print " invalid public/private string ", ppString
+                print " FATAL ERROR ... invalid public/private string ", ppString
                 sys.exit(-1)
 
             if ( len(sys.argv) == 4 ):

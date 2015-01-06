@@ -4,8 +4,14 @@
 : ${TCGAFMP_ROOT_DIR:?" environment variable must be set and non-empty; defines the path to the TCGA FMP scripts directory"}
 source ${TCGAFMP_ROOT_DIR}/../../gidget/util/gidget_util.sh
 
-
-# TODO: addition parameter checking, as below:
+WRONGARGS=1
+if [[ $# != 4 ]] 
+    then
+        echo " Usage   : `basename $0` <curDate> <tumorType> <tsvFile> <featFile>"
+        echo " Example : `basename $0` 05sep14  cesc  cesc.seq.05sep14.TP.tsv  survival.feat.txt"
+        echo " "
+        exit $WRONGARGS
+fi
 
 ## this script should be called with the following parameters:
 ##      date, eg '29jan13'

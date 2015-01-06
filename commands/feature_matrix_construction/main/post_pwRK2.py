@@ -140,6 +140,7 @@ if __name__ == "__main__":
 
     if (len(sys.argv) != 5):
         print " Usage : %s <scratch-dir> <tsv-File> <iOne> <BC_threshold> " % sys.argv[0]
+        print " ERROR -- bad command line arguments "
         sys.exit(-1)
 
     print " "

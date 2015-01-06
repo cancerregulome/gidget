@@ -517,6 +517,7 @@ if __name__ == "__main__":
         print "       as a *.forTSVmerge.tsv file, so you might want to include that "
         print "       suffix in the output-filename on the command line "
         print " "
+        print " ERROR -- bad command line arguments "
         sys.exit(-1)
 
     mafFilename = sys.argv[1]
@@ -535,6 +536,7 @@ if __name__ == "__main__":
     tumorList = getTumorBarcodes(mafFilename)
     print " --> %d tumor samples in MAF file " % (len(tumorList))
     tThresh = max(len(tumorList) / 25, 5)
+    tThresh = max(len(tumorList) / 50, 3)
     print " --> threshold will be %d " % (tThresh)
 
     mutDict = getMutDictFromMaf(mafFilename, geneList)
@@ -587,6 +589,7 @@ if __name__ == "__main__":
     ## now we walk along this cumulative histogram and keep track
     ## of when we have more than maxN hot-points ...
     maxN = 20
+    maxN = 50
     for iCount in range(len(cumHist)):
         jCount = len(cumHist) - 1 - iCount
         if ( cumHist[jCount] < maxN ):

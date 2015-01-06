@@ -620,6 +620,7 @@ if __name__ == "__main__":
     parser.add_argument('--verbosity', '-v',
                         action='store', default=0, type=int)
     parser.add_argument('--tsvFile', '-f', action='store', required=True)
+    parser.add_argument('--outFile', '-o', action='store')
     parser.add_argument('--forRE', '-R', action='store_true')
     parser.add_argument('--forLisa', '-L', action='store_true')
     parser.add_argument('--useBC', '-B', action='store',
@@ -643,6 +644,7 @@ if __name__ == "__main__":
         print "     #11  (same as col #9 but for feature B) "
         print "     #12  genomic distance between features A and B (or 500000000) "
         print " "
+        print " ERROR -- bad command line arguments "
 
     args = parser.parse_args()
     print args
@@ -831,7 +833,7 @@ if __name__ == "__main__":
         sys.exit(-1)
 
     golempwd = "PASSWD_HERE"
-    fhC = file (gidgetConfigVars['TCGAFMP_CLUSTER_SCRATCH'] + "/config", 'r' )
+    fhC = file (gidgetConfigVars['TCGAFMP_CLUSTER_HOME'] + "/GOLEMPW", 'r' )
     aLine = fhC.readline()
     fhC.close()
     aLine = aLine.strip()
@@ -844,7 +846,7 @@ if __name__ == "__main__":
         outName = tmpDir13 + "/%d.pw" % iJob
         listFile = tmpDir13 + "/%d.list" % iJob
 
-        cmdString = "1 ignoreThree.py " + gidgetConfigVars['TCGAFMP_PAIRWISE_ROOT'] + "/pairwise-2.0.0rc4-rel"
+        cmdString = "1 ignoreThree.py " + gidgetConfigVars['TCGAFMP_PAIRWISE_ROOT'] + "/pairwise-2.0.0-current"
         cmdString += " --by-index %s " % listFile
         ## cmdString += " --dry-run "
         cmdString += " --p-value %g " % args.pvalue
@@ -980,9 +982,11 @@ if __name__ == "__main__":
         (status, output) = commands.getstatusoutput(cmdString)
         print status, output
 
-        cmdString = "mv %s/%d.all.pwpv.sort %s.%d.all.pwpv.sort" % (tmpDir13,
-                                                                    iOne, tsvFile[:-4], iOne)
-        print " < %s > " % cmdString
+        if ( args.outFile ):
+            cmdString = "mv %s/%d.all.pwpv.sort %s" % (tmpDir13, iOne, args.outFile)
+        else:
+            cmdString = "mv %s/%d.all.pwpv.sort %s.%d.all.pwpv.sort" % (tmpDir13, iOne, tsvFile[:-4], iOne)
+        print " MOVING OUTPUT FILE < %s > " % cmdString
         (status, output) = commands.getstatusoutput(cmdString)
         print status, output
 

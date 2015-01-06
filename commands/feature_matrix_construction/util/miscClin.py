@@ -738,12 +738,12 @@ def filterClinDict(allClinDict,
         if (aKey.find("radiationtype") >= 0):
             print " HACK : tossing this key <%s> " % aKey
             continue
-        if (aKey.find("diagnosismethod") >= 0):
-            print " HACK : tossing this key <%s> " % aKey
-            continue
-        if (aKey.find("diagnosis_method") >= 0):
-            print " HACK : tossing this key <%s> " % aKey
-            continue
+        ## if (aKey.find("diagnosismethod") >= 0):
+        ##     print " HACK : tossing this key <%s> " % aKey
+        ##     continue
+        ## if (aKey.find("diagnosis_method") >= 0):
+        ##     print " HACK : tossing this key <%s> " % aKey
+        ##     continue
 
         tmpKey = aKey
         if (len(tmpKey) > 50):
@@ -1702,7 +1702,7 @@ def removeConstantKeys(allClinDict):
             print "         removing key %s : only non-NA value is %s " % (aKey, otherValues[0])
             removeFlags[ii] = 1
         elif (len(otherValues) == 0):
-            print "         removing key %s : only NA values !!! "
+            print "         removing key %s : only NA values !!! " % aKey
             removeFlags[ii] = 1
 
     print " "
@@ -1732,17 +1732,19 @@ def removeConstantKeys(allClinDict):
 
 def removeUninformativeKeys(allClinDict):
 
-    magicStrings = [
-        "detection_method", "tissue_source_site", "lab_proc", "_dcc_",
-        "procedure_name", "handbook_edition", "batch_number", "_method",
-        "icd_o_3_site", "ospective_collection"]
-
-    # new list of 'magic' strings with handbook_edition and batch_number
-    # removed (09nov12)
-    magicStrings = [
+    # these strings should be removed no matter what ...
+    magicDeleteStrings = [
         "detection_method", "tissue_source_site", "lab_proc", "_dcc_",
         "procedure_name", "_method", "ospective_collection",
-        "_involvement_site", "_reason", "_family_member_"]
+        "_involvement_site", "_reason", "_family_member_", "patient_id"]
+
+    # and these strings should NOT be removed ...
+    # (removed HPV_type_var on 9/29)
+    magicKeepStrings = [
+        "bcr_patient_barcode", "disease_code",
+        "iCluster_Adeno_k2", "nte_site", 
+        "initial_pathologic_diagnosis_method",
+        "init_pathology_dx_method_other" ]
 
     print " in removeUninformativeKeys ... "
 
@@ -1758,19 +1760,14 @@ def removeUninformativeKeys(allClinDict):
     for ii in range(len(allKeys)):
         aKey = allKeys[ii]
 
-        # a few "magic" keys that we do NOT want to lose!
-        if (aKey.lower().find("bcr_patient_barcode")>=0):
-            continue
-        if (aKey.lower().find("disease_code")>=0):
-            continue
-
-        # 01feb13 : removing "batch_number" from the "magic key" status ...
-        # if ( aKey == "batch_number" ): continue
-
-        if (aKey == "patient_id"):
-            removeFlags[ii] = 1
-            continue
-
+        # if this is one of the magicKeepStrings, then skip over ...
+        doSkip = 0
+        for aString in magicKeepStrings:
+            if ( aKey.lower().find(aString.lower()) >= 0 ): 
+                print " skipping looking at this string : <%s> " % aKey
+                doSkip = 1
+        if ( doSkip ): continue
+        
         otherValues = []
         numNA = 0
         allNumbers = 1
@@ -1801,9 +1798,11 @@ def removeUninformativeKeys(allClinDict):
                 print otherValues
                 removeFlags[ii] = 1
 
-        for aString in magicStrings:
+        # make sure that any string that looks like one of the magicDeleteStrings
+        # gets removed ...
+        for aString in magicDeleteStrings:
             if (not removeFlags[ii]):
-                if (aKey.find(aString) >= 0):
+                if ( aKey.lower().find(aString.lower()) >= 0 ):
                     print "        removing key %s " % aKey
                     removeFlags[ii] = 1
 
@@ -1907,6 +1906,11 @@ def lookAtKey(clinVec):
                     labelList += [aVal]
                     labelDict[aVal] = 0
                 labelDict[aVal] += 1
+
+    # check that there is something ???
+    if ( (nCount-nNA) == 0 ):
+        keyType = 'NA'
+        return (keyType, nCount, nNA, 0, [], [])
 
     nCard = len(labelList)
     # print allNumeric, nCount, nNA, nCard

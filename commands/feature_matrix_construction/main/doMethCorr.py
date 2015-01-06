@@ -88,6 +88,7 @@ if __name__ == "__main__":
     if (1):
         if (len(sys.argv) != 6):
             print " Usage : %s <input tsv file> <output tsv file> <dThresh> <minCount> <corrThresh> " % sys.argv[0]
+            print " ERROR -- bad command line arguments "
             sys.exit(-1)
 
         tsvFile = sys.argv[1]

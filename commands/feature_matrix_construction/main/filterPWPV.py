@@ -177,6 +177,7 @@ if __name__ == "__main__":
 
     if (len(sys.argv) != 2):
         print ' Usage : %s <pwpv results file> ' % sys.argv[0]
+        print " ERROR -- bad command line arguments "
         sys.exit(-1)
 
     pwpvOutFilename = sys.argv[1]

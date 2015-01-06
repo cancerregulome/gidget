@@ -29,7 +29,10 @@ TCGAFMP_DATA_DIR	path to general data directory containing per-tumor-type featur
 TCGAFMP_DCC_REPOSITORIES	path to directory which contains subdirectories such as "dcc-mirror", "dcc-snapshot", "dcc-snapshot-20sep13", "bio_clin", "uuids", "rppa", "scratch", etc; for example: ".../TCGA/repositories"
 
 # firehose data
-TCGAFMP_FIREHOSE_MIRROR	path to local Firehouse mirror; for example: ".../TCGA/firehose"
+TCGAFMP_FIREHOSE_MIRROR	path to local Firehose mirror; for example: ".../TCGA/firehose"
+
+# cluster password should be in this directory in a file called GOLEMPW
+TCGAFMP_CLUSTER_HOME	path to cluster information directory
 
 # scratch space -- one should be local on the computer you typically
 # launch jobs from, and the other should be on a file-server and
@@ -70,3 +73,4 @@ TCGAMAF_SCRIPTS_DIR	(currently same as TCGAMAF_ROOT_DIR)
 
 # should this be specified in another way?
 TCGAMAF_PYTHON_BINARY	TODO
+

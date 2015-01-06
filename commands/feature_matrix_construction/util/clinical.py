@@ -111,7 +111,7 @@ class clinical(technology_type):
             return ( 1 )
 
         try:
-            if ( newString == "deceased"  and  oldString == "living" ):
+            if ( newString == "Dead"  and  oldString == "Alive" ):
                 return ( 1 )
             else:
                 return ( 0 )

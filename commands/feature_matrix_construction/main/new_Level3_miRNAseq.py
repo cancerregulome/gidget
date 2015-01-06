@@ -146,6 +146,7 @@ if __name__ == "__main__":
             print " Usage: %s <outSuffix> <platformID> <tumorType#1> [tumorType#2 ...] [snapshot-name]"
             print " currently supported platforms : ", platformStrings
             print " currently supported tumor types : ", cancerDirNames
+            print " ERROR -- bad command line arguments "
             sys.exit(-1)
 
         else:
