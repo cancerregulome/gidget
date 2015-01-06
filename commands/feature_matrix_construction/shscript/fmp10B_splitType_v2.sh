@@ -73,20 +73,17 @@ echo " *******************"
 
 		echo " "
                 date
-                rm -fr tmpf1.tsv tmpf2.tsv
-
-                echo " adding indicator features ... "
-                python $TCGAFMP_ROOT_DIR/main/addIndicators.py $f tmpf1a.tsv >> final.addI.log
+                rm -fr tmpf?.tsv
 
                 if [ "$ppString" = 'private' ]
                     then
                         echo " adding discrete features ... "
-                        python $TCGAFMP_ROOT_DIR/main/addDiscreteFeat.py tmpf1a.tsv tmpf1.tsv ../$auxName/$tumor.addDiscreteFeat_List.txt >> final.addI.log
+                        python $TCGAFMP_ROOT_DIR/main/addDiscreteFeat.py $f tmpf1.tsv ../$auxName/$tumor.addDiscreteFeat_List.txt >> final.addI.log
                     else
-                        mv tmpf1a.tsv tmpf1.tsv
+                        cp $f tmpf1.tsv
                 fi
 
-                echo " filtering features and samples ... "
+                echo " filtering according to feature black and white lists ... "
                 python $TCGAFMP_ROOT_DIR/main/filterTSVbyFeatList.py \
                             tmpf1.tsv tmpf2.tsv \
                             ../$auxName/$tumor.features.blacklist.loose.tsv  black loose \
@@ -96,16 +93,32 @@ echo " *******************"
                             >> filterFeat.log
 
                 echo " log-transform all GEXP and MIRN features "
-                python $TCGAFMP_ROOT_DIR/main/logTransformTSV.py tmpf2.tsv tmpf2b.tsv GEXP MIRN
+                python $TCGAFMP_ROOT_DIR/main/logTransformTSV.py tmpf2.tsv tmpf3.tsv GEXP MIRN
 
+                echo " filtering according to sample black and white lists ... "
                 python $TCGAFMP_ROOT_DIR/main/filterTSVbySampList.py \
-                            tmpf2b.tsv $k \
+                            tmpf3.tsv tmpf4.tsv \
                             $tumor.blacklist.samples.tsv black loose \
                             ../$auxName/$tumor.blacklist.loose.tsv  black loose \
                             ../$auxName/$tumor.blacklist.strict.tsv black strict \
                             ../$auxName/$tumor.whitelist.loose.tsv  white loose \
                             ../$auxName/$tumor.whitelist.strict.tsv white strict \
                             >> filterFeat.log
+
+                echo " adding indicator features ... "
+                python $TCGAFMP_ROOT_DIR/main/addIndicators.py tmpf4.tsv tmpf5.tsv >> final.addI.log
+
+                echo " filtering AGAIN according to feature black and white lists ... "
+                python $TCGAFMP_ROOT_DIR/main/filterTSVbyFeatList.py \
+                            tmpf5.tsv tmpf6.tsv \
+                            ../$auxName/$tumor.features.blacklist.loose.tsv  black loose \
+                            ../$auxName/$tumor.features.blacklist.strict.tsv black strict \
+                            ../$auxName/$tumor.features.whitelist.loose.tsv  white loose \
+                            ../$auxName/$tumor.features.whitelist.strict.tsv white strict \
+                            >> filterFeat.log
+
+                ## we should end up here with file called $k
+                mv tmpf6.tsv $k
 
                 echo " get summary information on this file ... "
                 echo $k
