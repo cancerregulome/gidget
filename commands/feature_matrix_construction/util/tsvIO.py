@@ -403,13 +403,15 @@ def writeTSV_clinicalFlipNumeric ( allClinDict, bestKeyOrder, outName ):
     for ii in range(1,numKey):
 
         aKey = bestKeyOrder[ii]
+        print "        (a) ", ii, aKey
 
-        if (len(allClinDict[aKey]) != numClin):
+        if (len(allClinDict[aKey]) != numClin): 
+            print "             why don't the number of values match here ??? ", len(allClinDict[aKey]), numClin
             continue
 
         ( keyType, nCount, nNA, nCard, labelList, labelCount ) \
                 = miscClin.lookAtKey ( allClinDict[aKey] )
-        print ii, aKey, keyType, nCount, nNA, nCard, labelList, labelCount
+        print "        (b) ", keyType, nCount, nNA, nCard, labelList, labelCount
 
         if ( aKey == "patient_id" ):
             print " --> FORCING patient_id to be treated as a CATEGORICAL feature "
