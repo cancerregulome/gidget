@@ -76,6 +76,6 @@ else
 fi
 
 echo "Running Heterogeneous FMx construction"
-${TCGAFMP_ROOT_DIR}/shscript/${fmxScript} $date $snapshotName $tumorType ${TCGAFMP_ROOT_DIR}/config/${fmxConfig} $ppString
+${TCGAFMP_ROOT_DIR}/shscript/${fmxScript} $date $snapshotName $tumorType $fmxConfig $ppString
 
 #TODO: run pairwise analysis
