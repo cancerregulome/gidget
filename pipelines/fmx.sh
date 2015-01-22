@@ -8,10 +8,10 @@
 
 source ${GIDGET_SOURCE_ROOT}/gidget/util/gidget_util.sh
 
-if [[ $# != 4 && $# != 3 ]]
+if [[ $# != 5 && $# != 4 ]]
     then
-        echo " Usage   : `basename $0` <curDate> <tumorType> <public/private> [snapshotName] "
-        echo " Example : `basename $0` 28oct13 brca private dcc-snapshot-28oct13"
+        echo " Usage   : `basename $0` <curDate> <tumorType> <public/private> <fmxSuffix> [snapshotName] "
+        echo " Example : `basename $0` 28oct13 brca private TB.tsv dcc-snapshot-28oct13 "
         echo " "
         echo " note: snapshotName is optional. If not specified, will use most current snapshot "
         exit 1
@@ -20,10 +20,11 @@ fi
 date=$1
 tumorType=$2
 ppString=$3
+fmxSuffix=$4
 
-if [[ $# == 4 ]]
+if [[ $# == 5 ]]
     then
-        snapshotName=$4
+        snapshotName=$5
     else
         snapshotName="dcc-snapshot"
 fi
@@ -64,6 +65,7 @@ then
     if [[ ( ! -f ${prepped450k} ) || ( ${newestMethylationData} -nt ${prepped450k} ) ]]
     then
         echo "processing 450k data"
+        needRunFmx=true
         ${TCGAFMP_ROOT_DIR}/shscript/prep450k.sh $tumorType $snapshotName
     else
         echo "450k data already processed and up-to-date"
@@ -75,7 +77,18 @@ else
     fmxScript="doAllC_refactor_v2.sh"
 fi
 
-echo "Running Heterogeneous FMx construction"
-${TCGAFMP_ROOT_DIR}/shscript/${fmxScript} $date $snapshotName $tumorType $fmxConfig $ppString
+fmxCheckDate="${TCGAFMP_DATA_DIR}/${tumorType}/${date}/${tumorType}.seq.${date}.summary" # TODO verify that this file is actually guarenteed to be generated with fmx creation
 
-#TODO: run pairwise analysis
+echo $fmxCheckDate
+
+if [[ ( ! -f ${fmxCheckDate} ) || ( ${processedMutationData} -nt ${fmxCheckDate} ) || ( $needRunFmx = true ) ]]
+then
+    echo "Running Heterogeneous FMx construction"
+    ${TCGAFMP_ROOT_DIR}/shscript/${fmxScript} $date $snapshotName $tumorType $fmxConfig $ppString
+    echo "FMx construction completed. Moving on to pairwise processing"
+else
+    echo "Feature Matrix up-to-date. Skipping to pairwise processing"
+fi
+
+#Run pairwise analysis
+${TCGAFMP_ROOT_DIR}/shscript/PairProcess-v2.sh $date $tumorType $fmxSuffix
