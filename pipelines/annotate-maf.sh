@@ -27,6 +27,7 @@ pathToOriginalMAF=$2
 
 echo using tumor code: $tumorType and input file: $pathToOriginalMAF
 
+# TODO:FILE_LAYOUT:WORKING_DIR
 thisDir=`pwd`
 mafDirectory=$thisDir/$tumorType
 
@@ -50,7 +51,7 @@ echo
 echo `date`
 echo annotating MAF
 cd $mafDirectory
-export TCGAMAF_DATA_DIR=`pwd`
+export TCGAMAF_DATA_DIR=`pwd` # TODO:FILE_LAYOUT:WORKING_DIR
 ${TCGAMAF_SCRIPTS_DIR}/bash/updateMAF.sh > updateMAF.log 2>&1
 outputMAF=`ls -1 *.ncm.with_uniprot`
 echo MAF annotated: output maf is $outputMAF!

@@ -26,6 +26,7 @@ pathToAnnotatedMAF=$2
 
 echo using tumor code: $tumorType and input file: $pathToAnnotatedMAF
 
+# TODO:FILE_LAYOUT:WORKING_DIR
 thisDir=`pwd`
 binarizationDirectory=$thisDir/$tumorType
 

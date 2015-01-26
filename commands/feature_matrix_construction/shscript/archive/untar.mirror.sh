@@ -96,7 +96,7 @@ find . -type f -name "*expn_matrix_mimat*" -exec rm -f '{}' \;
 
 echo " "
 echo " running snapshot ... "
-python2.7 /titan/cancerregulome8/TCGA/scripts/dcc-snapshot-2.alt.py $TCGA_DATA_TOP_DIR/repositories/dcc-mirror $TCGA_DATA_TOP_DIR/repositories/dcc-snapshot
+python2.7 /titan/cancerregulome8/TCGA/scripts/dcc-snapshot-2.alt.py $TCGA_DATA_TOP_DIR/repositories/dcc-mirror $TCGA_DATA_TOP_DIR/repositories/dcc-snapshot # TODO:FILE_LAYOUT:EXPLICIT
 
 echo " "
 echo " DONE "
