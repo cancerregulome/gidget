@@ -8,3 +8,4 @@ Tags can be made hierarchical by simply append additional tags to the end, e.g. 
 
 - *FILE_LAYOUT* - Areas where the code takes a dependency on a specific layout of the data files (input or output files). These dependencies should at the very least be documented, but ideally eliminated. 
     - *EXPLICIT* - Areas where the specific file layout of our system is mentioned, either in a comment or a file path string that's in use. These should be removed if unused or refactored to use the env variable paths (or whatever system we end up with to manage the paths.)
+    - *WORKING_DIR* - Code that either puts files or expects files in the current working directory
