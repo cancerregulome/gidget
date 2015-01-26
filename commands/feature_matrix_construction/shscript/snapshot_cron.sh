@@ -1,5 +1,7 @@
 #!/bin/bash
 
+#TODO:FILE_LAYOUT this file appears to be unused, although if it is used then it needs to be refactored to avoid explicit paths
+
 export PATH=${HOME}/bin:${HOME}/bin/${THISARCH}:$PATH
 export PATH=/tools/bin:/titan/cancerregulome9/ITMI_PTB/bin/go/bin:$PATH # TODO:FILE_LAYOUT:EXPLICIT
 export PATH=/package/genome/EMBOSS/EMBOSS-1.13.3/emboss:$PATH
