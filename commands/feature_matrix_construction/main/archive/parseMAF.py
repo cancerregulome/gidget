@@ -294,7 +294,7 @@ def getTumorBarcodes(mafFilename):
 #
 # this program loops over the tumor types in the cancerDirNames list and
 # looks for all available *clinical*.xml files in the current "dcc-snapshot"
-## on /titan/cancerregulome7
+## on /titan/cancerregulome7  TODO:FILE_LAYOUT:EXPLICIT
 #
 # all of the information is bundled into a dictionary called allClinDict
 #
