@@ -12,7 +12,7 @@ This document is for describing the ways in which the gidget code expects or dep
         * _interpro_domains_vaquerizas_nature_2009.txt_ - Is this actually needed?
     
 
-## TCGAFMP_BIOINFORMATICS_REFERENCES
+## $TCGAFMP_BIOINFORMATICS_REFERENCES
 
 * `$TCGAFMP_BIOINFORMATICS_REFERENCES`
     * _ftp.ncbi.nlm.nih.gov/gene/DATA/gene_info/_
@@ -37,7 +37,7 @@ This document is for describing the ways in which the gidget code expects or dep
         * _MDA_antibody_annotation_2014_03_04.txt_
     
 
-## TCGAFMP_CLUSTER_HOME
+## $TCGAFMP_CLUSTER_HOME
 
 * `$TCGAFMP_CLUSTER_HOME`
     * _GOLEMPW/_
@@ -81,6 +81,7 @@ The environment variable `$TCGAFMP_DATA_DIR` points to the directory where you w
         * _name_map.tsv_
     * _\< **TODO** other stuff \>_
         * ...
+
 ## $TCGAFMP_PAIRWISE_ROOT
     
 * `$TCGAFMP_PAIRWISE_ROOT`
@@ -103,10 +104,7 @@ The environment variable `$TCGAFMP_DATA_DIR` points to the directory where you w
     * _uniprot_sprot_human.dat_
     * _uniprot_trembl_human.dat_
     
-    s
 ## $TCGAMAF_TOOLS_DIR
 
 * `$TCGAMAF_TOOLS_DIR`
     * _anotate_variation.pl_
-    
-    
