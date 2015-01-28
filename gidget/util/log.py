@@ -6,10 +6,10 @@ import threading
 import os
 import datetime
 
-LOG_DATE_FORMAT="[%H:%M:%S]"
+LOG_DATE_FORMAT = "%H:%M:%S"
+
 
 class LogPipe(threading.Thread):
-
     def __init__(self, tag, logfile):
         """
         Setup the object with a logger
@@ -35,7 +35,7 @@ class LogPipe(threading.Thread):
         """
         for line in iter(self.pipeReader.readline, ''):
             # TODO
-            self.fdLog.write("%s %s %s\n" % (datetime.now().strftime(LOG_DATE_FORMAT), self.tag, line.strip()))
+            self.fdLog.write("[%s] %s %s\n" % (datetime.now().strftime(LOG_DATE_FORMAT), self.tag, line.strip()))
 
         self.pipeReader.close()
 
@@ -45,7 +45,8 @@ class LogPipe(threading.Thread):
         """
         # TODO
         os.close(self.fdWrite)
-        self.logfile.close()
+        self.join()
+        self.pipeReader.close()
 
     def __enter__(self):
         return self
