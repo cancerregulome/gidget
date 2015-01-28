@@ -92,3 +92,6 @@ fi
 
 #Run pairwise analysis
 ${TCGAFMP_ROOT_DIR}/shscript/PairProcess-v2.sh $date $tumorType $fmxSuffix
+
+
+#TODO edit META file and fill in places like "DESCRIPTION_TEXT_HERE"
