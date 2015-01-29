@@ -9,13 +9,16 @@ import datetime
 LOG_DATE_FORMAT = "%H:%M:%S"
 LOGGER_ENV = "GIDGET_LOG_FILE"
 
+def log(tag, msg):
+    Logger._getOrCreate().log(tag, msg)
+
 class Logger:
     _loggerThisProcess = None
 
     def __init__(self, logFilePath):
         self.fdLog = open(logFilePath, "a")
 
-    def _log(self, tag, msg):
+    def log(self, tag, msg):
         self.fdLog.write("[%s] %s %s\n" % (datetime.now().strftime(LOG_DATE_FORMAT), tag, msg.strip()))
 
     def close(self):
@@ -30,10 +33,6 @@ class Logger:
 
         Logger._loggerThisProcess = Logger(os.getenv(LOGGER_ENV))
         return Logger._loggerThisProcess
-
-    @staticmethod
-    def log(tag, msg):
-        Logger._getOrCreate()
 
     def __enter__(self):
         pass
