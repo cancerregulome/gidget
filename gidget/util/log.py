@@ -50,7 +50,7 @@ class LogPipe(threading.Thread):
         """
         threading.Thread.__init__(self)
         self.daemon = False
-        self.tag = " " + tag
+        self.tag = tag
         self.fdRead, self.fdWrite = os.pipe()
         self.pipeReader = os.fdopen(self.fdRead)
         self.logger = logger
