@@ -7,10 +7,43 @@ import os
 import datetime
 
 LOG_DATE_FORMAT = "%H:%M:%S"
+LOGGER_ENV = "GIDGET_LOG_FILE"
 
+class Logger:
+    _loggerThisProcess = None
+
+    def __init__(self, logFilePath):
+        self.fdLog = open(logFilePath, "a")
+
+    def _log(self, tag, msg):
+        self.fdLog.write("[%s] %s %s\n" % (datetime.now().strftime(LOG_DATE_FORMAT), tag, msg.strip()))
+
+    def close(self):
+        self.fdLog.close()
+
+    @staticmethod
+    def _getOrCreate():
+        if Logger._loggerThisProcess is not None:
+            return Logger._loggerThisProcess
+
+        assert os.getenv(LOGGER_ENV) is not None
+
+        Logger._loggerThisProcess = Logger(os.getenv(LOGGER_ENV))
+        return Logger._loggerThisProcess
+
+    @staticmethod
+    def log(tag, msg):
+        Logger._getOrCreate()
+
+    def __enter__(self):
+        pass
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        if not self.logFile.closed():
+            self.logFile.close()
 
 class LogPipe(threading.Thread):
-    def __init__(self, tag, logfile):
+    def __init__(self, tag, logger):
         """
         Setup the object with a logger
         and start the thread
@@ -20,7 +53,7 @@ class LogPipe(threading.Thread):
         self.tag = " " + tag
         self.fdRead, self.fdWrite = os.pipe()
         self.pipeReader = os.fdopen(self.fdRead)
-        self.fdLog = logfile
+        self.logger = logger
         self.start()
 
     def fileno(self):
@@ -34,8 +67,7 @@ class LogPipe(threading.Thread):
         Run the thread, logging everything.
         """
         for line in iter(self.pipeReader.readline, ''):
-            # TODO
-            self.fdLog.write("[%s] %s %s\n" % (datetime.now().strftime(LOG_DATE_FORMAT), self.tag, line.strip()))
+            self.logger.log(self.tag, line)
 
         self.pipeReader.close()
 
