@@ -5,6 +5,7 @@ __author__ = 'nwilson'
 import threading
 import os
 import datetime
+import sys
 
 LOG_DATE_FORMAT = "%H:%M:%S"
 LOGGER_ENV = "GIDGET_LOG_FILE"
@@ -84,3 +85,12 @@ class LogPipe(threading.Thread):
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.close()
+
+# for use when logging is needed from a shell script or Perl code
+if __name__ == "__main__":
+
+    if len(sys.argv) != 3:
+        sys.stderr.write("Usage: python %s <tag> <message>" % sys.argv[0])
+        exit(1)
+
+    log(sys.argv[1], sys.argv[2])
