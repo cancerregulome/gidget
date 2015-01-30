@@ -9,18 +9,20 @@ source ${GIDGET_SOURCE_ROOT}/gidget/util/gidget_util.sh
 
 #TODO ssh?
 
-if [[ $# != 1 ]]
+if [[ $# != 3 ]]
     then
-        echo " Usage   : `basename $0` <path to META file> "
-        echo " Example : `basename $0` $TCGAFMP_DATA_DIR/thca/08jul13/META/META.thca.TP.pw "
+        echo " Usage   : `basename $0` <path to META file> <comment> <description>"
+        echo " Example : `basename $0` $TCGAFMP_DATA_DIR/thca/08jul13/META/META.thca.TP.pw \"A dataset\" \"This is some data\""
         echo " "
         echo " note: snapshotName is optional. If not specified, will use most current snapshot "
         exit 1
 fi
 
 metaFile=$1
+comment=$2
+description=$3
 
-#TODO insert data into meta_file
+sed -e "s/COMMENT_TEXT_HERE/$comment/" -e "s/DESCRIPTION_TEXT_HERE/$description/" -e "s/DATA_SET_DATE_HERE/`date +%d-%b-%Y`/"
 
 cd /titan/cancerregulome10/regulome-explorer/src/dataimport/python
 
