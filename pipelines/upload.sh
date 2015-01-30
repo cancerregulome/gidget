@@ -22,9 +22,16 @@ metaFile=$1
 comment=$2
 description=$3
 
-sed -e "s/COMMENT_TEXT_HERE/$comment/" -e "s/DESCRIPTION_TEXT_HERE/$description/" -e "s/DATA_SET_DATE_HERE/`date +%d-%b-%Y`/" ${metaFile}
+tmp=`mktemp`
+
+sed -e "s/COMMENT_TEXT_HERE/$comment/" \
+    -e "s/DESCRIPTION_TEXT_HERE/$description/" \
+    -e "s/DATA_SET_DATE_HERE/`date +%d-%b-%Y`/" \
+    ${metaFile} > ${tmp}
 
 cd /titan/cancerregulome10/regulome-explorer/src/dataimport/python
 
-/tools/bin/python2.7 start_re_dataimport_fixed.py ${metaFile}  ../config/rfex_sql_breve.config
+/tools/bin/python2.7 start_re_dataimport_fixed.py ${tmp}  ../config/rfex_sql_breve.config
+
+rm ${tmp}
 
