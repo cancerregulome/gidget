@@ -1676,7 +1676,8 @@ def removeConstantKeys(allClinDict):
     magicStrings = [
         "disease_code", "gender", "days_to_initial", "days_to_death", "icd_",
         "sampleType", "tumor_type", "cnvr_lvl3_qc", "pretreatment_history",
-        "year_of_dcc_upload", "tumor_tissue_site", "histolog", "diagnosis", "country"]
+        "year_of_dcc_upload", "tumor_tissue_site", "histolog", "diagnosis", 
+        "country", "_data" ]
 
     print " "
     print " now looking for constant (single-value) keys : "
@@ -1735,7 +1736,7 @@ def removeUninformativeKeys(allClinDict):
     # these strings should be removed no matter what ...
     magicDeleteStrings = [
         "detection_method", "tissue_source_site", "lab_proc", "_dcc_",
-        "procedure_name", "_method", "ospective_collection",
+        "procedure_name", "ospective_collection",
         "_involvement_site", "_reason", "_family_member_", "patient_id"]
 
     # and these strings should NOT be removed ...
