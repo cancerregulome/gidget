@@ -808,6 +808,9 @@ def lookAtDataD ( dataD ):
         print " no data to look at ??? "
         return ( )
 
+    if ( len(dataD['rowLabels']) == 0 ): return ( )
+    if ( len(dataD['colLabels']) == 0 ): return ( )
+
     if ( len(dataD['rowLabels']) < 8 ):
         print "         >>>>", dataD['rowLabels']
     else:
