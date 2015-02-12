@@ -530,10 +530,12 @@ def addFollowupInfo(allClinDict):
         numNotNA = 0
         for kk in range(numClin):
 
+            ## if we have a 'days_to_death' field and it is not NA, then set 'days_to_last_known_alive' to that value
             if (haveC):
                 if (str(allClinDict[cKey][kk]).upper() != "NA"):
                     allClinDict[aKey][kk] = allClinDict[cKey][kk]
 
+            ## if we have a 'days_to_last_followup' field and it is not NA, then ...
             if (haveB):
                 if (str(allClinDict[bKey][kk]).upper() != "NA"):
                     if (str(allClinDict[aKey][kk]).upper() == "NA"):
@@ -865,6 +867,7 @@ def checkFollowupInfo(allClinDict):
                 print dKey, allClinDict[dKey][kk]
                 print " UPDATING vital_status to Alive ... "
                 print " "
+                ## because we do not have a days_to_death value, we are going to call this person "Alive"
                 allClinDict[dKey][kk] = "Alive"
 
         if (str(allClinDict[dKey][kk]).upper() == "ALIVE"):
