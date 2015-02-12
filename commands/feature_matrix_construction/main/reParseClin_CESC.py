@@ -145,11 +145,12 @@ def addAgeSplits ( allClinDict ):
 
     for ii in range(numP):
         a = allClinDict[ageKey][ii]
-        for iC in range(numC):
-            if ( a <= youngMax[iC] ):
-                newVecs[iC][ii] = "young"
-            elif ( a > oldMin[iC] ):
-                newVecs[iC][ii] = "old"
+        if ( a != "NA" ):
+            for iC in range(numC):
+                if ( a <= youngMax[iC] ):
+                    newVecs[iC][ii] = "young"
+                elif ( a > oldMin[iC] ):
+                    newVecs[iC][ii] = "old"
 
     for iC in range(numC):
         if ( youngMax[iC] == oldMin[iC] ):
