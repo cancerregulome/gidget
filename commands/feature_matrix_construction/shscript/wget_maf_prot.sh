@@ -8,7 +8,7 @@ source ${TCGAFMP_ROOT_DIR}/../../gidget/util/gidget_util.sh
 # =============================================================================
 
 # outer loop is over center
-for c in bcgsc.ca broad.mit.edu genome.wustl.edu hgsc.bcm.edu ucsc.edu
+for c in bcgsc.ca broad.mit.edu genome.wustl.edu hgsc.bcm.edu ucsc.edu unc.edu
     do
         echo " "
         echo " "
@@ -19,7 +19,7 @@ for c in bcgsc.ca broad.mit.edu genome.wustl.edu hgsc.bcm.edu ucsc.edu
         # next loop is over platform / pipeline
         for p in abi illuminaga_dnaseq_cont illuminaga_dnaseq_cont_automated illuminaga_dnaseq_cont_curated \
                  illuminahiseq_dnaseq_cont illuminahiseq_dnaseq_cont_automated illuminahiseq_dnaseq_cont_curated \
-                 mixed_dnaseq_cont_curated solid_dnaseq
+                 mixed_dnaseq_cont_curated solid_dnaseq mixed_dnaseq_cont_automated
             do
                 echo "     PLATFORM " $p
                 
