@@ -351,7 +351,6 @@ def parseBestClusFiles(lastDir, outDir, zCancer):
 
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 
-
 def parseMutSig_CountsRatesFile(inName, outName):
 
     print " "
@@ -367,7 +366,14 @@ def parseMutSig_CountsRatesFile(inName, outName):
     hdrTokens = hdrLine.split('\t')
     numTokens = len(hdrTokens)
 
-    if ((numTokens != 8) and (numTokens != 10) and (numTokens != 11) and (numTokens != 12) and (numTokens != 13)):
+    ## updating this nasty hack of a function on 09feb2015 ... because there is 
+    ## once again another version of MutSig ...
+    ##          to recap: MutSig1.5 has 10 columns \  and are
+    ##                    MutSig2.0 has 10 columns /  the same
+    ##                    MutSigCV  has 13 columns
+    ##                    MutSig2CV has 22 columns
+
+    if ((numTokens != 10) and (numTokens != 13) and (numTokens !=22) ):
         print " ERROR ??? unexpected number of hdrTokens ??? ", numTokens
         print hdrTokens
         sys.exit(-1)
@@ -376,14 +382,7 @@ def parseMutSig_CountsRatesFile(inName, outName):
 
     # check that the hdrTokens are as we expect ... "
     goodData = 1
-    if (numTokens == 8):
-        if (hdrTokens[1] != "name"):
-            goodData = 0
-        if (hdrTokens[6] != "rate_sil"):
-            goodData = 0
-        if (hdrTokens[7] != "rate_non"):
-            goodData = 0
-    elif (numTokens == 10):
+    if (numTokens == 10):
         if (hdrTokens[2] != "name"):
             goodData = 0
         if (hdrTokens[7] != "rate_dbsnp"):
@@ -392,24 +391,6 @@ def parseMutSig_CountsRatesFile(inName, outName):
             goodData = 0
         if (hdrTokens[9] != "rate_non"):
             goodData = 0
-    elif (numTokens == 11):
-        if (hdrTokens[2] != "name"):
-            goodData = 0
-        if (hdrTokens[8] != "rate_dbsnp"):
-            goodData = 0
-        if (hdrTokens[9] != "rate_sil"):
-            goodData = 0
-        if (hdrTokens[10] != "rate_non"):
-            goodData = 0
-    elif (numTokens == 12):
-        if (hdrTokens[2] != "name"):
-            goodData = 0
-        if (hdrTokens[9] != "rate_dbsnp"):
-            goodData = 0
-        if (hdrTokens[10] != "rate_sil"):
-            goodData = 0
-        if (hdrTokens[11] != "rate_non"):
-            goodData = 0
     elif (numTokens == 13):
         if (hdrTokens[0] != "name"):
             goodData = 0
@@ -417,6 +398,16 @@ def parseMutSig_CountsRatesFile(inName, outName):
             goodData = 0
         if (hdrTokens[12] != "rate_non"):
             goodData = 0
+    elif (numTokens == 22):
+        if (hdrTokens[0] != "name"):
+            goodData = 0
+        if (hdrTokens[13] != "rate_sil"):
+            goodData = 0
+        if (hdrTokens[14] != "rate_non"):
+            goodData = 0
+        if (hdrTokens[15] != "rate_tot"):
+            goodData = 0
+
 
     if (not goodData):
         print " ERROR ??? unexpected hdrTokens ??? ", numTokens
@@ -425,19 +416,13 @@ def parseMutSig_CountsRatesFile(inName, outName):
 
     fhOut = file(outName, 'w')
     print "     writing out <%s> " % outName
-    if (numTokens == 8):
-        fhOut.write(
-            "bcr_patient_barcode\tN:SAMP:MutSig_rateSil_perMb:::::\tN:SAMP:MutSig_rateNon_perMb:::::\tN:SAMP:MutSig_rateTot_perMb:::::\tB:SAMP:MutSig_HiMut_bit:::::\n")
-    elif (numTokens == 10):
-        fhOut.write(
-            "bcr_patient_barcode\tN:SAMP:MutSig_rateDbSnp_perMb:::::\tN:SAMP:MutSig_rateSil_perMb:::::\tN:SAMP:MutSig_rateNon_perMb:::::\tN:SAMP:MutSig_rateTot_perMb:::::\tB:SAMP:MutSig_HiMut_bit:::::\n")
-    elif (numTokens == 11):
-        fhOut.write(
-            "bcr_patient_barcode\tN:SAMP:MutSig_rateDbSnp_perMb:::::\tN:SAMP:MutSig_rateSil_perMb:::::\tN:SAMP:MutSig_rateNon_perMb:::::\tN:SAMP:MutSig_rateTot_perMb:::::\tB:SAMP:MutSig_HiMut_bit:::::\n")
-    elif (numTokens == 12):
+    if (numTokens == 10):
         fhOut.write(
             "bcr_patient_barcode\tN:SAMP:MutSig_rateDbSnp_perMb:::::\tN:SAMP:MutSig_rateSil_perMb:::::\tN:SAMP:MutSig_rateNon_perMb:::::\tN:SAMP:MutSig_rateTot_perMb:::::\tB:SAMP:MutSig_HiMut_bit:::::\n")
     elif (numTokens == 13):
+        fhOut.write(
+            "bcr_patient_barcode\tN:SAMP:MutSig_rateSil_perMb:::::\tN:SAMP:MutSig_rateNon_perMb:::::\tN:SAMP:MutSig_rateTot_perMb:::::\tB:SAMP:MutSig_HiMut_bit:::::\n")
+    elif (numTokens == 22):
         fhOut.write(
             "bcr_patient_barcode\tN:SAMP:MutSig_rateSil_perMb:::::\tN:SAMP:MutSig_rateNon_perMb:::::\tN:SAMP:MutSig_rateTot_perMb:::::\tB:SAMP:MutSig_HiMut_bit:::::\n")
     else:
@@ -455,15 +440,11 @@ def parseMutSig_CountsRatesFile(inName, outName):
         else:
 
             # they seem to like to change the patient ID here ...
-            if (numTokens == 8):
-                patientID = tokenList[1]
-            elif (numTokens == 10):
-                patientID = tokenList[2]
-            elif (numTokens == 11):
-                patientID = tokenList[2]
-            elif (numTokens == 12):
+            if (numTokens == 10):
                 patientID = tokenList[2]
             elif (numTokens == 13):
+                patientID = tokenList[0]
+            elif (numTokens == 22):
                 patientID = tokenList[0]
 
             print " checking that patient ID looks ok ... ", patientID
@@ -527,28 +508,23 @@ def parseMutSig_CountsRatesFile(inName, outName):
                     print "     --> (f) change to ", patientID
 
             try:
-                if (numTokens == 8):
-                    ## print " WARNING : no dbSNP rate column "
-                    rateDbSnp = 0.
-                    rateSil = float(tokenList[6])
-                    rateNon = float(tokenList[7])
-                elif (numTokens == 10):
+                if (numTokens == 10):
                     rateDbSnp = float(tokenList[7])
                     rateSil = float(tokenList[8])
                     rateNon = float(tokenList[9])
-                elif (numTokens == 11):
-                    rateDbSnp = float(tokenList[8])
-                    rateSil = float(tokenList[9])
-                    rateNon = float(tokenList[10])
-                elif (numTokens == 12):
-                    rateDbSnp = float(tokenList[9])
-                    rateSil = float(tokenList[10])
-                    rateNon = float(tokenList[11])
+                    rateTot = rateDbSnp + rateSil + rateNon
                 elif (numTokens == 13):
                     ## print " WARNING : no dbSNP rate column "
                     rateDbSnp = 0.
                     rateSil = float(tokenList[11])
                     rateNon = float(tokenList[12])
+                    rateTot = rateSil + rateNon
+                elif (numTokens == 22):
+                    ## print " WARNING : no dbSNP rate column "
+                    rateDbSnp = 0.
+                    rateSil = float(tokenList[13])
+                    rateNon = float(tokenList[14])
+                    rateTot = float(tokenList[15])
                 else:
                     print " wrong number of token ??? ", numTokens
                     print tokenList
@@ -561,36 +537,19 @@ def parseMutSig_CountsRatesFile(inName, outName):
             rateDbSnp_perMb = rateDbSnp * 1000000.
             rateSil_perMb = rateSil * 1000000.
             rateNon_perMb = rateNon * 1000000.
+            rateTot_perMb = rateTot * 1000000.
 
-            # 31oct13 : the "total" now includes the dbSNP rate as well (if it
-            # was available)
-            rateTot_perMb = rateSil_perMb + rateNon_perMb + rateDbSnp_perMb
-
-            # this threshold used to be at 10 ...
-            # resetting to 8 for COAD/READ on 07jun
-            rate_bit = int(rateNon_perMb >= 8.)
-
-            # for BRCA/OV analysis, setting it much lower ... 1 per Mb
-            # (should catch about 30% of OV, fewer of BRCA)
-            # --> changed from 2 to 1 on 13Feb2012
-            rate_bit = int(rateNon_perMb >= 1.)
-
+            # this threshold is set somewhat arbitrarily at 10 ...
             # setting it back to 10 ... 25apr13
             rate_bit = int(rateNon_perMb >= 10.)
 
-        if (numTokens == 8):
-            fhOut.write("%s\t%7.3f\t%7.3f\t%7.3f\t%d\n" %
-                        (patientID, rateSil_perMb, rateNon_perMb, rateTot_perMb, rate_bit))
-        elif (numTokens == 10):
-            fhOut.write("%s\t%7.3f\t%7.3f\t%7.3f\t%7.3f\t%d\n" %
-                        (patientID, rateDbSnp_perMb, rateSil_perMb, rateNon_perMb, rateTot_perMb, rate_bit))
-        elif (numTokens == 11):
-            fhOut.write("%s\t%7.3f\t%7.3f\t%7.3f\t%7.3f\t%d\n" %
-                        (patientID, rateDbSnp_perMb, rateSil_perMb, rateNon_perMb, rateTot_perMb, rate_bit))
-        elif (numTokens == 12):
+        if (numTokens == 10):
             fhOut.write("%s\t%7.3f\t%7.3f\t%7.3f\t%7.3f\t%d\n" %
                         (patientID, rateDbSnp_perMb, rateSil_perMb, rateNon_perMb, rateTot_perMb, rate_bit))
         elif (numTokens == 13):
+            fhOut.write("%s\t%7.3f\t%7.3f\t%7.3f\t%d\n" %
+                        (patientID, rateSil_perMb, rateNon_perMb, rateTot_perMb, rate_bit))
+        elif (numTokens == 22):
             fhOut.write("%s\t%7.3f\t%7.3f\t%7.3f\t%d\n" %
                         (patientID, rateSil_perMb, rateNon_perMb, rateTot_perMb, rate_bit))
 
@@ -856,6 +815,8 @@ def parseMutSigFiles(lastDir, outDir, MSverString):
     d2 = path.path(lastDir)
     for d2Name in d2.dirs():
 
+        print "     checking in <%s> " % d2Name
+
         ## if (d2Name.find("Mutation_Significance.Level_4") > 0 or d2Name.find("MutSigNozzleReport1.5.Level_4") > 0):
         if ( d2Name.find(MSverString) >= 0  and  d2Name.find("Level_4") >= 0 ):
 
@@ -867,7 +828,8 @@ def parseMutSigFiles(lastDir, outDir, MSverString):
 
                 # the first file we are interested in is the
                 # patients.counts_and_rates file ...
-                if (fName.endswith("patients.counts_and_rates.txt")):
+                if ( fName.endswith("patients.counts_and_rates.txt") or
+                     fName.endswith("patient_counts_and_rates.txt") ):
                     inName = fName
                     print " >>> got one !!! ", fName
                     numGot += 1
@@ -1478,7 +1440,7 @@ def buildSampleWhiteList(lastDir, outDir):
 
 def getMutSigVersionString ( zCancer, auxName ):
 
-    defaultString = "MutSigNozzleReportCV"
+    defaultString = "MutSigNozzleReport2CV"
 
     try:
         rootString = gidgetConfigVars['TCGAFMP_DATA_DIR']
@@ -1494,7 +1456,7 @@ def getMutSigVersionString ( zCancer, auxName ):
             if ( aLine.startswith("#") ): continue
             if ( aLine.find("MutSig") >= 0 ):
                 MSverString = aLine.strip()
-                print "     --> will look for %s outputs " % defaultString
+                print "     --> will look for %s outputs " % MSverString
     except:
         MSverString = defaultString
         print "     --> defaulting to %s " % defaultString
