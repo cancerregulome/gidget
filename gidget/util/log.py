@@ -4,7 +4,7 @@ __author__ = 'nwilson'
 
 import threading
 import os
-import datetime
+from datetime import datetime
 import sys
 
 LOG_DATE_FORMAT = "%H:%M:%S"
