@@ -11,6 +11,10 @@ import time
 from gidget_util import gidgetConfigVars
 import miscIO
 
+blockDone = 0
+blockList = []
+maxCard = 30
+
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 
 
@@ -61,6 +65,45 @@ def getFeatureIndex(indexString, featureMatrixFile):
 
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 
+def getBlockList(tsvFile):
+
+    global blockDone
+    global blockList
+
+    fh = file(tsvFile)
+    aLine = fh.readline()
+    done = 0
+    ii = 0
+
+    while not done:
+
+        aLine = fh.readline()
+        aLine = aLine.strip()
+
+        if (len(aLine) < 5):
+            done = 1
+
+        else:
+
+            tokenList = aLine.split('\t')
+
+            if ( aLine.startswith("C:") ):
+                uList = []
+                for jj in range(1,len(tokenList)):
+                    if ( tokenList[jj] != "NA" ):
+                        if ( tokenList[jj] not in uList ):
+                            uList += [ tokenList[jj] ]
+                if ( len(uList) > maxCard ): blockList += [ii]
+
+        ii += 1
+
+    fh.close()
+
+    blockDone = 1
+    print " got blockList : ", blockList
+
+
+# -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 
 def getIndexRanges(tsvFile, aType):
 
@@ -79,16 +122,22 @@ def getIndexRanges(tsvFile, aType):
     ii = 0
 
     while not done:
+
         aLine = fh.readline()
         aLine = aLine.strip()
+
         if (len(aLine) < 5):
             done = 1
+
         else:
+
             tokenList = aLine.split('\t')
-            if (aType=="ANY"):
-                iList += [ii]
-            elif (tokenList[0].find(aType) >= 0):
-                iList += [ii]
+
+            if ( ii not in blockList ):
+                if (aType=="ANY"):
+                    iList += [ii]
+                elif (tokenList[0].find(aType) >= 0):
+                    iList += [ii]
         ii += 1
         # if ( ii%10000 == 0 ): print ii, len(tokenList)
 
@@ -449,7 +498,9 @@ def writeFullList ( tmpDir13, args, numFeat, iRanges1, iRanges2 ):
             print " "
 
         for ii in range(numFeat):
+            if ( ii in blockList ): continue
             for jj in range(ii+1,numFeat):
+                if ( jj in blockList ): continue
                 fh.write ( "%d %d\n" % ( ii, jj ) )
                 numPairs += 1
 
@@ -732,6 +783,9 @@ if __name__ == "__main__":
     numSamples = getNumSamples(tsvFile)
     print " --> number of samples  : ", numSamples
 
+    # make sure that we will block high-cardinality features ...
+    getBlockList(tsvFile)
+
     # if we are doing the 'byType' option, we need to figure out which indices
     # are involved ...
     iRanges1 = []
@@ -846,7 +900,7 @@ if __name__ == "__main__":
         outName = tmpDir13 + "/%d.pw" % iJob
         listFile = tmpDir13 + "/%d.list" % iJob
 
-        cmdString = "1 ignoreThree.py " + gidgetConfigVars['TCGAFMP_PAIRWISE_ROOT'] + "/pairwise-2.0.0-current"
+        cmdString = "1 ignoreThree.py " + gidgetConfigVars['TCGAFMP_PAIRWISE_ROOT'] + "/pairwise-2.0.1-current"
         cmdString += " --by-index %s " % listFile
         ## cmdString += " --dry-run "
         cmdString += " --p-value %g " % args.pvalue

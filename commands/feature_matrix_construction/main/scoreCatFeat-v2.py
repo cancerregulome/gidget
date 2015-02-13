@@ -390,6 +390,7 @@ if __name__ == "__main__":
     numSamples = getNumSamples(tsvFile)
     print " --> number of samples  : ", numSamples
 
+    # TODO:FILE_LAYOUT:EXPLICIT
     ## at this point, we can invoke the run-pairwise-v2 script like this:
     ## python ./run-pairwise-v2.py --pvalue 2. --one 24 --forRE \
     ##     --tsvFile /titan/cancerregulome14/TCGAfmp_outputs/ucs/24jun14_27k/ucs.seq.24jun14_27k.TP.tsv 
@@ -456,7 +457,7 @@ if __name__ == "__main__":
         outName = tmpDir + "/%d.pw" % eachI
         listFile = tmpDir + "/%d.list" % eachI
 
-        cmdString = "1 ignoreThree.py " + gidgetConfigVars['TCGAFMP_PAIRWISE_ROOT'] + "/pairwise-2.0.0-current"
+        cmdString = "1 ignoreThree.py " + gidgetConfigVars['TCGAFMP_PAIRWISE_ROOT'] + "/pairwise-2.0.1-current"
         cmdString += " --by-index %s " % listFile
         ## cmdString += " --dry-run "
         cmdString += " --p-value 2. "

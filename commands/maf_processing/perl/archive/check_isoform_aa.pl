@@ -5,7 +5,7 @@ use strict;
 #This script checks ANNOVAR amino acid change annotation against the default isoform amino acid sequence.  
 #The wildtype amino acid in ANNOVAR should match the amino acid in the default isoform.  If not, raise a flag.
 #TODO: configurable path
-open(FILE1, "/titan/cancerregulome9/workspaces/users/liype/maf_protein/output/run6_BRCA/genome.wustl.edu_BRCA.IlluminaGA_DNASeq.Level_2.3.2.0.somatic.maf.ncm.with_uniprot") or die "Error:  cannot read from file\n";
+open(FILE1, "/titan/cancerregulome9/workspaces/users/liype/maf_protein/output/run6_BRCA/genome.wustl.edu_BRCA.IlluminaGA_DNASeq.Level_2.3.2.0.somatic.maf.ncm.with_uniprot") or die "Error:  cannot read from file\n"; # TODO:FILE_LAYOUT:EXPLICIT
 my %annovar_results;
 my %uniprot;
 my $count=1;
@@ -66,7 +66,7 @@ close FILE1;
 
 #TODO: configurable path
 #change file handles to use env variables
-open(FILE2, "/titan/cancerregulome9/workspaces/users/liype/maf_protein/maf/reference/isoform1.sprot") or die "Error:  cannot read from file\n";
+open(FILE2, "/titan/cancerregulome9/workspaces/users/liype/maf_protein/maf/reference/isoform1.sprot") or die "Error:  cannot read from file\n"; # TODO:FILE_LAYOUT:EXPLICIT
 #open(FILE2, "test_isoform1") or die "Error:  cannot read from file\n";
 my %isoform_results;
 $count=1;

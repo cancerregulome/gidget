@@ -134,21 +134,30 @@ class genome_wide_snp_6(technology_type):
 
     #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
     def _readDatumDetails(self, info, tokens, dataMatrix, sampleIndex):
+
+        ## print " in _readDatumDetails ... ", tokens
+
         aChr = self._unifychr(tokens[1])
+        ## print " aChr : ", aChr
         try:
-            iStart = int(tokens[3])
+            iStart = int(tokens[2])
+            ## print " (a) iStart : ", iStart
         except:
             try:
-                iStart = int(float(tokens[3]))
+                iStart = int(float(tokens[2]))
+                ## print " (b) iStart : ", iStart
             except Exception as e:
                 raise ValueError("FATAL ERROR: failed to parse segment stop position from <%s> " % tokens[3], e)
         try:
             iStop = int(tokens[3])
+            ## print " (c) iStop : ", iStop
         except:
             try:
                 iStop = int(float(tokens[3]))
+                ## print " (d) iStop : ", iStop
             except Exception as e:
                 raise ValueError("FATAL ERROR: failed to parse segment stop position from <%s> " % tokens[3], e)
+
         self.chr2data[aChr][sampleIndex][iStart] = (iStop, float(tokens[self.tokenDatumIndex]))
         maxchrcoord = self.chr2maxcoord[aChr]
         steplength = int(self.configuration['steplength'])
