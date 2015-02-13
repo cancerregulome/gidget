@@ -19,6 +19,7 @@ from fnmatch import fnmatch
 from os.path import join as pathjoin
 import csv
 import os
+import sys
 
 from log import Logger, LogPipe, LOGGER_ENV
 
@@ -158,5 +159,17 @@ def _ensureDir(absPath):
 
 if __name__ == "__main__":
     arguments = docopt(__doc__, version='Gidget Run All 0.0')
-    run_all(arguments.get('<maf_manifest>'), arguments.get('--processes') or 4, arguments.get('<output_directory>'))
+
+    mafManifest = arguments.get('<maf_manifest>')
+    outputDir = arguments.get('<output_directory>')
+
+    if not os.path.exists(mafManifest):
+        sys.stderr.write("No manifest file at %s\n" % mafManifest)
+        exit(1)
+
+    if not os.path.exists(outputDir):
+        sys.stderr.write("Output directory at %s does not exist\n" % outputDir)
+        exit(1)
+
+    run_all(mafManifest, arguments.get('--processes') or 4, outputDir)
 
