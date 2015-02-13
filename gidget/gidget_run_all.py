@@ -16,8 +16,11 @@ from threading import Semaphore, Thread
 from subprocess import Popen
 from datetime import datetime
 from fnmatch import fnmatch
+from os.path import join as pathjoin
 import csv
 import os
+
+from log import Logger, LogPipe
 
 # tsv parser settings
 MAF_MANIFEST_DIALECT = "maf_manifest"
@@ -32,42 +35,47 @@ PATH       = 'internal-path'
 
 _processSemaphore = None
 
+
 class PipelineError(Exception):
-    pass
+    pass  # TODO
+
 
 class Pipeline(Thread):
 
     def __init__(self, mafFile, outputDirRoot, tagString, tumorString):
+        super(Pipeline, self).__init__()
+
         self.maf = os.path.expandvars(mafFile)
         self.tumorString = tumorString
 
-        self.outputDir = os.path.join(outputDirRoot, tagString)
+        self.outputDir = pathjoin(outputDirRoot, tagString)
 
         _ensureDir(self.outputDir)
-        tumorDir = os.path.join(self.outputDir, self.tumorString)
+        tumorDir = pathjoin(self.outputDir, self.tumorString)
         _ensureDir(tumorDir)
 
         self.dateString = datetime.now().strftime('%Y_%m_%d')
-        self.dateDir = os.path.join(tumorDir, self.dateString)
+        self.dateDir = pathjoin(tumorDir, self.dateString)
 
         if os.path.exists(self.dateDir):
             self.dateString = datetime.now().strftime('%Y_%m_%d-%H:%M')
-            self.dateDir = os.path.join(tumorDir, self.dateString)
+            self.dateDir = pathjoin(tumorDir, self.dateString)
 
         _ensureDir(self.dateDir)
 
         self.env = os.environ.copy()
         self.env["TCGAFMP_DATA_DIR"] = self.outputDir
 
-        super(Pipeline, self).__init__()
+        # Logging stuff
+        self.pipelinelog = PipelineLog(pathjoin(outputDirRoot, 'LOG'))
 
     def run(self):
         with _processSemaphore:
             self.executeGidgetPipeline('annotate-maf.sh', (self.maf, ))
 
             # this is just where the annotation and binarization scripts put things. Don't ask too many questions...
-            outputdir = os.path.join(self.dateDir, self.tumorString)
-            annotationOutput = os.path.join(outputdir, os.path.basename(self.maf) + '.ncm.with_uniprot')
+            outputdir = pathjoin(self.dateDir, self.tumorString)
+            annotationOutput = pathjoin(outputdir, os.path.basename(self.maf) + '.ncm.with_uniprot')
 
             self.executeGidgetPipeline('binarization.sh', (self.tumorString, annotationOutput))
 
@@ -89,18 +97,45 @@ class Pipeline(Thread):
 
 
     def executeGidgetPipeline(self, pipeline, args):
-        subProc = Popen((os.path.join(os.environ['GIDGET_SOURCE_ROOT'], 'pipelines', pipeline),) + args, cwd=self.dateDir)
+        subProc = Popen((pathjoin(os.environ['GIDGET_SOURCE_ROOT'], 'pipelines', pipeline),) + args,
+                        cwd=self.dateDir,
+                        stdout=self.pipelinelog.logpipeout,
+                        stderr=self.pipelinelog.logpipeerr)
         if subProc.wait() != 0:
             # TODO log error message
             raise PipelineError()  # TODO just exit?
 
+    def close(self):
+        self.pipelinelog.close()
+        self.join()
+
+
+class PipelineLog:
+    def __init__(self, logpath):
+        self.logger = Logger(logpath)
+        self.logpipeout = LogPipe('OUT', self.logger)
+        self.logpipeerr = LogPipe('ERROR', self.logger)
+        self.logpipeout.start()
+        self.logpipeerr.start()
+
+    def close(self):
+        self.logpipeout.close()
+        self.logpipeerr.cloose()
+        self.logger.close()
+
+
 def run_all(pathToMafManifest, numProcesses, outputDir):
     global _processSemaphore
     _processSemaphore = Semaphore(numProcesses)  # TODO there is probably a better way than using a global semaphore. Or is there...?
+    pipes = ()
     with open(pathToMafManifest) as tsv:
         for maf in csv.DictReader(tsv, dialect=MAF_MANIFEST_DIALECT):
             print maf
-            run_one(maf[PATH], outputDir, maf[TAGS], maf[TUMOR_CODE])
+            pipes += (run_one(maf[PATH], outputDir, maf[TAGS], maf[TUMOR_CODE]),)
+
+    # join all
+    for pipe in pipes:
+        pipe.close()
 
 
 def run_one(pathToMaf, outputDir, tags, tumorString):
@@ -117,6 +152,7 @@ def run_one(pathToMaf, outputDir, tags, tumorString):
 def _ensureDir(absPath):
     if not os.path.exists(absPath):
         os.mkdir(absPath)
+
 
 if __name__ == "__main__":
     arguments = docopt(__doc__, version='Gidget Run All 0.0')
