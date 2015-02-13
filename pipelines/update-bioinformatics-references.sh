@@ -29,21 +29,24 @@ echo "create MAF references directory, if necessary"
 mkdir -p $TCGAMAF_REFERENCES_DIR
 echo "-done."
 
+cd $TCGAMAF_REFERENCES_DIR
 echo "updating ANNOVAR reference data"
 $GIDGET_SOURCE_ROOT/gidget/commands/maf_processing/bash/download_monthly_annovar_build_data.sh
 echo "-done."
 
+cd $TCGAMAF_REFERENCES_DIR
 echo "HGNC processing"
 $GIDGET_SOURCE_ROOT/gidget/commands/maf_processing/bash/download_hgnc_symbols.sh
 echo "-done."
 
+cd $TCGAMAF_REFERENCES_DIR
 echo "gene data"
 $GIDGET_SOURCE_ROOT/gidget/commands/maf_processing/bash/download_daily_gene_data.sh
 echo "-done."
 
+cd $TCGAMAF_REFERENCES_DIR
 echo "prepareEntrezGeneUniprotReferences"
 $GIDGET_SOURCE_ROOT/gidget/commands/maf_processing/bash/prepareEntrezGeneUniprotReferences.sh
 echo "-done."
 
-
-
+echo "done with "
