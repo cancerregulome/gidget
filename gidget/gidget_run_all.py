@@ -158,6 +158,5 @@ def _ensureDir(absPath):
 
 if __name__ == "__main__":
     arguments = docopt(__doc__, version='Gidget Run All 0.0')
-    print(arguments)
     run_all(arguments.get('<maf_manifest>'), arguments.get('--processes') or 4, arguments.get('<output_directory>'))
 
