@@ -11,6 +11,8 @@ Options:
 
 """
 
+from gidget_util import gidgetConfigVars
+
 from docopt import docopt
 from threading import Semaphore, Thread
 from subprocess import Popen
@@ -100,7 +102,7 @@ class Pipeline(Thread):
 
 
     def executeGidgetPipeline(self, pipeline, args):
-        subProc = Popen((pathjoin(os.environ['GIDGET_SOURCE_ROOT'], 'pipelines', pipeline),) + args,
+        subProc = Popen((pathjoin(gidgetConfigVars['GIDGET_SOURCE_ROOT'], 'pipelines', pipeline),) + args,
                         cwd=self.dateDir,
                         stdout=self.pipelinelog.logpipeout,
                         stderr=self.pipelinelog.logpipeerr)
