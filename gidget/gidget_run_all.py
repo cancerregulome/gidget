@@ -20,7 +20,7 @@ from os.path import join as pathjoin
 import csv
 import os
 
-from log import Logger, LogPipe
+from log import Logger, LogPipe, LOGGER_ENV
 
 # tsv parser settings
 MAF_MANIFEST_DIALECT = "maf_manifest"
@@ -67,7 +67,9 @@ class Pipeline(Thread):
         self.env["TCGAFMP_DATA_DIR"] = self.outputDir
 
         # Logging stuff
-        self.pipelinelog = PipelineLog(pathjoin(outputDirRoot, 'LOG'))
+        logpath = pathjoin(outputDirRoot, 'LOG')
+        self.pipelinelog = PipelineLog(logpath)
+        self.env[LOGGER_ENV] = logpath
 
     def run(self):
         with _processSemaphore:
