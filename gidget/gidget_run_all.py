@@ -71,7 +71,7 @@ class Pipeline(Thread):
         self.env['WRONGARGS'] = '1'
 
         # Logging stuff
-        logpath = pathjoin(self.dateDir, 'LOG')
+        logpath = pathjoin(self.dateDir, 'LOG.txt')
         self.pipelinelog = PipelineLog(logpath)
         self.env[LOGGER_ENV] = logpath
 
