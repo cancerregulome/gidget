@@ -52,6 +52,7 @@ class LogPipe(threading.Thread):
         """
         logpipe = LogPipe(tag, logger)
         logpipe.start()
+        return logpipe
 
     def __init__(self, tag, logger):
         """
