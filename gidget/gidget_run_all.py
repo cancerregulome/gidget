@@ -77,7 +77,7 @@ class Pipeline(Thread):
 
     def run(self):
         with _processSemaphore:
-            self.executeGidgetPipeline('annotate-maf.sh', (self.maf, ))
+            self.executeGidgetPipeline('annotate-maf.sh', (self.tumorString, self.maf))
 
             # this is just where the annotation and binarization scripts put things. Don't ask too many questions...
             outputdir = pathjoin(self.dateDir, self.tumorString)
