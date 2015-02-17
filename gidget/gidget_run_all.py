@@ -32,7 +32,7 @@ csv.register_dialect(MAF_MANIFEST_DIALECT, delimiter='\t', lineterminator='\n')
 # keys to the maf manifest columns
 DATE       = 'date'
 PERSON     = 'point-person'
-TUMOR_CODE = 'tumor_short_code'
+TUMOR_CODE = 'tumor-short-code'
 TAGS       = 'tags'
 PATH       = 'internal-path'
 
