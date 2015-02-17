@@ -67,7 +67,8 @@ class Pipeline(Thread):
         _ensureDir(self.dateDir)
 
         self.env = os.environ.copy()
-        self.env["TCGAFMP_DATA_DIR"] = self.outputDir
+        self.env['TCGAFMP_DATA_DIR'] = self.outputDir
+        self.env['WRONGARGS'] = '1'
 
         # Logging stuff
         logpath = pathjoin(self.dateDir, 'LOG')
