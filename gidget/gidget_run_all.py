@@ -138,6 +138,7 @@ def run_all(pathToMafManifest, numProcesses, outputDir):
 
     # join all
     for pipe in pipes:
+        pipe.join()
         pipe.close()
 
 
