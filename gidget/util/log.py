@@ -42,11 +42,20 @@ class Logger:
         if not self.logFile.closed():
             self.logFile.close()
 
+
 class LogPipe(threading.Thread):
+
+    @staticmethod
+    def createAndStart(tag, logger):
+        """
+        Creates the pipe and starts the thread
+        """
+        logpipe = LogPipe(tag, logger)
+        logpipe.start()
+
     def __init__(self, tag, logger):
         """
         Setup the object with a logger
-        and start the thread
         """
         threading.Thread.__init__(self)
         self.daemon = False
@@ -54,7 +63,6 @@ class LogPipe(threading.Thread):
         self.fdRead, self.fdWrite = os.pipe()
         self.pipeReader = os.fdopen(self.fdRead)
         self.logger = logger
-        self.start()
 
     def fileno(self):
         """

@@ -118,10 +118,8 @@ class Pipeline(Thread):
 class PipelineLog:
     def __init__(self, logpath):
         self.logger = Logger(logpath)
-        self.logpipeout = LogPipe('OUT', self.logger)
-        self.logpipeerr = LogPipe('ERROR', self.logger)
-        self.logpipeout.start()
-        self.logpipeerr.start()
+        self.logpipeout = LogPipe.createAndStart('OUT', self.logger)
+        self.logpipeerr = LogPipe.createAndStart('ERROR', self.logger)
 
     def close(self):
         self.logpipeout.close()
