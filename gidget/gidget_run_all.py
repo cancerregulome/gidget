@@ -104,6 +104,7 @@ class Pipeline(Thread):
 
     def executeGidgetPipeline(self, pipeline, args):
         subProc = Popen((pathjoin(gidgetConfigVars['GIDGET_SOURCE_ROOT'], 'pipelines', pipeline),) + args,
+                        env=self.env,
                         cwd=self.dateDir,
                         stdout=self.pipelinelog.logpipeout,
                         stderr=self.pipelinelog.logpipeerr)
