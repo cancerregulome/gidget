@@ -123,7 +123,7 @@ class PipelineLog:
 
     def close(self):
         self.logpipeout.close()
-        self.logpipeerr.cloose()
+        self.logpipeerr.close()
         self.logger.close()
 
 
