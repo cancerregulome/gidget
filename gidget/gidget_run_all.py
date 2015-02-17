@@ -61,7 +61,7 @@ class Pipeline(Thread):
         self.dateDir = pathjoin(tumorDir, self.dateString)
 
         if os.path.exists(self.dateDir):
-            self.dateString = datetime.now().strftime('%Y_%m_%d-%H:%M')
+            self.dateString = datetime.now().strftime('%Y_%m_%d-%H%M')
             self.dateDir = pathjoin(tumorDir, self.dateString)
 
         _ensureDir(self.dateDir)
