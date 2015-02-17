@@ -135,7 +135,6 @@ def run_all(pathToMafManifest, numProcesses, outputDir):
     pipes = ()
     with open(pathToMafManifest) as tsv:
         for maf in csv.DictReader(tsv, dialect=MAF_MANIFEST_DIALECT):
-            print maf
             pipes += (run_one(maf[PATH], outputDir, maf[TAGS], maf[TUMOR_CODE]),)
 
     # join all
