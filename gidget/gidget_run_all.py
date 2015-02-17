@@ -70,7 +70,7 @@ class Pipeline(Thread):
         self.env["TCGAFMP_DATA_DIR"] = self.outputDir
 
         # Logging stuff
-        logpath = pathjoin(outputDirRoot, 'LOG')
+        logpath = pathjoin(self.dateDir, 'LOG')
         self.pipelinelog = PipelineLog(logpath)
         self.env[LOGGER_ENV] = logpath
 
