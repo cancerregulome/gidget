@@ -39,8 +39,8 @@ class Logger:
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        if not self.logFile.closed():
-            self.logFile.close()
+        if not self.fdLog.closed():
+            self.fdLog.close()
 
 
 class LogPipe(threading.Thread):
