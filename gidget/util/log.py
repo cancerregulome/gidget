@@ -21,6 +21,7 @@ class Logger:
 
     def log(self, tag, msg):
         self.fdLog.write("[%s] %s %s\n" % (datetime.now().strftime(LOG_DATE_FORMAT), tag, msg.strip()))
+        self.fdLog.flush() # TODO terrible
 
     def close(self):
         self.fdLog.close()
