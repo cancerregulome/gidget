@@ -22,8 +22,9 @@ from os.path import join as pathjoin
 import csv
 import os
 import sys
+from shutil import move
 
-from log import Logger, LogPipe, LOGGER_ENV
+from log import Logger, LogPipe, LOGGER_ENV, log
 
 # tsv parser settings
 MAF_MANIFEST_DIALECT = "maf_manifest"
@@ -51,10 +52,10 @@ class Pipeline(Thread):
         self.maf = os.path.expandvars(mafFile)
         self.tumorString = tumorString
 
-        self.outputDir = pathjoin(outputDirRoot, tagString)
+        self.tagDir = pathjoin(outputDirRoot, tagString)
 
-        _ensureDir(self.outputDir)
-        tumorDir = pathjoin(self.outputDir, self.tumorString)
+        _ensureDir(self.tagDir)
+        tumorDir = pathjoin(self.tagDir, self.tumorString)
         _ensureDir(tumorDir)
 
         self.dateString = datetime.now().strftime('%Y_%m_%d')
@@ -66,8 +67,15 @@ class Pipeline(Thread):
 
         _ensureDir(self.dateDir)
 
+        # HACK: this is needed for the doAllC code
+        _ensureDir(pathjoin(self.dateDir, self.tumorString))
+        _ensureDir(pathjoin(self.dateDir, self.tumorString, self.dateString))
+        _ensureDir(pathjoin(self.dateDir, self.tumorString, 'gnab'))
+        _ensureDir(pathjoin(self.dateDir, self.tumorString, 'scratch'))
+
         self.env = os.environ.copy()
-        self.env['TCGAFMP_DATA_DIR'] = self.outputDir
+        # self.env['TCGAFMP_DATA_DIR'] = self.outputDir
+        self.env['TCGAFMP_DATA_DIR'] = self.dateDir
         self.env['WRONGARGS'] = '1'
 
         # Logging stuff
@@ -77,32 +85,37 @@ class Pipeline(Thread):
 
     def run(self):
         with _processSemaphore:
-            self.executeGidgetPipeline('annotate-maf.sh', (self.tumorString, self.maf))
+            try:
+                self.executeGidgetPipeline('annotate-maf.sh', (self.tumorString, self.maf))
 
-            # this is just where the annotation and binarization scripts put things. Don't ask too many questions...
-            outputdir = pathjoin(self.dateDir, self.tumorString)
-            annotationOutput = pathjoin(outputdir, os.path.basename(self.maf) + '.ncm.with_uniprot')
+                # this is just where the annotation and binarization scripts put things. Don't ask too many questions...
+                outputdir = pathjoin(self.dateDir, self.tumorString)
+                annotationOutput = pathjoin(outputdir, os.path.basename(self.maf) + '.ncm.with_uniprot')
 
-            self.executeGidgetPipeline('binarization.sh', (self.tumorString, annotationOutput))
+                self.executeGidgetPipeline('binarization.sh', (self.tumorString, annotationOutput))
 
-            binarizationOutput = None
-            for outfile in os.listdir(os.curdir):
-                if fnmatch(outfile, 'mut_bin_*.txt'):
-                    binarizationOutput = outfile
-                    break
-            if (binarizationOutput is None):
-                raise PipelineError()  # TODO do something useful
+                binarizationOutput = None
+                for outfile in os.listdir(outputdir):
+                    if fnmatch(outfile, 'mut_bin_*.txt'):
+                        binarizationOutput = pathjoin(outputdir, outfile)
+                        break
+                if (binarizationOutput is None):
+                    raise PipelineError()  # TODO do something useful
 
-            self.executeGidgetPipeline('post_maf.sh', (self.tumorString, binarizationOutput))
+                self.executeGidgetPipeline('post-maf.sh', (self.tumorString, binarizationOutput))
 
-            ppstring = 'private'  # TODO is it always this way?
+                ppstring = 'private'  # TODO is it always this way?
+                fmxsuffix = 'TB.tsv'  # TODO is it always this way?
 
-            self.executeGidgetPipeline('fmx.sh', (self.dateString, self.tumorString, ppstring))
+                self.executeGidgetPipeline('fmx.sh', (self.dateString, self.tumorString, ppstring, fmxsuffix))
+
+            finally:
+                self.cleanupOutputFolder()
 
             # TODO load into re
 
-
     def executeGidgetPipeline(self, pipeline, args):
+        Pipeline._logPipelineStart(pipeline, self.env[LOGGER_ENV], args)
         subProc = Popen((pathjoin(gidgetConfigVars['GIDGET_SOURCE_ROOT'], 'pipelines', pipeline),) + args,
                         env=self.env,
                         cwd=self.dateDir,
@@ -110,11 +123,32 @@ class Pipeline(Thread):
                         stderr=self.pipelinelog.logpipeerr)
         if subProc.wait() != 0:
             # TODO log error message
-            raise PipelineError()  # TODO just exit?
+            raise PipelineError('Pipeline %s exited with non-zero status' % pipeline)  # TODO just exit?
+
+    @staticmethod
+    def _logPipelineStart(pipelineName, logfile, args):
+        log(logfile, 'PIPELINE-START', '%s %s' % (pipelineName, ' '.join(str(arg) for arg in args)))
 
     def close(self):
         self.pipelinelog.close()
         self.join()
+
+    # TODO a better thing would be to modify the scripts to put things in the right place to begin with...
+    def cleanupOutputFolder(self):
+
+        fmxdirNew = pathjoin(self.dateDir, 'fmx')
+        os.mkdir(fmxdirNew)
+        fmxdirOld = pathjoin(self.dateDir, self.tumorString, self.dateString)
+        for outfile in os.listdir(fmxdirOld):
+            move(pathjoin(fmxdirOld, outfile), fmxdirNew)
+
+        os.rmdir(fmxdirOld)
+
+        tumordir = pathjoin(self.dateDir, self.tumorString)
+        for outfile in os.listdir(tumordir):
+            move(pathjoin(tumordir, outfile), self.dateDir)
+
+        os.rmdir(tumordir)
 
 
 class PipelineLog:

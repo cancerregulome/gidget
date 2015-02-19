@@ -13,6 +13,13 @@ LOGGER_ENV = "GIDGET_LOG_FILE"
 def log(tag, msg):
     Logger._getOrCreate().log(tag, msg)
 
+def log(logfile, tag, msg):
+    """
+    Kind of a hack for the run-all script. Use sparingly
+    """
+    with Logger(logfile) as logger:
+        logger.log(tag, msg)
+
 class Logger:
     _loggerThisProcess = None
 
