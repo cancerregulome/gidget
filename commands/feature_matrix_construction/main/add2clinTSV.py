@@ -2,6 +2,7 @@
 
 import arffIO
 import miscClin
+import miscTCGA
 import tsvIO
 
 import sys
@@ -21,6 +22,7 @@ def fixCode(aCode):
             return (newCode)
 
         print " CASEFIXES: is this function used anymore ??? ", aCode
+        print " Feb 2015 ... assuming NOT !!! "
         sys.exit(-1)
 
         newCode[4] = '-'
@@ -222,11 +224,26 @@ def mergeClinDict(aDict, bDict):
             print " "
             print " "
             sys.exit(-1)
+
         if (keepLen < aLen):
             print " --> this may be a problem ... "
-            print "     YES, I THINK THIS HAS TO BE FIXED "
-            sys.exit(-1)
-        print " --> abbreviating longer set of barcodes ... "
+            ## if either keepLen and/or aLen are less than 16,
+            ## then we want to lengthen them both ...
+            if ( keepLen < 16 ):
+                print "     --> changing barcodes in bDict to length 16 ... "
+                for ii in range(len(bDict[keepKey])):
+                    bDict[keepKey][ii] = miscTCGA.get_barcode16 ( bDict[keepKey][ii] )
+                print "         OK done "
+                keepLen = 16
+            if ( aLen < 16 ):
+                print "     --> changing barcodes in aDict to length 16 ... "
+                for ii in range(len(aDict[aKey])):
+                    aDict[aKey][ii] = miscTCGA.get_barcode16 ( aDict[aKey][ii] )
+                print "         OK done "
+                aLen = 16
+
+    if ( keepLen > aLen ):
+        print " --> abbreviating longer barcodes in bDict ... "
         for ii in range(len(bDict[keepKey])):
             # print bDict[keepKey][ii]
             bDict[keepKey][ii] = bDict[keepKey][ii][:aLen]
