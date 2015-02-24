@@ -38,7 +38,7 @@ gidget run prepare-binarized-maf-for-fmx-construction
 
 
 # feature matrix (FMX) construction and merge pipeline
-This pipeline takes an _post-processed, annotated MAF_ (for ex, produced from the MAF annotation and then "prepare MAF"  pipelines) and binarization pipeline, creates a feature matrix, merges in other data types (for ex, methylation from the DCC), runs pairwise, and produces the final FMX tsv files.
+This pipeline takes ouput from the "post-binarization processing in prep for feature matrix construction" pipeline, and creates a feature matrix, merges in other data types (for ex, methylation from the DCC), and produces the final FMX tsv files.
 
 commandline usage:
 ```
