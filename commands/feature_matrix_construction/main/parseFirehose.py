@@ -222,12 +222,18 @@ def parseBestClusFiles(lastDir, outDir, zCancer):
                     done = 0
                     iMax = -999
                     iMin = 999
+
+                    print " reading input file ... "
+
                     while not done:
                         aLine = fhIn.readline()
                         aLine = aLine.strip()
                         tokenList = aLine.split('\t')
+
+                        print " tokenList : ", tokenList
                         if (len(tokenList) != 3):
                             done = 1
+
                         else:
                             # sanity checking that these tokens look correct
                             # ...
@@ -254,28 +260,28 @@ def parseBestClusFiles(lastDir, outDir, zCancer):
                             # 01234567890123456789012345678
                             # TCGA-A6-2678-01A-01D-1549-01
 
-                            if (len(aBarcode) < 15):
-                                if (len(aBarcode) == 12):
-                                    ## aBarcode += "-01"
-                                    aBarcode = miscTCGA.get_tumor_barcode(
-                                        aBarcode)
-                                else:
-                                    print " ERROR ??? barcode doesn't seem right ??? ", aBarcode
-                                    sys.exit(-1)
+                            if (len(aBarcode) < 16):
+                                print " trying to get a good barcode ... ", aBarcode
+                                aBarcode = miscTCGA.get_tumor_barcode(aBarcode)
+                                print " is this one good ??? ", aBarcode
                             else:
-                                if (len(aBarcode) > 15):
-                                    aBarcode = aBarcode[:15]
+                                if (len(aBarcode) > 16):
+                                    aBarcode = aBarcode[:16]
+                                    if ( aBarcode[15] == "-" ):
+                                        aBarcode = miscTCGA.get_tumor_barcode(aBarcode[:15])
+
+                            print " --> aBarcode : ", aBarcode
 
                             if (aBarcode in dataDict.keys()):
                                 if (sVal > dataDict[aBarcode][1]):
                                     dataDict[aBarcode] = (iClus, sVal)
                             else:
+                                print " adding to dataDict ... ", aBarcode, iClus, sVal
                                 dataDict[aBarcode] = (iClus, sVal)
 
-                            if (iMin > iClus):
-                                iMin = iClus
-                            if (iMax < iClus):
-                                iMax = iClus
+                            if (iMin > iClus): iMin = iClus
+                            if (iMax < iClus): iMax = iClus
+
                     fhIn.close()
 
                     # now let's look at all of the clusters and see how they
@@ -284,6 +290,8 @@ def parseBestClusFiles(lastDir, outDir, zCancer):
                         print " ERROR ??? shouldn't there be a cluster #1 ??? ", iMin, iMax
                         sys.exit(-1)
                     numClus = iMax - iMin + 1
+                    print " cluster indices ... ", iMin, iMax, numClus
+                    print " dataDict length = ", len(dataDict)
 
                     sumSV = [0] * numClus
                     numTot = [0] * numClus
@@ -295,12 +303,14 @@ def parseBestClusFiles(lastDir, outDir, zCancer):
 
                         iClus = dataDict[aKey][0]
                         sVal = dataDict[aKey][1]
+                        print " looping over dataDict ... ", aKey, iClus, sVal
                         sumSV[iClus - 1] += sVal
                         numTot[iClus - 1] += 1
                         if (sVal > 0):
                             numPos[iClus - 1] += 1
 
                     for iClus in range(numClus):
+                        print " cluster metrics ... ", iClus, sumSV[iClus], numTot[iClus], numPos[iClus]
                         metric1 = sumSV[iClus] / float(numTot[iClus])
                         metric2 = float(numPos[iClus]) / float(numTot[iClus])
                         cMetric[iClus] = metric1 + metric2 + metric2
@@ -471,18 +481,10 @@ def parseMutSig_CountsRatesFile(inName, outName):
                 patientID = "TCGA" + patientID[i1:]
                 print "     --> (c) change to ", patientID
 
-            if (len(patientID) < 15):
-                if (len(patientID) == 12):
-                    ## patientID += "-01"
-                    patientID = miscTCGA.get_tumor_barcode(patientID)
-                    print "     --> (d) change to ", patientID
-                else:
-                    print " ERROR ??? barcode doesn't seem right ??? ", patientID
-                    sys.exit(-1)
-
             # as of the 24oct12 analyses, the barcodes seem to look like this:
             # 012345678901234
             # BRCA-A1-A0SO-TP
+            print " now here in parseFirehose ... ", patientID
             if (len(patientID) > 12):
                 if (patientID[13:15] == "TP"):
                     patientID = patientID[:13] + "01" + patientID[15:]
@@ -503,9 +505,14 @@ def parseMutSig_CountsRatesFile(inName, outName):
                         print " ERROR in parseFirehose !!! invalid patientID ??? ", patientID
 
                 print "     --> (e) change to ", patientID
-                if ( len(patientID) > 15 ):
-                    patientID = patientID[:15]
+                if ( len(patientID) > 16 ):
+                    patientID = patientID[:16]
                     print "     --> (f) change to ", patientID
+
+            if (len(patientID) < 16):
+                print "     --> looking for a longer barcode ... "
+                patientID = miscTCGA.get_tumor_barcode(patientID)
+                print "     --> (d) change to ", patientID
 
             try:
                 if (numTokens == 10):
@@ -542,6 +549,8 @@ def parseMutSig_CountsRatesFile(inName, outName):
             # this threshold is set somewhat arbitrarily at 10 ...
             # setting it back to 10 ... 25apr13
             rate_bit = int(rateNon_perMb >= 10.)
+
+        print " and ready to write out now ... ", patientID
 
         if (numTokens == 10):
             fhOut.write("%s\t%7.3f\t%7.3f\t%7.3f\t%7.3f\t%d\n" %
@@ -1326,8 +1335,12 @@ def add2sampleList(fName, sampleList):
                     if (possibleBarcode not in sampleList):
                         print possibleBarcode
                         sampleList += [possibleBarcode]
-                elif (len(possibleBarcode) >= 15):
-                    shortBarcode = possibleBarcode[:15]
+                elif (len(possibleBarcode) >= 16):
+                    shortBarcode = possibleBarcode[:16]
+                    if ( shortBarcode[-1] == "-" ):
+                        print " WARNING ERROR ... bad barcode ??? ", shortBarcode
+                        shortBarcode = miscTCGA.get_tumor_barcode(shortBarcode[:15])
+                        print "      --> fixed ??? ", shortBarcode
                     if (shortBarcode not in sampleList):
                         print shortBarcode
                         sampleList += [shortBarcode]
@@ -1350,7 +1363,7 @@ def cleanupSampleList(sampleList):
         if (len(aSample) == 12):
             if (aSample not in cleanPatientList):
                 cleanPatientList += [aSample]
-        elif (len(aSample) == 15):
+        elif (len(aSample) == 16):
             shortB = aSample[:12]
             if (shortB not in cleanPatientList):
                 cleanPatientList += [shortB]
