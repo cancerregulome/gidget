@@ -872,6 +872,7 @@ if __name__ == "__main__":
 
         numJobs = ( numPairs / 1000 )
         if ( numJobs > 500 ): numJobs = 500
+        if ( numJobs < 1 ): numJobs = 1
         splitList ( listFile, numPairs, numJobs )
 
     else:
@@ -900,7 +901,7 @@ if __name__ == "__main__":
         outName = tmpDir13 + "/%d.pw" % iJob
         listFile = tmpDir13 + "/%d.list" % iJob
 
-        cmdString = "1 ignoreThree.py " + gidgetConfigVars['TCGAFMP_PAIRWISE_ROOT'] + "/pairwise-2.0.1-current"
+        cmdString = "1 ignoreThree.py " + gidgetConfigVars['TCGAFMP_PAIRWISE_ROOT'] + "/pairwise-2.1.0"
         cmdString += " --by-index %s " % listFile
         ## cmdString += " --dry-run "
         cmdString += " --p-value %g " % args.pvalue
@@ -926,7 +927,7 @@ if __name__ == "__main__":
     #     runlist /<path-to-scratch-space>/runList.txt
     cmdString = "python %s/main/golem.py " % gidgetConfigVars['TCGAFMP_ROOT_DIR']
     cmdString += "http://glados.systemsbiology.net:7083 -p " + golempwd + " "
-    cmdString += "-L pairwise-2.0.0 -u "
+    cmdString += "-L pairwise-2.1.0 -u "
     cmdString += getpass.getuser() + " "
     cmdString += "runlist " + runFile
     print cmdString
