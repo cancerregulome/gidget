@@ -205,13 +205,13 @@ python $TCGAFMP_ROOT_DIR/main/mergeTSV.py \
 
 ## all we do is merge ...
 ## AND filter so that we only keep mutations that are seen in all tumor types
-rm -fr $TCGAFMP_DATA_DIR/$oneTumor/gnab/$oneTumor.gnab.tmpData4b.tsv
+rm -fr $TCGAFMP_DATA_DIR/$oneTumor/gnab/$oneTumor.gnab.filter.annot.tsv
 python $TCGAFMP_ROOT_DIR/main/mergeTSV.py \
-    $TCGAFMP_DATA_DIR/$tumorA/gnab/$tumorA.gnab.tmpData4b.tsv \
-    $TCGAFMP_DATA_DIR/$tumorB/gnab/$tumorB.gnab.tmpData4b.tsv \
-    $TCGAFMP_DATA_DIR/$oneTumor/gnab/$oneTumor.gnab.tmpData4b.tsv \
+    $TCGAFMP_DATA_DIR/$tumorA/gnab/$tumorA.gnab.filter.annot.tsv \
+    $TCGAFMP_DATA_DIR/$tumorB/gnab/$tumorB.gnab.filter.annot.tsv \
+    $TCGAFMP_DATA_DIR/$oneTumor/gnab/$oneTumor.gnab.filter.annot.tsv \
     rc 0.99 0.05 \
-    >& $TCGAFMP_DATA_DIR/$oneTumor/scratch/MERGE.$oneTumor.gnab.tmpData4b.log
+    >& $TCGAFMP_DATA_DIR/$oneTumor/scratch/MERGE.$oneTumor.gnab.filter.annot.log
 
 ## at this point we should be able to revert to the "normal" pipeline starting at step fmp06B ...
 

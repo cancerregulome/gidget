@@ -119,7 +119,7 @@ fi
 	## ----------------------------------------------------------------------------
 	## and finally, we want to annotate these features with genomic coordinates
         python $TCGAFMP_ROOT_DIR/main/annotateTSV.py \
-		$tumor.gnab.tmpData3.tsv hg19 $tumor.gnab.tmpData4b.tsv >& gnab.B.log 
+		$tumor.gnab.tmpData3.tsv hg19 $tumor.gnab.filter.annot.tsv >& gnab.B.log
 
 	cd ..
 	cd ..

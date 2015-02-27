@@ -97,7 +97,7 @@ curwd=`pwd`
         rm -fr h1 g1
 
         ## and annotate the gene symbols
-        python $TCGAFMP_ROOT_DIR/main/annotateTSV.py $tumor.gnab.tmpData2.tsv hg19 $tumor.gnab.tmpData4b.tsv NO
+        python $TCGAFMP_ROOT_DIR/main/annotateTSV.py $tumor.gnab.tmpData2.tsv hg19 $tumor.gnab.filter.annot.tsv NO
 
 	cd ..
 	cd ..

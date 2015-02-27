@@ -50,6 +50,6 @@ python ${TCGAFMP_ROOT_DIR}/main/highVarTSV.py ${cleanUp_out} ${filter_out} -${mu
 #TODO other post-processing steps
 
 # annotate tsv
-annotate_out="${tumorType}.gnab.tmpData4b.tsv"
+annotate_out="${tumorType}.gnab.filter.annot.tsv"
 cd ${TCGAFMP_DATA_DIR}/${tumorType}/gnab/
 python ${TCGAFMP_ROOT_DIR}/main/annotateTSV.py ${filter_out} hg19 ${annotate_out}

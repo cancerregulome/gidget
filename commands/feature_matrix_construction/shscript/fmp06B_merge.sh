@@ -85,7 +85,7 @@ echo " *******************"
 			$tumor.rppa.tmpData3.tsv \
 			$tumor.msat.tmpData3.tsv \
 			$tumor.gexp.seq.tmpData3.tsv \
-			../gnab/$tumor.gnab.tmpData4b.tsv \
+			../gnab/$tumor.gnab.filter.annot.tsv \
 			$auxFiles \
 			tmp.tsv >& $tumor.newMerge.seq.$curDate.log 
 
@@ -105,7 +105,7 @@ echo " *******************"
 			$tumor.rppa.tmpData3.tsv \
 			$tumor.msat.tmpData3.tsv \
 			$tumor.gexp.ary.tmpData3.tsv \
-			../gnab/$tumor.gnab.tmpData4b.tsv \
+			../gnab/$tumor.gnab.filter.annot.tsv \
 			$auxFiles \
 			tmp.tsv >& $tumor.newMerge.ary.$curDate.log 
 
@@ -124,7 +124,7 @@ echo " *******************"
 			$tumor.msat.tmpData3.tsv \
 			$tumor.gexp.ary.tmpData3.tsv \
 			$tumor.gexp.seq.tmpData3.tsv \
-			../gnab/$tumor.gnab.tmpData4b.tsv \
+			../gnab/$tumor.gnab.filter.annot.tsv \
 			$auxFiles \
 			tmp.tsv >& $tumor.newMerge.all.$curDate.log 
 

@@ -91,8 +91,8 @@ $ python $TCGAFMP_ROOT_DIR/main/highVarTSV.py skcm.gnab.tmpData1.tsv skcm.gnab.t
 
         ```
 $ cd $TCGAFMP_OUTPUTS/<tumor>/gnab/
-$ python $TCGAFMP_ROOT_DIR/main/annotateTSV.py <infile> hg19 skcm.gnab.tmpData4b.tsv
+$ python $TCGAFMP_ROOT_DIR/main/annotateTSV.py <infile> hg19 skcm.gnab.filter.annot.tsv
         ```
         
-***Note***: it is important that the final output of this process be a file in the directory ```$TCGAFMP_OUTPUTS/<tumor>/gnab/```, in a file called ```<tumor>.gnab.tmpData4b.tsv```, as that is where the FMxP will be looking for mutation data.
+***Note***: it is important that the final output of this process be a file in the directory ```$TCGAFMP_OUTPUTS/<tumor>/gnab/```, in a file called ```<tumor>.gnab.filter.annot.tsv```, as that is where the FMxP will be looking for mutation data.
 
