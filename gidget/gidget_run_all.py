@@ -8,6 +8,7 @@ Options:
     -h, --help       Show this screen
     --version        Show version
     --processes=<n>  Number of concurrent pipeline runs. Default 4
+    --use-date=<date>   Run against existing output for <date>
 
 """
 
@@ -53,7 +54,7 @@ class PipelineError(Exception):
 
 class Pipeline(Thread):
 
-    def __init__(self, mafFile, outputDirRoot, tagString, tumorString):
+    def __init__(self, mafFile, outputDirRoot, tagString, tumorString, date=None):
         super(Pipeline, self).__init__()
 
         self.maf = os.path.expandvars(mafFile)
@@ -65,12 +66,15 @@ class Pipeline(Thread):
         tumorDir = pathjoin(self.tagDir, self.tumorString)
         _ensureDir(tumorDir)
 
-        self.dateString = datetime.now().strftime('%Y_%m_%d')
-        self.dateDir = pathjoin(tumorDir, self.dateString)
-
-        if os.path.exists(self.dateDir):
-            self.dateString = datetime.now().strftime('%Y_%m_%d-%H%M')
+        if (date is None):
+            self.dateString = datetime.now().strftime('%Y_%m_%d')
             self.dateDir = pathjoin(tumorDir, self.dateString)
+            if os.path.exists(self.dateDir):
+                self.dateString = datetime.now().strftime('%Y_%m_%d-%H%M')
+                self.dateDir = pathjoin(tumorDir, self.dateString)
+        else:
+            self.dateDir = pathjoin(tumorDir, self.date)
+            # TODO fail if date does not exist?
 
         _ensureDir(self.dateDir)
 
@@ -186,13 +190,13 @@ class PipelineLog:
         self.logger.close()
 
 
-def run_all(pathToMafManifest, numProcesses, outputDir):
+def run_all(pathToMafManifest, numProcesses, outputDir, date=None):
     global _processSemaphore
     _processSemaphore = Semaphore(numProcesses)  # TODO there is probably a better way than using a global semaphore. Or is there...?
     pipes = ()
     with open(pathToMafManifest) as tsv:
         for maf in csv.DictReader(tsv, dialect=MAF_MANIFEST_DIALECT):
-            pipes += (run_one(maf[PATH], outputDir, maf[TAGS], maf[TUMOR_CODE]),)
+            pipes += (run_one(maf[PATH], outputDir, maf[TAGS], maf[TUMOR_CODE], date),)
 
     # join all
     for pipe in pipes:
@@ -200,13 +204,13 @@ def run_all(pathToMafManifest, numProcesses, outputDir):
         pipe.close()
 
 
-def run_one(pathToMaf, outputDir, tags, tumorString):
+def run_one(pathToMaf, outputDir, tags, tumorString, date=None):
     """
     :param pathToMaf:
     :return the pipeline thread running this maf file
     """
     assert _processSemaphore is not None
-    pipeline = Pipeline(pathToMaf, outputDir, tags, tumorString)
+    pipeline = Pipeline(pathToMaf, outputDir, tags, tumorString, date)
     pipeline.start()
     return pipeline
 
@@ -230,5 +234,5 @@ if __name__ == "__main__":
         sys.stderr.write("Output directory at %s does not exist\n" % outputDir)
         exit(1)
 
-    run_all(mafManifest, arguments.get('--processes') or 4, outputDir)
+    run_all(mafManifest, arguments.get('--processes') or 4, outputDir, arguments.get('--use-date'))
 
