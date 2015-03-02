@@ -34,8 +34,15 @@ csv.register_dialect(MAF_MANIFEST_DIALECT, delimiter='\t', lineterminator='\n')
 DATE       = 'date'
 PERSON     = 'point-person'
 TUMOR_CODE = 'tumor-short-code'
-TAGS       = 'tags'
+TAGS       = 'tag'
 PATH       = 'internal-path'
+
+# pipeline names
+ANNOTATE     = 'maf-annotation-pipeline.sh'
+BINARIZATION = 'binarization-pipeline.sh'
+POST_MAF     = 'prepare-binarized-maf-for-fmx-construction.sh'
+FMX          = 'fmx-construction.sh'
+UPLOAD       = 'upload-fmx-to-regulome-explorer.sh'
 
 _processSemaphore = None
 
@@ -67,12 +74,6 @@ class Pipeline(Thread):
 
         _ensureDir(self.dateDir)
 
-        # HACK: this is needed for the doAllC code
-        _ensureDir(pathjoin(self.dateDir, self.tumorString))
-        _ensureDir(pathjoin(self.dateDir, self.tumorString, self.dateString))
-        _ensureDir(pathjoin(self.dateDir, self.tumorString, 'gnab'))
-        _ensureDir(pathjoin(self.dateDir, self.tumorString, 'scratch'))
-
         self.env = os.environ.copy()
         # self.env['TCGAFMP_DATA_DIR'] = self.outputDir
         self.env['TCGAFMP_DATA_DIR'] = self.dateDir
@@ -83,16 +84,31 @@ class Pipeline(Thread):
         self.pipelinelog = PipelineLog(logpath)
         self.env[LOGGER_ENV] = logpath
 
+        if not os.path.exists(self.maf):
+            self.pipelinelog.logger.log("FATAL", "Cannot find MAF file %s. Aborting pipeline" % self.maf)
+            self.maf = None
+            return
+
+        # HACK: this is needed for the doAllC code
+        _ensureDir(pathjoin(self.dateDir, self.tumorString))
+        _ensureDir(pathjoin(self.dateDir, self.tumorString, self.dateString))
+        _ensureDir(pathjoin(self.dateDir, self.tumorString, 'gnab'))
+        _ensureDir(pathjoin(self.dateDir, self.tumorString, 'scratch'))
+
     def run(self):
+        if self.maf is None:
+            return
+
         with _processSemaphore:
             try:
-                self.executeGidgetPipeline('annotate-maf.sh', (self.tumorString, self.maf))
+                self.executeGidgetPipeline(ANNOTATE, (self.tumorString, self.maf))
+
 
                 # this is just where the annotation and binarization scripts put things. Don't ask too many questions...
                 outputdir = pathjoin(self.dateDir, self.tumorString)
                 annotationOutput = pathjoin(outputdir, os.path.basename(self.maf) + '.ncm.with_uniprot')
 
-                self.executeGidgetPipeline('binarization.sh', (self.tumorString, annotationOutput))
+                self.executeGidgetPipeline(BINARIZATION, (self.tumorString, annotationOutput))
 
                 binarizationOutput = None
                 for outfile in os.listdir(outputdir):
@@ -102,12 +118,12 @@ class Pipeline(Thread):
                 if (binarizationOutput is None):
                     raise PipelineError()  # TODO do something useful
 
-                self.executeGidgetPipeline('post-maf.sh', (self.tumorString, binarizationOutput))
+                self.executeGidgetPipeline(POST_MAF, (self.tumorString, binarizationOutput))
 
                 ppstring = 'private'  # TODO is it always this way?
                 fmxsuffix = 'TB.tsv'  # TODO is it always this way?
 
-                self.executeGidgetPipeline('fmx.sh', (self.dateString, self.tumorString, ppstring, fmxsuffix))
+                self.executeGidgetPipeline(FMX, (self.dateString, self.tumorString, ppstring, fmxsuffix))
 
             finally:
                 self.cleanupOutputFolder()
