@@ -101,22 +101,15 @@ class Pipeline(Thread):
 
         with _processSemaphore:
             try:
-                self.executeGidgetPipeline(ANNOTATE, (self.tumorString, self.maf))
-
-
                 # this is just where the annotation and binarization scripts put things. Don't ask too many questions...
                 outputdir = pathjoin(self.dateDir, self.tumorString)
                 annotationOutput = pathjoin(outputdir, os.path.basename(self.maf) + '.ncm.with_uniprot')
 
-                self.executeGidgetPipeline(BINARIZATION, (self.tumorString, annotationOutput))
+                self.ensurePipelineOutput(ANNOTATE, (self.tumorString, self.maf), annotationOutput)
 
-                binarizationOutput = None
-                for outfile in os.listdir(outputdir):
-                    if fnmatch(outfile, 'mut_bin_*.txt'):
-                        binarizationOutput = pathjoin(outputdir, outfile)
-                        break
-                if (binarizationOutput is None):
-                    raise PipelineError()  # TODO do something useful
+                binarizationOutput = Pipeline.findBinarizationOutput(outputdir)
+                self.ensurePipelineOutput(BINARIZATION, (self.tumorString, annotationOutput), binarizationOutput)
+                binarizationOutput = Pipeline.findBinarizationOutput(outputdir)
 
                 self.executeGidgetPipeline(POST_MAF, (self.tumorString, binarizationOutput))
 
@@ -129,6 +122,20 @@ class Pipeline(Thread):
                 self.cleanupOutputFolder()
 
             # TODO load into re
+
+    @staticmethod
+    def findBinarizationOutput(outputdir):
+        binarizationOutput = None
+        for outfile in os.listdir(outputdir):
+            if fnmatch(outfile, 'mut_bin_*.txt'):
+                binarizationOutput = pathjoin(outputdir, outfile)
+                break
+        return binarizationOutput
+
+    def ensurePipelineOutput(self, pipelinecmd, args, outputfile):
+        if outputfile is None or not os.path.exists(outputfile):
+            self.executeGidgetPipeline(pipelinecmd, args)
+
 
     def executeGidgetPipeline(self, pipeline, args):
         Pipeline._logPipelineStart(pipeline, self.env[LOGGER_ENV], args)
