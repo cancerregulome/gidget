@@ -18,7 +18,6 @@ from docopt import docopt
 from threading import Semaphore, Thread
 from subprocess import Popen
 from datetime import datetime
-from fnmatch import fnmatch
 from os.path import join as pathjoin
 import csv
 import os
@@ -26,7 +25,7 @@ import sys
 from shutil import move
 
 from util.log import Logger, LogPipe, LOGGER_ENV, log
-from util.pipeline_util import ensureDir
+from util.pipeline_util import ensureDir, findBinarizationOutput
 
 # tsv parser settings
 MAF_MANIFEST_DIALECT = "maf_manifest"
@@ -113,9 +112,9 @@ class Pipeline(Thread):
 
                 self._ensurePipelineOutput(ANNOTATE, (self.tumorString, self.maf), annotationOutput)
 
-                binarizationOutput = Pipeline._findBinarizationOutput(outputdir)
+                binarizationOutput = findBinarizationOutput(outputdir)
                 self._ensurePipelineOutput(BINARIZATION, (self.tumorString, annotationOutput), binarizationOutput)
-                binarizationOutput = Pipeline._findBinarizationOutput(outputdir)
+                binarizationOutput = findBinarizationOutput(outputdir)
 
                 self.executeGidgetPipeline(POST_MAF, (self.tumorString, binarizationOutput))
 
@@ -129,19 +128,9 @@ class Pipeline(Thread):
 
             # TODO load into re
 
-    @staticmethod
-    def _findBinarizationOutput(outputdir):
-        binarizationOutput = None
-        for outfile in os.listdir(outputdir):
-            if fnmatch(outfile, 'mut_bin_*.txt'):
-                binarizationOutput = pathjoin(outputdir, outfile)
-                break
-        return binarizationOutput
-
     def _ensurePipelineOutput(self, pipelinecmd, args, outputfile):
         if outputfile is None or not os.path.exists(outputfile):
             self.executeGidgetPipeline(pipelinecmd, args)
-
 
     def executeGidgetPipeline(self, pipeline, args):
         Pipeline._logPipelineStart(pipeline, self.env[LOGGER_ENV], args)
