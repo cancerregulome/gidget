@@ -1,4 +1,4 @@
-from gidget_util import gidgetConfigVars
+from gidget.util.gidget_util import gidgetConfigVars
 
 import miscIO
 

@@ -1,6 +1,6 @@
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 
-from gidget_util import gidgetConfigVars
+from gidget.util.gidget_util import gidgetConfigVars
 import arffIO
 import miscClin
 import miscTCGA

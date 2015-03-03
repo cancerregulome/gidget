@@ -12,7 +12,7 @@ Options:
 
 """
 
-from gidget_util import gidgetConfigVars
+from util.gidget_util import gidgetConfigVars
 
 from docopt import docopt
 from threading import Semaphore, Thread
@@ -25,7 +25,7 @@ import os
 import sys
 from shutil import move
 
-from log import Logger, LogPipe, LOGGER_ENV, log
+from util.log import Logger, LogPipe, LOGGER_ENV, log
 
 # tsv parser settings
 MAF_MANIFEST_DIALECT = "maf_manifest"
