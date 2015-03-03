@@ -110,11 +110,11 @@ class Pipeline(Thread):
                 outputdir = pathjoin(self.dateDir, self.tumorString)
                 annotationOutput = pathjoin(outputdir, os.path.basename(self.maf) + '.ncm.with_uniprot')
 
-                self.ensurePipelineOutput(ANNOTATE, (self.tumorString, self.maf), annotationOutput)
+                self._ensurePipelineOutput(ANNOTATE, (self.tumorString, self.maf), annotationOutput)
 
-                binarizationOutput = Pipeline.findBinarizationOutput(outputdir)
-                self.ensurePipelineOutput(BINARIZATION, (self.tumorString, annotationOutput), binarizationOutput)
-                binarizationOutput = Pipeline.findBinarizationOutput(outputdir)
+                binarizationOutput = Pipeline._findBinarizationOutput(outputdir)
+                self._ensurePipelineOutput(BINARIZATION, (self.tumorString, annotationOutput), binarizationOutput)
+                binarizationOutput = Pipeline._findBinarizationOutput(outputdir)
 
                 self.executeGidgetPipeline(POST_MAF, (self.tumorString, binarizationOutput))
 
@@ -124,12 +124,12 @@ class Pipeline(Thread):
                 self.executeGidgetPipeline(FMX, (self.dateString, self.tumorString, ppstring, fmxsuffix))
 
             finally:
-                self.cleanupOutputFolder()
+                self._cleanupOutputFolder()
 
             # TODO load into re
 
     @staticmethod
-    def findBinarizationOutput(outputdir):
+    def _findBinarizationOutput(outputdir):
         binarizationOutput = None
         for outfile in os.listdir(outputdir):
             if fnmatch(outfile, 'mut_bin_*.txt'):
@@ -137,7 +137,7 @@ class Pipeline(Thread):
                 break
         return binarizationOutput
 
-    def ensurePipelineOutput(self, pipelinecmd, args, outputfile):
+    def _ensurePipelineOutput(self, pipelinecmd, args, outputfile):
         if outputfile is None or not os.path.exists(outputfile):
             self.executeGidgetPipeline(pipelinecmd, args)
 
@@ -162,7 +162,7 @@ class Pipeline(Thread):
         self.join()
 
     # TODO a better thing would be to modify the scripts to put things in the right place to begin with...
-    def cleanupOutputFolder(self):
+    def _cleanupOutputFolder(self):
 
         fmxdirNew = pathjoin(self.dateDir, 'fmx')
         os.mkdir(fmxdirNew)
