@@ -3,7 +3,7 @@
 # every TCGA script should start with these lines:
 : ${GIDGET_SOURCE_ROOT:?" environment variable must be set and non-empty; defines the path to the local code for the gidget project"}
 
-source ${GIDGET_SOURCE_ROOT}/gidget/util/gidget_util.sh
+source ${GIDGET_SOURCE_ROOT}/gidget/util/env.sh
 
 
 ## runs the binarization pipeline

@@ -4,7 +4,7 @@
 # usage
 
 # every bash file in the gidget project should begin
-# by sourcing gidget_util.sh, NOT this file
+# by sourcing env.sh, NOT this file
 
 
 ###

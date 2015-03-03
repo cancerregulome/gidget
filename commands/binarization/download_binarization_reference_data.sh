@@ -2,7 +2,7 @@
 
 # every TCGA Binarization script should start with these lines:
 : ${GIDGET_SOURCE_ROOT:?" environment variable must be set and non-empty; defines the path to the gidget code directory"}
-source $GIDGET_SOURCE_ROOT/gidget/util/gidget_util.sh
+source $GIDGET_SOURCE_ROOT/gidget/util/env.sh
 
 
 cd "$TCGABINARIZATION_REFERENCES_DIR"

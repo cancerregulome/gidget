@@ -12,7 +12,7 @@ Options:
 
 """
 
-from util.gidget_util import gidgetConfigVars
+from util.env import gidgetConfigVars
 
 from docopt import docopt
 from threading import Semaphore, Thread

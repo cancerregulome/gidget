@@ -2,7 +2,7 @@
 
 # every TCGA MAF script should start with these lines:
 : ${TCGAMAF_ROOT_DIR:?" environment variable must be set and non-empty; defines the path to the TCGA MAF directory"}
-source ${TCGAMAF_ROOT_DIR}/../../gidget/util/gidget_util.sh
+source ${TCGAMAF_ROOT_DIR}/../../gidget/util/env.sh
 
 
 #using UCSC known genes

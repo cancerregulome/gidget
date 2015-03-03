@@ -5,7 +5,7 @@
 usage: gidget run <pipelinename> [<pipelineargs>...]
 
 """
-from gidget.util.gidget_util import gidgetConfigVars
+from gidget.util.env import gidgetConfigVars
 
 from docopt import docopt
 
