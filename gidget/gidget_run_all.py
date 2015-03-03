@@ -26,6 +26,7 @@ import sys
 from shutil import move
 
 from util.log import Logger, LogPipe, LOGGER_ENV, log
+from util.pipeline_util import ensureDir
 
 # tsv parser settings
 MAF_MANIFEST_DIALECT = "maf_manifest"
@@ -62,9 +63,9 @@ class Pipeline(Thread):
 
         self.tagDir = pathjoin(outputDirRoot, tagString)
 
-        _ensureDir(self.tagDir)
+        ensureDir(self.tagDir)
         tumorDir = pathjoin(self.tagDir, self.tumorString)
-        _ensureDir(tumorDir)
+        ensureDir(tumorDir)
 
         if (date is None):
             self.dateString = datetime.now().strftime('%Y_%m_%d')
@@ -77,7 +78,7 @@ class Pipeline(Thread):
             self.dateDir = pathjoin(tumorDir, date)
             # TODO fail if date does not exist?
 
-        _ensureDir(self.dateDir)
+        ensureDir(self.dateDir)
 
         self.env = os.environ.copy()
         # self.env['TCGAFMP_DATA_DIR'] = self.outputDir
@@ -95,10 +96,10 @@ class Pipeline(Thread):
             return
 
         # HACK: this is needed for the doAllC code
-        _ensureDir(pathjoin(self.dateDir, self.tumorString))
-        _ensureDir(pathjoin(self.dateDir, self.tumorString, self.dateString))
-        _ensureDir(pathjoin(self.dateDir, self.tumorString, 'gnab'))
-        _ensureDir(pathjoin(self.dateDir, self.tumorString, 'scratch'))
+        ensureDir(pathjoin(self.dateDir, self.tumorString))
+        ensureDir(pathjoin(self.dateDir, self.tumorString, self.dateString))
+        ensureDir(pathjoin(self.dateDir, self.tumorString, 'gnab'))
+        ensureDir(pathjoin(self.dateDir, self.tumorString, 'scratch'))
 
     def run(self):
         if self.maf is None:
@@ -214,11 +215,6 @@ def run_one(pathToMaf, outputDir, tags, tumorString, date=None):
     pipeline = Pipeline(pathToMaf, outputDir, tags, tumorString, date)
     pipeline.start()
     return pipeline
-
-
-def _ensureDir(absPath):
-    if not os.path.exists(absPath):
-        os.mkdir(absPath)
 
 
 if __name__ == "__main__":
