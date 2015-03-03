@@ -73,6 +73,7 @@ class Pipeline(Thread):
                 self.dateString = datetime.now().strftime('%Y_%m_%d-%H%M')
                 self.dateDir = pathjoin(tumorDir, self.dateString)
         else:
+            self.dateString = date
             self.dateDir = pathjoin(tumorDir, date)
             # TODO fail if date does not exist?
 
