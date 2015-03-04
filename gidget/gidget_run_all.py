@@ -47,7 +47,6 @@ UPLOAD       = 'upload-fmx-to-regulome-explorer.sh'
 
 _processSemaphore = None
 
-
 class PipelineError(Exception):
     pass  # TODO
 
@@ -56,6 +55,9 @@ class Pipeline(Thread):
 
     def __init__(self, mafFile, outputDirRoot, tagString, tumorString, date=None):
         super(Pipeline, self).__init__()
+
+        self.interrupted = False
+        self.procCur = None
 
         self.maf = os.path.expandvars(mafFile)
         self.tumorString = tumorString
@@ -122,7 +124,10 @@ class Pipeline(Thread):
                 fmxsuffix = 'TB.tsv'  # TODO is it always this way?
 
                 self.executeGidgetPipeline(FMX, (self.dateString, self.tumorString, ppstring, fmxsuffix))
-
+            except KeyboardInterrupt:
+                log(self.env[LOGGER_ENV], 'FATAL', "Keyboard interrupt")
+            except PipelineError as perror:
+                log(self.env[LOGGER_ENV], 'FATAL', perror.message)
             finally:
                 self._cleanupOutputFolder()
 
@@ -133,19 +138,31 @@ class Pipeline(Thread):
             self.executeGidgetPipeline(pipelinecmd, args)
 
     def executeGidgetPipeline(self, pipeline, args):
+        if self.interrupted:
+            raise KeyboardInterrupt()
         Pipeline._logPipelineStart(pipeline, self.env[LOGGER_ENV], args)
-        subProc = Popen((pathjoin(gidgetConfigVars['GIDGET_SOURCE_ROOT'], 'pipelines', pipeline),) + args,
+        self.procCur = Popen((pathjoin(gidgetConfigVars['GIDGET_SOURCE_ROOT'], 'pipelines', pipeline),) + args,
                         env=self.env,
                         cwd=self.dateDir,
                         stdout=self.pipelinelog.logpipeout,
                         stderr=self.pipelinelog.logpipeerr)
-        if subProc.wait() != 0:
+        if self.procCur.wait() != 0:
+            if self.interrupted:
+                raise KeyboardInterrupt()
             # TODO log error message
             raise PipelineError('Pipeline %s exited with non-zero status' % pipeline)  # TODO just exit?
+        self.procCur = None
 
     @staticmethod
     def _logPipelineStart(pipelineName, logfile, args):
         log(logfile, 'PIPELINE-START', '%s %s' % (pipelineName, ' '.join(str(arg) for arg in args)))
+
+    # Execute on main thread
+    def forceClose(self):
+        self.interrupted = True
+        if self.procCur is not None:
+            self.procCur.terminate()
+            self.procCur = None
 
     def close(self):
         self.pipelinelog.close()
@@ -181,18 +198,37 @@ class PipelineLog:
         self.logger.close()
 
 
+def interruptAll(pipes):
+    print ("Terminating all subproccesses and exiting...")
+    for pipe in pipes:
+        pipe.forceClose()
+
+
 def run_all(pathToMafManifest, numProcesses, outputDir, date=None):
     global _processSemaphore
-    _processSemaphore = Semaphore(numProcesses)  # TODO there is probably a better way than using a global semaphore. Or is there...?
     pipes = ()
-    with open(pathToMafManifest) as tsv:
-        for maf in csv.DictReader(tsv, dialect=MAF_MANIFEST_DIALECT):
-            pipes += (run_one(maf[PATH], outputDir, maf[TAGS], maf[TUMOR_CODE], date),)
+    try:
+        _processSemaphore = Semaphore(numProcesses)  # TODO there is probably a better way than using a global semaphore. Or is there...?
+        with open(pathToMafManifest) as tsv:
+            for maf in csv.DictReader(tsv, dialect=MAF_MANIFEST_DIALECT):
+                pipes += (run_one(maf[PATH], outputDir, maf[TAGS], maf[TUMOR_CODE], date),)
 
-    # join all
-    for pipe in pipes:
-        pipe.join()
-        pipe.close()
+        # TODO Kludge
+        # Python will only send interrupts to the main thread and the main thread will not respond if it is
+        # blocked/waiting. So we need to make sure the main thread wakes up occasionally to handle interrupts
+        # (terminating subprocesses and cleaning up open resources).
+        allPipesDone = False  # done = not alive
+        while not allPipesDone:
+            allPipesDone = True
+            for pipe in pipes:
+                pipe.join(1.0)  # Think of this as just a wait(1.0). The 1.0 is mostly arbitrary
+                allPipesDone = allPipesDone and not pipe.isAlive()
+    except KeyboardInterrupt:
+        interruptAll(pipes)
+    finally:
+        for pipe in pipes:
+            pipe.join()
+            pipe.close()
 
 
 def run_one(pathToMaf, outputDir, tags, tumorString, date=None):
