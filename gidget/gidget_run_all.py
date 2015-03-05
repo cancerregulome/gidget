@@ -93,7 +93,12 @@ class Pipeline(Thread):
         self.env[LOGGER_ENV] = logpath
 
         if not os.path.exists(self.maf):
-            self.pipelinelog.logger.log("FATAL", "Cannot find MAF file %s. Aborting pipeline" % self.maf)
+            self.pipelinelog.logger.log("FATAL", "Cannot find MAF file %s." % self.maf)
+            self.pipelinelog.logger.log("FATAL", "Aborting pipeline.")
+            self.pipelinelog.logger.log("FATAL", "Please check the file path in the manifest file for tumor type %s and tag %s" % (self.tumorString, self.tagString))
+            self.pipelinelog.logger.log("FATAL", "Also check your environment variables. See below for current values:")
+            self.pipelinelog.logger.log("FATAL", "TCGAMAF_OUTPUTS=%s" % self.env['TCGAMAF_OUTPUTS'])
+            self.pipelinelog.logger.log("FATAL", "TCGAFMP_DCC_REPOSITORIES=%s" % self.env['TCGAFMP_DCC_REPOSITORIES'])
             self.maf = None
             return
 
