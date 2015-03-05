@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+# TODO make config file a non-optional parameter
+
 """Gidget Run All
 
 usage: gidget_run_all [options] <maf_manifest> <output_directory>
@@ -9,10 +11,9 @@ Options:
     --version        Show version
     --processes=<n>  Number of concurrent pipeline runs. Default 4
     --use-date=<date>   Run against existing output for <date>
+    --config=<config file> Use the specified config file
 
 """
-
-from util.env import gidgetConfigVars
 
 from docopt import docopt
 from threading import Semaphore, Thread
@@ -25,7 +26,8 @@ import sys
 from shutil import move
 
 from util.log import Logger, LogPipe, LOGGER_ENV, log
-from util.pipeline_util import ensureDir, findBinarizationOutput
+from util.pipeline_util import ensureDir, findBinarizationOutput, expandPath
+from util.load_path_config import envFromConfigOrOs
 
 # tsv parser settings
 MAF_MANIFEST_DIALECT = "maf_manifest"
@@ -53,13 +55,13 @@ class PipelineError(Exception):
 
 class Pipeline(Thread):
 
-    def __init__(self, mafFile, outputDirRoot, tagString, tumorString, date=None):
+    def __init__(self, mafFile, outputDirRoot, tagString, tumorString, env, date=None):
         super(Pipeline, self).__init__()
 
         self.interrupted = False
         self.procCur = None
 
-        self.maf = os.path.expandvars(mafFile)
+        self.maf = expandPath(mafFile)
         self.tumorString = tumorString
         self.tagString = tagString
 
@@ -82,7 +84,7 @@ class Pipeline(Thread):
 
         ensureDir(self.dateDir)
 
-        self.env = os.environ.copy()
+        self.env = env.copy()
         # self.env['TCGAFMP_DATA_DIR'] = self.outputDir
         self.env['TCGAFMP_DATA_DIR'] = self.dateDir
         self.env['WRONGARGS'] = '1'
@@ -147,7 +149,7 @@ class Pipeline(Thread):
         if self.interrupted:
             raise KeyboardInterrupt()
         Pipeline._logPipelineStart(pipeline, self.env[LOGGER_ENV], args)
-        self.procCur = Popen((pathjoin(gidgetConfigVars['GIDGET_SOURCE_ROOT'], 'pipelines', pipeline),) + args,
+        self.procCur = Popen((pathjoin(self.env['GIDGET_SOURCE_ROOT'], 'pipelines', pipeline),) + args,
                         env=self.env,
                         cwd=self.dateDir,
                         stdout=self.pipelinelog.logpipeout,
@@ -210,14 +212,14 @@ def interruptAll(pipes):
         pipe.forceClose()
 
 
-def run_all(pathToMafManifest, numProcesses, outputDir, date=None):
+def run_all(pathToMafManifest, numProcesses, outputDir, env, date=None):
     global _processSemaphore
     pipes = ()
     try:
         _processSemaphore = Semaphore(numProcesses)  # TODO there is probably a better way than using a global semaphore. Or is there...?
         with open(pathToMafManifest) as tsv:
             for maf in csv.DictReader(tsv, dialect=MAF_MANIFEST_DIALECT):
-                pipes += (run_one(maf[PATH], outputDir, maf[TAGS], maf[TUMOR_CODE], date),)
+                pipes += (run_one(maf[PATH], outputDir, maf[TAGS], maf[TUMOR_CODE], env, date),)
 
         # TODO Kludge
         # Python will only send interrupts to the main thread and the main thread will not respond if it is
@@ -237,13 +239,13 @@ def run_all(pathToMafManifest, numProcesses, outputDir, date=None):
             pipe.close()
 
 
-def run_one(pathToMaf, outputDir, tags, tumorString, date=None):
+def run_one(pathToMaf, outputDir, tags, tumorString, env, date=None):
     """
     :param pathToMaf:
     :return the pipeline thread running this maf file
     """
     assert _processSemaphore is not None
-    pipeline = Pipeline(pathToMaf, outputDir, tags, tumorString, date)
+    pipeline = Pipeline(pathToMaf, outputDir, tags, tumorString, env, date)
     pipeline.start()
     return pipeline
 
@@ -253,6 +255,7 @@ if __name__ == "__main__":
 
     mafManifest = arguments.get('<maf_manifest>')
     outputDir = arguments.get('<output_directory>')
+    configFile = expandPath(arguments.get('--config'))
 
     if not os.path.exists(mafManifest):
         sys.stderr.write("No manifest file at %s\n" % mafManifest)
@@ -262,5 +265,14 @@ if __name__ == "__main__":
         sys.stderr.write("Output directory at %s does not exist\n" % outputDir)
         exit(1)
 
-    run_all(mafManifest, arguments.get('--processes') or 4, outputDir, arguments.get('--use-date'))
+    if configFile is not None and not os.path.exists(configFile):
+        sys.stderr.write("Cannot find config file %s\n" % configFile)
+        exit(1)
+
+    run_all(
+        mafManifest,
+        arguments.get('--processes') or 4,
+        outputDir,
+        envFromConfigOrOs(configFile),
+        arguments.get('--use-date'))
 
