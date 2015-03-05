@@ -15,3 +15,7 @@ def findBinarizationOutput(outputdir):
             binarizationOutput = pathjoin(outputdir, outfile)
             break
     return binarizationOutput
+
+def expandPath(path):
+    if path is None: return path
+    return os.path.expanduser(os.path.expandvars(path))
