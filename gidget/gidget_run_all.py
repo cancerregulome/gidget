@@ -61,6 +61,7 @@ class Pipeline(Thread):
 
         self.maf = os.path.expandvars(mafFile)
         self.tumorString = tumorString
+        self.tagString = tagString
 
         self.tagDir = pathjoin(outputDirRoot, tagString)
 
