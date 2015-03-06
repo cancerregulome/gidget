@@ -52,7 +52,7 @@ echo `date`
 echo annotating MAF
 cd $mafDirectory
 export TCGAMAF_DATA_DIR=`pwd` # TODO:FILE_LAYOUT:WORKING_DIR
-${TCGAMAF_SCRIPTS_DIR}/bash/updateMAF.sh > updateMAF.log 2>&1
+${TCGAMAF_SCRIPTS_DIR}/bash/updateMAF.sh 2>&1 | tee updateMAF.log
 outputMAF=`ls -1 *.ncm.with_uniprot`
 echo MAF annotated: output maf is $outputMAF!
 echo
