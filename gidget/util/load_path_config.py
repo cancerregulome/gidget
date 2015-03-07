@@ -55,7 +55,7 @@ def envFromConfig(pthConfig):
     parser = SafeConfigParser()
     parser.read(pthConfig)
 
-    env = {}
+    env = os.environ
 
     pthdGidgetRoot = pthExpanded(parser.get('gidget', 'GIDGET_SOURCE_ROOT'))
     pthdFmpRoot = pthJoin(pthdGidgetRoot, COMMANDS_DIR, 'feature_matrix_construction')
