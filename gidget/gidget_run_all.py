@@ -25,7 +25,7 @@ import os
 import sys
 from shutil import move
 
-from util.log import Logger, LogPipe, LOGGER_ENV, log
+from util.log import Logger, LogPipe, LOGGER_ENV, logToFile
 from util.pipeline_util import ensureDir, findBinarizationOutput, expandPath
 from util.load_path_config import envFromConfigOrOs
 
@@ -133,9 +133,9 @@ class Pipeline(Thread):
 
                 self.executeGidgetPipeline(FMX, (self.dateString, self.tumorString, ppstring, fmxsuffix))
             except KeyboardInterrupt:
-                log(self.env[LOGGER_ENV], 'FATAL', "Keyboard interrupt")
+                logToFile(self.env[LOGGER_ENV], 'FATAL', "Keyboard interrupt")
             except PipelineError as perror:
-                log(self.env[LOGGER_ENV], 'FATAL', perror.message)
+                logToFile(self.env[LOGGER_ENV], 'FATAL', perror.message)
             finally:
                 self._cleanupOutputFolder()
 
@@ -163,7 +163,7 @@ class Pipeline(Thread):
 
     @staticmethod
     def _logPipelineStart(pipelineName, logfile, args):
-        log(logfile, 'PIPELINE-START', '%s %s' % (pipelineName, ' '.join(str(arg) for arg in args)))
+        logToFile(logfile, 'PIPELINE-START', '%s %s' % (pipelineName, ' '.join(str(arg) for arg in args)))
 
     # Execute on main thread
     def forceClose(self):
