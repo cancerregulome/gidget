@@ -54,9 +54,11 @@ cd $mafDirectory
 export TCGAMAF_DATA_DIR=`pwd` # TODO:FILE_LAYOUT:WORKING_DIR
 ${TCGAMAF_SCRIPTS_DIR}/bash/updateMAF.sh 2>&1 | tee updateMAF.log
 
-if [[ $? -ne 0 ]]; then
-    echo "updateMAF.sh exited with status $?. Maf-annotation will now exit."
-    exit $?
+status=${PIPESTATUS[0]}
+if [[ $status -ne 0 ]]
+then
+    echo "updateMAF.sh exited with status $status. Maf-annotation will now exit."
+    exit $status
 fi
 
 outputMAF=`ls -1 *.ncm.with_uniprot`
