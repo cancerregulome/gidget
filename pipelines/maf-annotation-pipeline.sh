@@ -87,7 +87,7 @@ numError=`eval "cat ./no_* | $getLines"`
 ${GIDGET_SOURCE_ROOT}/gidget/util/log.py "DEBUG" "Number of Valid Lines: $numValid"
 ${GIDGET_SOURCE_ROOT}/gidget/util/log.py "DEBUG" "Number of Error Lines: $numError"
 
-if [[ `bc -l <<< "$numError / $numValid < $errorThreshold"` -ne 0 ]]
+if [[ `bc -l <<< "$numError / $numValid < $errorThreshold"` -eq 0 ]]
 then
     ${GIDGET_SOURCE_ROOT}/gidget/util/log.py "FATAL" "Error rate for annotated MAF too high!"
     ${GIDGET_SOURCE_ROOT}/gidget/util/log.py "DEBUG" "Threshold: $errorThreshold"
