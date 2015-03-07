@@ -169,8 +169,10 @@ class Pipeline(Thread):
     def forceClose(self):
         self.interrupted = True
         if self.procCur is not None:
-            self.procCur.terminate()
-            self.procCur = None
+            try:
+                self.procCur.terminate()
+            finally:
+                self.procCur = None
 
     def close(self):
         self.pipelinelog.close()
