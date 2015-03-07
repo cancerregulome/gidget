@@ -14,16 +14,23 @@ source ${GIDGET_SOURCE_ROOT}/gidget/util/env.sh
 ##      one tumor type, eg 'ucec'
 ##      a config file, eg 'parse_tcga.config', relative to $TCGAFMP_ROOT_DIR/config
 
-if [ $# != 2 ]
+if [[ $# != 2 && $# != 3 ]]
     then
-        echo " Usage   : `basename $0` <tumorType> <fullMafPath>"
-        echo " Example : `basename $0` brca full-path-to-unannotated-brca-maf"
+        echo " Usage   : `basename $0` <tumorType> <fullMafPath> [errorRateThreshold (default 0.1)]"
+        echo " Example : `basename $0` brca full-path-to-unannotated-brca-maf 0.1"
         exit $WRONGARGS
 fi
 
 
 tumorType=$1
 pathToOriginalMAF=$2
+
+if [[ $# == 3 ]]
+    then
+        errorThreshold=$3
+    else
+        errorThreshold=0.1
+fi
 
 echo using tumor code: $tumorType and input file: $pathToOriginalMAF
 
@@ -52,7 +59,15 @@ echo `date`
 echo annotating MAF
 cd $mafDirectory
 export TCGAMAF_DATA_DIR=`pwd` # TODO:FILE_LAYOUT:WORKING_DIR
-${TCGAMAF_SCRIPTS_DIR}/bash/updateMAF.sh > updateMAF.log 2>&1
+${TCGAMAF_SCRIPTS_DIR}/bash/updateMAF.sh 2>&1 | tee updateMAF.log
+
+status=${PIPESTATUS[0]}
+if [[ $status -ne 0 ]]
+then
+    echo "updateMAF.sh exited with status $status. Maf-annotation will now exit."
+    exit $status
+fi
+
 outputMAF=`ls -1 *.ncm.with_uniprot`
 echo MAF annotated: output maf is $outputMAF!
 echo
@@ -64,6 +79,20 @@ echo running stats
 ${TCGAMAF_SCRIPTS_DIR}/bash/final_maf_diagnostics.sh $outputMAF
 echo
 
+# Perform validation
+getLines="wc -l | sed -e 's#\(\w\+\)\W\+.\+#\1#'"
+numValid=`eval "cat ./*.ncm.with_uniprot | $getLines"`
+numError=`eval "cat ./no_* | $getLines"`
+
+${GIDGET_SOURCE_ROOT}/gidget/util/log.py "DEBUG" "Number of Valid Lines: $numValid"
+${GIDGET_SOURCE_ROOT}/gidget/util/log.py "DEBUG" "Number of Error Lines: $numError"
+
+if [[ `bc -l <<< "$numError / $numValid < $errorThreshold"` -eq 0 ]]
+then
+    ${GIDGET_SOURCE_ROOT}/gidget/util/log.py "FATAL" "Error rate for annotated MAF too high!"
+    ${GIDGET_SOURCE_ROOT}/gidget/util/log.py "DEBUG" "Threshold: $errorThreshold"
+    exit -1
+fi
 
 echo `date`
 echo "Done with MAF annotation pipeline"
