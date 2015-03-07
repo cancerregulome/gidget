@@ -80,9 +80,10 @@ while read line; do
     echo got line: $line
     #that previous line replacement is necessary to handle output that doesn't understand comment lines, which is everything
     $TCGAMAF_PYTHON_BINARY $TCGAMAF_SCRIPTS_DIR/python/simplify_maf.py $line ${line}.annovar_input ${line}.buildID
-    if [[ $? -ne 0 ]]; then
+    status=$?
+    if [[ $status -ne 0 ]]; then
 	echo "exiting with error"
-	exit $?
+	exit $status
     fi
 	#awk 'BEGIN{FS="\t";OFS="\t"}NR>1{print $5,$6,$7,$11,$13,"line"NR,$1,$2,$10,$12}' $line > $line".annovar_input"
 	buildver=`cat ${line}.buildID`
