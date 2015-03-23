@@ -9,25 +9,43 @@ source ${GIDGET_SOURCE_ROOT}/gidget/util/env.sh
 
 #TODO this script should probably be incorporated into the maf-processing script
 
-if [[ $# != 2 ]] && [[ $# != 3 ]]
+function showHelpAndExit {
+    echo "Usage: `basename $0` [-c] [-m MUTATION_THRESHOLD] [TUMOR_TYPE] [BINARIZATION_OUTPUT]"
+    echo "    -h                     display this help and exit"
+    echo "    -c                     By default this script uses only code-potential mutation features. Use this option to skip the code-potential filtering step"
+    echo "    -m MUTATION_THRESHOLD  Filter out features with fewer than MUTATION_THRESHOLD mutations. Default 2."
+
+    exit ${WRONGARGS-1}
+}
+
+OPTIND=1
+
+codePotentialOnly=1
+mutationThreshold=2
+
+while getopts "h?cm:" opt; do
+    case "$opt" in
+    h|\?)
+        showHelpAndExit
+        ;;
+    c)  codePotentialOnly=0
+        ;;
+    m)  mutationThreshold=$OPTARG
+        ;;
+    esac
+done
+
+shift $((OPTIND-1))
+
+[ "$1" = "--" ] && shift
+
+if [[ $# != 2 ]]
     then
-        echo " Usage   : `basename $0` <tumorType> <binarizationOutput> [mutationThreshold]"
-        echo " Example : `basename $0` laml laml/mut_bin_01.14.2015.txt"
-        echo ""
-        echo "NOTE: Features that have fewer than mutationThreshold mutations will be filtered out. Defaults to 2."
-        exit 1
+        showHelpAndExit
 fi
 
 tumorType=$1
 binarizationOutput=$2
-
-#TODO instead of providing this as a parameter, get from a config file per tumor type?
-if [[ $# == 3 ]]
-then
-    mutationThreshold=$3
-else
-    mutationThreshold=2
-fi
 
 outDir=${TCGAFMP_DATA_DIR}/${tumorType}/gnab
 echo "ouputs are in $outDir"
@@ -41,11 +59,29 @@ cd ${TCGAFMP_ROOT_DIR}/shscript
 
 cleanUp_out="${tumorType}.gnab.tmpData1.tsv"
 
+if [[ ${codePotentialOnly} -ne 0 ]]
+then
+    # keep only "code_potential" mutation features
+
+    h1=`mktemp`
+    g1=`mktemp`
+
+    codePot_out="${tumorType}.gnab.codePot.tsv"
+    head -1 ${cleanUp_out} >& h1
+    grep "code_potential" ${cleanUp_out} >& g1
+    cat h1 g1 >& ${codePot_out}
+
+    rm ${h1} ${g1}
+else
+    codePot_out=${cleanUp_out}
+fi
+
 # filter out features
 filter_out="${tumorType}.gnab.tmpData2.tsv"
 cd ${TCGAFMP_DATA_DIR}/${tumorType}/gnab/
 echo "python ${TCGAFMP_ROOT_DIR}/main/highVarTSV.py skcm.gnab.tmpData1.tsv skcm.gnab.tmpData2.tsv -${mutationThreshold} NZC" #TODO
-python ${TCGAFMP_ROOT_DIR}/main/highVarTSV.py ${cleanUp_out} ${filter_out} -${mutationThreshold} NZC
+python ${TCGAFMP_ROOT_DIR}/main/highVarTSV.py ${codePot_out} ${filter_out} -${mutationThreshold} NZC
+
 
 #TODO other post-processing steps
 

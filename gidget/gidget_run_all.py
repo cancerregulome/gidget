@@ -273,7 +273,7 @@ if __name__ == "__main__":
 
     run_all(
         mafManifest,
-        int(arguments.get('--processes')) or 4,
+        int(arguments.get('--processes') or 4),
         outputDir,
         envFromConfigOrOs(configFile),
         arguments.get('--use-date'))
