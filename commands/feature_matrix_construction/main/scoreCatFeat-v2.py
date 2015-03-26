@@ -457,7 +457,7 @@ if __name__ == "__main__":
         outName = tmpDir + "/%d.pw" % eachI
         listFile = tmpDir + "/%d.list" % eachI
 
-        cmdString = "1 ignoreThree.py " + gidgetConfigVars['TCGAFMP_PAIRWISE_ROOT'] + "/pairwise-2.0.1-current"
+        cmdString = "1 ignoreThree.py " + gidgetConfigVars['TCGAFMP_PAIRWISE_ROOT'] + "/pairwise-2.1.2"
         cmdString += " --by-index %s " % listFile
         ## cmdString += " --dry-run "
         cmdString += " --p-value 2. "
