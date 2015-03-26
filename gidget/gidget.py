@@ -30,7 +30,7 @@ import gidget_help
 #import gidget_remove
 #import gidget_run
 
-from gidget_util import gidgetConfigVars
+from gidget.util.env import gidgetConfigVars
 
 if __name__ == '__main__':
 

@@ -6,7 +6,7 @@ use File::Basename;
 use Cwd qw(abs_path);
 
 use lib dirname(abs_path(__FILE__)) . "/../../gidget/util";
-use gidget_util;
+use env;
 
 
 $maf_file = $ARGV[0] || die "usage: $0 MAF_FILE\n";

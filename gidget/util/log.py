@@ -13,7 +13,7 @@ LOGGER_ENV = "GIDGET_LOG_FILE"
 def log(tag, msg):
     Logger._getOrCreate().log(tag, msg)
 
-def log(logfile, tag, msg):
+def logToFile(logfile, tag, msg):
     """
     Kind of a hack for the run-all script. Use sparingly
     """

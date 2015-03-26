@@ -1,6 +1,6 @@
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 
-from gidget_util import gidgetConfigVars
+from gidget.util.env import gidgetConfigVars
 
 import os
 import path

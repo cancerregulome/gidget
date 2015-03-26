@@ -9,7 +9,7 @@
 import sys
 
 # these are my local ones
-from gidget_util import gidgetConfigVars
+from gidget.util.env import gidgetConfigVars
 import chrArms
 import refData
 import tsvIO

@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-package gidget_util;
+package env;
 
 use strict;
 use warnings;

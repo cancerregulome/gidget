@@ -5,7 +5,7 @@
 # every TCGA MAF script should start with these lines:
 : ${TCGAMAF_ROOT_DIR:?" environment variable must be set and non-empty; defines the path to the TCGA MAF directory"}
 <<<<<<< HEAD
-source ${TCGAMAF_ROOT_DIR}/../../gidget/util/gidget_util.sh
+source ${TCGAMAF_ROOT_DIR}/../../gidget/util/env.sh
 =======
 source ${TCGAMAF_ROOT_DIR}/bash/tcga_maf_util.sh
 >>>>>>> develop
