@@ -64,7 +64,7 @@ curDir=`pwd`
 	cd $TCGAFMP_DATA_DIR/$tumor/$curDate
         pwd
 
-        for st in XX
+        for st in TP
             do
 
                 ## ------------------------------------------------------------------- #
