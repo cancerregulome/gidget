@@ -1677,7 +1677,7 @@ def removeConstantKeys(allClinDict):
         "disease_code", "gender", "days_to_initial", "days_to_death", "icd_",
         "sampleType", "tumor_type", "cnvr_lvl3_qc", "pretreatment_history",
         "year_of_dcc_upload", "tumor_tissue_site", "histolog", "diagnosis", 
-        "country", "_data" ]
+        "country", "_data", "batch_number" ]
 
     print " "
     print " now looking for constant (single-value) keys : "
@@ -1743,7 +1743,7 @@ def removeUninformativeKeys(allClinDict):
     # (removed HPV_type_var on 9/29)
     magicKeepStrings = [
         "bcr_patient_barcode", "disease_code",
-        "iCluster_Adeno_k2", "nte_site", 
+        "iCluster_Adeno_k2", "nte_site", "batch_number",
         "initial_pathologic_diagnosis_method",
         "init_pathology_dx_method_other" ]
 
