@@ -20,9 +20,8 @@ curDate=$1
 
 echo " "
 echo " "
-echo " ***********"
 echo " *" $curDate "* "
-echo " ***********"
+echo " "
 
 cd $TCGAFMP_DATA_DIR
 echo " "
@@ -31,19 +30,26 @@ echo " "
 
 echo " "
 echo " checking parse (xml and Firehose) log files ... "
-grep -i "error" */$curDate/parse*.$curDate.log | grep -v "ERROR in path\.list" | sort | uniq
+grep -i "error" */$curDate/parse*.$curDate.log | grep -v "ERROR in path\.list" | \
+        grep -v " no information for patient " | grep -v "no MutSig" | \
+        sort | uniq
 
 echo " "
 echo " checking cleanClin log files ... "
-grep -i "error" */$curDate/cleanClin.$curDate.log | grep -v "returning NA" | sort | uniq
+grep -i "error" */$curDate/cleanClin.$curDate.log | grep -v "returning NA" | \
+        grep -v "no information " | grep -v updateAge |
+        grep -v " when this person died " | \
+        sort | uniq
 
 echo " "
 echo " checking level3 log files ... "
-grep -i "error" */$curDate/level3.*.$curDate.log | grep -v " nothing returned from SDRFs " | sort | uniq
+grep -i "error" */$curDate/level3.*.$curDate.log | grep -v " nothing returned from SDRFs " | \
+        grep -v " did not find any " | \
+        sort | uniq
 
-echo " "
-echo " data contents in level3 data files ..."
-grep -i "finished in writeTSV_dataMatrix" */level3.*.$curDate.log | sort | uniq
+## echo " "
+## echo " data contents in level3 data files ..."
+## grep -i "finished in writeTSV_dataMatrix" */$curDate/level3.*.$curDate.log | sort | uniq
 
 echo " "
 echo " checking filterSamp log files ... "
@@ -59,7 +65,9 @@ grep -i "error" */$curDate/highVar.*.$curDate.log | grep -v " QQ " | sort | uniq
 
 echo " "
 echo " checking merge log files ... "
-grep -i "error" */$curDate/*.newMerge*.$curDate.log | sort | uniq
+grep -i "error" */$curDate/*.newMerge*.$curDate.log | \
+        grep -v " no tumor sample for " | \
+        sort | uniq
 
 echo " "
 echo " checking j log files ... "
@@ -71,7 +79,7 @@ grep -i "error" */$curDate/*.$curDate.jc.log | sort | uniq
 
 echo " "
 echo " checking jct log files ... "
-grep -i "error" */$curDate/*.$curDate.jct.log | sort | uniq
+grep -i "error" */$curDate/*.$curDate.jct.log | grep -v addSampleType | sort | uniq
 
 echo " "
 echo " checking jctm log files ... "
@@ -85,7 +93,4 @@ echo " "
 echo " checking split log files ... "
 grep -i "error" */$curDate/*.$curDate.*split.log | sort | uniq
 
-echo " "
-echo " checking merge-NT log files ... "
-grep -i "error" */$curDate/*.???.$curDate.*.NT.log | sort | uniq
 
