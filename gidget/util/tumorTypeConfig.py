@@ -5,7 +5,7 @@ import sys
 import csv
 
 TUMOR_CONFIG_DIALECT = "tumor-type-config"
-csv.register_dialect(TUMOR_CONFIG_DIALECT, delimiter=',', lineterminator='\n')
+csv.register_dialect(TUMOR_CONFIG_DIALECT, delimiter=',', lineterminator='\n', skipinitialspace=True)
 
 _relpath_configfile = path.join('config', 'tumorTypesConfig.csv')
 
