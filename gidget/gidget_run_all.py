@@ -30,6 +30,7 @@ from shutil import move
 from util.log import Logger, LogPipe, LOGGER_ENV, logToFile
 from util.pipeline_util import ensureDir, findBinarizationOutput, expandPath
 from util.load_path_config import envFromConfigOrOs
+from util.tumorTypeConfig import tumorTypeConfig
 
 # tsv parser settings
 MAF_MANIFEST_DIALECT = "maf_manifest"
@@ -132,7 +133,7 @@ class Pipeline(Thread):
                 if self._ensurePipelineOutput(POST_MAF, (self.tumorString, binarizationOutput), None): return
 
                 ppstring = 'private'  # TODO is it always this way?
-                fmxsuffix = 'TB.tsv'  # TODO is it always this way?
+                fmxsuffix = tumorTypeConfig[self.tumorString]['fmx_suffix']
 
                 if self._ensurePipelineOutput(FMX, (self.dateString, self.tumorString, ppstring, fmxsuffix), None): return
 
