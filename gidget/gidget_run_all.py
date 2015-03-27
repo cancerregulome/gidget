@@ -7,11 +7,13 @@
 usage: gidget_run_all [options] <maf_manifest> <output_directory>
 
 Options:
-    -h, --help       Show this screen
-    --version        Show version
-    --processes=<n>  Number of concurrent pipeline runs. Default 4
-    --use-date=<date>   Run against existing output for <date>
-    --config=<config file> Use the specified config file
+    -h, --help                Show this screen
+    --version                 Show version
+    --processes=<n>           Number of concurrent pipeline runs. Default 4
+    --use-date=<date>         Run against existing output for <date>
+    --config=<config file>    Use the specified config file
+    --stop-at=<pipeline step> If set, will only run the pipeline until <pipeline step>.
+                              Set to one of ['annotation', 'binarization', 'cleanup', 'fmx']
 
 """
 
@@ -41,11 +43,11 @@ TAGS       = 'tag'
 PATH       = 'internal-path'
 
 # pipeline names
-ANNOTATE     = 'maf-annotation-pipeline.sh'
-BINARIZATION = 'binarization-pipeline.sh'
-POST_MAF     = 'prepare-binarized-maf-for-fmx-construction.sh'
-FMX          = 'fmx-construction.sh'
-UPLOAD       = 'upload-fmx-to-regulome-explorer.sh'
+ANNOTATE     = ('maf-annotation-pipeline.sh', 'annotation')
+BINARIZATION = ('binarization-pipeline.sh', 'binarization')
+POST_MAF     = ('prepare-binarized-maf-for-fmx-construction.sh', 'cleanup')
+FMX          = ('fmx-construction.sh', 'fmx')
+UPLOAD       = ('upload-fmx-to-regulome-explorer.sh',)
 
 _processSemaphore = None
 
@@ -61,6 +63,7 @@ class Pipeline(Thread):
         self.interrupted = False
         self.procCur = None
 
+        self.cmdargs = cmdargs
         self.maf = expandPath(mafFile)
         self.tumorString = tumorString
         self.tagString = tagString
@@ -120,18 +123,20 @@ class Pipeline(Thread):
                 outputdir = pathjoin(self.dateDir, self.tumorString)
                 annotationOutput = pathjoin(outputdir, os.path.basename(self.maf) + '.ncm.with_uniprot')
 
-                self._ensurePipelineOutput(ANNOTATE, (self.tumorString, self.maf), annotationOutput)
+                if self._ensurePipelineOutput(ANNOTATE, (self.tumorString, self.maf), annotationOutput): return
 
                 binarizationOutput = findBinarizationOutput(outputdir)
-                self._ensurePipelineOutput(BINARIZATION, (self.tumorString, annotationOutput), binarizationOutput)
+                if self._ensurePipelineOutput(BINARIZATION, (self.tumorString, annotationOutput), binarizationOutput): return
                 binarizationOutput = findBinarizationOutput(outputdir)
 
-                self.executeGidgetPipeline(POST_MAF, (self.tumorString, binarizationOutput))
+                if self._ensurePipelineOutput(POST_MAF, (self.tumorString, binarizationOutput), None): return
 
                 ppstring = 'private'  # TODO is it always this way?
                 fmxsuffix = 'TB.tsv'  # TODO is it always this way?
 
-                self.executeGidgetPipeline(FMX, (self.dateString, self.tumorString, ppstring, fmxsuffix))
+                if self._ensurePipelineOutput(FMX, (self.dateString, self.tumorString, ppstring, fmxsuffix), None): return
+
+                # TODO load into re
             except KeyboardInterrupt:
                 logToFile(self.env[LOGGER_ENV], 'FATAL', "Keyboard interrupt")
             except PipelineError as perror:
@@ -139,11 +144,14 @@ class Pipeline(Thread):
             finally:
                 self._cleanupOutputFolder()
 
-            # TODO load into re
 
-    def _ensurePipelineOutput(self, pipelinecmd, args, outputfile):
+    '''
+    return true if we're done at this point
+    '''
+    def _ensurePipelineOutput(self, pipeline, args, outputfile):
         if outputfile is None or not os.path.exists(outputfile):
-            self.executeGidgetPipeline(pipelinecmd, args)
+            self.executeGidgetPipeline(pipeline[0], args)
+        return self._stophere(pipeline[1])
 
     def executeGidgetPipeline(self, pipeline, args):
         if self.interrupted:
@@ -164,6 +172,9 @@ class Pipeline(Thread):
     @staticmethod
     def _logPipelineStart(pipelineName, logfile, args):
         logToFile(logfile, 'PIPELINE-START', '%s %s' % (pipelineName, ' '.join(str(arg) for arg in args)))
+
+    def _stophere(self, pipelinename):
+        return self.cmdargs.stopat is not None and self.cmdargs.stopat == pipelinename
 
     # Execute on main thread
     def forceClose(self):
@@ -277,6 +288,7 @@ class Cmdargs:
         self.manifestfile = mafmanifest
         self.outputdir = outputdir
         self.configfile = configfile
+        self.stopat = arguments.get('--stop-at')
 
 
 if __name__ == "__main__":
