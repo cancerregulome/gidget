@@ -2,7 +2,7 @@
 
 import sys
 
-from gidget.util.env import gidgetConfigVars
+from env import gidgetConfigVars
 import miscClin
 import miscTCGA
 import path

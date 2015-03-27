@@ -1,6 +1,6 @@
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 
-from gidget.util.env import gidgetConfigVars
+from env import gidgetConfigVars
 import miscMath
 import miscTCGA
 

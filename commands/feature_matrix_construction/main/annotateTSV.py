@@ -4,7 +4,7 @@
 import sys
 
 # these are my local ones
-from gidget.util.env import gidgetConfigVars
+from env import gidgetConfigVars
 import chrArms
 import refData
 import tsvIO

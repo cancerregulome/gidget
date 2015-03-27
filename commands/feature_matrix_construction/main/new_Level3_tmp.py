@@ -6,7 +6,7 @@ import os
 import sys
 
 # these are my local modules
-from gidget.util.env import gidgetConfigVars
+from env import gidgetConfigVars
 import miscIO
 import miscTCGA
 import path

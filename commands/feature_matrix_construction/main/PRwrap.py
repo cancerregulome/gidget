@@ -7,7 +7,7 @@ import os
 import sys
 import time
 
-from gidget.util.env import gidgetConfigVars
+from env import gidgetConfigVars
 import miscIO
 import tsvIO
 
