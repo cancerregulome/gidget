@@ -1,4 +1,4 @@
-from gidget.util.env import gidgetConfigVars
+from env import gidgetConfigVars
 
 import miscIO
 
@@ -65,7 +65,7 @@ def patientLevelCode ( barcode ):
 
 #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 def sampleLevelCode ( barcode ):
-    return ( barcode[:15] )
+    return ( barcode[:16] )
 
 #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 # 012345678901234567890123456
@@ -164,7 +164,7 @@ def parseTCGAbarcode ( barcode ):
         sys.exit(-1)
 
     bLen = len(barcode)
-    if ( bLen < 15 ):
+    if ( bLen < 16 ):
         print " ERROR in parseTCGAbarcode ... too short ??? ", barcode, bLen
         sys.exit(-1)
     if ( bLen > 30 ):
@@ -426,6 +426,11 @@ def get_uuid2barcode_dict():
         sys.exit(-1)
 
     print datetime.now(), " done reading UUID to barcode mapping file (%d UUIDs and %d patients) " % ( len(uuid2barcode_dict), len(patient_dict) )
+    print " some examples : "
+    tKeys = uuid2barcode_dict.keys()
+    print tKeys[0], tKeys[5000], tKeys[10000]
+    tKeys = patient_dict.keys()
+    print tKeys[0], tKeys[5000], tKeys[10000]
 
     if ( len(uuid2barcode_dict) < 50000 ):
         print " ERROR in get_uuid2barcode_dict ??? it should be much longer than: "
@@ -441,42 +446,211 @@ def get_uuid2barcode_dict():
         print " "
 
 #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
+
 def get_tumor_barcode ( patientBarcode ):
+    ## print " in get_tumor_barcode ... ", patientBarcode
 
     if ( len(patient_dict) == 0 ):
         get_uuid2barcode_dict()
 
     patientBarcode = patientBarcode.upper()
+    ## print "         --> patientBarcode ", patientBarcode
 
     if ( len(patientBarcode) > 12 ):
-        if ( len(patientBarcode) >= 15 ):
+        if ( len(patientBarcode) >= 16 ):
             if ( patientBarcode[13] == '0' ):
-                return ( patientBarcode[:15] )
+                ## print "             --> returning : ", patientBarcode[:16]
+                return ( patientBarcode[:16] )
+        if ( len(patientBarcode) >= 14 ):
+            if ( patientBarcode[13] == '1' ):
+                ## print " SWITCHING to looking for a normal barcode ... ??? "
+                return ( get_normal_barcode(patientBarcode) )
+            elif ( patientBarcode[13] == '2' ):
+                ## print " SWITCHING to looking for an other barcode ... ??? "
+                return ( get_other_barcode(patientBarcode) )
 
-        print " ERROR ??? barcode is wrong format ??? ", patientBarcode
-        sys.exit(-1)
+    b12 = patientBarcode[:12]
+    ## print "         --> b12 : ", b12
 
     try:
-        barcodeList = patient_dict[patientBarcode]
+        barcodeList = patient_dict[b12]
         barcodeList.sort()
-        # print barcodeList
+        ## print len(barcodeList)
+        ## print barcodeList
+        u16List = []
         for aCode in barcodeList:
-            if ( len(aCode) >= 15 ):
+            if ( len(aCode) >= 16 ):
                 if ( aCode[13] == "0" ):
-                    return ( aCode[:15] )
+                    b16 = aCode[:16]
+                    if ( b16.startswith(patientBarcode) ):
+                        if ( b16 not in u16List ):
+                            u16List += [ b16 ]
+
+        if ( len(u16List) > 0 ):
+            u16List.sort()
+            ## print " YAY ", u16List[0] 
+            return ( u16List[0] )
+
     except:
         print " ERROR in get_tumor_barcode ??? no information for patient ", patientBarcode
-        if ( len(patientBarcode) == 12 ):
-            tmpCode = patientBarcode + "-01"
+        if ( len(patientBarcode) >= 12 ):
+            tmpCode = patientBarcode[:12] + "-01A"
             print " --> assuming that <%s> is ok " % tmpCode
             return ( tmpCode )
         sys.exit(-1)
 
     print " ERROR ??? no tumor sample for ", patientBarcode
-    if ( len(patientBarcode) == 12 ):
-        tmpCode = patientBarcode + "-01"
+    if ( len(patientBarcode) >= 12 ):
+        tmpCode = patientBarcode[:12] + "-01A"
         print " --> assuming that <%s> is ok " % tmpCode
         return ( tmpCode )
+
+    print " FATAL ERROR in get_tumor_barcode "
+    sys.exit(-1)
+
+#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
+
+def get_normal_barcode ( patientBarcode ):
+    ## print " in get_normal_barcode ... ", patientBarcode
+
+    if ( len(patient_dict) == 0 ):
+        get_uuid2barcode_dict()
+
+    patientBarcode = patientBarcode.upper()
+    ## print "         --> patientBarcode ", patientBarcode
+
+    if ( len(patientBarcode) > 12 ):
+        if ( len(patientBarcode) >= 16 ):
+            if ( patientBarcode[13] == '1' ):
+                ## print "             --> returning : ", patientBarcode[:16]
+                return ( patientBarcode[:16] )
+        if ( len(patientBarcode) >= 14 ):
+            if ( patientBarcode[13] == '0' ):
+                ## print " SWITCHING to looking for a tumor barcode ... ??? "
+                return ( get_tumor_barcode(patientBarcode) )
+            elif ( patientBarcode[13] == '2' ):
+                ## print " SWITCHING to looking for an other barcode ... ??? "
+                return ( get_other_barcode(patientBarcode) )
+
+    b12 = patientBarcode[:12]
+    ## print "         --> b12 : ", b12
+
+    try:
+        barcodeList = patient_dict[b12]
+        barcodeList.sort()
+        ## print len(barcodeList)
+        ## print barcodeList
+        u16List = []
+        for aCode in barcodeList:
+            if ( len(aCode) >= 16 ):
+                if ( aCode[13] == "1" ):
+                    b16 = aCode[:16]
+                    if ( b16.startswith(patientBarcode) ):
+                        if ( b16 not in u16List ):
+                            u16List += [ b16 ]
+
+        if ( len(u16List) > 0 ):
+            u16List.sort()
+            ## print " YAY ", u16List[0] 
+            return ( u16List[0] )
+
+    except:
+        print " ERROR in get_normal_barcode ??? no information for patient ", patientBarcode
+        if ( len(patientBarcode) >= 12 ):
+            tmpCode = patientBarcode[:12] + "-10A"
+            print " --> assuming that <%s> is ok " % tmpCode
+            return ( tmpCode )
+        sys.exit(-1)
+
+    print " ERROR ??? no normal sample for ", patientBarcode
+    if ( len(patientBarcode) >= 12 ):
+        tmpCode = patientBarcode[:12] + "-10A"
+        print " --> assuming that <%s> is ok " % tmpCode
+        return ( tmpCode )
+
+    print " FATAL ERROR in get_normal_barcode "
+    sys.exit(-1)
+
+#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
+
+def get_other_barcode ( patientBarcode ):
+    ## print " in get_other_barcode ... ", patientBarcode
+
+    if ( len(patient_dict) == 0 ):
+        get_uuid2barcode_dict()
+
+    patientBarcode = patientBarcode.upper()
+    ## print "         --> patientBarcode ", patientBarcode
+
+    if ( len(patientBarcode) > 12 ):
+        if ( len(patientBarcode) >= 16 ):
+            ## print "             --> returning : ", patientBarcode[:16]
+            return ( patientBarcode[:16] )
+
+    b12 = patientBarcode[:12]
+    ## print "         --> b12 : ", b12
+
+    try:
+        barcodeList = patient_dict[b12]
+        barcodeList.sort()
+        ## print len(barcodeList)
+        ## print barcodeList
+        u16List = []
+        for aCode in barcodeList:
+            if ( len(aCode) >= 16 ):
+                b16 = aCode[:16]
+                if ( b16.startswith(patientBarcode) ):
+                    if ( b16 not in u16List ):
+                        u16List += [ b16 ]
+
+        if ( len(u16List) > 0 ):
+            u16List.sort()
+            ## print " YAY ", u16List[0] 
+            return ( u16List[0] )
+
+    except:
+        print " ERROR in get_other_barcode ??? no information for patient ", patientBarcode
+        sys.exit(-1)
+
+    print " ERROR ??? no other sample for ", patientBarcode
+    print " FATAL ERROR in get_other_barcode "
+    sys.exit(-1)
+
+#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
+
+def get_barcode16 ( patientBarcode ):
+    ## print " in get_barcode16 ... ", patientBarcode
+
+    if ( len(patient_dict) == 0 ):
+        get_uuid2barcode_dict()
+
+    if ( len(patientBarcode) >= 16 ): return ( patientBarcode[:16] )
+
+    if ( len(patientBarcode) < 12 ):
+        print " FATAL ERROR: barcode must at least specify a patient !!! ", patientBarcode
+        sys.exit(-1)
+
+    ## if we have at least 14 characters, eg TCGA-E9-A22B-0
+    ## then we should be able to figure out what we need ...
+    if ( len(patientBarcode) >= 14 ):
+        if ( patientBarcode[13] == '1' ): 
+            return ( get_normal_barcode(patientBarcode) )
+        elif ( patientBarcode[13] == '0' ): 
+            return ( get_tumor_barcode(patientBarcode) )
+        elif ( patientBarcode[13] == '2' ):
+            return ( get_other_barcode(patientBarcode) )
+        else:
+            print " ERROR in get_barcode16 ... ", patientBarcode
+            sys.exit(-1)
+
+    ## if we have only 12 characters, then lets assume that we're looking
+    ## for a tumor sample ...
+    elif ( len(patientBarcode) < 14 ):
+        if ( len(patientBarcode) == 12 ):
+            patientBarcode += "-0"
+            return ( get_tumor_barcode(patientBarcode) )
+
+    print " FATAL ERROR in get_barcode16 ... ", patientBarcode
     sys.exit(-1)
 
 #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
@@ -507,7 +681,7 @@ def uuid_to_barcode ( uuid ):
                 return ( uuid_to_barcode ( uuid ) )
 
     # we should never fall through to here ...
-    print " should never get here ??? "
+    print " ERROR ??? ... should never get here ??? "
     print len(uuid2barcode_dict)
     print uuid
     print uuid2barcode_dict[uuid]
@@ -540,7 +714,7 @@ def barcode_to_uuid ( barcode ):
                 return ( barcode_to_uuid ( barcode ) )
 
     # we should never fall through to here ...
-    print " should never get here ??? "
+    print " ERROR ??? ... should never get here ??? "
     print len(barcode2uuid_dict)
     print barcode
     print barcode2uuid_dict[barcode]
@@ -578,7 +752,7 @@ def barcode_to_disease ( barcode ):
                 return ( barcode_to_disease ( barcode ) )
 
     # we should never fall through to here ...
-    print " should never get here ??? "
+    print " ERROR ??? ... should never get here ??? "
     print len(barcode2disease_dict)
     print barcode, shortBarcode
     print barcode2disease_dict[barcode]

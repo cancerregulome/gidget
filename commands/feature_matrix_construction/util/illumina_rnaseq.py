@@ -3,7 +3,7 @@ Created on Jun 20, 2012
 
 @author: michael
 '''
-from gidget.util.env import gidgetConfigVars
+from env import gidgetConfigVars
 
 import commands
 from datetime import datetime

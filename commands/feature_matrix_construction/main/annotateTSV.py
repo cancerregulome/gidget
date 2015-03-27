@@ -4,7 +4,7 @@
 import sys
 
 # these are my local ones
-from gidget.util.env import gidgetConfigVars
+from env import gidgetConfigVars
 import chrArms
 import refData
 import tsvIO
@@ -505,7 +505,7 @@ def chooseBestName(curGene, curID, curType, geneInfoDict, synMapDict, GAF_geneCo
 def annotateFeatures ( dataD, geneInfoDict, synMapDict, \
         Gencode_geneCoordDict_bySymbol, Gencode_geneCoordDict_byID, Gencode_geneSymbol_byID, \
         GAF_geneCoordDict_bySymbol, GAF_geneCoordDict_byID, GAF_geneSymbol_byID, \
-        refGeneDict, cytoDict, nameChangeFlag ):
+        refGeneDict, cytoDict, forceFlag, nameChangeFlag ):
 
     print " "
     print " in annotateFeatures ... "
@@ -607,6 +607,14 @@ def annotateFeatures ( dataD, geneInfoDict, synMapDict, \
 
         print " curType=<%s>  haveName=%d  haveCoord=%d  haveExtraName=%d " % \
             (curType, haveName, haveCoord, haveExtraName)
+
+        ## if we are forcing a re-annotation, then we may reset haveCoord to false ...
+        if ( forceFlag ):
+            if ( haveCoord ):
+                if ( curType == "GEXP" ): haveCoord = 0
+                if ( curType == "MIRN" ): haveCoord = 0
+                if ( curType == "GNAB" ): haveCoord = 0
+                if ( curType == "RPPA" ): haveCoord = 0
 
         # ------------
         # IF haveCoord
@@ -828,17 +836,26 @@ if __name__ == "__main__":
             build = sys.argv[2]
             outFile = sys.argv[3]
             if (len(sys.argv) >= 5):
-                nameChangeFlag = sys.argv[4].upper()
+                forceFlag = sys.argv[4].upper()
+            else:
+                forceFlag = "NO"
+            if (len(sys.argv) >= 6):
+                nameChangeFlag = sys.argv[5].upper()
             else:
                 nameChangeFlag = "NO"
         else:
             print " "
-            print " Usage: %s <input TSV file> <hg18 or hg19> <output TSV file> [nameChangeFlag=NO/YES] "
-            print "        note that nameChangeFlag will default to NO "
+            print " Usage: %s <input TSV file> <hg18 or hg19> <output TSV file> [force REannotation=NO/YES] [nameChangeFlag=NO/YES] "
+            print "        note that forceFlag nameChangeFlag will default to NO "
             print " "
             print " ERROR -- bad command line arguments "
             sys.exit(-1)
             tumorType = 'gbm'
+
+    if (forceFlag == "Y"):
+        forceFlag = "YES"
+    if (forceFlag != "YES"):
+        forceFlag = "NO"
 
     if (nameChangeFlag == "Y"):
         nameChangeFlag = "YES"
@@ -918,7 +935,7 @@ if __name__ == "__main__":
     annotD = annotateFeatures ( testD, geneInfoDict, synMapDict, \
         Gencode_geneCoordDict_bySymbol, Gencode_geneCoordDict_byID, Gencode_geneSymbol_byID, \
         GAF_geneCoordDict_bySymbol, GAF_geneCoordDict_byID, GAF_geneSymbol_byID, \
-        refGeneDict, cytoDict, nameChangeFlag )
+        refGeneDict, cytoDict, forceFlag, nameChangeFlag )
 
     # check that the feature names are still unique ...
     print " --> verify that the feature names are unique ... "

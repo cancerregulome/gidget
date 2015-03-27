@@ -24,9 +24,13 @@ wget https://tcga-data.nci.nih.gov/tcgafiles/ftp_auth/distro_ftpusers/anonymous/
 ## make sure that we actually got something back !!!
 if [ -s metadata.current.txt ]
     then
-
+        curdate=`echo "$(date +"%d%b%y")" | tr '[A-Z]' '[a-z]'`
         rm -fr metadata.original.copy
         cp metadata.current.txt metadata.original.copy
+        ## adjust for potentially wrongly labeled MSI samples
+        echo " start correcting default MSI vials"
+        python $TCGAFMP_ROOT_DIR/util/correct_metadata_msi_samples.py metadata.current.txt >& correct_metadata_msi_samples.$curdate.log
+        echo " finished..."
         
         grep -v "UUID" metadata.current.txt | cut -f1-4 | sort >& t1
         rm -fr metadata.current.txt
@@ -35,7 +39,7 @@ if [ -s metadata.current.txt ]
         ## and also make a copy that includes the date, just
         ## like the snapshot will
         ## cp metadata.current.txt metadata.`echo "$(date +%Y-%m-%d)"`.txt
-        cp metadata.current.txt metadata.`echo "$(date +"%d%b%y")" | tr '[A-Z]' '[a-z]'`.txt
+        cp metadata.current.txt metadata.$curdate.txt
         
     else
 

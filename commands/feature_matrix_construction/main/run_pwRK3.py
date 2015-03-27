@@ -8,7 +8,7 @@ import os.path
 import sys
 import time
 
-from gidget.util.env import gidgetConfigVars
+from env import gidgetConfigVars
 import miscIO
 
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
@@ -590,7 +590,7 @@ if __name__ == "__main__":
         while iStart < numFeat:
             iStop = min ( (iStart + nFpJ), numFeat )
             outName = tmpDir13 + "/" + str(numJobs) + ".pw"
-            cmdString = "1 " + gidgetConfigVars['TCGAFMP_PAIRWISE_ROOT'] + "/pairwise-1.1.2"
+            cmdString = "1 " + gidgetConfigVars['TCGAFMP_PAIRWISE_ROOT'] + "/pairwise-2.1.2"
             cmdString += " --pvalue %g --min-ct-cell %d --min-mx-cell %d --min-samples %d" \
                 % (args.pvalue, args.min_ct_cell, args.min_mx_cell, args.min_samples)
             cmdString += " --outer %d:%d:1 --inner +1::1  %s  %s " \
@@ -616,7 +616,7 @@ if __name__ == "__main__":
         for iTuple in iRanges1:
             for jTuple in iRanges2:
                 outName = tmpDir13 + "/" + str(numJobs) + ".pw"
-                cmdString = "1 " + gidgetConfigVars['TCGAFMP_PAIRWISE_ROOT'] + "/pairwise-1.1.2"
+                cmdString = "1 " + gidgetConfigVars['TCGAFMP_PAIRWISE_ROOT'] + "/pairwise-2.1.2"
                 cmdString += " --pvalue %g --min-ct-cell %d --min-mx-cell %d --min-samples %d" \
                     % (args.pvalue, args.min_ct_cell, args.min_mx_cell, args.min_samples)
 
@@ -651,7 +651,7 @@ if __name__ == "__main__":
         # handle the single index vs all option ...
         # ( note that the single-index vs a specified "type" is handled above )
         outName = tmpDir13 + "/" + str(index) + ".pw"
-        cmdString = "1 " + gidgetConfigVars['TCGAFMP_PAIRWISE_ROOT'] + "/pairwise-1.1.2"
+        cmdString = "1 " + gidgetConfigVars['TCGAFMP_PAIRWISE_ROOT'] + "/pairwise-2.1.2"
         cmdString += " --pvalue %g --min-ct-cell %d --min-mx-cell %d --min-samples %d" \
             % (args.pvalue, args.min_ct_cell, args.min_mx_cell, args.min_samples)
         cmdString += " --outer %d:%d:1 --inner 0::1  %s  %s " \
