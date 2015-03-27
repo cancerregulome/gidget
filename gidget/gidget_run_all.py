@@ -55,7 +55,7 @@ class PipelineError(Exception):
 
 class Pipeline(Thread):
 
-    def __init__(self, mafFile, outputDirRoot, tagString, tumorString, env, date=None):
+    def __init__(self, cmdargs, mafFile, tagString, tumorString, env, date=None):
         super(Pipeline, self).__init__()
 
         self.interrupted = False
@@ -65,7 +65,7 @@ class Pipeline(Thread):
         self.tumorString = tumorString
         self.tagString = tagString
 
-        self.tagDir = pathjoin(outputDirRoot, tagString)
+        self.tagDir = pathjoin(cmdargs.outputdir, tagString)
 
         ensureDir(self.tagDir)
         tumorDir = pathjoin(self.tagDir, self.tumorString)
@@ -214,14 +214,14 @@ def interruptAll(pipes):
         pipe.forceClose()
 
 
-def run_all(pathToMafManifest, numProcesses, outputDir, env, date=None):
+def run_all(cmdargs, env):
     global _processSemaphore
     pipes = ()
     try:
-        _processSemaphore = Semaphore(numProcesses)  # TODO there is probably a better way than using a global semaphore. Or is there...?
-        with open(pathToMafManifest) as tsv:
+        _processSemaphore = Semaphore(cmdargs.numprocesses)  # TODO there is probably a better way than using a global semaphore. Or is there...?
+        with open(cmdargs.manifestfile) as tsv:
             for maf in csv.DictReader(tsv, dialect=MAF_MANIFEST_DIALECT):
-                pipes += (run_one(maf[PATH], outputDir, maf[TAGS], maf[TUMOR_CODE], env, date),)
+                pipes += (run_one(cmdargs, maf[PATH], maf[TAGS], maf[TUMOR_CODE], env),)
 
         # TODO Kludge
         # Python will only send interrupts to the main thread and the main thread will not respond if it is
@@ -241,40 +241,44 @@ def run_all(pathToMafManifest, numProcesses, outputDir, env, date=None):
             pipe.close()
 
 
-def run_one(pathToMaf, outputDir, tags, tumorString, env, date=None):
+def run_one(cmdargs, pathToMaf, tags, tumorString, env):
     """
     :param pathToMaf:
     :return the pipeline thread running this maf file
     """
     assert _processSemaphore is not None
-    pipeline = Pipeline(pathToMaf, outputDir, tags, tumorString, env, date)
+    pipeline = Pipeline(cmdargs, pathToMaf, tags, tumorString, env)
     pipeline.start()
     return pipeline
 
 
+class Cmdargs:
+
+    def __init__(self, arguments):
+
+        mafmanifest = arguments.get('<maf_manifest>')
+        outputdir = arguments.get('<output_directory>')
+        configfile = expandPath(arguments.get('--config'))
+
+        if not os.path.exists(mafmanifest):
+            sys.stderr.write("No manifest file at %s\n" % mafmanifest)
+            exit(1)
+
+        if not os.path.exists(outputdir):
+            sys.stderr.write("Output directory at %s does not exist\n" % outputdir)
+            exit(1)
+
+        if configfile is not None and not os.path.exists(configfile):
+            sys.stderr.write("Cannot find config file %s\n" % configfile)
+            exit(1)
+
+        self.numprocesses = arguments.get('--processes') or 4
+        self.usedate = arguments.get('--use-date')
+        self.manifestfile = mafmanifest
+        self.outputdir = outputdir
+        self.configfile = configfile
+
+
 if __name__ == "__main__":
-    arguments = docopt(__doc__, version='Gidget Run All 0.0')
-
-    mafManifest = arguments.get('<maf_manifest>')
-    outputDir = arguments.get('<output_directory>')
-    configFile = expandPath(arguments.get('--config'))
-
-    if not os.path.exists(mafManifest):
-        sys.stderr.write("No manifest file at %s\n" % mafManifest)
-        exit(1)
-
-    if not os.path.exists(outputDir):
-        sys.stderr.write("Output directory at %s does not exist\n" % outputDir)
-        exit(1)
-
-    if configFile is not None and not os.path.exists(configFile):
-        sys.stderr.write("Cannot find config file %s\n" % configFile)
-        exit(1)
-
-    run_all(
-        mafManifest,
-        int(arguments.get('--processes') or 4),
-        outputDir,
-        envFromConfigOrOs(configFile),
-        arguments.get('--use-date'))
-
+    cmdargs = Cmdargs(docopt(__doc__, version='Gidget Run All 0.0'))
+    run_all(cmdargs, envFromConfigOrOs(cmdargs.configfile))
