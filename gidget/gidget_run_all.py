@@ -47,7 +47,7 @@ ANNOTATE     = ('maf-annotation-pipeline.sh', 'annotation')
 BINARIZATION = ('binarization-pipeline.sh', 'binarization')
 POST_MAF     = ('prepare-binarized-maf-for-fmx-construction.sh', 'cleanup')
 FMX          = ('fmx-construction.sh', 'fmx')
-UPLOAD       = ('upload-fmx-to-regulome-explorer.sh',)
+UPLOAD       = ('upload-fmx-to-regulome-explorer.sh', None)
 
 _processSemaphore = None
 
