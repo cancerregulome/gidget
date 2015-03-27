@@ -131,7 +131,7 @@ class Pipeline(Thread):
                 if self._ensurePipelineOutput(POST_MAF, (self.mafargs.tumorcode, binarizationOutput), None): return
 
                 ppstring = 'private'  # TODO is it always this way?
-                fmxsuffix = tumorTypeConfig[self.mafargs.tumorcode]['fmx_suffix']
+                fmxsuffix = tumorTypeConfig[self.mafargs.tumorcode]['fmx_suffix'] + ".tsv"
 
                 if self._ensurePipelineOutput(FMX, (self.dateString, self.mafargs.tumorcode, ppstring, fmxsuffix), None): return
 
