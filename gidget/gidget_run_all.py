@@ -58,21 +58,19 @@ class PipelineError(Exception):
 
 class Pipeline(Thread):
 
-    def __init__(self, cmdargs, mafFile, tagString, tumorString, env, date=None):
+    def __init__(self, cmdargs, mafargs, env, date=None):
         super(Pipeline, self).__init__()
 
         self.interrupted = False
         self.procCur = None
 
         self.cmdargs = cmdargs
-        self.maf = expandPath(mafFile)
-        self.tumorString = tumorString
-        self.tagString = tagString
+        self.mafargs = mafargs
 
-        self.tagDir = pathjoin(cmdargs.outputdir, tagString)
+        self.tagDir = pathjoin(cmdargs.outputdir, self.mafargs.tags)
 
         ensureDir(self.tagDir)
-        tumorDir = pathjoin(self.tagDir, self.tumorString)
+        tumorDir = pathjoin(self.tagDir, self.mafargs.tumorcode)
         ensureDir(tumorDir)
 
         if (date is None):
@@ -98,44 +96,44 @@ class Pipeline(Thread):
         self.pipelinelog = PipelineLog(logpath)
         self.env[LOGGER_ENV] = logpath
 
-        if not os.path.exists(self.maf):
-            self.pipelinelog.logger.log("FATAL", "Cannot find MAF file %s." % self.maf)
+        if not os.path.exists(self.mafargs.path):
+            self.pipelinelog.logger.log("FATAL", "Cannot find MAF file %s." % self.mafargs.path)
             self.pipelinelog.logger.log("FATAL", "Aborting pipeline.")
-            self.pipelinelog.logger.log("FATAL", "Please check the file path in the manifest file for tumor type %s and tag %s" % (self.tumorString, self.tagString))
+            self.pipelinelog.logger.log("FATAL", "Please check the file path in the manifest file for tumor type %s and tag %s" % (self.mafargs.tumorcode, self.mafargs.tags))
             self.pipelinelog.logger.log("FATAL", "Also check your environment variables. See below for current values:")
             self.pipelinelog.logger.log("FATAL", "TCGAMAF_OUTPUTS=%s" % self.env['TCGAMAF_OUTPUTS'])
             self.pipelinelog.logger.log("FATAL", "TCGAFMP_DCC_REPOSITORIES=%s" % self.env['TCGAFMP_DCC_REPOSITORIES'])
-            self.maf = None
+            self.mafargs.path = None
             return
 
         # HACK: this is needed for the doAllC code
-        ensureDir(pathjoin(self.dateDir, self.tumorString))
-        ensureDir(pathjoin(self.dateDir, self.tumorString, self.dateString))
-        ensureDir(pathjoin(self.dateDir, self.tumorString, 'gnab'))
-        ensureDir(pathjoin(self.dateDir, self.tumorString, 'scratch'))
+        ensureDir(pathjoin(self.dateDir, self.mafargs.tumorcode))
+        ensureDir(pathjoin(self.dateDir, self.mafargs.tumorcode, self.dateString))
+        ensureDir(pathjoin(self.dateDir, self.mafargs.tumorcode, 'gnab'))
+        ensureDir(pathjoin(self.dateDir, self.mafargs.tumorcode, 'scratch'))
 
     def run(self):
-        if self.maf is None:
+        if self.mafargs.path is None:
             return
 
         with _processSemaphore:
             try:
                 # this is just where the annotation and binarization scripts put things. Don't ask too many questions...
-                outputdir = pathjoin(self.dateDir, self.tumorString)
-                annotationOutput = pathjoin(outputdir, os.path.basename(self.maf) + '.ncm.with_uniprot')
+                outputdir = pathjoin(self.dateDir, self.mafargs.tumorcode)
+                annotationOutput = pathjoin(outputdir, os.path.basename(self.mafargs.path) + '.ncm.with_uniprot')
 
-                if self._ensurePipelineOutput(ANNOTATE, (self.tumorString, self.maf), annotationOutput): return
+                if self._ensurePipelineOutput(ANNOTATE, (self.mafargs.tumorcode, self.mafargs.path), annotationOutput): return
 
                 binarizationOutput = findBinarizationOutput(outputdir)
-                if self._ensurePipelineOutput(BINARIZATION, (self.tumorString, annotationOutput), binarizationOutput): return
+                if self._ensurePipelineOutput(BINARIZATION, (self.mafargs.tumorcode, annotationOutput), binarizationOutput): return
                 binarizationOutput = findBinarizationOutput(outputdir)
 
-                if self._ensurePipelineOutput(POST_MAF, (self.tumorString, binarizationOutput), None): return
+                if self._ensurePipelineOutput(POST_MAF, (self.mafargs.tumorcode, binarizationOutput), None): return
 
                 ppstring = 'private'  # TODO is it always this way?
-                fmxsuffix = tumorTypeConfig[self.tumorString]['fmx_suffix']
+                fmxsuffix = tumorTypeConfig[self.mafargs.tumorcode]['fmx_suffix']
 
-                if self._ensurePipelineOutput(FMX, (self.dateString, self.tumorString, ppstring, fmxsuffix), None): return
+                if self._ensurePipelineOutput(FMX, (self.dateString, self.mafargs.tumorcode, ppstring, fmxsuffix), None): return
 
                 # TODO load into re
             except KeyboardInterrupt:
@@ -195,13 +193,13 @@ class Pipeline(Thread):
 
         fmxdirNew = pathjoin(self.dateDir, 'fmx')
         os.mkdir(fmxdirNew)
-        fmxdirOld = pathjoin(self.dateDir, self.tumorString, self.dateString)
+        fmxdirOld = pathjoin(self.dateDir, self.mafargs.tumorcode, self.dateString)
         for outfile in os.listdir(fmxdirOld):
             move(pathjoin(fmxdirOld, outfile), fmxdirNew)
 
         os.rmdir(fmxdirOld)
 
-        tumordir = pathjoin(self.dateDir, self.tumorString)
+        tumordir = pathjoin(self.dateDir, self.mafargs.tumorcode)
         for outfile in os.listdir(tumordir):
             move(pathjoin(tumordir, outfile), self.dateDir)
 
@@ -233,7 +231,7 @@ def run_all(cmdargs, env):
         _processSemaphore = Semaphore(cmdargs.numprocesses)  # TODO there is probably a better way than using a global semaphore. Or is there...?
         with open(cmdargs.manifestfile) as tsv:
             for maf in csv.DictReader(tsv, dialect=MAF_MANIFEST_DIALECT):
-                pipes += (run_one(cmdargs, maf[PATH], maf[TAGS], maf[TUMOR_CODE], env),)
+                pipes += (run_one(cmdargs, Mafargs(maf), env),)
 
         # TODO Kludge
         # Python will only send interrupts to the main thread and the main thread will not respond if it is
@@ -253,13 +251,13 @@ def run_all(cmdargs, env):
             pipe.close()
 
 
-def run_one(cmdargs, pathToMaf, tags, tumorString, env):
+def run_one(cmdargs, mafargs, env):
     """
     :param pathToMaf:
     :return the pipeline thread running this maf file
     """
     assert _processSemaphore is not None
-    pipeline = Pipeline(cmdargs, pathToMaf, tags, tumorString, env)
+    pipeline = Pipeline(cmdargs, mafargs, env)
     pipeline.start()
     return pipeline
 
@@ -290,6 +288,14 @@ class Cmdargs:
         self.outputdir = outputdir
         self.configfile = configfile
         self.stopat = arguments.get('--stop-at')
+
+
+class Mafargs:
+
+    def __init__(self, manifestLineDict):
+        self.path = expandPath(manifestLineDict[PATH])
+        self.tags = manifestLineDict[TAGS]
+        self.tumorcode = manifestLineDict[TUMOR_CODE]
 
 
 if __name__ == "__main__":
