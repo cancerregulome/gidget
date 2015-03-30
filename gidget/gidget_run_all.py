@@ -30,7 +30,7 @@ from shutil import move
 from util.log import Logger, LogPipe, LOGGER_ENV, logToFile
 from util.pipeline_util import ensureDir, findBinarizationOutput, expandPath
 from util.load_path_config import envFromConfigOrOs
-from util.tumorTypeConfig import tumorTypeConfig
+from util.tumor_type_config import tumorTypeConfig
 
 # tsv parser settings
 MAF_MANIFEST_DIALECT = "maf_manifest"
