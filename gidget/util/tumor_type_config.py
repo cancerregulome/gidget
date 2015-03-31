@@ -11,8 +11,6 @@ _relpath_configfile = path.join('config', 'tumorTypesConfig.csv')
 
 _configfile = path.expandvars(path.join('${GIDGET_SOURCE_ROOT}', _relpath_configfile))
 
-print (_configfile)
-
 if not path.exists(_configfile):
     # KLUDGE
     _configfile = path.join(path.dirname(path.dirname(path.dirname(path.abspath(sys.modules[__name__].__file__)))), _relpath_configfile)
