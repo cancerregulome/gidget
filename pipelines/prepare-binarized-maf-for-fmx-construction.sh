@@ -57,6 +57,8 @@ cp -v ${binarizationOutput} "${TCGAFMP_DATA_DIR}/${tumorType}/gnab/latest.gnab.t
 cd ${TCGAFMP_ROOT_DIR}/shscript
 ./fmp03B_gnab_part.sh $tumorType
 
+cd ${TCGAFMP_DATA_DIR}/${tumorType}/gnab/
+
 cleanUp_out="${tumorType}.gnab.tmpData1.tsv"
 
 if [[ ${codePotentialOnly} -ne 0 ]]
