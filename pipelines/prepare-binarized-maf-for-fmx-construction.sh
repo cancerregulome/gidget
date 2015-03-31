@@ -67,9 +67,9 @@ then
     g1=`mktemp`
 
     codePot_out="${tumorType}.gnab.codePot.tsv"
-    head -1 ${cleanUp_out} >& h1
-    grep "code_potential" ${cleanUp_out} >& g1
-    cat h1 g1 >& ${codePot_out}
+    head -1 ${cleanUp_out} >& ${h1}
+    grep "code_potential" ${cleanUp_out} >& ${g1}
+    cat ${h1} ${g1} >& ${codePot_out}
 
     rm ${h1} ${g1}
 else
