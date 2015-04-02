@@ -552,10 +552,18 @@ def annotateFeatures ( dataD, geneInfoDict, synMapDict, \
                 numDup += 1
                 dupList += [curGene]
 
-    if (numDup > 0):
-        print " "
-        print " WARNING !!! DUPLICATE gene symbols coming in !!! "
-        print " "
+    ## the RNAseqV2 pipeline has SLC35E2 repeated ...
+    if ( "SLC35E2" in dupList ):
+        if ( numDup == 1 ):
+            curGeneSymbols += [ "SLC35E2B" ]
+            numDup = 0
+            dupList = []
+            print " --> the only duplicated gene symbol (SLC35E2) will be handled explicitly ... "
+        else:
+            print " "
+            print " WARNING !!! DUPLICATE gene symbols coming in !!! ", numDup
+            print dupList
+            print " "
 
     # we want to loop over all of the feature names and attempt to add either
     # gene names or coordinates as appropriate ...
@@ -652,7 +660,14 @@ def annotateFeatures ( dataD, geneInfoDict, synMapDict, \
                                        geneInfoDict, synMapDict, \
                                        GAF_geneCoordDict_bySymbol, GAF_geneCoordDict_byID )
 
-            if (nameChangeFlag == "YES"):
+            if ( curGene.startswith("SLC35E2") ):
+                ## gene IDs 728661 and 9906 are both being called "SLC35E2" in the RNAseqV2
+                ## data, but 728661 should be changed to SLC35E2B ...
+                if ( curID == "728661" ):
+                    print " --> changing gene from <%s> to SLC35E2B " % curGene
+                    curGene = "SLC35E2B"
+
+            elif (nameChangeFlag == "YES"):
                 if (newGene != curGene):
                     # do NOT change to this "new" name if this name seems to
                     # already be in use ...
