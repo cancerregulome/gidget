@@ -617,7 +617,7 @@ def annotateFeatures ( dataD, geneInfoDict, synMapDict, \
             (curType, haveName, haveCoord, haveExtraName)
 
         ## if we are forcing a re-annotation, then we may reset haveCoord to false ...
-        if ( forceFlag ):
+        if ( forceFlag == "YES" ):
             if ( haveCoord ):
                 if ( curType == "GEXP" ): haveCoord = 0
                 if ( curType == "MIRN" ): haveCoord = 0
@@ -876,6 +876,10 @@ if __name__ == "__main__":
         nameChangeFlag = "YES"
     if (nameChangeFlag != "YES"):
         nameChangeFlag = "NO"
+
+    print "         forceFlag = %s " % forceFlag
+    print "         nameChangeFlag = %s " % nameChangeFlag
+    print " "
 
     # and get the coordinates for these genes ...
     bioinformaticsReferencesDir = gidgetConfigVars['TCGAFMP_BIOINFORMATICS_REFERENCES']
