@@ -25,12 +25,12 @@ from os.path import join as pathjoin
 import csv
 import os
 import sys
-from shutil import move
+from shutil import move, rmtree
 
 from util.log import Logger, LogPipe, LOGGER_ENV, logToFile
 from util.pipeline_util import ensureDir, findBinarizationOutput, expandPath
 from util.load_path_config import envFromConfigOrOs
-from util.tumorTypeConfig import tumorTypeConfig
+from util.tumor_type_config import tumorTypeConfig
 
 # tsv parser settings
 MAF_MANIFEST_DIALECT = "maf_manifest"
@@ -131,7 +131,7 @@ class Pipeline(Thread):
                 if self._ensurePipelineOutput(POST_MAF, (self.mafargs.tumorcode, binarizationOutput), None): return
 
                 ppstring = 'private'  # TODO is it always this way?
-                fmxsuffix = tumorTypeConfig[self.mafargs.tumorcode]['fmx_suffix']
+                fmxsuffix = tumorTypeConfig[self.mafargs.tumorcode]['fmx_suffix'] + ".tsv"
 
                 if self._ensurePipelineOutput(FMX, (self.dateString, self.mafargs.tumorcode, ppstring, fmxsuffix), None): return
 
@@ -194,16 +194,19 @@ class Pipeline(Thread):
         fmxdirNew = pathjoin(self.dateDir, 'fmx')
         os.mkdir(fmxdirNew)
         fmxdirOld = pathjoin(self.dateDir, self.mafargs.tumorcode, self.dateString)
-        for outfile in os.listdir(fmxdirOld):
+        for outfile in _listdirNonHidden(fmxdirOld):
             move(pathjoin(fmxdirOld, outfile), fmxdirNew)
 
-        os.rmdir(fmxdirOld)
+        rmtree(fmxdirOld)
 
         tumordir = pathjoin(self.dateDir, self.mafargs.tumorcode)
-        for outfile in os.listdir(tumordir):
+        for outfile in _listdirNonHidden(tumordir):
             move(pathjoin(tumordir, outfile), self.dateDir)
 
-        os.rmdir(tumordir)
+        rmtree(tumordir)
+
+def _listdirNonHidden(dir):
+    return [file for file in os.listdir(dir) if not file.startswith('.')]
 
 
 class PipelineLog:

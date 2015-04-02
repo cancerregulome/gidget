@@ -57,6 +57,8 @@ cp -v ${binarizationOutput} "${TCGAFMP_DATA_DIR}/${tumorType}/gnab/latest.gnab.t
 cd ${TCGAFMP_ROOT_DIR}/shscript
 ./fmp03B_gnab_part.sh $tumorType
 
+cd ${TCGAFMP_DATA_DIR}/${tumorType}/gnab/
+
 cleanUp_out="${tumorType}.gnab.tmpData1.tsv"
 
 if [[ ${codePotentialOnly} -ne 0 ]]
@@ -67,9 +69,9 @@ then
     g1=`mktemp`
 
     codePot_out="${tumorType}.gnab.codePot.tsv"
-    head -1 ${cleanUp_out} >& h1
-    grep "code_potential" ${cleanUp_out} >& g1
-    cat h1 g1 >& ${codePot_out}
+    head -1 ${cleanUp_out} >& ${h1}
+    grep "code_potential" ${cleanUp_out} >& ${g1}
+    cat ${h1} ${g1} >& ${codePot_out}
 
     rm ${h1} ${g1}
 else
