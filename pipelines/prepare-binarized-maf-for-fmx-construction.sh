@@ -81,7 +81,6 @@ fi
 # filter out features
 filter_out="${tumorType}.gnab.tmpData2.tsv"
 cd ${TCGAFMP_DATA_DIR}/${tumorType}/gnab/
-echo "python ${TCGAFMP_ROOT_DIR}/main/highVarTSV.py skcm.gnab.tmpData1.tsv skcm.gnab.tmpData2.tsv -${mutationThreshold} NZC" #TODO
 python ${TCGAFMP_ROOT_DIR}/main/highVarTSV.py ${codePot_out} ${filter_out} -${mutationThreshold} NZC
 
 

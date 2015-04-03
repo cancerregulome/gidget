@@ -22,7 +22,7 @@ Output directory will be the root of all outputs. The directory structure of the
         <tag>
             <tumor type>
                 <date>
-                
+
 The tag and tumor-type directory names come from the lines in the manifest file. The date comes from the current system
 date, or the --use-date option if specified. Included under the <date> directory is a LOG.txt file which contains the
 captured output from subprocesses spawned by this script as well as log messages from the script itself.
