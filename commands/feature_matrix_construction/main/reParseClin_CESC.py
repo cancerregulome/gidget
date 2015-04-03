@@ -568,15 +568,15 @@ def makeMergedDx ( allClinDict ):
             if ( allClinDict[histTypeKey][ii] == "Cervical_Squamous_Cell_Carcinoma" ):
                 mergeDx += [ "Squamous" ]
             elif ( allClinDict[histTypeKey][ii] == "Endocervical_Type_of_Adenocarcinoma" ):
-                mergeDx += [ "Endocervical_Adeno" ]
+                mergeDx += [ "Adenocarcinoma" ]
             elif ( allClinDict[histTypeKey][ii] == "Mucinous_Adenocarcinoma_of_Endocervical_Type" ):
-                mergeDx += [ "Endocervical_Adeno" ]
+                mergeDx += [ "Adenocarcinoma" ]
             elif ( allClinDict[histTypeKey][ii] == "Adenosquamous" ):
                 mergeDx += [ "Adenosquamous" ]
             elif ( allClinDict[histTypeKey][ii] == "Endometrioid_Adenocarcinoma_of_Endocervix" ):
-                mergeDx += [ "Endocervical_Adeno" ]
+                mergeDx += [ "Adenocarcinoma" ]
             elif ( allClinDict[histTypeKey][ii] == "Endocervical_Adenocarcinoma_of_the_Usual_Type" ):
-                mergeDx += [ "Endocervical_Adeno" ]
+                mergeDx += [ "Adenocarcinoma" ]
             elif ( allClinDict[histTypeKey][ii] == "NA" ):
                 mergeDx += [ "NA" ]
             else:
