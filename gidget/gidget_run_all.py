@@ -10,11 +10,25 @@ Options:
     -h, --help                Show this screen
     --version                 Show version
     --processes=<n>           Number of concurrent pipeline runs. Default 4
-    --use-date=<date>         Run against existing output for <date>
+    --use-date=<date>         Run against existing output for <date>. If existing output does not exists, will use the
+                              string provided as the name for date-based folders.
     --config=<config file>    Use the specified config file
     --stop-at=<pipeline step> If set, will only run the pipeline until <pipeline step>.
-                              Set to one of ['annotation', 'binarization', 'cleanup', 'fmx']
+                              Set it to one of ['annotation', 'binarization', 'cleanup', 'fmx']
 
+Output directory will be the root of all outputs. The directory structure of the outputs is as follows:
+
+    <output root>
+        <tag>
+            <tumor type>
+                <date>
+                
+The tag and tumor-type directory names come from the lines in the manifest file. The date comes from the current system
+date, or the --use-date option if specified. Included under the <date> directory is a LOG.txt file which contains the
+captured output from subprocesses spawned by this script as well as log messages from the script itself.
+
+The run_all script requires you to set your gidget-env variables or to specify a config file to import them from. See
+the files 'required_env_vars' and 'gidget_config_template.config' for more information.
 """
 
 from docopt import docopt
@@ -55,7 +69,10 @@ _processSemaphore = None
 class PipelineError(Exception):
     pass  # TODO
 
-
+"""
+Represents a run of one of the MAFs in the maf-manifest file. The _processSemaphore is used to ensure that a limited
+number of MAFs are being processed at any one time.
+"""
 class Pipeline(Thread):
 
     def __init__(self, cmdargs, mafargs, env, date=None):
@@ -291,6 +308,11 @@ class Cmdargs:
         self.outputdir = outputdir
         self.configfile = configfile
         self.stopat = arguments.get('--stop-at')
+
+        if not (self.stopat is None or self.stopat == ANNOTATE[1] or self.stopat == BINARIZATION[1]
+                or self.stopat == POST_MAF[1] or self.stopat == FMX[1]):
+            sys.stderr.write("Invalid stop-at parameter\n")
+            exit(1)
 
 
 class Mafargs:
