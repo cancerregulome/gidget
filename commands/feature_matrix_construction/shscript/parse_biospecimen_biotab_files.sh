@@ -21,6 +21,7 @@ for tumor in `cat $TCGAFMP_ROOT_DIR/config/tumor_list.txt`
         ## the biospecimen_cqcf_$tumor.txt file has either 29 [17 tumors] or 30 [18 tumors] columns ...
         ##     29 columns: brca, cesc, chol, hnsc, kirc, kirp, laml, lcml, lgg, lihc, lnnh, lusc, ov, pcpg, thym, ucs, uvm
         ##     30 columns: acc, blca, coad, dlbc, esca, gbm, kich, luad, meso, paad, prad, read, sarck, skcm, stad, tgct, thca, ucec
+        ## --> as of 12apr15 ... some of these files now have 34 columns!!! but the ones we want are still #2 and #7
 
         ## the biospecimen_slide_$tumor.txt file has either 14 [17] or 15 [18] columns, with the same disease-type splits
 
@@ -33,7 +34,7 @@ for tumor in `cat $TCGAFMP_ROOT_DIR/config/tumor_list.txt`
         head -1 *bio.Level_2*/nationwidechildrens.org_biospecimen_cqcf*.txt >& $TCGAFMP_DCC_REPOSITORIES/scratch/ta
         ~/scripts/transpose $TCGAFMP_DCC_REPOSITORIES/scratch/ta >& $TCGAFMP_DCC_REPOSITORIES/scratch/tb
         numLines=$(wc -l < "$TCGAFMP_DCC_REPOSITORIES/scratch/tb" )
-        if [ $numLines -eq 30 ]
+        if [ $numLines -eq 30 ] || [ $numLines -eq 34 ]
             then
                 cut -f 2,7 *bio.Level_2*/nationwidechildrens.org_biospecimen_cqcf*.txt         | sort | sed -e '1,$s/\[Not Available\]/NA/g' | sed -e '1,$s/\[Not Reported\]/NA/g' | sed -e '1,$s/\[Not Applicable\]/NA/g' | sed -e '1,$s/null/NA/g' >& $TCGAFMP_DCC_REPOSITORIES/scratch/t1
             else
