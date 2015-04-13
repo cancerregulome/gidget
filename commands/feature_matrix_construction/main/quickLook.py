@@ -362,7 +362,7 @@ if __name__ == "__main__":
         for iRow in range(numRow):
             featName = dataMatrix[0][iRow]
             if (featName.startswith("B:GNAB:TP53:") or featName.startswith("B:GNAB:TTN:")):
-                if (featName.find("y_n") > 0):
+                if (featName.find("code_potential") > 0):
                     bitD = {}
                     print iRow, featName
                     print featName
