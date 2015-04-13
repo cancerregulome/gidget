@@ -582,6 +582,10 @@ def makeMergedDx ( allClinDict ):
             else:
                 print " ERROR ??? we should not be here ... ", ii, allClinDict[barKey][ii], \
                     allClinDict[histTypeKey][ii], allClinDict[epcDxKey][ii]
+
+        ## just double-checking terminology one more time ...
+        if ( mergeDx[-1] == "Endocervical_Adeno" ):
+            mergeDx[-1] = "Adenocarcinoma"
             
     keyString = "C:CLIN:Dx_merged:::::"
     allClinDict[keyString] = mergeDx
