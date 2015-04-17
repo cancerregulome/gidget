@@ -547,23 +547,29 @@ def annotateFeatures ( dataD, geneInfoDict, synMapDict, \
             if (curGene not in curGeneSymbols):
                 curGeneSymbols += [curGene]
             else:
-                print " how can this be ??? duplicate gene labels ??? ", curGene
-                # sys.exit(-1)
-                numDup += 1
-                dupList += [curGene]
+                if ( curGene not in dupList ):
+                    print " how can this be ??? duplicate gene labels ??? ", curGene
+                    # sys.exit(-1)
+                    numDup += 1
+                    dupList += [curGene]
 
-    ## the RNAseqV2 pipeline has SLC35E2 repeated ...
-    if ( "SLC35E2" in dupList ):
-        if ( numDup == 1 ):
-            curGeneSymbols += [ "SLC35E2B" ]
-            numDup = 0
-            dupList = []
-            print " --> the only duplicated gene symbol (SLC35E2) will be handled explicitly ... "
-        else:
-            print " "
-            print " WARNING !!! DUPLICATE gene symbols coming in !!! ", numDup
-            print dupList
-            print " "
+    if ( 0 ):
+        ## the RNAseqV2 pipeline has SLC35E2 repeated ...
+        if ( "SLC35E2" in dupList ):
+            if ( numDup == 1 ):
+                curGeneSymbols += [ "SLC35E2B" ]
+                numDup = 0
+                dupList = []
+                print " --> the only duplicated gene symbol (SLC35E2) will be handled explicitly ... "
+            else:
+                print " "
+                print " WARNING !!! DUPLICATE gene symbols coming in !!! ", numDup
+                print dupList
+                print " "
+    else:
+        print " WARNING !!! DUPLICATE gene symbols coming in !!! ", numDup
+        print dupList
+        print " "
 
     # we want to loop over all of the feature names and attempt to add either
     # gene names or coordinates as appropriate ...
@@ -956,14 +962,22 @@ if __name__ == "__main__":
 
     # check that the feature names are still unique ...
     print " --> verify that the feature names are unique ... "
-    newLabels = tsvIO.uniqueFeatureLabels(
-        annotD['rowLabels'], annotD['dataMatrix'])
+    ( newLabels, rmList ) = tsvIO.uniqueFeatureLabels(annotD['rowLabels'], annotD['dataMatrix'])
+    print "     back from tsvIO.uniqueFeatureLabels "
+
+    # quick sanity check that labels are still what I think they are ...
     for ii in range(len(newLabels)):
         if (not (newLabels[ii] == annotD['rowLabels'][ii])):
             print " "
             print " BAILING !!! ", newLabels[ii], annotD['rowLabels'][ii]
             print " "
             sys.exit(-1)
+
+    # remove any 'extra' features that need removing ...
+    if ( len(rmList) > 0 ):
+        print "     --> need to remove these rows ", rmList
+        tmpD = tsvIO.filter_dataMatrix ( annotD, rmList, [] )
+        annotD = tmpD
 
     # and write the matrix back out
     print " --> calling tsvIO.writeTSV_dataMatrix ... "
