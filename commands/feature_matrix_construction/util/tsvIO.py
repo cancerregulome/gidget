@@ -1460,6 +1460,7 @@ def uniqueFeatureLabels ( fLabels, dataMatrix ):
     print " in uniqueFeatureLabels ... "
     numRename = 0
     numRemove = 0
+    rmList = []
 
     if ( 0 ):
         print len(fLabels)
@@ -1489,8 +1490,9 @@ def uniqueFeatureLabels ( fLabels, dataMatrix ):
                 print fLabel, aVec[:10]
                 print fLabel, bVec[:10]
                 if ( aVec == bVec ):
-                    print " identical !!! "
+                    print " identical data !!! "
                     rmRowList.add(jj)
+                    rmList += [ jj ]
                     numRemove += 1
         indices = indices.difference(rmRowList)
         for ii in indices:
@@ -1504,18 +1506,19 @@ def uniqueFeatureLabels ( fLabels, dataMatrix ):
             numRename += 1
         
     if ( numRemove > 0 ):
-        print " need to remove %d features " % numRemove
-        sys.exit(-1)
+        print " WARNING !!! need to remove %d features " % numRemove
 
     if ( numRename > 0 ):
         print " --> %d features were renamed to ensure uniqueness " % numRename
 
-    return ( fLabels )
+    return ( fLabels, rmList )
 
 #------------------------------------------------------------------------------
 
 def writeTSV_dataMatrix ( dataD, sortRowFlag, sortColFlag, outFilename, \
                           rowOrder=[], colOrder=[], simpleNames=0 ):
+
+    print " in writeTSV_dataMatrix ... "
 
     if ( sortColFlag or sortRowFlag ):
         print " in writeTSV_dataMatrix ... sorting is ON !!! "
@@ -1626,7 +1629,10 @@ def writeTSV_dataMatrix ( dataD, sortRowFlag, sortColFlag, outFilename, \
     # idea ... make sure that the rowLabels are unique!
     if ( 1 ):
         print " calling uniqueFeatureLabels ... ", numRow, rowLabels[0], rowLabels[-1]
-        rowLabels = uniqueFeatureLabels ( rowLabels, dataMatrix )
+        ( rowLabels, rmList ) = uniqueFeatureLabels ( rowLabels, dataMatrix )
+        if ( len(rmList) > 0 ):
+            print " ERROR ??? need to remove features ??? ", rmList
+            sys.exit(-1)
 
     # make a temporary list of the feature names
     tmpRowList = []
