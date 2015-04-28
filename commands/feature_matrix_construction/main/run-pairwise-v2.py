@@ -673,7 +673,6 @@ if __name__ == "__main__":
     parser.add_argument('--tsvFile', '-f', action='store', required=True)
     parser.add_argument('--outFile', '-o', action='store')
     parser.add_argument('--forRE', '-R', action='store_true')
-    parser.add_argument('--forLisa', '-L', action='store_true')
     parser.add_argument('--useBC', '-B', action='store',
                         default=99, type=float)
 
@@ -720,7 +719,6 @@ if __name__ == "__main__":
     indexString = ''
     
     ## make sure that some sort of post-processing has been specified ...
-    if ( not args.forLisa ): args.forRE = True
 
     useExplicitList = 1
     useLuaScript = 0
@@ -1105,9 +1103,9 @@ if __name__ == "__main__":
         (status, output) = commands.getstatusoutput(cmdString)
         print " (g) TIME ", time.asctime(time.localtime(time.time()))
 
-    elif (args.forLisa):
-        print " post-processing for Lisa's pancan analysis ... "
-        print " (d) TIME ", time.asctime(time.localtime(time.time()))
+    else:
+
+        print " post-processing but NOT for RE ... "
         if (args.useBC < 1.):
             print "     --> will filter on Bonferonni-corrected p-value with threshold of ", args.useBC
 
@@ -1117,37 +1115,21 @@ if __name__ == "__main__":
             gidgetConfigVars['TCGAFMP_ROOT_DIR'], tmpDir13, tsvFile, args.useBC)
         print " < %s > " % cmdString
         (status, output) = commands.getstatusoutput(cmdString)
-        print " (e) TIME ", time.asctime(time.localtime(time.time()))
-
-        # at this point we have post_proc_all.tsv
-        # and post_proc_all.NGEXP.NGEXP.tmp
-        cmdString = "%s/shscript/proc_pancan.sh %s" % (gidgetConfigVars['TCGAFMP_ROOT_DIR'], tmpDir13)
-        print " < %s > " % cmdString
-        (status, output) = commands.getstatusoutput(cmdString)
-        print " (f) TIME ", time.asctime(time.localtime(time.time()))
+        print " STATUS : ", status
+        print " OUTPUT : ", output
+        print " (d) TIME ", time.asctime(time.localtime(time.time()))
 
         # and now we move the files that we want to keep ...
-        cmdString = "mv %s/post_proc_all.NGEXP.NGEXP.tmp.sort.top1M %s.pwpv.NGEXP.NGEXP.top1M" % (
-            tmpDir13, tsvFile[:-4])
+        if (args.byType):
+            cmdString = "mv %s/post_proc_all.tsv %s.%s.%s.pwpv" % \
+                (tmpDir13, tsvFile[:-4], cleanString(args.type1),
+                 cleanString(args.type2))
+        else:
+            cmdString = "mv %s/post_proc_all.tsv %s.pwpv" % (tmpDir13,
+                                                             tsvFile[:-4])
         print " < %s > " % cmdString
         (status, output) = commands.getstatusoutput(cmdString)
         print " (g) TIME ", time.asctime(time.localtime(time.time()))
-
-        cmdString = "mv %s/post_proc_all.NGEXP.NGEXP.tmp.sort %s.pwpv.NGEXP.NGEXP.all" % (
-            tmpDir13, tsvFile[:-4])
-        print " < %s > " % cmdString
-        (status, output) = commands.getstatusoutput(cmdString)
-        print " (h) TIME ", time.asctime(time.localtime(time.time()))
-
-        cmdString = "mv %s/post_proc_all.tsv %s.pwpv" % (tmpDir13, tsvFile[:-4])
-        print " < %s > " % cmdString
-        (status, output) = commands.getstatusoutput(cmdString)
-        print " (i) TIME ", time.asctime(time.localtime(time.time()))
-
-    else:
-        print " ************************************************** "
-        print " *** NO POST-PROCESSING ??? OUTPUTS MAY BE LOST *** "
-        print " ************************************************** "
 
     if ( 0 ):
         cmdString = "rm -fr %s" % tmpDir13
