@@ -58,5 +58,53 @@ for d in `cat $TCGAFMP_ROOT_DIR/config/tumor_list.txt`
 	     --recursive --level=1 \
 	     https://tcga-data.nci.nih.gov/tcgafiles/ftp_auth/distro_ftpusers/anonymous/tumor/$d/cgcc/bcgsc.ca/illuminaga_mirnaseq/mirnaseq/
 
+	echo " "
+	echo " "
+	echo " ******************************************************************** "
+	echo $d
+
+	cd $TCGAFMP_DCC_REPOSITORIES/dcc-mirror/public/tumor/$d/cgcc/
+        mkdir unc.edu
+        chmod g+w unc.edu
+        cd unc.edu
+        mkdir h-mirna_8x15kv2
+        chmod g+w h-mirna_8x15kv2
+        cd h-mirna_8x15kv2
+        mkdir mirna
+        chmod g+w mirna
+        cd mirna
+
+	rm -fr index.html
+	wget -e robots=off --wait 1 --debug --no-clobber --continue --server-response --no-directories \
+	     --accept "*Level_3*.tar.gz" --accept "*mage-tab*.tar.gz" --accept "*CHANGES*txt" \
+             -R "*images*" \
+	     --verbose \
+	     --recursive --level=1 \
+	     https://tcga-data.nci.nih.gov/tcgafiles/ftp_auth/distro_ftpusers/anonymous/tumor/$d/cgcc/unc.edu/h-mirna_8x15kv2/mirna/
+
+	echo " "
+	echo " "
+	echo " ******************************************************************** "
+	echo $d
+
+	cd $TCGAFMP_DCC_REPOSITORIES/dcc-mirror/public/tumor/$d/cgcc/
+        mkdir unc.edu
+        chmod g+w unc.edu
+        cd unc.edu
+        mkdir h-mirna_8x15k
+        chmod g+w h-mirna_8x15k
+        cd h-mirna_8x15k
+        mkdir mirna
+        chmod g+w mirna
+        cd mirna
+
+	rm -fr index.html
+	wget -e robots=off --wait 1 --debug --no-clobber --continue --server-response --no-directories \
+	     --accept "*Level_3*.tar.gz" --accept "*mage-tab*.tar.gz" --accept "*CHANGES*txt" \
+             -R "*images*" \
+	     --verbose \
+	     --recursive --level=1 \
+	     https://tcga-data.nci.nih.gov/tcgafiles/ftp_auth/distro_ftpusers/anonymous/tumor/$d/cgcc/unc.edu/h-mirna_8x15k/mirna/
+
     done
 
