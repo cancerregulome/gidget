@@ -567,9 +567,10 @@ def annotateFeatures ( dataD, geneInfoDict, synMapDict, \
                 print dupList
                 print " "
     else:
-        print " WARNING !!! DUPLICATE gene symbols coming in !!! ", numDup
-        print dupList
-        print " "
+        if ( numDup > 0 ):
+            print " WARNING !!! DUPLICATE gene symbols coming in !!! ", numDup
+            print dupList
+            print " "
 
     # we want to loop over all of the feature names and attempt to add either
     # gene names or coordinates as appropriate ...
