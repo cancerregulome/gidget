@@ -51,8 +51,22 @@ class mdanderson_org_mda_rppa_core(technology_type):
         if not self.genename2geneinfo.get(tokens[-1]):
             ## the gene names are the first part of the list, create a feature for each one
             for gene in genes:
-                featureName = self.dType + ":" + fType + ":" + self._cleanString(gene) + ":::::" + tokens[-1]
+
+                ## potentially clean up the tokens[-1] value ...
+                antibodyToken = tokens[-1]
+                if ( antibodyToken.endswith("-G-C") ): antibodyToken = antibodyToken[:-4]
+                if ( antibodyToken.endswith("-G-V") ): antibodyToken = antibodyToken[:-4]
+                if ( antibodyToken.endswith("-M-C") ): antibodyToken = antibodyToken[:-4]
+                if ( antibodyToken.endswith("-M-E") ): antibodyToken = antibodyToken[:-4]
+                if ( antibodyToken.endswith("-M-V") ): antibodyToken = antibodyToken[:-4]
+                if ( antibodyToken.endswith("-R-C") ): antibodyToken = antibodyToken[:-4]
+                if ( antibodyToken.endswith("-R-E") ): antibodyToken = antibodyToken[:-4]
+                if ( antibodyToken.endswith("-R-NA") ): antibodyToken = antibodyToken[:-5]
+                if ( antibodyToken.endswith("-R-V") ): antibodyToken = antibodyToken[:-4]
+
+                featureName = self.dType + ":" + fType + ":" + self._cleanString(gene) + ":::::" + antibodyToken
                 names = self.genename2geneinfo.setdefault(tokens[-1], [])
+                ## names = self.genename2geneinfo.setdefault(antibodyToken, [])
                 names += [featureName]
 
     #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
@@ -88,12 +102,15 @@ class mdanderson_org_mda_rppa_core(technology_type):
         ab = tokens[self.tokenGeneIndex]
         genes = self.genename2geneinfo[ab]
         for gene in genes:
+
             # verify the gene is only associated with one antibody
+            # does this have to be an error ??? DO NOT CHECK THIS IN BEFORE MORE TESTING !!!
             seen_abs = self.gene2ab.setdefault(gene, set())
-            if 0 < len(seen_abs) and ab not in seen_abs:
+            if ab not in seen_abs:
                 seen_abs.add(ab)
-                raise ValueError("more than one antibody associated with %s: %s" % (gene, seen_abs))
-            seen_abs.add(ab)
+            if 1 < len(seen_abs):
+                #### raise ValueError("more than one antibody associated with %s: %s" % (gene, seen_abs))
+                print " WARNING ... more than one antibody associated with a gene ??? %s %s " % ( gene, seen_abs )
             
             # add the gene to the feature matrix if we haven't seen it already
             if not self.fname2row.has_key(gene):

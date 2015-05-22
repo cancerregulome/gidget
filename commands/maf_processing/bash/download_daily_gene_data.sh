@@ -2,7 +2,7 @@
 
 # every TCGA MAF script should start with these lines:
 : ${TCGAMAF_ROOT_DIR:?" environment variable must be set and non-empty; defines the path to the TCGA MAF directory"}
-source ${TCGAMAF_ROOT_DIR}/../../gidget/util/gidget_util.sh
+source ${TCGAMAF_ROOT_DIR}/../../gidget/util/env.sh
 
 
 # Cronjob for downloading reference data against 
@@ -19,17 +19,17 @@ fi
 
 cd "$TCGAMAF_REFERENCES_DIR"
 
-rm -rf gene2accession*
-rm -rf gene2refseq* 
-rm -rf Homo_sapiens.gene_info*
-rm -rf gene_refseq_uniprotkb_collab*
+#rm -rf gene2accession*
+#rm -rf gene2refseq* 
+#rm -rf Homo_sapiens.gene_info*
+#rm -rf gene_refseq_uniprotkb_collab*
 
 # save files with original timestamps
 
-curl -O --remote-time ftp://ftp.ncbi.nlm.nih.gov/gene/DATA/gene2accession.gz
-curl -O --remote-time ftp://ftp.ncbi.nlm.nih.gov/gene/DATA/gene2refseq.gz
-curl -O --remote-time ftp://ftp.ncbi.nlm.nih.gov/gene/DATA/GENE_INFO/Mammalia/Homo_sapiens.gene_info.gz
-curl -O --remote-time ftp://ftp.ncbi.nlm.nih.gov/gene/DATA/gene_refseq_uniprotkb_collab.gz
+curl -C - -O --remote-time ftp://ftp.ncbi.nlm.nih.gov/gene/DATA/gene2accession.gz
+curl -C - -O --remote-time ftp://ftp.ncbi.nlm.nih.gov/gene/DATA/gene2refseq.gz
+curl -C - -O --remote-time ftp://ftp.ncbi.nlm.nih.gov/gene/DATA/GENE_INFO/Mammalia/Homo_sapiens.gene_info.gz
+curl -C - -O --remote-time ftp://ftp.ncbi.nlm.nih.gov/gene/DATA/gene_refseq_uniprotkb_collab.gz
 
 
 # Store original timestamps for NCBI's Gene for archival purposes.
@@ -62,16 +62,16 @@ sed -iorig '1d' Homo_sapiens.gene_info
 
 # TODO: move these into per-uniprot-release directories
 
-rm -rf idmapping_selected.tab*
-rm -rf uniprot_sprot_human*
-rm -rf uniprot_trembl_human*
-rm -rf uniprot_sprot_varsplic.fasta*
-rm -rf uniprot_sec_ac.txt
-curl -O ftp://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/idmapping/idmapping_selected.tab.gz
-curl -O ftp://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/taxonomic_divisions/uniprot_sprot_human.dat.gz
-curl -O ftp://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/taxonomic_divisions/uniprot_trembl_human.dat.gz
-curl -O ftp://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/complete/uniprot_sprot_varsplic.fasta.gz
-curl -O ftp://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/complete/docs/sec_ac.txt
+#rm -rf idmapping_selected.tab*
+#rm -rf uniprot_sprot_human*
+#rm -rf uniprot_trembl_human*
+#rm -rf uniprot_sprot_varsplic.fasta*
+#rm -rf uniprot_sec_ac.txt
+curl -C - -O ftp://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/idmapping/idmapping_selected.tab.gz
+curl -C - -O ftp://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/taxonomic_divisions/uniprot_sprot_human.dat.gz
+curl -C - -O ftp://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/taxonomic_divisions/uniprot_trembl_human.dat.gz
+curl -C - -O ftp://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/complete/uniprot_sprot_varsplic.fasta.gz
+curl -C - -O ftp://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/complete/docs/sec_ac.txt
 mv sec_ac.txt uniprot_sec_ac.txt
 cp uniprot_sec_ac.txt uniprot_sec_ac.txt.orig # TODO is this still necessary? probably there for manual version
 # before next line's automation:
@@ -80,7 +80,7 @@ cp uniprot_sec_ac.txt uniprot_sec_ac.txt.orig # TODO is this still necessary? pr
 sed -r -n -i '/^[a-zA-Z0-9]+[ \t]+[a-zA-Z0-9]+$/p' uniprot_sec_ac.txt
 
 # get the uniprot release name
-curl -O ftp://ftp.uniprot.org/pub/databases/uniprot/current_release/relnotes.txt
+curl -C - -O ftp://ftp.uniprot.org/pub/databases/uniprot/current_release/relnotes.txt
 uniprotversion=`head -n 1 relnotes.txt | cut -d ' ' -f3`
 rm -f relnotes.txt
 

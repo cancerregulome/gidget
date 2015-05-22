@@ -39,11 +39,11 @@ def removeNonTumorSamples(dataD):
 
         # if the barcode is not even long enough to specify the sample type,
         # we will just assume that we keep it ...
-        if (len(aCode) < 15):
+        if (len(aCode) < 16):
             tumorCode = aCode
 
         else:
-            # if the barcode is at least 15 characters long, then we parse it
+            # if the barcode is at least 16 characters long, then we parse it
             # ...
             aCode = miscTCGA.fixTCGAbarcode(aCode)
             (site, patient, sample, vial, portion, analyte,

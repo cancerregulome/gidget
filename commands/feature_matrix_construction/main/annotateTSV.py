@@ -4,7 +4,7 @@
 import sys
 
 # these are my local ones
-from gidget_util import gidgetConfigVars
+from env import gidgetConfigVars
 import chrArms
 import refData
 import tsvIO
@@ -505,7 +505,7 @@ def chooseBestName(curGene, curID, curType, geneInfoDict, synMapDict, GAF_geneCo
 def annotateFeatures ( dataD, geneInfoDict, synMapDict, \
         Gencode_geneCoordDict_bySymbol, Gencode_geneCoordDict_byID, Gencode_geneSymbol_byID, \
         GAF_geneCoordDict_bySymbol, GAF_geneCoordDict_byID, GAF_geneSymbol_byID, \
-        refGeneDict, cytoDict, nameChangeFlag ):
+        refGeneDict, cytoDict, forceFlag, nameChangeFlag ):
 
     print " "
     print " in annotateFeatures ... "
@@ -547,15 +547,30 @@ def annotateFeatures ( dataD, geneInfoDict, synMapDict, \
             if (curGene not in curGeneSymbols):
                 curGeneSymbols += [curGene]
             else:
-                print " how can this be ??? duplicate gene labels ??? ", curGene
-                # sys.exit(-1)
-                numDup += 1
-                dupList += [curGene]
+                if ( curGene not in dupList ):
+                    print " how can this be ??? duplicate gene labels ??? ", curGene
+                    # sys.exit(-1)
+                    numDup += 1
+                    dupList += [curGene]
 
-    if (numDup > 0):
-        print " "
-        print " WARNING !!! DUPLICATE gene symbols coming in !!! "
-        print " "
+    if ( 0 ):
+        ## the RNAseqV2 pipeline has SLC35E2 repeated ...
+        if ( "SLC35E2" in dupList ):
+            if ( numDup == 1 ):
+                curGeneSymbols += [ "SLC35E2B" ]
+                numDup = 0
+                dupList = []
+                print " --> the only duplicated gene symbol (SLC35E2) will be handled explicitly ... "
+            else:
+                print " "
+                print " WARNING !!! DUPLICATE gene symbols coming in !!! ", numDup
+                print dupList
+                print " "
+    else:
+        if ( numDup > 0 ):
+            print " WARNING !!! DUPLICATE gene symbols coming in !!! ", numDup
+            print dupList
+            print " "
 
     # we want to loop over all of the feature names and attempt to add either
     # gene names or coordinates as appropriate ...
@@ -608,6 +623,14 @@ def annotateFeatures ( dataD, geneInfoDict, synMapDict, \
         print " curType=<%s>  haveName=%d  haveCoord=%d  haveExtraName=%d " % \
             (curType, haveName, haveCoord, haveExtraName)
 
+        ## if we are forcing a re-annotation, then we may reset haveCoord to false ...
+        if ( forceFlag == "YES" ):
+            if ( haveCoord ):
+                if ( curType == "GEXP" ): haveCoord = 0
+                if ( curType == "MIRN" ): haveCoord = 0
+                if ( curType == "GNAB" ): haveCoord = 0
+                if ( curType == "RPPA" ): haveCoord = 0
+
         # ------------
         # IF haveCoord
         if (haveCoord):
@@ -644,7 +667,14 @@ def annotateFeatures ( dataD, geneInfoDict, synMapDict, \
                                        geneInfoDict, synMapDict, \
                                        GAF_geneCoordDict_bySymbol, GAF_geneCoordDict_byID )
 
-            if (nameChangeFlag == "YES"):
+            if ( curGene.startswith("SLC35E2") ):
+                ## gene IDs 728661 and 9906 are both being called "SLC35E2" in the RNAseqV2
+                ## data, but 728661 should be changed to SLC35E2B ...
+                if ( curID == "728661" ):
+                    print " --> changing gene from <%s> to SLC35E2B " % curGene
+                    curGene = "SLC35E2B"
+
+            elif (nameChangeFlag == "YES"):
                 if (newGene != curGene):
                     # do NOT change to this "new" name if this name seems to
                     # already be in use ...
@@ -667,50 +697,48 @@ def annotateFeatures ( dataD, geneInfoDict, synMapDict, \
             # here we want to add coordinates based on a gene name ... 
             # --> first we try Gencode, and then we try GAF ...
 
-            if (curGene in Gencode_geneCoordDict_bySymbol):
-                print " found a gene in Gencode ... ", curLabel, curGene, Gencode_geneCoordDict_bySymbol[curGene]
-                newLabel = annotateLabel(
-                    curLabel, curGene, Gencode_geneCoordDict_bySymbol[curGene])
-                print " addGene : ", tokenList, " --> ", newLabel
-                gotItFlag = 1
-                # keep track of how often we add a gene label ...
-                if (curType not in addGene):
-                    addGene[curType] = 1
-                else:
-                    addGene[curType] += 1
+            # more importantly, FIRST we try by gene ID and then by gene symbol ...
+            if ( haveExtraName ):
+                geneID = tokenList[7]
+                print "         --> first looking using gene ID <%s> " % geneID
+                if (geneID in GAF_geneCoordDict_byID):
+                    print " found by ID ... ", curLabel, curGene, geneID, GAF_geneCoordDict_byID[geneID]
+                    newGene = GAF_geneSymbol_byID[geneID][0]
+                    if (newGene != curGene):
+                        print " --> changing name from <%s> to <%s> " % (curGene, newGene)
+                        curGene = newGene
+                        # sys.exit(-1)
+                    newLabel = annotateLabel(curLabel, curGene, GAF_geneCoordDict_byID[geneID])
+                    print " addGene : ", tokenList, " --> ", newLabel
+                    gotItFlag = 1
+                    if (curType not in addGene):
+                        addGene[curType] = 1
+                    else:
+                        addGene[curType] += 1
 
-            elif (curGene in GAF_geneCoordDict_bySymbol):
-                print " found a gene in GAF ... ", curLabel, curGene, GAF_geneCoordDict_bySymbol[curGene]
-                newLabel = annotateLabel(
-                    curLabel, curGene, GAF_geneCoordDict_bySymbol[curGene])
-                print " addGene : ", tokenList, " --> ", newLabel
-                gotItFlag = 1
-                # keep track of how often we add a gene label ...
-                if (curType not in addGene):
-                    addGene[curType] = 1
-                else:
-                    addGene[curType] += 1
+            if ( not gotItFlag ):
+                if (curGene in Gencode_geneCoordDict_bySymbol):
+                    print " now looking by gene sybmol in Gencode ... ", curLabel, curGene, Gencode_geneCoordDict_bySymbol[curGene]
+                    newLabel = annotateLabel(curLabel, curGene, Gencode_geneCoordDict_bySymbol[curGene])
+                    print " addGene : ", tokenList, " --> ", newLabel
+                    gotItFlag = 1
+                    # keep track of how often we add a gene label ...
+                    if (curType not in addGene):
+                        addGene[curType] = 1
+                    else:
+                        addGene[curType] += 1
 
-            if (not gotItFlag):
-                print "     this gene is not in Gencode or GAF by gene symbol ??? ", curGene
-                if (haveExtraName):
-                    geneID = tokenList[7]
-                    print "         --> now looking again using <%s> " % geneID
-                    if (geneID in GAF_geneCoordDict_byID):
-                        print " found by ID ... ", curLabel, curGene, geneID, GAF_geneCoordDict_byID[geneID]
-                        newGene = GAF_geneSymbol_byID[geneID][0]
-                        if (newGene != curGene):
-                            print " --> changing name from <%s> to <%s> " % (curGene, newGene)
-                            curGene = newGene
-                            # sys.exit(-1)
-                        newLabel = annotateLabel(
-                            curLabel, curGene, GAF_geneCoordDict_byID[geneID])
-                        print " addGene : ", tokenList, " --> ", newLabel
-                        gotItFlag = 1
-                        if (curType not in addGene):
-                            addGene[curType] = 1
-                        else:
-                            addGene[curType] += 1
+            if ( not gotItFlag ):
+                if (curGene in GAF_geneCoordDict_bySymbol):
+                    print " now looking by symbol in GAF ... ", curLabel, curGene, GAF_geneCoordDict_bySymbol[curGene]
+                    newLabel = annotateLabel(curLabel, curGene, GAF_geneCoordDict_bySymbol[curGene])
+                    print " addGene : ", tokenList, " --> ", newLabel
+                    gotItFlag = 1
+                    # keep track of how often we add a gene label ...
+                    if (curType not in addGene):
+                        addGene[curType] = 1
+                    else:
+                        addGene[curType] += 1
 
             if (not gotItFlag):
                 print "     this gene is not in GAF by gene ID (or no gene ID available) ??? ", tokenList
@@ -828,22 +856,35 @@ if __name__ == "__main__":
             build = sys.argv[2]
             outFile = sys.argv[3]
             if (len(sys.argv) >= 5):
-                nameChangeFlag = sys.argv[4].upper()
+                forceFlag = sys.argv[4].upper()
+            else:
+                forceFlag = "NO"
+            if (len(sys.argv) >= 6):
+                nameChangeFlag = sys.argv[5].upper()
             else:
                 nameChangeFlag = "NO"
         else:
             print " "
-            print " Usage: %s <input TSV file> <hg18 or hg19> <output TSV file> [nameChangeFlag=NO/YES] "
-            print "        note that nameChangeFlag will default to NO "
+            print " Usage: %s <input TSV file> <hg18 or hg19> <output TSV file> [force REannotation=NO/YES] [nameChangeFlag=NO/YES] "
+            print "        note that forceFlag nameChangeFlag will default to NO "
             print " "
             print " ERROR -- bad command line arguments "
             sys.exit(-1)
             tumorType = 'gbm'
 
+    if (forceFlag == "Y"):
+        forceFlag = "YES"
+    if (forceFlag != "YES"):
+        forceFlag = "NO"
+
     if (nameChangeFlag == "Y"):
         nameChangeFlag = "YES"
     if (nameChangeFlag != "YES"):
         nameChangeFlag = "NO"
+
+    print "         forceFlag = %s " % forceFlag
+    print "         nameChangeFlag = %s " % nameChangeFlag
+    print " "
 
     # and get the coordinates for these genes ...
     bioinformaticsReferencesDir = gidgetConfigVars['TCGAFMP_BIOINFORMATICS_REFERENCES']
@@ -918,18 +959,26 @@ if __name__ == "__main__":
     annotD = annotateFeatures ( testD, geneInfoDict, synMapDict, \
         Gencode_geneCoordDict_bySymbol, Gencode_geneCoordDict_byID, Gencode_geneSymbol_byID, \
         GAF_geneCoordDict_bySymbol, GAF_geneCoordDict_byID, GAF_geneSymbol_byID, \
-        refGeneDict, cytoDict, nameChangeFlag )
+        refGeneDict, cytoDict, forceFlag, nameChangeFlag )
 
     # check that the feature names are still unique ...
     print " --> verify that the feature names are unique ... "
-    newLabels = tsvIO.uniqueFeatureLabels(
-        annotD['rowLabels'], annotD['dataMatrix'])
+    ( newLabels, rmList ) = tsvIO.uniqueFeatureLabels(annotD['rowLabels'], annotD['dataMatrix'])
+    print "     back from tsvIO.uniqueFeatureLabels "
+
+    # quick sanity check that labels are still what I think they are ...
     for ii in range(len(newLabels)):
         if (not (newLabels[ii] == annotD['rowLabels'][ii])):
             print " "
             print " BAILING !!! ", newLabels[ii], annotD['rowLabels'][ii]
             print " "
             sys.exit(-1)
+
+    # remove any 'extra' features that need removing ...
+    if ( len(rmList) > 0 ):
+        print "     --> need to remove these rows ", rmList
+        tmpD = tsvIO.filter_dataMatrix ( annotD, rmList, [] )
+        annotD = tmpD
 
     # and write the matrix back out
     print " --> calling tsvIO.writeTSV_dataMatrix ... "

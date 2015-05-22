@@ -2,7 +2,7 @@
 
 # every TCGA FMP script should start with these lines:
 : ${TCGAFMP_ROOT_DIR:?" environment variable must be set and non-empty; defines the path to the TCGA FMP scripts directory"}
-source ${TCGAFMP_ROOT_DIR}/../../gidget/util/gidget_util.sh
+source ${TCGAFMP_ROOT_DIR}/../../gidget/util/env.sh
 
 
 ## this script should be called with the following parameters:
@@ -40,7 +40,7 @@ echo " * run id ........... " $runID
 echo " * tumor ............ " $tumors
 echo " *******************"
 
-cd /local/sreynold/scratch
+cd /local/sreynold/scratch/myFavGene
 
 args=("$@")
 for tumor in $tumors
@@ -62,7 +62,7 @@ for tumor in $tumors
                 python $TCGAFMP_ROOT_DIR/main/run-pairwise-v2.py \
                     --pvalue 2. --one $aName \
                     --tsvFile $TCGAFMP_DATA_DIR/$tumor/$runID/$tumor.all.$runID.tsv \
-                    --outFile /local/sreynold/scratch/$geneSymbol.$tumor.scratch.$ii >> $geneSymbol.$tumor.log
+                    --outFile /local/sreynold/scratch/myFavGene/$geneSymbol.$tumor.scratch.$ii >> $geneSymbol.$tumor.log
                 ((ii++))
             done
 

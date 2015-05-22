@@ -59,7 +59,7 @@ for tumor in skcm stad thca ucec
 			$tumor.rppa.tmpData3.tsv \
 			$tumor.msat.tmpData3.tsv \
 			$tumor.gexp.seq.tmpData3.tsv \
-			../gnab/$tumor.gnab.tmpData4b.tsv \
+			../gnab/$tumor.gnab.filter.annot.tsv \
 			$tumor.newMerge.seq.$curDate.tsv >& $tumor.newMerge.seq.$curDate.log 
 	fi
 
@@ -73,7 +73,7 @@ for tumor in skcm stad thca ucec
 			$tumor.rppa.tmpData3.tsv \
 			$tumor.msat.tmpData3.tsv \
 			$tumor.gexp.ary.tmpData3.tsv \
-			../gnab/$tumor.gnab.tmpData4b.tsv \
+			../gnab/$tumor.gnab.filter.annot.tsv \
 			$tumor.newMerge.ary.$curDate.tsv >& $tumor.newMerge.ary.$curDate.log &
 	fi
 

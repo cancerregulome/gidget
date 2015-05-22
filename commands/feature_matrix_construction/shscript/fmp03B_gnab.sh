@@ -2,7 +2,7 @@
 
 # every TCGA FMP script should start with these lines:
 : ${TCGAFMP_ROOT_DIR:?" environment variable must be set and non-empty; defines the path to the TCGA FMP scripts directory"}
-source ${TCGAFMP_ROOT_DIR}/../../gidget/util/gidget_util.sh
+source ${TCGAFMP_ROOT_DIR}/../../gidget/util/env.sh
 
 
 ## this script should be called with the following parameters:
@@ -119,7 +119,7 @@ fi
 	## ----------------------------------------------------------------------------
 	## and finally, we want to annotate these features with genomic coordinates
         python $TCGAFMP_ROOT_DIR/main/annotateTSV.py \
-		$tumor.gnab.tmpData3.tsv hg19 $tumor.gnab.tmpData4b.tsv >& gnab.B.log 
+		$tumor.gnab.tmpData3.tsv hg19 $tumor.gnab.filter.annot.tsv >& gnab.B.log
 
 	cd ..
 	cd ..

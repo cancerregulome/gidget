@@ -3,7 +3,7 @@ Created on Aug 2, 2012
 
 @author: michael
 '''
-from gidget_util import gidgetConfigVars
+from env import gidgetConfigVars
 
 from xml.dom  import minidom
 from xml.dom  import Node

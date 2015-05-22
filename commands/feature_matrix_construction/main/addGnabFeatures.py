@@ -5,7 +5,7 @@ import numpy
 import sys
 
 # these are my local ones
-from gidget_util import gidgetConfigVars
+from env import gidgetConfigVars
 import tsvIO
 
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#

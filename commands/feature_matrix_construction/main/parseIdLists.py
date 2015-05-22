@@ -2,7 +2,7 @@
 
 import sys
 
-from gidget_util import gidgetConfigVars
+from env import gidgetConfigVars
 import miscTCGA
 import path
 import tsvIO

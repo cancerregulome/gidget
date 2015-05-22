@@ -6,7 +6,7 @@
 # every TCGA script should start with these lines:
 : ${GIDGET_SOURCE_ROOT:?" environment variable must be set and non-empty; defines the path to the local code for the gidget project"}
 
-source ${GIDGET_SOURCE_ROOT}/gidget/util/gidget_util.sh
+source ${GIDGET_SOURCE_ROOT}/gidget/util/env.sh
 
 if [[ $# != 5 && $# != 4 ]]
     then
@@ -32,7 +32,7 @@ fi
 #TODO?: ensure tumor is valid type
 
 # Ensure that maf processing has been completed
-processedMutationData="${TCGAFMP_DATA_DIR}/${tumorType}/gnab/${tumorType}.gnab.tmpData4b.tsv"
+processedMutationData="${TCGAFMP_DATA_DIR}/${tumorType}/gnab/${tumorType}.gnab.filter.annot.tsv"
 if [[ ! -s $processedMutationData ]]
 then
     echo "Looking for processed mutation data at location ${processedMutationData}"

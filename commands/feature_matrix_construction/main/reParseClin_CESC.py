@@ -2,7 +2,7 @@
 
 import sys
 
-from gidget_util import gidgetConfigVars
+from env import gidgetConfigVars
 import miscClin
 import miscTCGA
 import path
@@ -568,20 +568,24 @@ def makeMergedDx ( allClinDict ):
             if ( allClinDict[histTypeKey][ii] == "Cervical_Squamous_Cell_Carcinoma" ):
                 mergeDx += [ "Squamous" ]
             elif ( allClinDict[histTypeKey][ii] == "Endocervical_Type_of_Adenocarcinoma" ):
-                mergeDx += [ "Endocervical_Adeno" ]
+                mergeDx += [ "Adenocarcinoma" ]
             elif ( allClinDict[histTypeKey][ii] == "Mucinous_Adenocarcinoma_of_Endocervical_Type" ):
-                mergeDx += [ "Endocervical_Adeno" ]
+                mergeDx += [ "Adenocarcinoma" ]
             elif ( allClinDict[histTypeKey][ii] == "Adenosquamous" ):
                 mergeDx += [ "Adenosquamous" ]
             elif ( allClinDict[histTypeKey][ii] == "Endometrioid_Adenocarcinoma_of_Endocervix" ):
-                mergeDx += [ "Endocervical_Adeno" ]
+                mergeDx += [ "Adenocarcinoma" ]
             elif ( allClinDict[histTypeKey][ii] == "Endocervical_Adenocarcinoma_of_the_Usual_Type" ):
-                mergeDx += [ "Endocervical_Adeno" ]
+                mergeDx += [ "Adenocarcinoma" ]
             elif ( allClinDict[histTypeKey][ii] == "NA" ):
                 mergeDx += [ "NA" ]
             else:
                 print " ERROR ??? we should not be here ... ", ii, allClinDict[barKey][ii], \
                     allClinDict[histTypeKey][ii], allClinDict[epcDxKey][ii]
+
+        ## just double-checking terminology one more time ...
+        if ( mergeDx[-1] == "Endocervical_Adeno" ):
+            mergeDx[-1] = "Adenocarcinoma"
             
     keyString = "C:CLIN:Dx_merged:::::"
     allClinDict[keyString] = mergeDx

@@ -1,6 +1,6 @@
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 
-from gidget_util import gidgetConfigVars
+from env import gidgetConfigVars
 import miscMath
 import miscTCGA
 
@@ -167,7 +167,7 @@ def cleanupSampleDict(sampleDict):
         if (len(aSample) == 12):
             if (aSample not in cleanPatientList):
                 cleanPatientList += [aSample]
-        elif (len(aSample) == 15):
+        elif (len(aSample) == 16):
             shortB = aSample[:12]
             if (shortB not in cleanPatientList):
                 cleanPatientList += [shortB]

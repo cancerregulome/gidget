@@ -9,7 +9,8 @@ import os.path
 import sys
 import time
 
-from gidget_util import gidgetConfigVars
+from  env import gidgetConfigVars
+
 import miscIO
 
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
@@ -457,7 +458,7 @@ if __name__ == "__main__":
         outName = tmpDir + "/%d.pw" % eachI
         listFile = tmpDir + "/%d.list" % eachI
 
-        cmdString = "1 ignoreThree.py " + gidgetConfigVars['TCGAFMP_PAIRWISE_ROOT'] + "/pairwise-2.0.1-current"
+        cmdString = "1 ignoreThree.py " + gidgetConfigVars['TCGAFMP_PAIRWISE_ROOT'] + "/pairwise-2.1.2"
         cmdString += " --by-index %s " % listFile
         ## cmdString += " --dry-run "
         cmdString += " --p-value 2. "
@@ -483,7 +484,7 @@ if __name__ == "__main__":
     #     runlist /<path-to-scratch-space>/runList.txt
     cmdString = "python %s/main/golem.py " % gidgetConfigVars['TCGAFMP_ROOT_DIR']
     cmdString += "http://glados.systemsbiology.net:7083 -p " + golempwd + " "
-    cmdString += "-L pairwise-2.0.0 -u "
+    cmdString += "-L pairwise-2.1.0 -u "
     cmdString += getpass.getuser() + " "
     cmdString += "runlist " + runFile
     print cmdString

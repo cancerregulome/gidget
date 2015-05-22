@@ -5,7 +5,7 @@
 
 # all python scripts in the gidget project should include this line:
 
-# from gidget_util import gidgetConfigVars
+# from env import gidgetConfigVars
 
 # which checks to make sure that all required environmental variables are defined,
 # and if so, populates a dictionary "gidgetConfigVars" with the env var names and values

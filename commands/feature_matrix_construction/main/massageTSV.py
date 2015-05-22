@@ -66,8 +66,8 @@ if __name__ == "__main__":
         if ( not aLine.startswith("TCGA") ): continue
 
         barcode = tokenList[0]
-        ## if (len(barcode) >= 15): barcode = barcode[:15]
-        if (len(barcode) >= 16): barcode = barcode[:16]
+        ## truncate barcode to 16 characters, eg TCGA-BF-A1PU-01A
+        if (len(barcode) >= 17): barcode = barcode[:16]
 
         ## print barcode
 

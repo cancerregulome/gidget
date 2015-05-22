@@ -15,6 +15,6 @@
 if [ -z "${GIDGET_IMPORTED_UTILS}" ]
 then
     # echo "importing TCGA FMP utilities:"
-    source ${GIDGET_SOURCE_ROOT}/gidget/util/gidget_util_impl.sh
+    source ${GIDGET_SOURCE_ROOT}/gidget/util/env_impl.sh
     # echo "..done"
 fi
