@@ -30,7 +30,7 @@ import gidget_help
 #import gidget_remove
 #import gidget_run
 
-from gidget.util.env import gidgetConfigVars
+from util.env import gidgetConfigVars
 
 if __name__ == '__main__':
 
@@ -88,7 +88,7 @@ if __name__ == '__main__':
 
     # for "-h" or "--help", docopt prints usage and exits cleanly
     mainArgs = docopt(__doc__,
-                      version = 'gidget version 1.2.0',
+                      version = 'gidget version 1.2.1',
                       options_first = True)
 
 
