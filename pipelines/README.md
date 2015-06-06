@@ -1,6 +1,14 @@
 available gidget pipeline commands
 ==================================
 
+# Preprocess Firhose MAF files
+This pipeline generates unannotated MAF files (and a corresponding MAF manifest) from either the "stddata" or "analyses" firehose datasets.
+
+commandline usage:
+```
+gidget run preprocess-firehose-mafs
+```
+
 # update MAF pipeline's bioinformatics references
 _This is an administration function and should NOT be run by most users_
 
