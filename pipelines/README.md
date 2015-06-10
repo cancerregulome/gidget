@@ -6,7 +6,12 @@ This pipeline generates unannotated MAF files (and a corresponding MAF manifest)
 
 commandline usage:
 ```
-gidget run preprocess-firehose-mafs
+gidget run preprocess-firehose-mafs [OPTIONS]
+
+    Options:
+    -r [ stddata | analyses ]    (Required)
+    -d DATE                      (Optional -- Default: the latest firehose data date)
+    -o OUTPUT_DIR                (Optional -- Default: current working directory)
 ```
 
 # update MAF pipeline's bioinformatics references
