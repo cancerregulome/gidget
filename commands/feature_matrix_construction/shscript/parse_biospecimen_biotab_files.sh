@@ -26,6 +26,7 @@ for tumor in `cat $TCGAFMP_ROOT_DIR/config/tumor_list.txt`
         ## the biospecimen_slide_$tumor.txt file has either 14 [17] or 15 [18] columns, with the same disease-type splits
 
         ## and the biospecimen_tumor_sample_$tumor.txt file has 6 [17] or 7 [18] columns, again with apparently the same split
+        ## as of 13jul15, the biospecimen_tumor_sample_$tumor.txt file can have 8 columns :(
 
         rm -fr $TCGAFMP_DCC_REPOSITORIES/scratch/t?
 
@@ -57,12 +58,16 @@ for tumor in `cat $TCGAFMP_ROOT_DIR/config/tumor_list.txt`
 
         ## for the tumor types with 6 columns, we want: 1,3-5
         ## and for those with 7 columns, we want: 2,4-6
+        ## and for those with 8 columns, we want: 2,5-7 (as of 13jul15 ... may want to also grab #4, but not right now)
         head -1 *bio.Level_2*/nationwidechildrens.org_biospecimen_tumor_sample*.txt >& $TCGAFMP_DCC_REPOSITORIES/scratch/te
         ~/scripts/transpose $TCGAFMP_DCC_REPOSITORIES/scratch/te >& $TCGAFMP_DCC_REPOSITORIES/scratch/tf
         numLines=$(wc -l < "$TCGAFMP_DCC_REPOSITORIES/scratch/tf" )
         if [ $numLines -eq 7 ]
             then
                 cut -f 2,4-6  *bio.Level_2*/nationwidechildrens.org_biospecimen_tumor_sample*.txt | sort | sed -e '1,$s/\[Not Available\]/NA/g' | sed -e '1,$s/\[Not Reported\]/NA/g' | sed -e '1,$s/\[Not Applicable\]/NA/g' | sed -e '1,$s/null/NA/g' >& $TCGAFMP_DCC_REPOSITORIES/scratch/t3
+            elif [ $numLines -eq 8 ]
+                then
+                    cut -f 2,5-7  *bio.Level_2*/nationwidechildrens.org_biospecimen_tumor_sample*.txt | sort | sed -e '1,$s/\[Not Available\]/NA/g' | sed -e '1,$s/\[Not Reported\]/NA/g' | sed -e '1,$s/\[Not Applicable\]/NA/g' | sed -e '1,$s/null/NA/g' >& $TCGAFMP_DCC_REPOSITORIES/scratch/t3
             else
                 echo " ERROR ... unexpected number of columns in biospecimen_tumor_sample biotab file "
             fi
