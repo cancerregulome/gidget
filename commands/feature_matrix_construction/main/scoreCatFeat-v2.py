@@ -458,7 +458,8 @@ if __name__ == "__main__":
         outName = tmpDir + "/%d.pw" % eachI
         listFile = tmpDir + "/%d.list" % eachI
 
-        cmdString = "1 ignoreThree.py " + gidgetConfigVars['TCGAFMP_PAIRWISE_ROOT'] + "/pairwise-2.1.2"
+        ## cmdString = "1 ignoreThree.py " + gidgetConfigVars['TCGAFMP_PAIRWISE_ROOT'] + "/pairwise-2.1.2"
+        cmdString = "1 ignoreThree.py " + gidgetConfigVars['TCGAFMP_PAIRWISE_ROOT'] + "/pairwise-3.0.0rc1-rel"
         cmdString += " --by-index %s " % listFile
         ## cmdString += " --dry-run "
         cmdString += " --p-value 2. "
@@ -484,7 +485,7 @@ if __name__ == "__main__":
     #     runlist /<path-to-scratch-space>/runList.txt
     cmdString = "python %s/main/golem.py " % gidgetConfigVars['TCGAFMP_ROOT_DIR']
     cmdString += "http://glados.systemsbiology.net:7083 -p " + golempwd + " "
-    cmdString += "-L pairwise-2.1.0 -u "
+    cmdString += "-L pairwise-3.0.0 -u "
     cmdString += getpass.getuser() + " "
     cmdString += "runlist " + runFile
     print cmdString
