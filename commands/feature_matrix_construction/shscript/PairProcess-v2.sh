@@ -15,13 +15,14 @@ fi
 ##      date, eg '29jan13'
 ##      tumor, eg: 'brca'
 ##      tsvExtension, eg: 'TP.tsv'
+##      REflag, eg: 'RE'
 
 WRONGARGS=1
 if [[ $# != 5 ]] && [[ $# != 6 ]]
     then
         echo " "
         echo " Usage   : `basename $0` <curDate> <tumorType> <mRNAtype> <tsvExtension> <REflag=RE/noRE> [config-file] "
-        echo " Example : `basename $0` 28oct13  brca  seq  TP.tsv "
+        echo " Example : `basename $0` 28oct13  brca  seq  TP.tsv  RE  "
         echo " "
         echo " NOTES : "
         echo "     mRNAtype should be either seq or array "
