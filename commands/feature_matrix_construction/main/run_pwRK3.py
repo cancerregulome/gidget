@@ -591,7 +591,7 @@ if __name__ == "__main__":
             iStop = min ( (iStart + nFpJ), numFeat )
             outName = tmpDir13 + "/" + str(numJobs) + ".pw"
             ## cmdString = "1 " + gidgetConfigVars['TCGAFMP_PAIRWISE_ROOT'] + "/pairwise-2.1.2"
-            cmdString = "1 " + gidgetConfigVars['TCGAFMP_PAIRWISE_ROOT'] + "/pairwise-3.0.0rc1-rel"
+            cmdString = "1 " + gidgetConfigVars['TCGAFMP_PAIRWISE_ROOT'] + "/pairwise-3.0.1rc1-rel"
             cmdString += " --pvalue %g --min-ct-cell %d --min-mx-cell %d --min-samples %d" \
                 % (args.pvalue, args.min_ct_cell, args.min_mx_cell, args.min_samples)
             cmdString += " --outer %d:%d:1 --inner +1::1  %s  %s " \
@@ -618,7 +618,7 @@ if __name__ == "__main__":
             for jTuple in iRanges2:
                 outName = tmpDir13 + "/" + str(numJobs) + ".pw"
                 ## cmdString = "1 " + gidgetConfigVars['TCGAFMP_PAIRWISE_ROOT'] + "/pairwise-2.1.2"
-                cmdString = "1 " + gidgetConfigVars['TCGAFMP_PAIRWISE_ROOT'] + "/pairwise-3.0.0rc1-rel"
+                cmdString = "1 " + gidgetConfigVars['TCGAFMP_PAIRWISE_ROOT'] + "/pairwise-3.0.1rc1-rel"
                 cmdString += " --pvalue %g --min-ct-cell %d --min-mx-cell %d --min-samples %d" \
                     % (args.pvalue, args.min_ct_cell, args.min_mx_cell, args.min_samples)
 
@@ -654,7 +654,7 @@ if __name__ == "__main__":
         # ( note that the single-index vs a specified "type" is handled above )
         outName = tmpDir13 + "/" + str(index) + ".pw"
         ## cmdString = "1 " + gidgetConfigVars['TCGAFMP_PAIRWISE_ROOT'] + "/pairwise-2.1.2"
-        cmdString = "1 " + gidgetConfigVars['TCGAFMP_PAIRWISE_ROOT'] + "/pairwise-3.0.0rc1-rel"
+        cmdString = "1 " + gidgetConfigVars['TCGAFMP_PAIRWISE_ROOT'] + "/pairwise-3.0.1rc1-rel"
         cmdString += " --pvalue %g --min-ct-cell %d --min-mx-cell %d --min-samples %d" \
             % (args.pvalue, args.min_ct_cell, args.min_mx_cell, args.min_samples)
         cmdString += " --outer %d:%d:1 --inner 0::1  %s  %s " \
@@ -680,7 +680,7 @@ if __name__ == "__main__":
     # ok, now we want to actually launch the jobs ...
     cmdString = "python %s/main/golem.py " % gidgetConfigVars['TCGAFMP_ROOT_DIR']
     cmdString += "http://glados.systemsbiology.net:7083 -p " + golempwd + " "
-    cmdString += "-L pairwiseRK -u "
+    cmdString += "-L pairwise-3.0.1rc1-rel -u "
     cmdString += getpass.getuser() + " "
     cmdString += "runlist " + runFile
     print cmdString
