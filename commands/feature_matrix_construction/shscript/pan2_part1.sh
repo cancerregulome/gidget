@@ -49,6 +49,8 @@ if [ ! -d $curDate ]
 fi
 cd $curDate
 
+echo `pwd`
+
 rm -fr $TCGAFMP_DATA_DIR/$oneTumor/scratch/*.$curDate.$snapshotName.$oneTumor.log
 rm -fr $TCGAFMP_DATA_DIR/$oneTumor/scratch/*.$curDate.$oneTumor.log
 rm -fr $TCGAFMP_DATA_DIR/$oneTumor/$curDate/*.*
