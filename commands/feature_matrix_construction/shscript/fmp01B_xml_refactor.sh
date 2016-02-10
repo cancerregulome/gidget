@@ -81,6 +81,9 @@ for tumor in $tumors
 	        continue
 	fi
 
+        ## make a copy of this first file, just in case we need to check some things ...
+        cp $tumor.clinical.$curDate.tsv $tumor.clinical.$curDate.tsv_fromXML_only
+
 	rm -fr tmp.sort
 	sort $tumor.clinical.$curDate.tsv >& tmp.sort
 	mv -f tmp.sort $tumor.clinical.$curDate.tsv
@@ -96,7 +99,7 @@ for tumor in $tumors
 
         ## the patients.counts_and_rates files do not differ across multiple subsets
         ## so we can concatenate all of these ...
-        echo " creating new MutSig counts and rates file in aux directory "
+        echo " creating new MutSig counts and rates file in aux directory " $auxName
         rm -fr ../$auxName/MutSigCV.patients.counts_and_rates.forXmlMerge.tsv
         rm -fr ../$auxName/MutSig.patients.counts_and_rates.forXmlMerge.tsv
         cat gdac.broadinstitute.org_*counts*rates*tsv | sort | uniq >& \
