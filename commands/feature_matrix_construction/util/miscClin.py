@@ -1761,7 +1761,8 @@ def removeUninformativeKeys(allClinDict):
     for ii in range(len(allKeys)):
         aKey = allKeys[ii]
 
-        # if this is one of the magicKeepStrings, then skip over ...
+        # if this is one of the magicKeepStrings, then we don't need to look 
+        # into more detail ...
         doSkip = 0
         for aString in magicKeepStrings:
             if ( aKey.lower().find(aString.lower()) >= 0 ): 
@@ -1786,14 +1787,15 @@ def removeUninformativeKeys(allClinDict):
 
         print " looking at key %s ... allNumbers=%d ... |card|=%d " % (aKey, allNumbers, len(otherValues)), otherValues[:10]
         if (not allNumbers):
-            if ((len(otherValues) + numNA) > int(0.90 * numClin)):
+            ## if ((len(otherValues) + numNA) > int(0.90 * numClin)):
+            if ((len(otherValues) + (numNA-numClin/2)) > int(0.90 * (numClin/2))):
                 print "        (a) removing key %s : numNA=%d  len(otherValues)=%d  numClin=%d " % (aKey, numNA, len(otherValues), numClin)
                 print "                                    ", otherValues[:3], otherValues[-3:]
                 print otherValues
                 removeFlags[ii] = 1
-            # 01feb13 : if a categorical feature has more than 20 categories,
-            # drop it!
-            if (len(otherValues) > 20):
+            # 01feb13 : if a categorical feature has more than 20 categories, drop it!
+            # 03feb16 : increasing this to 30 categories
+            if (len(otherValues) > 30):
                 print "        (b) removing key %s : numNA=%d  len(otherValues)=%d  numClin=%d " % (aKey, numNA, len(otherValues), numClin)
                 print "                                    ", otherValues[:3], otherValues[-3:]
                 print otherValues
