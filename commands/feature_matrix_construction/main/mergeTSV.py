@@ -3,6 +3,7 @@
 import miscTCGA
 import tsvIO
 
+import numpy
 import os
 import sys
 import time
@@ -466,6 +467,7 @@ if __name__ == "__main__":
             print " --> nothing found ??? continuing ... "
             continue
 
+        print " first look ... "
         tsvIO.lookAtDataD(testD)
 
         if (1):
@@ -478,29 +480,15 @@ if __name__ == "__main__":
             print " "
             print " checking for duplicates ... "
             testD = removeDuplicateSamples(testD, 16, 0)
+            print " second look ... "
+            tsvIO.lookAtDataD(testD)
 
             if (1):
                 print " "
                 print " dropping details (beyond sample type) at the end of the barcodes ... "
                 testD = dropDetailsFromBarcodes(testD)
+                print " third look ... "
                 tsvIO.lookAtDataD(testD)
-
-        if (0):
-
-            print " "
-            print " at the individual input file level, remove rows and then columns with too many missing values ... "
-            skipRowList = tsvIO.getSkipList(rowMaxNAfrac, testD, 'row')
-            if (skipRowList != []):
-                testD = tsvIO.filter_dataMatrix(testD, skipRowList, [])
-            tsvIO.lookAtDataD(testD)
-
-            skipColList = tsvIO.getSkipList(colMaxNAfrac, testD, 'col')
-            if (skipColList != []):
-                testD = tsvIO.filter_dataMatrix(testD, [], skipColList)
-            tsvIO.lookAtDataD(testD)
-
-        # finally, add this dictionary to our list of input data sets ...
-        inputData += [testD]
 
         tokenList = testD['dataType'].split(':')
         if (len(tokenList) != 2):
@@ -510,14 +498,28 @@ if __name__ == "__main__":
             print " ERROR in mergeTSV ... the dataType in the upper-left corner of <%s> does not appear to be correct ? " % aFile
             print testD['dataType']
             sys.exit(-1)
+
         dType = tokenList[0]
+        if (dType not in dTypeList): dTypeList += [dType]
+
         fType = tokenList[1]
-        if (dType not in dTypeList):
-            dTypeList += [dType]
-        if (fType not in fTypeList):
-            fTypeList += [fType]
+        if ( fType.find('+') > 0 ):
+            fSplit = fType.split('+')
+            for aF in fSplit:
+                if (aF not in fTypeList): fTypeList += [aF]
+        else:
+            if (fType not in fTypeList): fTypeList += [fType]
+
+        print " --> latest dType and fType lists: ", dTypeList, fTypeList
+
+        # finally, add this dictionary to our list of input data sets ...
+        print " --> adding this data set to input list ... ", len(inputData) + 1
+        inputData += [testD]
+
 
     print " "
+    print " "
+
     numD = len(inputData)
     print " DONE looping over input files ... have %d input data sets " % numD
     print " "
@@ -584,26 +586,35 @@ if __name__ == "__main__":
                     outMatrix[iu][ju] = inputData[iD]['dataMatrix'][ii][jj]
                     continue
 
-                print " SHOULD NOT GET HERE ANYMORE "
-                sys.exit(-1)
 
-                # OLD:
-                if (outMatrix[iu][ju] != NA_VALUE):
-                    if (inputData[iD]['dataMatrix'][ii][jj] != NA_VALUE and inputData[iD]['dataMatrix'][ii][jj] != "NA"):
-                        if (outMatrix[iu][ju] != inputData[iD]['dataMatrix'][ii][jj]):
-                            print " WARNING ??? different data already here ??? ", iu, ju, outMatrix[iu][ju], inputData[iD]['dataMatrix'][ii][jj], curRowLabels[ii], curColLabels[jj]
+        ## NEW SANITY CHECKING ...
+        badValue = 0
+        for ii in range(numRow):
+            iu = rowMap[ii]
+            for jj in range(numCol):
+                ju = colMap[jj]
+
+                if ( outMatrix[iu][ju] != "NA" ):
+                    if ( curRowLabels[ii][0] != "C" ):
+                        try:
+                            if ( numpy.isnan(outMatrix[iu][ju]) or numpy.isinf(outMatrix[iu][ju]) ):
+                                print " bad data value !!! ??? ", ii, iu, jj, ju, curRowLabels[ii], \
+                                        curColLabels[jj], outMatrix[iu][ju], inputData[iD]['dataMatrix'][ii][jj]
+                                badValue = 1
+                        except:
+                            print " EXCEPT: bad data value !!! ??? ", ii, iu, jj, ju, curRowLabels[ii], \
+                                    curColLabels[jj],  outMatrix[iu][ju], inputData[iD]['dataMatrix'][ii][jj]
                             sys.exit(-1)
-                            outMatrix[iu][ju] = inputData[
-                                iD]['dataMatrix'][ii][jj]
-                elif (outMatrix[iu][ju] != "NA"):
-                    if (inputData[iD]['dataMatrix'][ii][jj] != NA_VALUE and inputData[iD]['dataMatrix'][ii][jj] != "NA"):
-                        if (outMatrix[iu][ju] != inputData[iD]['dataMatrix'][ii][jj]):
-                            print " WARNING ??? different data already here ??? ", iu, ju, outMatrix[iu][ju], inputData[iD]['dataMatrix'][ii][jj], curRowLabels[ii], curColLabels[jj]
-                            sys.exit(-1)
-                            outMatrix[iu][ju] = inputData[
-                                iD]['dataMatrix'][ii][jj]
-                else:
-                    outMatrix[iu][ju] = inputData[iD]['dataMatrix'][ii][jj]
+
+        if ( badValue ):
+            print "     sanity-checking step FAILED "
+            sys.exit(-1)
+        else:
+            print '     --> new sanity-checking step succeeded ... '
+
+        print " "
+        print " "
+        ## go back up to: for iD in range(numD) ...
 
     print ' (c) TIME ', time.asctime(time.localtime(time.time()))
 
