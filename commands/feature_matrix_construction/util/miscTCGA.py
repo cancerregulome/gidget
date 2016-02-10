@@ -447,6 +447,21 @@ def get_uuid2barcode_dict():
 
 #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 
+def get_sample_barcodes ( patientBarcode ):
+    ## print " in get_sample_barcodes ", patientBarcode
+
+    if ( len(patient_dict) == 0 ):
+        get_uuid2barcode_dict()
+
+    patientBarcode = patientBarcode.upper()
+    if ( len(patientBarcode) > 12 ): patientBarcode = patientBarcode[:12]
+
+    barcodeList = patient_dict[patientBarcode]
+
+    return ( barcodeList )
+
+#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
+
 def get_tumor_barcode ( patientBarcode ):
     ## print " in get_tumor_barcode ... ", patientBarcode
 
