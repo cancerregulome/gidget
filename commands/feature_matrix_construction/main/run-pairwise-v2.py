@@ -902,6 +902,7 @@ if __name__ == "__main__":
         ## cmdString = "1 ignoreThree.py " + gidgetConfigVars['TCGAFMP_PAIRWISE_ROOT'] + "/pairwise-2.1.2"
         cmdString = "1 ignoreThree.py " + gidgetConfigVars['TCGAFMP_PAIRWISE_ROOT'] + "/pairwise-3.0.1rc1-rel"
         cmdString += " --by-index %s " % listFile
+        ## cmdString += " --verbosity 99 --by-index %s " % listFile
         ## cmdString += " --dry-run "
         cmdString += " --p-value %g " % args.pvalue
         cmdString += " --min-ct-cell %d --min-mx-cell %d --min-samples %d " % \
