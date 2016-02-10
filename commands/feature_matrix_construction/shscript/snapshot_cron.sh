@@ -44,5 +44,12 @@ source ${TCGAFMP_ROOT_DIR}/../../gidget/util/env.sh
 cd $TCGAFMP_ROOT_DIR/shscript
 
 f=snapshot-`echo "$(date +%Y-%m-%d)"`-log.txt
+echo $f
+echo " "
+echo " STARTING wget_ALL_parse_biotab_untar script NOW "
+echo " "
 nohup ./wget_ALL_parse_biotab_untar.sh >& $TCGAFMP_DCC_REPOSITORIES/script_log/$f &
+
+echo " "
+echo " "
 
