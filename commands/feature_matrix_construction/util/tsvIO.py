@@ -838,8 +838,10 @@ def lookAtDataD ( dataD ):
     for ii in range(numRow):
         for jj in range(numCol):
             if ( dataD['dataMatrix'][ii][jj] == "" ):
-                print " ERROR ??? data matrix has a blank token ??? "
+                print " ERROR ??? data matrix has a blank token ??? (in lookAtDataD) "
                 print ii, jj, dataD['dataMatrix'][ii][jj]
+                print dataD['rowLabels'][ii], len(dataD['rowLabels'])
+                print dataD['colLabels'][jj], len(dataD['colLabels'])
                 sys.exit(-1)
 
     # count up number of missing values ...
