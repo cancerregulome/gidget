@@ -58,7 +58,7 @@ wc -l $d/post_proc_all.short.sort
 
 date
 
-echo " deleting .tmp and .tmp.sort and .pw files "
+echo " deleting .tmp and .tmp.sort files "
 rm -fr $d/post_proc_all.*.*.tmp.sort
 rm -fr $d/post_proc_all.*.*.tmp
 ## rm -fr $d/*.pw 
