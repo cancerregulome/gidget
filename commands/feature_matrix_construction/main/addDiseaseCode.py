@@ -10,6 +10,60 @@ import tsvIO
 NA_VALUE = -999999
 
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
+
+def updateDiseaseCode(dataD):
+
+    print " "
+    print " in updateDiseaseCode ... "
+
+    # the feature matrix has thousands of features x hundreds of patients
+    rowLabels = dataD['rowLabels']
+    colLabels = dataD['colLabels']
+    numRow = len(rowLabels)
+    numCol = len(colLabels)
+    dataMatrix = dataD['dataMatrix']
+    print " %d rows x %d columns " % (numRow, numCol)
+    # print rowLabels[:5]
+    # print rowLabels[-5:]
+
+    keepRow = -1
+    for iRow in range(numRow):
+        if (rowLabels[iRow].find("disease_code") >= 0):
+            keepRow = iRow
+
+    if ( keepRow < 0 ): sys.exit(-1)
+
+    # outer loop is over columns ...
+    print " "
+    print " starting loop over %d columns ... " % numCol
+
+    for iCol in range(numCol):
+        curSample = colLabels[iCol]
+        diseaseCode = miscTCGA.barcode_to_disease(curSample)
+        if (diseaseCode == "NA"):
+            print " got an unknown disease code ??? ", curSample, diseaseCode
+        else:
+            if (dataMatrix[keepRow][iCol] == "NA" ):
+                dataMatrix[keepRow][iCol] = diseaseCode
+                print " updating disease code from NA to %s " % diseaseCode
+            else:
+                if ( dataMatrix[keepRow][iCol] != diseaseCode ):
+                    print " WARNING ??? disease codes do not match ??? !!! ", dataMatrix[keepRow][iCol], diseaseCode
+                    print "         current value in disease_code feature : ", dataMatrix[keepRow][iCol]
+                    print "         based on the barcode to disease map   : ", diseaseCode
+                    print "         leaving as is ... "
+                    ## sys.exit(-1)
+            
+
+    newD = {}
+    newD['rowLabels'] = rowLabels
+    newD['colLabels'] = colLabels
+    newD['dataType'] = dataD['dataType']
+    newD['dataMatrix'] = dataMatrix
+
+    return (newD)
+
+
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 
 
@@ -30,9 +84,10 @@ def addDiseaseCode(dataD):
 
     for iRow in range(numRow):
         if (rowLabels[iRow].find("disease_code") >= 0):
-            print " ERROR in addDiseaseCode ... this matrix already seems to have this feature ", rowLabels[iRow]
-            print " --> will NOT add a new feature (output TSV == input TSV) "
-            return (dataD)
+            return ( updateDiseaseCode(dataD) )
+            ## print " ERROR in addDiseaseCode ... this matrix already seems to have this feature ", rowLabels[iRow]
+            ## print " --> will NOT add a new feature (output TSV == input TSV) "
+            ## return (dataD)
 
     numRow += 1
     rowLabels += ["C:CLIN:disease_code:::::"]
@@ -76,6 +131,7 @@ if __name__ == "__main__":
             print " "
             print " Usage: %s <input TSV file> <output TSV file> "
             print " "
+            print " ERROR -- bad command line arguments "
             sys.exit(-1)
 
     print " "

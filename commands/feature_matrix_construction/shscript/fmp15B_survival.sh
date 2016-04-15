@@ -1,25 +1,37 @@
 #!/bin/bash
 
-export LD_LIBRARY_PATH=/tools/lib/
-export TCGAFMP_ROOT_DIR=/users/sreynold/to_be_checked_in/TCGAfmp
-export PYTHONPATH=$TCGAFMP_ROOT_DIR/pyclass:$TCGAFMP_ROOT_DIR/util:$PYTHONPATH
-export VT_UTIL=/users/sreynold/git_home/vt_foo
+# every TCGA FMP script should start with these lines:
+: ${TCGAFMP_ROOT_DIR:?" environment variable must be set and non-empty; defines the path to the TCGA FMP scripts directory"}
+source ${TCGAFMP_ROOT_DIR}/../../gidget/util/env.sh
+
+# additional required variables for this script:
+: ${VT_UTILS:?" environment variable must be set and non-empty"}
+: ${VT_SURVIVAL:?" environment variable must be set and non-empty"}
+: ${TCGAFMP_OUTPUTS:?" environment variable must be set and non-empty; Location of all-tumor output from TCGAfmp"}
+
 
 ## this script should be called with the following parameters:
-##      date, eg '29jan13'
-##      one or more tumor types, eg: 'prad thca skcm stad'
+##      date, eg '12jul13' or 'test'
+##      one tumor type, eg 'ucec'
+
+WRONGARGS=1
+if [[ $# != 2 ]] && [[ $# != 3 ]]
+    then
+        echo " Usage   : `basename $0` <curDate> <tumorType> [auxName] "
+        echo " Example : `basename $0` 28oct13  brca  aux "
+        echo " "
+        echo " Note that the new auxName option at the end is optional and will default to simply aux "
+        exit $WRONGARGS
+fi
+
 curDate=$1
 tumor=$2
 
-if [ -z "$curDate" ]
+if (( $# == 3 ))
     then
-        echo " this script must be called with a date string of some kind, eg 28feb13 "
-        exit
-fi
-if [ -z "$tumor" ]
-    then
-        echo " this script must be called with at least one tumor type "
-        exit
+        auxName=$3
+    else
+        auxName=aux
 fi
 
 echo " "
@@ -29,11 +41,6 @@ echo `date`
 echo " *" $curDate
 echo " *******************"
 
-args=("$@")
-for ((i=1; i<$#; i++))
-
-    do
-        tumor=${args[$i]}
 
         echo " "
         echo " *************************************************************** "
@@ -64,14 +71,14 @@ for ((i=1; i<$#; i++))
                         head Survival.CVars.txt
                         echo " "
                 
-                        cd /users/sreynold/git_home/vt_cncreg/survival
+                        cd $VT_SURVIVAL
                         rm -fr $TCGAFMP_DATA_DIR/$tumor/$curDate/SurvivalPVal.$st.tmp
                         rm -fr $TCGAFMP_DATA_DIR/$tumor/$curDate/SurvivalPVal.$st.tsv
                         rm -fr $TCGAFMP_DATA_DIR/$tumor/scratch/SurvivalPVal.seq.$st.log
                         ./SurvivalPVal.sh \
                                 -f $TCGAFMP_DATA_DIR/$tumor/$curDate/$tumor.seq.$curDate.$st.tsv \
                                 -c $TCGAFMP_DATA_DIR/$tumor/$curDate/Survival.CVars.txt \
-                                -m $TCGAFMP_DATA_DIR/$tumor/aux/survival.feat.txt \
+                                -m $TCGAFMP_DATA_DIR/$tumor/$auxName/survival.feat.txt \
                                 -o $TCGAFMP_DATA_DIR/$tumor/$curDate/SurvivalPVal.$st.tmp >& $TCGAFMP_DATA_DIR/$tumor/scratch/SurvivalPVal.seq.$st.log
                         grep -v "	NA" $TCGAFMP_DATA_DIR/$tumor/$curDate/SurvivalPVal.$st.tmp | sort -gk 2 | grep -v "vital" \
                                 >& $TCGAFMP_DATA_DIR/$tumor/$curDate/SurvivalPVal.seq.$st.tsv
@@ -86,43 +93,6 @@ for ((i=1; i<$#; i++))
                     fi
 
             done ## loop over st
-
-        ## also do the non-split matrix ...
-        if [ -f $tumor.seq.$curDate.tsv ]
-            then
-
-                echo " "
-                echo " --> running survival analysis on " $tumor.seq.$curDate.tsv
-                rm -fr Survival.CVars.txt
-                cut -f1 $tumor.seq.$curDate.tsv | grep -v "^N:" | grep -v "^M:" | grep -v "vital_status" | sort >& Survival.CVars.txt
-        
-                echo " "
-                head Survival.CVars.txt
-                echo " "
-        
-                cd /users/sreynold/git_home/vt_cncreg/survival
-                rm -fr $TCGAFMP_DATA_DIR/$tumor/$curDate/SurvivalPVal.tmp
-                rm -fr $TCGAFMP_DATA_DIR/$tumor/$curDate/SurvivalPVal.tsv 
-                rm -fr $TCGAFMP_DATA_DIR/$tumor/scratch/SurvivalPVal.seq.log
-                ./SurvivalPVal.sh \
-                        -f $TCGAFMP_DATA_DIR/$tumor/$curDate/$tumor.seq.$curDate.tsv \
-                        -c $TCGAFMP_DATA_DIR/$tumor/$curDate/Survival.CVars.txt \
-                        -m $TCGAFMP_DATA_DIR/$tumor/aux/survival.feat.txt \
-                        -o $TCGAFMP_DATA_DIR/$tumor/$curDate/SurvivalPVal.tmp >& $TCGAFMP_DATA_DIR/$tumor/scratch/SurvivalPVal.seq.log
-                grep -v "	NA" $TCGAFMP_DATA_DIR/$tumor/$curDate/SurvivalPVal.tmp | sort -gk 2 | grep -v "vital" \
-                        >& $TCGAFMP_DATA_DIR/$tumor/$curDate/SurvivalPVal.seq.tsv
-
-                head -5 $TCGAFMP_DATA_DIR/$tumor/$curDate/SurvivalPVal.seq.tsv
-                echo " "
-                echo " "
-
-	        cd $TCGAFMP_DATA_DIR/$tumor/$curDate
-                rm -fr SurvivalPVal.tmp
-
-            fi
-
-                
-    done ## loop over tumor
 
 echo " "
 echo " fmp15B_survival script is FINISHED !!! "

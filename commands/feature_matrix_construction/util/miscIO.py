@@ -9,32 +9,6 @@ import time
 import urllib2
 
 #------------------------------------------------------------------------------
-
-
-def open_url(fName):
-
-    print " in openURL : ", fName
-
-    if (fName.startswith("https://")):
-        request = urllib2.Request(fName)
-        username = "ShmulevI"
-        # this is the new password as of June 2nd 2010
-        password = "CancerReg1***"
-        base64string = base64.encodestring('%s:%s' % (username, password))
-        base64string = base64string[:-1]
-        request.add_header("Authorization", "Basic %s" % base64string)
-    else:
-        request = urllib2.Request(fName)
-
-    try:
-        htmlFile = urllib2.urlopen(request)
-    except:
-        print " ERROR ??? failed to open URL ... "
-        print fName
-        sys.exit(-1)
-
-    return (htmlFile)
-
 #------------------------------------------------------------------------------
 
 
@@ -143,54 +117,6 @@ def delete_file(fname):
     (status, output) = commands.getstatusoutput(cmdString)
 
     return (status)
-
-#------------------------------------------------------------------------------
-# this file takes a single-sequence FASTA file and 'crunches' it so that it
-# is only 2 lines long: one line for the header, and one line for the sequence
-# no matter how long the sequence is ... this allows for MUCH faster reading
-# of the file ...
-
-
-def crunch_file(fname):
-
-    rname = make_random_fname()
-    # print rname
-
-    try:
-        fhRand = file('/s0/sheila/scratch/' + rname + '.head.1', 'w')
-    except:
-        try:
-            fhRand = file('/s1/sheila/scratch/' + rname + '.head.1', 'w')
-        except:
-            print ' FATAL ERROR ... could not open scratch file '
-            sys.exit(-1)
-
-    fullRname = fhRand.name
-    fhRand.close()
-
-    # print fullRname
-
-    cmdString = "head -1 " + fname + " > " + fullRname + ".head.1"
-    (status, output) = commands.getstatusoutput(cmdString)
-
-    cmdString = "grep -v '>' " + fname + " > " + fullRname + ".data.1"
-    (status, output) = commands.getstatusoutput(cmdString)
-
-    cmdString = "sed -e 'H;$!d;x;s/\n//g' " + \
-        fullRname + ".data.1 > " + fullRname + ".data.2"
-    (status, output) = commands.getstatusoutput(cmdString)
-
-    cmdString = "cat " + fullRname + ".head.1 " + \
-        fullRname + ".data.2 > " + fullRname + ".new"
-    (status, output) = commands.getstatusoutput(cmdString)
-
-    cmdString = "rm " + fullRname + ".head.1 "
-    (status, output) = commands.getstatusoutput(cmdString)
-
-    cmdString = "rm " + fullRname + ".data.? "
-    (status, output) = commands.getstatusoutput(cmdString)
-
-    return (fullRname + '.new')
 
 #------------------------------------------------------------------------------
 

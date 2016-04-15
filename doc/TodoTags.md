@@ -1,0 +1,11 @@
+## How I use TODO tags
+
+`TODO` items in comments can be organized by marking with a "tag". A tag is a unique identifier associated with a work item or task that is appended to the `TOOD` string in a comment, e.g. `# TODO:REFACTOR` or `// TODO:MY_COOL_FEATURE`. The purpose of this is to make it easy to mark areas of code that are relevant to a particular task or work item and find them quickly later. For example, suppose you are planning on adding some cool feature some time in the future. In the course of working on other things you (or someone else) might run into areas of code that will need to be changed in order to accommodate your cool feature. If you mark these areas with `TODO:MY_COOL_FEATURE`, then once you get around to actually implementing your feature you can find the spots that you need to work on by simply doing a global text search for the tag rather than having to dig through the code all over again. Another situation where this is useful is when you find yourself needing to quickly hack together something. You can mark the spots that you plan on cleaning up later so that they can easily be found again by you or someone else. 
+
+Tags can be made hierarchical by simply append additional tags to the end, e.g. `TODO:AWESOME_FEATURE:SPECIFIC_TASK`. You can search for either the more general category `AWESOME_FEATURE` or more the more specific item `AWESOME_FEATURE:SPECIFIC_TASK`.
+
+## Tags in use in the gidget project
+
+- *FILE_LAYOUT* - Areas where the code takes a dependency on a specific layout of the data files (input or output files). These dependencies should at the very least be documented, but ideally eliminated. 
+    - *EXPLICIT* - Areas where the specific file layout of our system is mentioned, either in a comment or a file path string that's in use. These should be removed if unused or refactored to use the env variable paths (or whatever system we end up with to manage the paths.)
+    - *WORKING_DIR* - Code that either puts files or expects files in the current working directory

@@ -5,6 +5,7 @@ import numpy
 import sys
 
 # these are my local ones
+from env import gidgetConfigVars
 import tsvIO
 
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
@@ -76,12 +77,8 @@ def cleanUpName(aName):
 
 def readPathways():
 
-    ## fh = file ( "/users/sreynold/scratch/CPDB_pathways_genes.tab", 'r' )
-    ## fh = file ( "/users/sreynold/scratch/CPDB_plus.tab", 'r' )
-    ## fh = file ( "/proj/ilyalab/sreynold/TCGA/pathways/only_biocarta.tab", 'r' )
-    ## fh = file ( "/proj/ilyalab/sreynold/TCGA/pathways/only_NCI_Nature.tab", 'r' )
     fh = file(
-        "/proj/ilyalab/sreynold/TCGA/pathways/only_NCI_Nature_ver4.tab", 'r')
+        gidgetConfigVars['TCGAFMP_BIOINFORMATICS_REFERENCES'] + "/nci_pid/only_NCI_Nature_ver4.tab", 'r')
 
     pwDict = {}
 
@@ -443,6 +440,7 @@ if __name__ == "__main__":
             print " "
             print " Usage: %s <input TSV file> <output TSV file> "
             print " "
+            print " ERROR -- bad command line arguments "
             sys.exit(-1)
 
     print " "

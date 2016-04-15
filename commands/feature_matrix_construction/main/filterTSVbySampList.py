@@ -259,6 +259,8 @@ if __name__ == "__main__":
             print "         if the methylation data from a particular sample is in the white list, that "
             print "         does not necessarily mean that the microRNA data from the same sample can "
             print "         automatically be included as well -- it must be listed explicitly. "
+            print " "
+            print " ERROR -- bad command line arguments "
             sys.exit(-1)
 
         inFile = sys.argv[1]
@@ -322,17 +324,22 @@ if __name__ == "__main__":
     print " "
     print " building up skipColList ... "
     skipColList = []
+
+    ## first, we loop over the black-lists and check each column
+    ## label to see if it should be added to the skipColList ...
+    numSkip = 0
+    print " "
+    print " FIRST checking black lists ... "
     for iList in range(numLists):
+        bwFlag = listBW[iList]
+        if ( bwFlag != "black" ): continue
 
         sampleList = listDetails[iList]
-        if (len(sampleList) == 0):
-            continue
+        if (len(sampleList) == 0): continue
 
-        bwFlag = listBW[iList]
         lsFlag = listLS[iList]
         print "         examining list #%d (%d,%s,%s) " % ((iList + 1), len(sampleList), bwFlag, lsFlag)
 
-        numSkip = 0
         for iCol in range(numCol):
             # print colLabels[iCol], sampleList[1:5]
             tmpLabel = colLabels[iCol]
@@ -344,18 +351,50 @@ if __name__ == "__main__":
                 print "     <%s> is ALREADY in the skip-list (list #%d) " % (tmpLabel, (iList + 1))
                 continue
 
-            # NEW:
-            if (bwFlag == "black"):
-                if (is_in_list(tmpLabel, sampleList, lsFlag)):
-                    skipColList += [iCol]
-                    numSkip += 1
-
-            else:
-                if (not is_in_list(tmpLabel, sampleList, lsFlag)):
-                    skipColList += [iCol]
-                    numSkip += 1
+            if (is_in_list(tmpLabel, sampleList, lsFlag)):
+                skipColList += [iCol]
+                numSkip += 1
 
         print "         --> %d additional samples to be skipped " % numSkip, listInfo[iList][0], bwFlag, lsFlag
+
+    ## now we're going to loop over the column labels and see if they
+    ## are in any of the white lists ...
+    print " "
+    print " NOW checking white lists ... "
+    for iCol in range(numCol):
+        tmpLabel = colLabels[iCol]
+
+        ## initialize the isWhite flag to TRUE
+        isWhite = 1
+
+        for iList in range(numLists):
+            bwFlag = listBW[iList]
+            if ( bwFlag == "black" ): continue
+
+            sampleList = listDetails[iList]
+            if (len(sampleList) == 0): continue
+
+            ## if we get to here, then we have at least one white list
+            ## so reset the isWhite flag to FALSE
+            isWhite = 0
+
+            lsFlag = listLS[iList]
+            print "         examining list #%d (%d,%s,%s) " % ((iList + 1), len(sampleList), bwFlag, lsFlag)
+
+            if (is_in_list(tmpLabel, sampleList, lsFlag)):
+                isWhite = 1
+
+        ## once we get back to here, if isWhite is FALSE, then add to skipColList
+        if ( iCol in skipColList):
+            print "     <%s> is ALREADY in the skip-list (list #%d) " % (tmpLabel, (iList + 1))
+            continue
+
+        if ( isWhite == 0 ):
+            skipColList += [iCol]
+            numSkip += 1
+
+    print "         --> %d additional samples to be skipped " % numSkip
+
     # print skipColList
 
     print " "
@@ -408,11 +447,15 @@ if __name__ == "__main__":
         outD2 = tsvIO.filter_dataMatrix(outD, skipRowList, [])
         outD = outD2
 
+    # set up sorting options ...
+    sortRowFlag = 0
+    sortColFlag = 0
+    rowOrder = []
+    colOrder = []
+
     # print " "
     # print " calling writeTSV_dataMatrix ... ", outFile
-    sortRowFlag = 0
-    sortColFlag = 1
-    tsvIO.writeTSV_dataMatrix(outD, sortRowFlag, sortColFlag, outFile)
+    tsvIO.writeTSV_dataMatrix(outD, sortRowFlag, sortColFlag, outFile, rowOrder, colOrder)
 
     print " "
     print " DONE "

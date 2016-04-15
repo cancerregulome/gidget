@@ -1,0 +1,76 @@
+# required environmental variables
+#
+# all scripts should reference the project's utility functions,
+# which should verify that all of these variables here have been set
+
+# VAR_NAME\tdescription
+
+
+##
+# -- gidget config
+#
+
+GIDGET_SOURCE_ROOT	path to top-level of gidget project; for example, directory with subdirs "commands", "config", "gidget", etc
+
+
+##
+# -- feature matrix (fmp, FMx) construction
+#
+
+# path to FMP scripts
+TCGAFMP_ROOT_DIR	path to the top level of the feature matrix project's code; for example ".../commands/feature_matrix_construction"
+
+TCGAFMP_BIOINFORMATICS_REFERENCES	path to externally-produced references and databases, containing subdirectories for "uniprot", "gencode", etc; for example ".../bioinformatics_references"
+
+# fmp outputs
+TCGAFMP_DATA_DIR	path to general data directory containing per-tumor-type feature matrix outputs; for example ".../TCGAfmp_outputs", which should contain subdirectories for each tumor type, each again with subdirectories per date.
+
+# dcc data
+TCGAFMP_DCC_REPOSITORIES	path to directory which contains subdirectories such as "dcc-mirror", "dcc-snapshot", "dcc-snapshot-20sep13", "bio_clin", "uuids", "rppa", "scratch", etc; for example: ".../TCGA/repositories"
+
+# firehose data
+TCGAFMP_FIREHOSE_MIRROR	path to local Firehose mirror; for example: ".../TCGA/firehose"
+
+# cluster password should be in this directory in a file called GOLEMPW
+TCGAFMP_CLUSTER_HOME	path to cluster information directory
+
+# scratch space -- one should be local on the computer you typically
+# launch jobs from, and the other should be on a file-server and
+# accessible from the cluster
+TCGAFMP_LOCAL_SCRATCH	path to large scratch space (some scripts such as pairwise need more than /tmp); for example: "/local/.../pw_scratch/"
+TCGAFMP_CLUSTER_SCRATCH	path to large scratch space accessible by cluster; for example: ".../TCGA/pw_scratch"
+
+# auxiliary code: pairwise
+TCGAFMP_PAIRWISE_ROOT	path to the top level of the pairwise project's code which should contain the 'pairwise' executable, 'prep4pairwise.py', etc; or example ".../TCGA/scripts"
+
+# python3 binary
+# TODO: can this be required from the standard shell env and tested for?
+TCGAFMP_PYTHON3	path to python3 binary
+
+
+##
+# -- binarization --
+#
+
+TCGABINARIZATION_DATABASE_DIR	path to databases expected by binarization scripts; for example, should contain subdirs with "TRANSFAC_2010.1", "interpro/data", "uniprot/data", etc
+
+
+##
+# -- MAF processing --
+#
+
+# TODO: better usage message; why necessary
+LD_LIBRARY_PATH	environment variable must be set and non-empty
+
+TCGAMAF_ROOT_DIR	path to the top level of the maf pipeline's code
+TCGAMAF_DATA_DIR	path to the maf data directory
+TCGAMAF_REFERENCES_DIR	path to the bioinformatics references for maf
+
+TCGAMAF_TOOLS_DIR	path containing annovar
+
+# currently same as TCGAMAF_ROOT_DIR; TODO merge
+TCGAMAF_SCRIPTS_DIR	(currently same as TCGAMAF_ROOT_DIR)
+
+# should this be specified in another way?
+TCGAMAF_PYTHON_BINARY	TODO
+

@@ -1,7 +1,13 @@
+#!/bin/bash
+
+# every TCGA FMP script should start with these lines:
+: ${TCGAFMP_ROOT_DIR:?" environment variable must be set and non-empty; defines the path to the TCGA FMP scripts directory"}
+source ${TCGAFMP_ROOT_DIR}/../../gidget/util/env.sh
+
 
 for d in brca gbm ov
     do
-        for f in /titan/cancerregulome14/TCGAfmp_outputs/$d/24may13/$d.seq.24may13.T?.tsv
+        for f in $TCGAFMP_DATA_DIR/$d/24may13/$d.seq.24may13.T?.tsv
             do
                 echo $d $f
                 date

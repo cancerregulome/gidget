@@ -1,6 +1,12 @@
-cd ~/scratch/
+#!/bin/bash
 
-for d in acc blca brca cesc cntl coad dlbc esca gbm hnsc kich kirc kirp laml lgg lihc luad lusc meso ov paad pcpg prad read sarc skcm stad tgct thca ucs ucec
+# every TCGA FMP script should start with these lines:
+: ${TCGAFMP_ROOT_DIR:?" environment variable must be set and non-empty; defines the path to the TCGA FMP scripts directory"}
+source ${TCGAFMP_ROOT_DIR}/../../gidget/util/env.sh
+
+
+for d in `cat $TCGAFMP_ROOT_DIR/config/tumor_list.txt`
+
     do
 
 	echo " "
@@ -8,7 +14,7 @@ for d in acc blca brca cesc cntl coad dlbc esca gbm hnsc kich kirc kirp laml lgg
 	echo " ******************************************************************** "
 	echo $d
 
-	cd /titan/cancerregulome11/TCGA/repositories/dcc-mirror/secure/tumor/$d/cgcc/
+	cd $TCGAFMP_DCC_REPOSITORIES/dcc-mirror/secure/tumor/$d/cgcc/
 	mkdir nationwidechildrens.org
         chmod g+w nationwidechildrens.org
 	cd nationwidechildrens.org
@@ -26,7 +32,7 @@ for d in acc blca brca cesc cntl coad dlbc esca gbm hnsc kich kirc kirp laml lgg
              -R "*images*" \
 	     --verbose \
 	     --recursive --level=1 \
-	     --user=ShmulevI --password=C@ncerReg22 \
+	     --user=USERNAME_HERE --password=PASSWD_HERE \
 	     https://tcga-data-secure.nci.nih.gov/tcgafiles/tcga4yeo/tumor/$d/cgcc/nationwidechildrens.org/microsat_i/fragment_analysis
 
     done

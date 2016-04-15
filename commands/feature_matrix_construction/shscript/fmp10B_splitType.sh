@@ -1,24 +1,33 @@
 #!/bin/bash
 
-export LD_LIBRARY_PATH=/tools/lib/
-export TCGAFMP_ROOT_DIR=/users/sreynold/to_be_checked_in/TCGAfmp
-export PYTHONPATH=$TCGAFMP_ROOT_DIR/pyclass:$TCGAFMP_ROOT_DIR/util:$PYTHONPATH
+# every TCGA FMP script should start with these lines:
+: ${TCGAFMP_ROOT_DIR:?" environment variable must be set and non-empty; defines the path to the TCGA FMP scripts directory"}
+source ${TCGAFMP_ROOT_DIR}/../../gidget/util/env.sh
+
 
 ## this script should be called with the following parameters:
-##      date, eg '29jan13'
-##      one or more tumor types, eg: 'prad thca skcm stad'
+##      date, eg '12jul13' or 'test'
+##      one tumor type, eg 'ucec'
+
+WRONGARGS=1
+if [[ $# != 3 ]] && [[ $# != 4 ]]
+    then
+        echo " Usage   : `basename $0` <curDate> <tumorType> <public/private>  [auxName] "
+        echo " Example : `basename $0` 28oct13  brca  private  aux "
+        echo " "
+        echo " Note that the new auxName option at the end is optional and will default to simply aux "
+        exit $WRONGARGS
+fi
+
 curDate=$1
 tumor=$2
+ppString=$3
 
-if [ -z "$curDate" ]
+if (( $# == 4 ))
     then
-        echo " this script must be called with a date string of some kind, eg 28feb13 "
-        exit
-fi
-if [ -z "$tumor" ]
-    then
-        echo " this script must be called with at least one tumor type "
-        exit
+        auxName=$4
+    else
+        auxName=aux
 fi
 
 echo " "
@@ -28,12 +37,8 @@ echo `date`
 echo " *" $curDate
 echo " *******************"
 
-args=("$@")
-for ((i=1; i<$#; i++))
-    do
-        tumor=${args[$i]}
 
-	cd /titan/cancerregulome14/TCGAfmp_outputs/$tumor
+	cd $TCGAFMP_DATA_DIR/$tumor
 
 	echo " "
 	echo " "
@@ -42,13 +47,17 @@ for ((i=1; i<$#; i++))
 
 	cd $curDate
 
-	s=$(<../aux/splitType.txt)
-	if [ -z "$s" ]
-	    then
-	        echo " no splitType specified "
-	    else
-		echo " splitType is $s"
-	fi
+        s=''
+        if [ "$ppString" = 'private' ]
+            then
+	        s=$(<../$auxName/splitType.txt)
+	        if [ -z "$s" ]
+	            then
+	                echo " no splitType specified "
+	            else
+		        echo " splitType is $s"
+	        fi
+        fi
 
         rm -fr filterFeat.log
         rm -fr final.addI.log
@@ -64,21 +73,27 @@ for ((i=1; i<$#; i++))
 
 		echo " "
                 date
+                echo " operating on intermediate file " $f
+
+                ## delete scratch files that might have been left over from before ...
                 rm -fr tmpf1.tsv tmpf2.tsv
 
                 echo " adding indicator features ... "
                 python $TCGAFMP_ROOT_DIR/main/addIndicators.py $f tmpf1a.tsv >> final.addI.log
 
-                echo " adding discrete features ... "
-                python $TCGAFMP_ROOT_DIR/main/addDiscreteFeat.py tmpf1a.tsv tmpf1.tsv ../aux/$tumor.addDiscreteFeat_List.txt
+                if [ "$ppString" = 'private' ]
+                    then
+                        echo " adding discrete features ... "
+                        python $TCGAFMP_ROOT_DIR/main/addDiscreteFeat.py tmpf1a.tsv tmpf1.tsv ../$auxName/$tumor.addDiscreteFeat_List.txt >> final.addI.log
+                fi
 
                 echo " filtering features and samples ... "
                 python $TCGAFMP_ROOT_DIR/main/filterTSVbyFeatList.py \
                             tmpf1.tsv tmpf2.tsv \
-                            ../aux/$tumor.features.blacklist.loose.tsv  black loose \
-                            ../aux/$tumor.features.blacklist.strict.tsv black strict \
-                            ../aux/$tumor.features.whitelist.loose.tsv  white loose \
-                            ../aux/$tumor.features.whitelist.strict.tsv white strict \
+                            ../$auxName/$tumor.features.blacklist.loose.tsv  black loose \
+                            ../$auxName/$tumor.features.blacklist.strict.tsv black strict \
+                            ../$auxName/$tumor.features.whitelist.loose.tsv  white loose \
+                            ../$auxName/$tumor.features.whitelist.strict.tsv white strict \
                             >> filterFeat.log
 
                 echo " log-transform all GEXP and MIRN features "
@@ -87,14 +102,18 @@ for ((i=1; i<$#; i++))
                 python $TCGAFMP_ROOT_DIR/main/filterTSVbySampList.py \
                             tmpf2b.tsv $k \
                             $tumor.blacklist.samples.tsv black loose \
-                            ../aux/$tumor.blacklist.loose.tsv  black loose \
-                            ../aux/$tumor.blacklist.strict.tsv black strict \
-                            ../aux/$tumor.whitelist.loose.tsv  white loose \
-                            ../aux/$tumor.whitelist.strict.tsv white strict \
+                            ../$auxName/$tumor.blacklist.loose.tsv  black loose \
+                            ../$auxName/$tumor.blacklist.strict.tsv black strict \
+                            ../$auxName/$tumor.whitelist.loose.tsv  white loose \
+                            ../$auxName/$tumor.whitelist.strict.tsv white strict \
                             >> filterFeat.log
 
-                echo " and finally split according to sampleType ... "
+                echo " get summary information on this file ... "
                 echo $k
+		smry=${k/.tsv/.summary}
+                python $TCGAFMP_ROOT_DIR/main/quickLook.py $k >& $smry
+
+                echo " and finally split according to sampleType ... "
                 python $TCGAFMP_ROOT_DIR/main/splitTSVbyCat.py \
                         $k sampleType >> sampleType.split.log
 
@@ -113,7 +132,7 @@ for ((i=1; i<$#; i++))
 
 			h=${f/.tsv/.score.log}
 			python $TCGAFMP_ROOT_DIR/main/scoreCatFeat.py \
-			    --tsvFile /titan/cancerregulome14/TCGAfmp_outputs/$tumor/$curDate/$f >& $h
+			    --tsvFile $TCGAFMP_DATA_DIR/$tumor/$curDate/$f >& $h
 	
 			h=${f/.tsv/.split.log}
 	
@@ -133,7 +152,6 @@ for ((i=1; i<$#; i++))
 
 	    done
 
-    done
 
 echo " "
 echo " fmp10B_splitType script is FINISHED !!! "

@@ -92,6 +92,7 @@ if __name__ == "__main__":
     if (1):
         if (len(sys.argv) != 6):
             print " Usage : %s <input meth file> <input other file> <otherType> <outputFile> <corrThresh> " % sys.argv[0]
+            print " ERROR -- bad command line arguments "
             sys.exit(-1)
 
         methFile = sys.argv[1]
@@ -245,7 +246,6 @@ if __name__ == "__main__":
     sortRowFlag = 0
     sortColFlag = 0
 
-    ## methOutFile = "/local/sreynold/scratch/methOut2.tsv"
     tsvIO.writeTSV_dataMatrix(methD, sortRowFlag, sortColFlag, outFile)
 
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#

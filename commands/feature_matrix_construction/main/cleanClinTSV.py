@@ -308,6 +308,16 @@ remapDict["axillary_lymph_node_stage_method_type"]["other_(specify)"] = "NA"
 
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 
+def stringInList_CaseInsens ( aString, aList ):
+
+    for s in aList:
+        u = s.upper()
+        if ( aString.upper() == u ): return ( 1 )
+
+    return ( 0 )
+
+# -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
+
 
 def remapCategoricalFeatures(allClinDict):
 
@@ -361,64 +371,56 @@ def remapCategoricalFeatures(allClinDict):
 
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 
+def getNumPatients(allClinDict):
 
-def renameB2mutations(allClinDict):
-
-    # print " "
-    # print " in renameB2mutations ... "
-
-    lastGene = ''
-    fh = file("/proj/ilyalab/TCGA/COAD+READ/clinicalPlus/B2_mappings.tsv")
-    B2names = {}
-    for aLine in fh:
-        aLine = aLine.strip()
-        tokenList = aLine.split('\t')
-        # print tokenList
-
-        if (len(tokenList) == 3):
-            lastGene = tokenList[0]
-            newName = lastGene + "_" + tokenList[1]
-            oldName = "B2_" + tokenList[2]
-        elif (len(tokenList) == 2):
-            newName = lastGene + "_" + tokenList[0]
-            oldName = "B2_" + tokenList[1]
-
-        oldName = oldName.lower()
-        newName = newName.lower()
-
-        if (not newName.endswith("_mut")):
-            newName += "_mut"
-
-        if (newName.find(' ') >= 0):
-            print " ERROR ??? blank ??? <%s> " % newName
-            sys.exit(-1)
-        if (oldName in B2names.keys()):
-            print " ERROR ??? oldName already in dict ??? <%s> " % oldName
-            sys.exit(-1)
-        B2names[oldName] = newName
-
-    fh.close()
-
-    keyList = allClinDict.keys()
-    keyList.sort()
-    for aKey in keyList:
-
-        aKey2 = aKey.lower()
-        if (aKey2 in B2names.keys()):
-            newKey = B2names[aKey2]
-            allClinDict[newKey] = allClinDict[aKey]
-            del allClinDict[aKey]
-            # print aKey2, newKey, len(allClinDict[newKey])
-
-    return (allClinDict)
+    aKey = allClinDict.keys()[0]
+    return ( len(allClinDict[aKey]) )
 
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 
+def findProperKey(allClinDict, aString):
+
+    keyList = allClinDict.keys()
+    foundList = []
+
+    for aKey in keyList:
+        if ( aKey.lower().find(aString.lower()) >=0 ):
+            foundList += [ aKey ]
+
+    if ( len(foundList) == 0 ):
+        return ( "NO KEY" )
+    elif ( len(foundList) == 1 ):
+        return ( foundList[0] )
+    else:
+
+        ## look for a perfect match ...
+        for mString in foundList:
+            mTokens = mString.split(':')
+            if ( len(mTokens) == 1 ):
+                if ( mTokens[0].lower() == aString.lower() ):
+                    return ( mString )
+            elif ( len(mTokens) > 2 ):
+                try:
+                    if ( mTokens[2].lower() == aString.lower() ):
+                        return ( mString )
+                except:
+                    print " findProperKey: ERROR in try ??? ", mString
+                    print foundList
+
+        print " "
+        print " ERROR in findProperKey ??? multiple matches "
+        print " but none of them are perfect matches ... "
+        print aString
+        print foundList
+        print " "
+        sys.exit(-1)
+
+# -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 
 def computeLymphnodesFraction(allClinDict):
 
-    aKey = "number_of_lymphnodes_positive_by_he"
-    bKey = "number_of_lymphnodes_examined"
+    aKey = findProperKey ( allClinDict, "number_of_lymphnodes_positive_by_he" )
+    bKey = findProperKey ( allClinDict, "number_of_lymphnodes_examined" )
 
     if (aKey not in allClinDict.keys()):
         print " "
@@ -430,9 +432,9 @@ def computeLymphnodesFraction(allClinDict):
         return (allClinDict)
 
     print " "
-    print " in computeLymphnodesFractoin ... "
+    print " in computeLymphnodesFraction ... "
 
-    numClin = len(allClinDict[aKey])
+    numClin = getNumPatients(allClinDict)
     newV = [0] * numClin
     for kk in range(numClin):
         if (allClinDict[bKey][kk] == "NA"):
@@ -444,9 +446,43 @@ def computeLymphnodesFraction(allClinDict):
         else:
             newV[kk] = float(allClinDict[aKey][kk]) / \
                 float(allClinDict[bKey][kk])
-    allClinDict["fraction_lymphnodes_positive_by_he"] = newV
+    allClinDict["N:SAMP:fraction_lymphnodes_positive_by_he:::::"] = newV
 
     return (allClinDict)
+
+# -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
+
+def addTag2Key ( aKey, aTag ):
+
+    aTokens = aKey.split(':')
+
+    if ( len(aTokens) >= 7 ):
+        newKey = aTokens[0] + ':' + aTokens[1] + ':' + aTokens[2]
+        if ( aTag[0] == "_" ):
+            newKey += aTag
+        else:
+            newKey += "_" + aTag
+        for ii in range(3,len(aTokens)):
+            newKey += ":" + aTokens[ii]
+
+    else:
+        newKey = aKey
+        if ( aTag[0] == "_" ):
+            newKey += aTag
+        else:
+            newKey += "_" + aTag
+        
+    return ( newKey )
+
+# -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
+
+def checkBarcodes(allClinDict):
+    zKey = findProperKey (allClinDict, "bcr_patient_barcode" )
+    numClin = getNumPatients(allClinDict)
+    for ii in range(numClin):
+        if ( allClinDict[zKey][ii].find("_") >= 0 ):
+            print " BAD barcode !!! ", ii, allClinDict[zKey][ii]
+            sys.exit(-1)
 
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 # fields of interest:
@@ -466,34 +502,40 @@ def addFollowupInfo(allClinDict):
     print " "
     print " in addFollowupInfo ... "
 
+    # ------------------------------------------------------------------------
     # FIRST: if there is a days_to_last_known_alive, then check that it is
     # used consistently, otherwise create it
 
-    aKey = "days_to_last_known_alive"
-    bKey = "days_to_last_followup"
-    cKey = "days_to_death"
+    zKey = findProperKey (allClinDict, "bcr_patient_barcode")
+    aKey = findProperKey (allClinDict, "days_to_last_known_alive")
+    bKey = findProperKey (allClinDict, "days_to_last_followup")
+    cKey = findProperKey (allClinDict, "days_to_death")
 
     haveA = (aKey in allClinDict.keys())
     haveB = (bKey in allClinDict.keys())
     haveC = (cKey in allClinDict.keys())
 
+    print " "
+    print " STEP #1 "
     print " have flags A, B, and C : ", haveA, haveB, haveC
 
-    print " allClinDict.keys() : "
-    print allClinDict.keys()
+    ## print " allClinDict.keys() : "
+    ## print allClinDict.keys()
 
     if (haveA):
 
         # if we have the "days_to_last_known_alive" field, check that it
         # is consistent with the other two fields ...
-        numClin = len(allClinDict[aKey])
+        numClin = getNumPatients(allClinDict)
         numNotNA = 0
         for kk in range(numClin):
 
+            ## if we have a 'days_to_death' field and it is not NA, then set 'days_to_last_known_alive' to that value
             if (haveC):
                 if (str(allClinDict[cKey][kk]).upper() != "NA"):
                     allClinDict[aKey][kk] = allClinDict[cKey][kk]
 
+            ## if we have a 'days_to_last_followup' field and it is not NA, then ...
             if (haveB):
                 if (str(allClinDict[bKey][kk]).upper() != "NA"):
                     if (str(allClinDict[aKey][kk]).upper() == "NA"):
@@ -508,13 +550,8 @@ def addFollowupInfo(allClinDict):
     else:
 
         # create it ...
-        if (haveB):
-            numClin = len(allClinDict[bKey])
-        elif (haveC):
-            numClin = len(allClinDict[cKey])
-        else:
-            print " FATAL ERROR ??? no followup or death information ??? "
-            sys.exit(-1)
+        if ( aKey == "NO KEY" ): aKey = "N:CLIN:days_to_last_known_alive:::::"
+        numClin = getNumPatients(allClinDict)
 
         newVec = [0] * numClin
         numNotNA = 0
@@ -535,94 +572,327 @@ def addFollowupInfo(allClinDict):
                 numNotNA += 1
 
         print " NEW days_to_last_known_alive (%d) : " % numNotNA
-        print newVec
-        allClinDict["days_to_last_known_alive"] = newVec
+        ## print newVec
+        allClinDict[aKey] = newVec
 
+    # ------------------------------------------------------------------------
     # SECOND: if there is a "days_to_submitted_specimen_dx", then create
     # a set of "days_to_" features that instead of being relative
     # to "initial_pathologic_diagnosis" are relative to "submitted_specimen"
 
-    aKey = "days_to_submitted_specimen_dx"
-    tKey = "days_to_initial_pathologic_diagnosis"
+    print " "
+    print " STEP #2 "
+    aKey = findProperKey (allClinDict, "days_to_submitted_specimen_dx")
+    tKey = findProperKey (allClinDict, "days_to_initial_pathologic_diagnosis")
+
+    if (aKey in allClinDict.keys()):
+        haveA = 1
+    else:
+        print " do not have [days_to_submitted_specimen_dx] in allClinDict " 
+        haveA = 0
+
+    if (tKey in allClinDict.keys()):
+        haveT = 1
+    else:
+        print " do not have [days_to_initial_pathologic_diagnosis] in allClinDict "
+        haveT = 0
 
     try:
-        print aKey, allClinDict[aKey][:3]
+        numClin = getNumPatients(allClinDict)
+        for bKey in allClinDict.keys():
+            if (haveA == 0): continue
+            if (bKey == aKey): continue
+
+            if (bKey.find("days_to_") >= 0):
+                newKey = addTag2Key ( bKey, "relSS" )
+                print " --> making newKey <%s> from bKey <%s> [%d] " % (newKey, bKey, numClin)
+                newVec = [0] * numClin
+                numNotNA = 0
+                for kk in range(numClin):
+
+                    ## initialize to NA
+                    newVec[kk] = "NA"
+
+                    ## skip if an important value is NA
+                    if (str(allClinDict[aKey][kk]).upper() == "NA"): continue
+                    if (str(allClinDict[bKey][kk]).upper() == "NA"): continue
+                    if (haveT):
+                        if (str(allClinDict[tKey][kk]).upper() == "NA"): continue
+
+                    ## deltaDays is either (days_to_submitted_specimen_dx) - (days_to_initial_pathologic_diagnosis)
+                    ##             or just (days_to_submitted_specimen_dx)
+                    if (haveT): 
+                        deltaDays = allClinDict[aKey][kk] - allClinDict[tKey][kk]
+                    else:
+                        deltaDays = allClinDict[aKey][kk]
+
+                    ## and then we subtract 'delta days' from the original key to make the new relative key
+                    newVec[kk] = allClinDict[bKey][kk] - deltaDays
+
+                    print " STEP2a ", kk, allClinDict[zKey][kk], allClinDict[bKey][kk], allClinDict[aKey][kk], deltaDays, newVec[kk]
+
+                    numNotNA += 1
+
+                if ( numNotNA > 30 ):
+                    print " adding new key (%d) : " % numNotNA, newKey
+                    ## print newVec[:5]
+                    ## print newVec[-5:]
+                    allClinDict[newKey] = newVec
+                else:
+                    print " NOT adding new key (%d) : ", numNotNA, newKey
+
+            if (bKey.find("age_at_") >= 0):
+                ## make sure that this is not a "stage_at_" feature !!!
+                if ( bKey.find("stage_at_") >= 0 ): continue
+
+                newKey = addTag2Key ( bKey, "relSS" )
+                print " --> making newKey <%s> from bKey <%s> [%d] " % (newKey, bKey, numClin)
+                newVec = [0] * numClin
+                numNotNA = 0
+                for kk in range(numClin):
+
+                    ## initialize to NA
+                    newVec[kk] = "NA"
+
+                    ## skip if an important value is NA
+                    if (str(allClinDict[aKey][kk]).upper() == "NA"): continue
+                    if (str(allClinDict[bKey][kk]).upper() == "NA"): continue
+                    if (haveT):
+                        if (str(allClinDict[tKey][kk]).upper() == "NA"): continue
+
+                    ## deltaDays is either (days_to_submitted_specimen_dx) - (days_to_initial_pathologic_diagnosis)
+                    ##             or just (days_to_submitted_specimen_dx)
+                    if (haveT): 
+                        deltaDays = allClinDict[aKey][kk] - allClinDict[tKey][kk]
+                    else:
+                        deltaDays = allClinDict[aKey][kk]
+
+                    ## and then we subtract 'delta days' from the original key to make the new relative key
+                    ## 04mar14 : actually we need to ADD here because "age" should go UP with deltaDays ...
+                    newVec[kk] = allClinDict[bKey][kk] + ( float(deltaDays) / DAYS_PER_YEAR )
+
+                    print " STEP2b ", kk, allClinDict[zKey][kk], allClinDict[bKey][kk], allClinDict[aKey][kk], deltaDays, newVec[kk]
+
+                    numNotNA += 1
+
+                if ( numNotNA > 30 ):
+                    print " adding new key (%d) : " % numNotNA, newKey
+                    ## print newVec[:5]
+                    ## print newVec[-5:]
+                    allClinDict[newKey] = newVec
+                else:
+                    print " NOT adding new key (%d) : ", numNotNA, newKey
+
     except:
-        print " do not have <%s> in allClinDict " % aKey
+        print " --> failed in this try (x) "
+        doNothing = 1
+
+    # ------------------------------------------------------------------------
+    # THIRD: if there is a "days_to_sample_procurement", then create
+    # a set of "days_to_" features that instead of being relative
+    # to "initial_pathologic_diagnosis" are relative to "sample_procurement
+
+    print " "
+    print " STEP #3 "
+    aKey = findProperKey (allClinDict, "days_to_sample_procurement")
+    tKey = findProperKey (allClinDict, "days_to_initial_pathologic_diagnosis")
+
+    if (aKey in allClinDict.keys()):
+        haveA = 1
+    else:
+        print " do not have [days_to_sample_procurement] in allClinDict " 
+        haveA = 0
 
     if (tKey in allClinDict.keys()):
         haveT = 1
     else:
         haveT = 0
+        print " do not have a [days_to_initial_pathologic_diagnosis] key "
 
     try:
-        numClin = len(allClinDict[aKey])
+        numClin = getNumPatients(allClinDict)
         for bKey in allClinDict.keys():
-            if (bKey == aKey):
-                continue
+            if (haveA == 0): continue
+            if (bKey == aKey): continue
 
-            if (bKey.startswith("days_to_")):
-                newKey = bKey + "_relSS"
-                print " --> making newKy <%s> from bKey <%s> " % (newKey, bKey)
+            if (bKey.find("days_to_") >= 0):
+                ## make sure that this is not one of the relSS features just added !!!
+                if ( bKey.find("relSS") >= 0 ): continue
+
+                newKey = addTag2Key ( bKey, "relSP" )
+                print " --> making newKey <%s> from bKey <%s> [%d] " % (newKey, bKey, numClin)
                 newVec = [0] * numClin
                 numNotNA = 0
                 for kk in range(numClin):
+
+                    ## initialize to NA
                     newVec[kk] = "NA"
-                    if (str(allClinDict[aKey][kk]).upper() == "NA"):
-                        continue
+
+                    ## skip if an important value is NA
+                    if (str(allClinDict[aKey][kk]).upper() == "NA"): continue
+                    if (str(allClinDict[bKey][kk]).upper() == "NA"): continue
                     if (haveT):
-                        if (str(allClinDict[tKey][kk]).upper() == "NA"):
-                            continue
-                    if (haveT):
-                        deltaDays = allClinDict[aKey][kk] - \
-                            allClinDict[tKey][kk]
+                        if (str(allClinDict[tKey][kk]).upper() == "NA"): continue
+
+                    ## deltaDays is either (days_to_sample_procurement) - (days_to_initial_pathologic_diagnosis)
+                    ##             or just (days_to_sample_procurement)
+                    if (haveT): 
+                        deltaDays = allClinDict[aKey][kk] - allClinDict[tKey][kk]
                     else:
                         deltaDays = allClinDict[aKey][kk]
-                    if (str(allClinDict[bKey][kk]).upper() == "NA"):
-                        continue
+
+                    ## and then we subtract 'delta days' from the original key to make the new relative key
                     newVec[kk] = allClinDict[bKey][kk] - deltaDays
-                    numNotNA += 1
-                print " adding new key (%d) : " % numNotNA, newKey
-                print newVec
-                allClinDict[newKey] = newVec
 
-            if (bKey.startswith("age_at_")):
-                ## newKey = bKey + "_relSS"
-                newKey = "age_at_submitted_specimen_dx"
-                print " --> making newKy <%s> from bKey <%s> " % (newKey, bKey)
+                    print " STEP3a ", kk, allClinDict[zKey][kk], allClinDict[bKey][kk], allClinDict[aKey][kk], deltaDays, newVec[kk]
+
+                    numNotNA += 1
+
+                if ( numNotNA > 30 ):
+                    print " adding new key (%d) : " % numNotNA, newKey
+                    ## print newVec[:5]
+                    ## print newVec[-5:]
+                    allClinDict[newKey] = newVec
+                else:
+                    print " NOT adding new key (%d) : ", numNotNA, newKey
+
+            if (bKey.find("age_at_") >= 0):
+                ## make sure that this is not one of the relSS features just added !!!
+                if ( bKey.find("relSS") >= 0 ): continue
+                ## make sure that this is not a "stage_at_" feature !!!
+                if ( bKey.find("stage_at_") >= 0 ): continue
+
+                newKey = addTag2Key ( bKey, "relSP" )
+                print " --> making newKey <%s> from bKey <%s> [%d] " % (newKey, bKey, numClin)
                 newVec = [0] * numClin
                 numNotNA = 0
                 for kk in range(numClin):
+
+                    ## initialize to NA
                     newVec[kk] = "NA"
-                    if (str(allClinDict[aKey][kk]).upper() == "NA"):
-                        continue
-                    if (haveT):
-                        if (str(allClinDict[tKey][kk]).upper() == "NA"):
-                            continue
-                    if (haveT):
-                        deltaDays = allClinDict[aKey][kk] - \
-                            allClinDict[tKey][kk]
+
+                    ## skip if an important value is NA
+                    print " checking for important information ... ", aKey, bKey, tKey
+                    print allClinDict[aKey][kk]
+                    print allClinDict[bKey][kk]
+                    if (str(allClinDict[aKey][kk]).upper() == "NA"): continue
+                    if (str(allClinDict[bKey][kk]).upper() == "NA"): continue
+                    if (haveT): 
+                        print allClinDict[tKey][kk]
+                        if (str(allClinDict[tKey][kk]).upper() == "NA"): continue
+
+                    ## deltaDays is either (days_to_sample_procurement) - (days_to_initial_pathologic_diagnosis)
+                    ##             or just (days_to_sample_procurement)
+                    if (haveT): 
+                        deltaDays = allClinDict[aKey][kk] - allClinDict[tKey][kk]
                     else:
                         deltaDays = allClinDict[aKey][kk]
-                    if (str(allClinDict[bKey][kk]).upper() == "NA"):
-                        continue
-                    newVec[kk] = allClinDict[bKey][kk] + \
-                        (float(deltaDays) / DAYS_PER_YEAR)
+                    print " computed deltaDays : ", deltaDays
+
+                    ## and then we subtract 'delta days', scaled to years ...
+                    ## 03mar14 : actually we need to ADD here ...
+                    newVec[kk] = allClinDict[bKey][kk] + ( float(deltaDays) / DAYS_PER_YEAR )
+
+                    print " STEP3b ", kk, allClinDict[zKey][kk], allClinDict[bKey][kk], allClinDict[aKey][kk], deltaDays, newVec[kk]
+
                     numNotNA += 1
-                print " adding new key (%d) : " % numNotNA, newKey
-                print newVec
-                allClinDict[newKey] = newVec
+
+                if ( numNotNA > 30 ):
+                    print " adding new key (%d) : " % numNotNA, newKey
+                    ## print newVec[:5]
+                    ## print newVec[-5:]
+                    allClinDict[newKey] = newVec
+                else:
+                    print " NOT adding new key (%d) : ", numNotNA, newKey
 
     except:
-        print " --> failed in this try (x) "
+        print " --> failed in this try (y) "
         doNothing = 1
+
+
+    return (allClinDict)
+
+# -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
+# fields of interest:
+# days_to_birth
+# days_to_initial_pathologic_diagnosis	<-- this is always 0
+# days_to_submitted_specimen_dx
+# days_to_last_followup
+# days_to_last_known_alive
+# days_to_death
+# also:
+# new_tumor_event_after_initial_treatment
+# days_to_new_tumor_event_after_initial_treatment
+
+
+def checkFollowupInfo(allClinDict):
+
+    print " "
+    print " in checkFollowupInfo ... "
+
+    # FIRST: if there is a days_to_last_known_alive, then check that it is
+    # used consistently, otherwise create it
+
+    zKey = findProperKey (allClinDict, "bcr_patient_barcode")
+    aKey = findProperKey (allClinDict, "days_to_last_known_alive")
+    bKey = findProperKey (allClinDict, "days_to_last_followup")
+    cKey = findProperKey (allClinDict, "days_to_death")
+    dKey = findProperKey (allClinDict, "vital_status")
+
+    haveA = (aKey in allClinDict.keys())
+    haveB = (bKey in allClinDict.keys())
+    haveC = (cKey in allClinDict.keys())
+    haveD = (dKey in allClinDict.keys())
+
+    print " have flags A, B, C and D : ", haveA, haveB, haveC, haveD
+
+    if ( not haveD ):
+        print " skipping this function ... requires vital_status "
+        return (allClinDict)
+
+    ## print " allClinDict.keys() : "
+    ## print allClinDict.keys()
+
+    numClin = getNumPatients(allClinDict)
+
+    # range of days_to_last_known_alive is typically something like [0,3196]
+    for kk in range(numClin):
+        if (str(allClinDict[dKey][kk]).upper() == "DEAD"):
+            if (str(allClinDict[cKey][kk]).upper() == "NA"):
+                print " ERROR !!! need to know when this person died !!! ", allClinDict[zKey][kk]
+                print kk
+                print aKey, allClinDict[aKey][kk]
+                print bKey, allClinDict[bKey][kk]
+                print cKey, allClinDict[cKey][kk]
+                print dKey, allClinDict[dKey][kk]
+                print " UPDATING vital_status to Alive ... "
+                print " "
+                ## because we do not have a days_to_death value, we are going to call this person "Alive"
+                allClinDict[dKey][kk] = "Alive"
+
+        if (str(allClinDict[dKey][kk]).upper() == "ALIVE"):
+            if (str(allClinDict[aKey][kk]).upper() == "NA"):
+                if (str(allClinDict[bKey][kk]).upper() == "NA"):
+                    print " ERROR !!! no information about follow-up ??? ", allClinDict[zKey][kk]
+                    print kk
+                    print aKey, allClinDict[aKey][kk]
+                    print bKey, allClinDict[bKey][kk]
+                    print cKey, allClinDict[cKey][kk]
+                    print dKey, allClinDict[dKey][kk]
+                    print " UPDATING days_to_last_known_alive and days_to_last_followup to 0 "
+                    print " "
+                    allClinDict[aKey][kk] = 0
+                    allClinDict[bKey][kk] = 0
+                else:
+                    print " ERROR in checkFollowupInfo ... how did we get here ??? "
+                    sys.exit(-1)
+        
 
     return (allClinDict)
 
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 # derive the preferred stage tumor stage from the comparison of the
 # reported one with the derived one
-
 
 def PreferredStage(reported, computed):
     t = testTumorStage(reported, computed)
@@ -679,6 +949,9 @@ def testTumorStage(reported, computed):
 
 
 def getTumorStage(T, N, M):
+
+    print " WARNING ... this function should NOT be called ... "
+    sys.exit(-1)
 
     T = T.upper()
     N = N.upper()
@@ -875,7 +1148,7 @@ def checkTumorStage(allClinDict):
     else:
         print " running checkTumorStage ... "
 
-    numClin = len(allClinDict["bcr_patient_barcode"])
+    numClin = getNumPatients(allClinDict)
     print " total number of patients : ", numClin
 
     if (0):
@@ -896,20 +1169,30 @@ def checkTumorStage(allClinDict):
         print " skipping checkTumorStage ... "
         return (allClinDict)
 
+    pKey = getProperKey ( allClinDict, "bcr_patient_barcode" )
+    sKey = getProperKey ( allClinDict, "tumor_stage" )
+    tKey = getProperKey ( allClinDict, "primary_tumor_pathologic_spread" )
+    nKey = getProperKey ( allClinDict, "lymphnode_pathologic_spread" )
+    mKey = getProperKey ( allClinDict, "distant_metastasis_pathologic_spread" )
+
     for ii in range(numClin):
-        aCode = allClinDict["bcr_patient_barcode"][ii]
-        curTumorStage = allClinDict["tumor_stage"][ii]
-        curT = allClinDict["primary_tumor_pathologic_spread"][ii]
-        curN = allClinDict["lymphnode_pathologic_spread"][ii]
-        curM = allClinDict["distant_metastasis_pathologic_spread"][ii]
+
+        aCode = allClinDict[pKey][ii]
+        curTumorStage = allClinDict[sKey][ii]
+        curT = allClinDict[tKey][ii]
+        curN = allClinDict[nKey][ii]
+        curM = allClinDict[mKey][ii]
+
         # print " checking tumor stage for <%s> <%s> <%s> <%s> <%s> " % (
         # aCode, curTumorStage, curN, curM, curT )
 
-        curTumorStage = curTumorStage.upper()
-        curTumorStage = curTumorStage.strip()
-        if (curTumorStage != "NA"):
-            if (not curTumorStage.startswith("STAGE ")):
-                curTumorStage = "STAGE " + curTumorStage
+        ## removing this 15aug2014 ...
+        if ( 0 ):
+            curTumorStage = curTumorStage.upper()
+            curTumorStage = curTumorStage.strip()
+            if (curTumorStage != "NA"):
+                if (not curTumorStage.startswith("STAGE ")):
+                    curTumorStage = "STAGE " + curTumorStage
 
         # as of 09nov12, NOT attempting to derive tumor stage from T, N, and M
         if (0):
@@ -918,7 +1201,7 @@ def checkTumorStage(allClinDict):
             # which to use
             ajccStage = getTumorStage(curT, curN, curM)
             newStage = PreferredStage(curTumorStage, ajccStage)
-            allClinDict["tumor_stage"][ii] = newStage
+            allClinDict[sKey][ii] = newStage
 
             # report
             if (type(ajccStage) is list):
@@ -939,44 +1222,42 @@ def checkTumorStage(allClinDict):
 
 def checkVitalStatus(allClinDict):
 
-    if ("vital_status" not in allClinDict.keys()):
+    vsKey = findProperKey ( allClinDict, "vital_status" )
+    bcKey = findProperKey ( allClinDict, "bcr_patient_barcode" )
+
+    if ( vsKey == "NO KEY" ):
         print " skipping checkVitalStatus ... "
         return (allClinDict)
-    else:
-        print " running checkVitalStatus ... "
 
-    numClin = len(allClinDict["bcr_patient_barcode"])
+    print " running checkVitalStatus ... "
+
+    numClin = getNumPatients(allClinDict)
     print " total number of patients : ", numClin
 
     numLC = 0
     numDC = 0
     for ii in range(numClin):
-        aCode = allClinDict["bcr_patient_barcode"][ii]
-        curStatus = allClinDict["vital_status"][ii]
+
+        aCode = allClinDict[bcKey][ii]
+        curStatus = allClinDict[vsKey][ii]
 
         doChange = 1
         try:
-            newStatus = curStatus.upper()
-            if (curStatus.upper() == "ALIVE"):
-                newStatus = "LIVING"
-                numLC += 1
-            if (curStatus.upper() == "DEAD"):
-                newStatus = "DECEASED"
-                numDC += 1
+            newStatus = curStatus
 
         except:
             try:
                 if (curStatus == 0):
-                    newStatus = "LIVING"
+                    newStatus = "Alive"
                     numLC += 1
                 elif (curStatus == 1):
-                    newStatus = "DECEASED"
+                    newStatus = "Dead"
                     numDC += 1
             except:
                 doChange = 0
 
         if (doChange):
-            allClinDict["vital_status"][ii] = newStatus
+            allClinDict[vsKey][ii] = newStatus
 
     if (numLC + numDC > 0):
         print " WARNING: changed some vital status fields ... %d %d " % (numLC, numDC)
@@ -988,30 +1269,26 @@ def checkVitalStatus(allClinDict):
 
 def updateAge(allClinDict):
 
-    if ("age_at_initial_pathologic_diagnosis" not in allClinDict.keys()):
-        print " skipping updateAge ... "
-        return (allClinDict)
-    else:
-        if ("days_to_birth" not in allClinDict.keys()):
-            print " skipping updateAge ... "
-            return (allClinDict)
-        else:
-            print " running updateAge ... "
+    pKey = findProperKey ( allClinDict, "bcr_patient_barcode" )
+    aKey = findProperKey ( allClinDict, "age_at_initial_pathologic_diagnosis" )
+    bKey = findProperKey ( allClinDict, "days_to_birth" )
 
-    numClin = len(allClinDict["bcr_patient_barcode"])
+    print " running updateAge ... "
+
+    numClin = getNumPatients(allClinDict)
     print " total number of patients : ", numClin
 
     for ii in range(numClin):
         try:
-            aCode = allClinDict["bcr_patient_barcode"][ii]
-            curAge = allClinDict["age_at_initial_pathologic_diagnosis"][ii]
-            curD2B = allClinDict["days_to_birth"][ii]
+            aCode = allClinDict[pKey][ii]
+            curAge = allClinDict[aKey][ii]
+            curD2B = allClinDict[bKey][ii]
             newAge = float(0 - int(curD2B)) / DAYS_PER_YEAR
             # now we want to limit the 'precision' to two decimal places
             newAge = float(int((100. * newAge) + 0.49)) / 100.
             if (abs(curAge - int(newAge)) > 0):
                 print " ERROR in updateAge ??? ", curAge, curD2B, newAge, aCode
-            allClinDict["age_at_initial_pathologic_diagnosis"][ii] = newAge
+            allClinDict[aKey][ii] = newAge
         except:
             doNothing = 1
 
@@ -1109,15 +1386,15 @@ def removeSpecialChars(oneKey):
 
         # for now, we are just checking for 'grade' strings that are sometimes
         # 'grade_3' and sometimes just '3'
-        if (aString.startswith("grade_")):
+        if (aString.lower().startswith("grade_")):
             for ii in range(len(oneKey)):
                 aLabel = str(oneKey[ii])
                 if (aLabel.upper() == "NA"):
                     continue
-                if (not aLabel.startswith("grade_")):
+                if (not aLabel.lower().startswith("grade_")):
                     try:
                         iVal = int(aLabel)
-                        aString = "grade_%d" % iVal
+                        aString = "Grade_%d" % iVal
                         oneKey[ii] = aString
                     except:
                         print "     FAILED to prepend grade ??? ", aLabel
@@ -1137,10 +1414,11 @@ def removeSpecialChars(oneKey):
                     doNothing = 1
 
         elif (aString not in okExceptions):
-            print " this is weird, no ??? ", aInt, aString
-            print oneKey
-            return ([])
-            sys.exit(-1)
+            if ( 1 ):
+                print " WARNING ... something odd about this feature ... ", aInt, aString
+                print oneKey
+                ## return ([])
+                ## sys.exit(-1)
 
     origUniqList = []
     newUniqList = []
@@ -1205,11 +1483,11 @@ def getCommonPrefix(aLabel, bLabel):
     while (aLabel[nn].lower() == bLabel[nn].lower()):
         nn += 1
         if (nn >= len(aLabel)):
-            return (aLabel[:nn].lower())
+            return (aLabel[:nn])
         if (nn >= len(bLabel)):
-            return (aLabel[:nn].lower())
+            return (aLabel[:nn])
 
-    return (aLabel[:nn].lower())
+    return (aLabel[:nn])
 
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 
@@ -1227,7 +1505,7 @@ def getCommonSuffix(aLabel, bLabel):
     if (nn == -1):
         return ("")
     else:
-        return (aLabel[nn + 1:].lower())
+        return (aLabel[nn + 1:])
 
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 
@@ -1254,8 +1532,7 @@ def removeCommonPrefix(oneKey, labelList):
 
                 newKey = []
                 for cLabel in oneKey:
-                    cLabel = cLabel.lower()
-                    if (cLabel.startswith(commonPrefix)):
+                    if (cLabel.lower().startswith(commonPrefix)):
                         dLabel = cLabel[len(commonPrefix):]
                         if (len(dLabel) < 4):
                             dLabel = cLabel
@@ -1269,8 +1546,7 @@ def removeCommonPrefix(oneKey, labelList):
 
                 newList = []
                 for cLabel in labelList:
-                    cLabel = cLabel.lower()
-                    if (cLabel.startswith(commonPrefix)):
+                    if (cLabel.lower().startswith(commonPrefix)):
                         dLabel = cLabel[len(commonPrefix):]
                         if (len(dLabel) < 4):
                             dLabel = cLabel
@@ -1316,8 +1592,7 @@ def removeCommonSuffix(oneKey, labelList):
 
                 newKey = []
                 for cLabel in oneKey:
-                    cLabel = cLabel.lower()
-                    if (cLabel.endswith(commonSuffix)):
+                    if (cLabel.lower().endswith(commonSuffix)):
                         dLabel = cLabel[:-len(commonSuffix)]
                         if (len(dLabel) < 4):
                             dLabel = cLabel
@@ -1331,8 +1606,7 @@ def removeCommonSuffix(oneKey, labelList):
 
                 newList = []
                 for cLabel in labelList:
-                    cLabel = cLabel.lower()
-                    if (cLabel.endswith(commonSuffix)):
+                    if (cLabel.lower().endswith(commonSuffix)):
                         dLabel = cLabel[:-len(commonSuffix)]
                         if (len(dLabel) < 4):
                             dLabel = cLabel
@@ -1373,10 +1647,14 @@ def abbrevCategStrings(allClinDict):
 
     for aKey in keyList:
 
-        if (aKey == "bcr_patient_barcode"):
+        if (aKey.find("bcr_patient_barcode") >= 0): 
+            print " all barcodes : "
+            print allClinDict[aKey]
+            print " done "
             continue
-        (keyType, nCount, nNA, nCard, labelList,
-         labelCount) = miscClin.lookAtKey(allClinDict[aKey])
+
+        (keyType, nCount, nNA, nCard, labelList, labelCount) = miscClin.lookAtKey(allClinDict[aKey])
+        print aKey, keyType, nCount, nNA
 
         if (keyType == "NOMINAL"):
 
@@ -1385,12 +1663,12 @@ def abbrevCategStrings(allClinDict):
             allClinDict[aKey] = removeSpecialChars(allClinDict[aKey])
 
             # if we get nothing back, then skip ...
-            if (allClinDict[aKey] == []):
+            if (allClinDict[aKey] == []): 
+                print " WARNING ... got nothing back ??? ", aKey
                 continue
 
             # otherwise, look at cardinality, type, etc ...
-            (keyType, nCount, nNA, nCard, labelList,
-             labelCount) = miscClin.lookAtKey(allClinDict[aKey])
+            (keyType, nCount, nNA, nCard, labelList, labelCount) = miscClin.lookAtKey(allClinDict[aKey])
 
             maxLen = 0
             skipFlag = 0
@@ -1406,7 +1684,7 @@ def abbrevCategStrings(allClinDict):
 
             if (maxLen > 10):
 
-                print aKey, labelList, maxLen
+                ## print aKey, labelList, maxLen
 
                 # first try at making the labels a bit shorter by removing
                 # parenthetical elements ...
@@ -1417,7 +1695,7 @@ def abbrevCategStrings(allClinDict):
                 maxLen = 0
                 for aLabel in labelList:
                     maxLen = max(maxLen, len(aLabel))
-                print aKey, labelList, maxLen
+                ## print aKey, labelList, maxLen
 
                 # removing this step for now (04dec12)
                 if (0):
@@ -1432,7 +1710,7 @@ def abbrevCategStrings(allClinDict):
                         maxLen = 0
                         for aLabel in labelList:
                             maxLen = max(maxLen, len(aLabel))
-                        print aKey, labelList, maxLen
+                        ## print aKey, labelList, maxLen
                         if (maxLen > 25):
                             print "     --> strings are still rather long, but not sure what to do about this ... "
 
@@ -1457,8 +1735,8 @@ def checkPrefix(labelList, aPrefix):
         if (bLabel.startswith(aPrefix)):
             nHas += 1
 
-    if ((nHas + 2) >= nLabel):
-        return (1)
+    if ((nHas + 2) >= nLabel): return (1)
+
     return (0)
 
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
@@ -1708,7 +1986,7 @@ def addNumericalFeatures(allClinDict):
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 
 
-def getMappingDict(featName):
+def getMappingDict(featName, auxName):
 
     mapDict = {}
 
@@ -1720,12 +1998,12 @@ def getMappingDict(featName):
         tmpFeatName = featName
 
     try:
-        mapFilename = "../aux/" + tmpFeatName + ".map"
+        mapFilename = "../" + auxName + "/" + tmpFeatName + ".map"
         fh = file(mapFilename)
         firstLine = 1
         for aLine in fh:
             aLine = aLine.strip()
-            aLine = aLine.upper()
+            ## aLine = aLine.upper()
             tokenList = aLine.split('\t')
             if (firstLine):
                 if (tokenList[0].upper() == tmpFeatName.upper()):
@@ -1752,8 +2030,21 @@ def getMappingDict(featName):
 
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 
+def getMapping ( mapDict, curV, ii ):
 
-def addDerivedFeatures(allClinDict):
+    for k in mapDict.keys():
+        if ( k.lower() == curV.lower() ):
+            return ( mapDict[k][ii] )
+
+    print " FAILED TO GET MAPPING ??? ", curV, ii
+    print mapDict
+
+    sys.exit(-1)
+
+# -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
+
+
+def addDerivedFeatures(allClinDict, auxName):
 
     print " "
     print " "
@@ -1766,8 +2057,7 @@ def addDerivedFeatures(allClinDict):
 
         if (aKey == "bcr_patient_barcode"):
             continue
-        (keyType, nCount, nNA, nCard, labelList,
-         labelCount) = miscClin.lookAtKey(allClinDict[aKey])
+        (keyType, nCount, nNA, nCard, labelList, labelCount) = miscClin.lookAtKey(allClinDict[aKey])
         print " considering key <%s> " % (aKey), keyType, nCard
 
         if (keyType == "NOMINAL"):
@@ -1782,13 +2072,10 @@ def addDerivedFeatures(allClinDict):
                         tmpList += [tmpL]
                 labelList = tmpList
 
-# if ( tmpKey.find("stage")>=0  or  tmpKey.find("grade")>=0  or
-# tmpKey.find("pathologic_spread")>=0 ):
-
                 if (1):
                     print " considering this categorical feature ... ", aKey, keyType, nCard, labelList, labelCount
 
-                    (mapDict, newNames) = getMappingDict(aKey)
+                    (mapDict, newNames) = getMappingDict(aKey, auxName)
 
                     # if there is no mapping file, then we won't be making any
                     # new features ...
@@ -1798,7 +2085,7 @@ def addDerivedFeatures(allClinDict):
                     # sanity check ...
                     if (0):
                         for bKey in mapDict.keys():
-                            if (bKey.upper() not in labelList):
+                            if ( stringInList_CaseInsens ( bKey, labelList ) ):
                                 print " ERROR ??? mapping does not match this feature ??? "
                                 print mapDict
                                 print labelList
@@ -1806,7 +2093,7 @@ def addDerivedFeatures(allClinDict):
                     if (1):
                         for bLabel in labelList:
                             try:
-                                if (bLabel.upper() not in mapDict.keys()):
+                                if ( not stringInList_CaseInsens ( bLabel, mapDict.keys() ) ):
                                     print " ************************************************** "
                                     print " ERROR ??? feature value not in mapDict ??? ", bLabel
                                     print " labelList : ", labelList
@@ -1816,21 +2103,7 @@ def addDerivedFeatures(allClinDict):
                                     continue
                                     # sys.exit(-1)
                             except:
-                                if (bLabel not in mapDict.keys()):
-                                    print " ************************************************** "
-                                    print " ERROR ??? feature value not in mapDict ??? ", bLabel
-                                    print " labelList : ", labelList
-                                    print " mapDict   : ", mapDict
-                                    print " --> WILL NOT ADD ANY DERIVED FEATURES AT THIS TIME "
-                                    print " ************************************************** "
-                                    continue
-
-                                if (0):
-                                    print " ERROR ??? why am I here ??? "
-                                    print bLabel
-                                    print labelList
-                                    print mapDict
-                                    sys.exit(-1)
+                                doNothing = 1
 
                     # if there is no mapping file, then we won't be making any
                     # new features ...
@@ -1851,8 +2124,8 @@ def addDerivedFeatures(allClinDict):
                             curVal = mapDict[bKey][ithName]
                             if (curVal == "NA"):
                                 continue
-                            if (curVal.upper() not in uVec):
-                                uVec += [curVal.upper()]
+                            if ( stringInList_CaseInsens ( curVal, uVec ) ):
+                                uVec += [curVal]
                             try:
                                 fVal = float(curVal)
                             except:
@@ -1892,11 +2165,11 @@ def addDerivedFeatures(allClinDict):
                                 tmpV[kk] = "NA"
                             else:
                                 try:
-                                    tmpV[kk] = mapDict[curV[kk]
-                                                       .upper()][ithName]
+                                    tmpV[kk] = getMapping ( mapDict, curV[kk], ithName )
+                                    ## tmpV[kk] = mapDict[curV[kk]][ithName]
                                 except:
                                     print " ERROR ??? failed to map ??? setting to NA but MUST FIX !!! "
-                                    print kk, curV[kk].upper(), ithName
+                                    print kk, curV[kk], ithName
                                     print mapDict
                                     if (1):
                                         tmpV[kk] = "NA"
@@ -1974,7 +2247,7 @@ def addIndicatorFeatures(allClinDict):
                         aLabel = "%d" % iVal
 
                     print " "
-                    print aKey, aLabel
+                    ## print aKey, aLabel
                     try:
                         # 012345678901234567890123456789...
                         # C:CLIN:<label>
@@ -2147,12 +2420,18 @@ def addPairwiseIndicatorFeatures(allClinDict):
 
 if __name__ == "__main__":
 
-    if (len(sys.argv) != 3):
-        print " Usage : %s <input TSV> <output TSV> " % sys.argv[0]
+    if ( (len(sys.argv)!=4) and (len(sys.argv)!=5) ):
+        print " Usage : %s <input TSV> <output TSV> <public/private> [auxName] " % sys.argv[0]
+        print " ERROR -- bad command line arguments "
         sys.exit(-1)
 
     tsvNameIn = sys.argv[1]
     tsvNameOut = sys.argv[2]
+    ppString = sys.argv[3]
+    if ( len(sys.argv) == 5 ):
+        auxName = sys.argv[4]
+    else:
+        auxName = "aux"
 
     # test out readTSV ...
     ## tsvName = "coad_read_clinical.27jan.tsv"
@@ -2160,6 +2439,8 @@ if __name__ == "__main__":
     print " ****************************************************************** "
     print " reading input file <%s> " % tsvNameIn
     allClinDict = tsvIO.readTSV(tsvNameIn)
+    print " A "
+    checkBarcodes(allClinDict)
 
     # take a look ...
     (naCounts, otherCounts) = miscClin.lookAtClinDict(allClinDict)
@@ -2167,50 +2448,68 @@ if __name__ == "__main__":
     if (1):
         # remove constant-value keys ...
         allClinDict = miscClin.removeConstantKeys(allClinDict)
+        print " B "
+        checkBarcodes(allClinDict)
 
     if (1):
         # remove uninformative keys ...
         allClinDict = miscClin.removeUninformativeKeys(allClinDict)
+        print " C "
+        checkBarcodes(allClinDict)
 
     # check the tumor stage based on the other T/N/M definitions, update if possible
     # (and if the original setting was "NA")
     if (1):
         allClinDict = checkTumorStage(allClinDict)
+        print " D "
+        checkBarcodes(allClinDict)
 
     # new as of 16aug13 ... vital_status strings are inconsistent between
     # 'living' or 'alive' or 'deceased' or 'dead' ...
+    #           --> standard should be "Alive" or "Dead"
     if (1):
         allClinDict = checkVitalStatus(allClinDict)
+        print " E "
+        checkBarcodes(allClinDict)
 
     # new as of 13sep13 ... makig 'age' a continuous feature that
     # exactly matches the days_to_birth ...
     if (1):
         allClinDict = updateAge(allClinDict)
+        print " F "
+        checkBarcodes(allClinDict)
 
     # remap some categorical features to numerical features ...
-    if (1):
-        allClinDict = remapCategoricalFeatures(allClinDict)
-
-    # rename Brady's mutation fields
+    # oh, this shouldn't still be here, should it ??? 15aug2014
     if (0):
-        allClinDict = renameB2mutations(allClinDict)
+        allClinDict = remapCategoricalFeatures(allClinDict)
+        print " G "
+        checkBarcodes(allClinDict)
 
     # add the lymphnodes_positive fraction ...
     allClinDict = computeLymphnodesFraction(allClinDict)
+    print " H "
+    checkBarcodes(allClinDict)
 
     # fill in some missing information that we have collected from elsewhere
     # ...
     if (0):
         allClinDict = addMissingInfo(allClinDict)
+        print " I "
+        checkBarcodes(allClinDict)
 
     # NEW: look at some of the "days_to_" fields and do some fix-ups ...
     if (1):
         allClinDict = addFollowupInfo(allClinDict)
+        print " J "
+        checkBarcodes(allClinDict)
 
-    # total hack ...
-    if (0):
-        if ("location" in allClinDict.keys()):
-            del allClinDict["location"]
+    # new as of 04dec13 ... checking that vital_status and various days_to_???
+    # features are consistent ...
+    if (1):
+        allClinDict = checkFollowupInfo(allClinDict)
+        print " K "
+        checkBarcodes(allClinDict)
 
     # take a look at the updated dictionary ...
     (naCounts, otherCounts) = miscClin.lookAtClinDict(allClinDict)
@@ -2218,6 +2517,8 @@ if __name__ == "__main__":
     if (1):
         # remove constant-value keys ...
         allClinDict = miscClin.removeConstantKeys(allClinDict)
+        print " L "
+        checkBarcodes(allClinDict)
 
     if (0):
         # removing this ... 02Feb2012 SMR
@@ -2234,20 +2535,31 @@ if __name__ == "__main__":
                                               numerical_naFracThresh,
                                               classSize_minFracThresh,
                                               classSize_maxFracThresh)
+        print " M "
+        checkBarcodes(allClinDict)
 
     # try to abbreviate clinical feature strings
     allClinDict = abbrevCategStrings(allClinDict)
+    print " N "
+    checkBarcodes(allClinDict)
 
     if (0):
         # automatically generate indicator features for remaining categorical
         # features
         allClinDict = addIndicatorFeatures(allClinDict)
+        print " O "
+        checkBarcodes(allClinDict)
         # new 10Feb2012 : add pairwise indicator features
         allClinDict = addPairwiseIndicatorFeatures(allClinDict)
+        print " P "
+        checkBarcodes(allClinDict)
 
     # new 09Jan2013 : try to add numeric features that map the non-binary categorical features ...
-    ## allClinDict = addNumericalFeatures ( allClinDict )
-    allClinDict = addDerivedFeatures(allClinDict)
+    # as of 06Aug2014, this is only done for "private" runs
+    if ( ppString == "private" ):
+        allClinDict = addDerivedFeatures(allClinDict, auxName)
+        print " Q "
+        checkBarcodes(allClinDict)
 
     # look at pairwise MI ...
     if (0):

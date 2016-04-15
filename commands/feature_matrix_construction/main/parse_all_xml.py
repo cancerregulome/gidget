@@ -1,5 +1,6 @@
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 
+from env import gidgetConfigVars
 import arffIO
 import miscClin
 import miscTCGA
@@ -14,6 +15,9 @@ import os
 import path
 import string
 import sys
+
+featNamesLoaded = 0
+featNamesDict = {}
 
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 
@@ -34,14 +38,14 @@ def getLastBit(aName):
 def newContentOK(oldString, newString, strName):
 
     # if the strings are the same, then that's fine ...
-    if (newString == oldString):
+    if (newString.lower() == oldString.lower()):
         return (1)
 
     # try removing special characters from the 'new' string and see if it
     # matches
     newString2 = removeSpecialChars(newString)
     # print "     newString2: ", newString2
-    if (newString2 == oldString):
+    if (newString2.lower() == oldString.lower()):
         return (1)
 
     print "         in newContentOK for <%s> :  newString = <%s>  oldString = <%s> " % (strName, newString, oldString)
@@ -54,34 +58,34 @@ def newContentOK(oldString, newString, strName):
 
     # first, if the patient has gone from living to deceased, that is ok
     try:
-        if (newString == "deceased" and oldString == "living"):
+        if (newString.lower() == "deceased" and oldString.lower() == "living"):
             return (1)
     except:
         doNothing = 1
 
     # also going from tumor_free to "with tumor" is ok ...
     try:
-        if (newString == "with tumor" and oldString == "tumor_free"):
+        if (newString.lower() == "with tumor" and oldString.lower() == "tumor_free"):
             return (1)
     except:
         doNothing = 1
 
     # and I guess the other way around is also ok? (surgery?)
     try:
-        if (newString == "tumor free" and oldString == "with_tumor"):
+        if (newString.lower() == "tumor free" and oldString.lower() == "with_tumor"):
             return (1)
     except:
         doNothing = 1
 
     # also going from adjuvant to palliative is ok ...
     try:
-        if (newString == "palliative" and oldString == "adjuvant"):
+        if (newString.lower() == "palliative" and oldString.lower() == "adjuvant"):
             return (1)
     except:
         doNothing = 1
 
     # next, if the feature is a number and it has increased, that is ok
-    if (strName.startswith("days_to") or (strName.find(":days_to_") > 0)):
+    if (strName.lower().startswith("days_to") or (strName.lower().find(":days_to_") > 0)):
         try:
             iNew = int(newString)
             iOld = int(oldString)
@@ -189,10 +193,10 @@ def walk(parent, xmlDict, xmlFlags):
 
                 strContent = string.join(content)
                 strContent = strContent.strip()
-                try:
-                    strContent = strContent.lower()
-                except:
-                    strContent = strContent
+                ## try:
+                ##     strContent = strContent.lower()
+                ## except:
+                ##     strContent = strContent
 
                 if (len(strContent) > 0):
                     # element content is strContent
@@ -223,21 +227,21 @@ def walk(parent, xmlDict, xmlFlags):
                         continue
 
                     # ignore certain fields ...
-                    if (strName.find("_of_form_completion") > 0):
+                    if (strName.lower().find("_of_form_completion") > 0):
                         print " FORM COMPLETION INFORMATION : ", strName, strContent
                         continue
 
-                    if (strName.find("_followup_barcode") > 0):
+                    if (strName.lower().find("_followup_barcode") > 0):
                         continue
-                    if (strName.find("_followup_uuid") > 0):
+                    if (strName.lower().find("_followup_uuid") > 0):
                         continue
-                    if (strName.startswith("rx:")):
+                    if (strName.lower().startswith("rx:")):
                         continue
-                    if (strName.startswith("rad:")):
+                    if (strName.lower().startswith("rad:")):
                         continue
-                    if (strName.endswith("_text")):
+                    if (strName.lower().endswith("_text")):
                         continue
-                    if (strName.endswith("_notes")):
+                    if (strName.lower().endswith("_notes")):
                         continue
 
                     if (0):
@@ -246,12 +250,12 @@ def walk(parent, xmlDict, xmlFlags):
 
                     insertNew = 1
                     if (strName in xmlDict.keys()):
-                        if (str(xmlDict[strName]) != str(strContent)):
+                        if (str(xmlDict[strName]).lower() != str(strContent).lower()):
                             print " "
                             print " WARNING: <%s> is already in xmlDict keys and content is different ??? (%s vs %s) " % (strName, xmlDict[strName], strContent)
                             # print type(xmlDict[strName]), type(strContent)
                             for bKey in xmlDict.keys():
-                                if (bKey.find("_barcode") > 0):
+                                if (bKey.lower().find("_barcode") > 0):
                                     print "         ", bKey, xmlDict[bKey]
 
                             # -------------------------------------------------
@@ -267,17 +271,17 @@ def walk(parent, xmlDict, xmlFlags):
 
                                 # there are certain types of keys that we want
                                 # to keep no matter what ...
-                                if (strName.find("days_to_") > 0):
+                                if (strName.lower().find("days_to_") > 0):
                                     doNothing = 1
-                                elif (strName.find("vital_status") > 0):
+                                elif (strName.lower().find("vital_status") > 0):
                                     doNothing = 1
-                                elif (strName.find("eastern_cancer_oncology_group") > 0):
+                                elif (strName.lower().find("eastern_cancer_oncology_group") > 0):
                                     doNothing = 1
-                                elif (strName.find("primary_therapy_outcome") > 0):
+                                elif (strName.lower().find("primary_therapy_outcome") > 0):
                                     doNothing = 1
-                                elif (strName.find("followup_treatment_success") > 0):
+                                elif (strName.lower().find("followup_treatment_success") > 0):
                                     doNothing = 1
-                                elif (strName.find("additional_treatment_completion_success_outcome") > 0):
+                                elif (strName.lower().find("additional_treatment_completion_success_outcome") > 0):
                                     doNothing = 1
                                 else:
                                     print " flagging this key as do-not-use \t %s \t %s \t %s " % (strName, str(xmlDict[strName]), str(strContent))
@@ -300,14 +304,14 @@ def walk(parent, xmlDict, xmlFlags):
                             except:
                                 # is it a stage or grade string? (is already
                                 # lowercase)
-                                if (strContent.startswith("stage ")):
+                                if (strContent.lower().startswith("stage ")):
                                     print "         startswith stage "
                                     # stage 'zero' is the same as 'in situ' ...
                                     if (strContent == "stage 0"):
                                         strContent = "tis"
                                     else:
                                         strContent = strContent[6:]
-                                elif (strContent.startswith("grade ")):
+                                elif (strContent.lower().startswith("grade ")):
                                     print "         startswith grade "
                                     strContent = strContent[6:]
                                     try:
@@ -317,7 +321,7 @@ def walk(parent, xmlDict, xmlFlags):
                                         doNothing = 1
 
                                 try:
-                                    if ((strName.find("barcode") < 0) and (strName.find("uuid") < 0)):
+                                    if ((strName.lower().find("barcode") < 0) and (strName.lower().find("uuid") < 0)):
                                         fixContent = removeSpecialChars(
                                             strContent)
                                         xmlDict[strName] = str(fixContent)
@@ -350,7 +354,7 @@ def walk(parent, xmlDict, xmlFlags):
 
 def writeDataFreezeLog(fhLog, fName):
 
-    ## fName = "/titan/cancerregulome11/TCGA/repositories/dcc-snapshot/public/tumor/brca/bcr/nationwidechildrens.org/bio/clin/nationwidechildrens.org_BRCA.bio.Level_1.120.20.0/nationwidechildrens.org_clinical.TCGA-A2-A1FZ.xml"
+    ## fName = ".../TCGA/repositories/dcc-snapshot/public/tumor/brca/bcr/nationwidechildrens.org/bio/clin/nationwidechildrens.org_BRCA.bio.Level_1.120.20.0/nationwidechildrens.org_clinical.TCGA-A2-A1FZ.xml"
 
     i1 = len(fName) - 1
     while (fName[i1] != '/'):
@@ -373,6 +377,83 @@ def writeDataFreezeLog(fhLog, fName):
     fhLog.write("%s\t%s\t%s\n" % (patientID, fileName, archiveName))
 
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
+
+def getFeatNamesDict():
+    global featNamesLoaded
+    global featNamesDict
+
+    if ( featNamesLoaded ):
+        return
+    try:
+        fh = file (gidgetConfigVars['TCGAFMP_DCC_REPOSITORIES'] + "/bio_clin/featNames.tsv")
+        for aLine in fh:
+            tokenList = aLine.split()
+            featName = tokenList[1]
+            featType = tokenList[0]
+            featNamesDict[featName] = featType
+        fh.close()
+        featNamesLoaded = 1
+
+    except:
+        featNamesLoaded = 2
+
+    return
+
+# -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
+
+def getFeatTypeByName ( aName ):
+    global featNamesDict
+    global featNamesLoaded
+    if ( featNamesLoaded == 0 ):
+        getFeatNamesDict()
+
+    try:
+        return ( featNamesDict[aName] )
+    except:
+        return ( "CLIN" )
+
+# -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
+
+def fixUpFeatureNames(allClinDict):
+
+    print " "
+    print " in fixUpFeatureNames ... "
+
+    keyList = allClinDict.keys()
+    newClinDict = {}
+
+    for aKey in keyList:
+
+        ## if the feature name already looks like B:SAMP:etc or N:CLIN:etc
+        ## then we don't do anything
+        if ( aKey[1]==":" and aKey[6]==":" ):
+            newName = aKey
+
+        else:
+            try:
+                featType = getFeatTypeByName ( aKey )
+                print featType
+                info = miscClin.lookAtKey ( allClinDict[aKey] )
+                print aKey
+                print info
+                if ( info[0] == "NOMINAL" ):
+                    if ( info[3] == 2 ):
+                        newName = "B:" + featType + ":" + aKey + ":::::"
+                    else:
+                        newName = "C:" + featType + ":" + aKey + ":::::"
+                elif ( info[0] == "NUMERIC" ):
+                    newName = "N:" + featType + ":" + aKey + ":::::"
+                else:
+                    sys.exit(-1)
+            except:
+                print " ERROR in fixUpFeatureNames ??? key not found <%s> " % aKey
+                newName = aKey
+
+            newClinDict[newName] = allClinDict[aKey]
+
+    return ( newClinDict )
+
+# -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 # NOTE (01mar13): maybe this should be done using
 # http://docs.python.org/2/library/xml.etree.elementtree.html
 # instead ...
@@ -385,7 +466,7 @@ def writeDataFreezeLog(fhLog, fName):
 
 def parseOneXmlFile(xmlFilename):
 
-    ## xmlFilename = "/titan/cancerregulome7/TCGA/repositories/dcc-mirror/coad/bcr/intgen.org/bio/clin/intgen.org_COAD.bio.Level_1.41.3.0/intgen.org_clinical.TCGA-AA-3984.xml"
+    ## xmlFilename = ".../TCGA/repositories/dcc-mirror/coad/bcr/intgen.org/bio/clin/intgen.org_COAD.bio.Level_1.41.3.0/intgen.org_clinical.TCGA-AA-3984.xml"
 
     print " "
     print " --------------------------------------------------------------------------------- "
@@ -436,7 +517,6 @@ def parseOneXmlFile(xmlFilename):
 #
 # this program loops over the tumor types in the cancerDirNames list and
 # looks for all available *clinical*.xml files in the current "dcc-snapshot"
-## on /titan/cancerregulome7
 #
 # all of the information is bundled into a dictionary called allClinDict
 #
@@ -446,6 +526,7 @@ if __name__ == "__main__":
     if (1):
         if (len(sys.argv) > 4 or len(sys.argv) < 3):
             print " Usage: %s <tumorType> <outSuffix> [snapshot-name] "
+            print " ERROR -- bad command line arguments "
             sys.exit(-1)
         else:
 
@@ -462,7 +543,7 @@ if __name__ == "__main__":
             else:
                 snapshotName = "dcc-snapshot"
 
-            ## outName = "/titan/cancerregulome3/TCGA/outputs/" + tumorType + "/" + tumorType + "." + outSuffix
+            ## outName = ".../TCGA/outputs/" + tumorType + "/" + tumorType + "." + outSuffix
             outName = "./" + tumorType + "." + outSuffix
 
     # open output header files ...
@@ -492,8 +573,8 @@ if __name__ == "__main__":
         print ' '
         print ' OUTER LOOP over CANCER TYPES ... ', zCancer
 
-        ## topDir = "/titan/cancerregulome11/TCGA/repositories/dcc-snapshot/public/tumor/" + zCancer + "/bcr"
-        topDir = "/titan/cancerregulome11/TCGA/repositories/" + \
+        ## topDir = ".../TCGA/repositories/dcc-snapshot/public/tumor/" + zCancer + "/bcr"
+        topDir = gidgetConfigVars['TCGAFMP_DCC_REPOSITORIES'] + "/" + \
             snapshotName + "/public/tumor/" + zCancer + "/bcr"
 
         # get the contents of the bcr directory and loop over the subdirectories which
@@ -523,7 +604,7 @@ if __name__ == "__main__":
 
             # finally, at this level is where we look for "Level_1" archives, so d2Name
             # will, for example, look like:
-            # /titan/cancerregulome7/TCGA/repositories/dcc-snapshot/coad/bcr/intgen.org/bio/clin/intgen.org_COAD.bio.Level_1.45.6.0
+            # .../TCGA/repositories/dcc-snapshot/coad/bcr/intgen.org/bio/clin/intgen.org_COAD.bio.Level_1.45.6.0
             for d2Name in d2.dirs():
                 print '        ', d2Name
                 if (d2Name.find("Level_1") >= 0):
@@ -632,6 +713,9 @@ if __name__ == "__main__":
     # now look for duplicate keys ...
     # (note this also abbreviates the key names)
     (allClinDict) = miscClin.removeDuplicateKeys(allClinDict)
+
+    # add prefixes onto feature names and standardize ...
+    (allClinDict) = fixUpFeatureNames(allClinDict)
 
     if (0):
         # and remove uninformative keys ...

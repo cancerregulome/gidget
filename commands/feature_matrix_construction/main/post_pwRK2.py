@@ -35,49 +35,8 @@ def getNumSamples(featureMatrixFile):
     return (numSamples)
 
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
-# input file is assumed to end in .tsv
-# this function checks to see if the binFile exists and is up to date
-# with respect to the tsvFile ... if necessary, it will call prep4pairwise
-# to create the bin file
-
-
-def preProcessTSV(tsvFile):
-
-    tsvTime = os.path.getmtime(tsvFile)
-    # print tsvTime
-
-    binFile = tsvFile[:-4] + ".bin"
-    catFile = tsvFile[:-4] + ".cat"
-    try:
-        binTime = os.path.getmtime(binFile)
-        # print binTime
-    except:
-        binTime = 0
-
-    if (tsvTime > binTime):
-
-        # just to be sure, delete the *.bin and *.cat files ...
-        cmdString = "rm -fr %s" % binFile
-        (status, output) = commands.getstatusoutput(cmdString)
-        cmdString = "rm -fr %s" % catFile
-        (status, output) = commands.getstatusoutput(cmdString)
-
-        print " creating bin file "
-        cmdString = "/users/rkramer/bin/python3 /titan/cancerregulome8/TCGA/scripts/prep4pairwise.py %s" % tsvFile
-        (status, output) = commands.getstatusoutput(cmdString)
-        if (status != 0):
-            print " ERROR ??? failed to execute command ??? "
-            print cmdString
-            sys.exit(-1)
-    else:
-        print " bin file already up to date "
-
-    return (binFile)
-
-# -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 
 BIG_DISTANCE = 500000000
-
 
 def getGenomicDistance(aName, bName):
 
@@ -181,7 +140,16 @@ if __name__ == "__main__":
 
     if (len(sys.argv) != 5):
         print " Usage : %s <scratch-dir> <tsv-File> <iOne> <BC_threshold> " % sys.argv[0]
+        print " ERROR -- bad command line arguments "
         sys.exit(-1)
+
+    print " "
+    print " in post_pwRK2b ... "
+    print "     scratch directory: ", sys.argv[1]
+    print "     tsv file: ", sys.argv[2]
+    print "     iOne: ", sys.argv[3]
+    print "     BC_threshold: ", sys.argv[4]
+    print " "
 
     sDir = sys.argv[1]
     if (sDir[-1] != "/"):
@@ -200,9 +168,16 @@ if __name__ == "__main__":
     featTypesCounts = getFeatTypesCounts(tsvFile)
     numFeat = getNumFeat(tsvFile)
     numSamp = getNumSamples(tsvFile)
+
+    print " "
+    print " <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><> "
+    print " "
     print " "
     print numFeat, numSamp
     print featTypesCounts
+
+    ## new 04apr14 ... still having NFS latency problems ...
+    time.sleep ( 30 )
 
     featTypesList = featTypesCounts.keys()
     featTypesList.sort()
@@ -253,7 +228,7 @@ if __name__ == "__main__":
         # files ...
         inFile = sDir + "%d.pw" % iFeat
         try:
-            # print " opening input file <%s> " % inFile
+            print " opening input file <%s> " % inFile
             fhIn = file(inFile)
         except:
             print " --> FAILED to open input file <%s> " % inFile
@@ -304,6 +279,46 @@ if __name__ == "__main__":
         if (iFeat % 10000 == 0):
             print " feature # ", iFeat
 
+        # NEW TEST 04apr14 ... read through the entire file to try and
+        # check for truncation problems ...
+        ## print " NEW TESTING FOR FILE COMPLETENESS !!! ", inFile
+        fileGood = 0
+        numRetry = 0
+        while ( not fileGood ):
+            fhIn.close()
+            fhIn = file(inFile, 'r')
+            bailFlag = 0
+            numLines = 0
+            keepReading = 1
+            while ( keepReading ):
+                aLine = fhIn.readline()
+                numLines += 1
+                aLine = aLine.strip()
+                if ( len(aLine) == 0 ):
+                    keepReading = 0
+                    continue
+                if ( aLine.startswith("#") ): continue
+                tokenList = aLine.split('\t')
+                if ( len(tokenList)>1 and len(tokenList)<10 ):
+                    bailFlag = 1
+                    print " BAILING ... RETRY !!! ", numLines, inFile, tokenList, numRetry
+                    fhIn.close()
+                    time.sleep ( 2 )
+                    fhIn = file(inFile, 'r')
+                    numLines = 0
+                    numRetry += 1
+                if ( numRetry > 3 ):
+                    print " too many retries ... ", numLines, inFile, numRetry
+                    keepReading = 0
+                    fileGood = 1
+                    bailFlag = 0
+            if ( not bailFlag ):
+                fileGood = 1
+                ## print "         YAY ", numLines, inFile
+                fhIn.close()
+                fhIn = file(inFile, 'r')
+
+
         # print " beginning to loop over input lines ... "
         for aLine in fhIn:
 
@@ -317,6 +332,16 @@ if __name__ == "__main__":
 
             aLine = aLine.strip()
             tokenList = aLine.split('\t')
+
+            # this should not happen and yet it does sometimes,
+            # when a file has gotten truncated ...
+            if ( len(tokenList) < 10 ): 
+                print " "
+                print " WARNING !!! truncated file ??? "
+                print len(tokenList), tokenList
+                print " "
+                continue
+
 
             aFeat = tokenList[0]
             bFeat = tokenList[1]
@@ -342,16 +367,24 @@ if __name__ == "__main__":
             else:
                 try:
                     rho = float(tokenList[3])
-                    rhoString = "%.3f" % rho
+                    rhoString = "%.2f" % rho
+                    rho = float(rhoString)
                 except:
                     rhoString = "NA"
 
-            num = int(tokenList[4])
-            logP = float(tokenList[5])
-            nA = int(tokenList[6])
-            pA = float(tokenList[7])
-            nB = int(tokenList[8])
-            pB = float(tokenList[9])
+            try:
+                num = int(tokenList[4])
+                logP = float(tokenList[5])
+                nA = int(tokenList[6])
+                pA = float(tokenList[7])
+                nB = int(tokenList[8])
+                pB = float(tokenList[9])
+            except:
+                print " "
+                print " WARNING !!! truncated file ??? "
+                print len(tokenList), tokenList
+                print " "
+                continue
 
             # rules for disqualifying this ...
             dqFlag = 0
@@ -366,8 +399,9 @@ if __name__ == "__main__":
                 if (blogP < logP_BC):
                     dqFlag = 1
 
-            if (num < 10):
-                dqFlag = 1
+            if ( 0 ):
+                if (num < 10): dqFlag = 1
+
             if (rhoString != "NA"):
                 if ((logP > 299) and (abs(float(rhoString)) < 0.1)):
                     dqFlag = 1
@@ -390,14 +424,17 @@ if __name__ == "__main__":
                         bTokens = bFeat.split(':')
                         if (aTokens[2] == bTokens[2]):
                             dqFlag = 1
-                    elif (aType[1:] == "CLIN"):
-                        dqFlag = 1
-                    elif (bType[1:] == "CLIN"):
-                        dqFlag = 1
-                    elif (aType[1:] == "SAMP"):
-                        dqFlag = 1
-                    elif (bType[1:] == "SAMP"):
-                        dqFlag = 1
+
+                    if ( 0 ):
+                        if ( not dqFlag ):
+                            if (aType[1:] == "CLIN"):
+                                dqFlag = 1
+                            elif (bType[1:] == "CLIN"):
+                                dqFlag = 1
+                            elif (aType[1:] == "SAMP"):
+                                dqFlag = 1
+                            elif (bType[1:] == "SAMP"):
+                                dqFlag = 1
 
             # do not write out if this line has been "disqualified" ...
 

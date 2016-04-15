@@ -1,3 +1,6 @@
+# gidget-specific files
+.gidgetconfig
+
 *.py[cod]
 
 # C extensions
@@ -37,3 +40,7 @@ nosetests.xml
 
 # virtualenv
 env/
+
+# WebStorm/IntelliJ
+.idea
+

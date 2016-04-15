@@ -1,30 +1,27 @@
 #!/bin/bash
 
-export LD_LIBRARY_PATH=/tools/lib/
-export TCGAFMP_ROOT_DIR=/users/sreynold/to_be_checked_in/TCGAfmp
-export PYTHONPATH=$TCGAFMP_ROOT_DIR/pyclass:$TCGAFMP_ROOT_DIR/util:$PYTHONPATH
+# every TCGA FMP script should start with these lines:
+: ${TCGAFMP_ROOT_DIR:?" environment variable must be set and non-empty; defines the path to the TCGA FMP scripts directory"}
+source ${TCGAFMP_ROOT_DIR}/../../gidget/util/env.sh
 
 
 ## this script should be called with the following parameters:
-##	date, eg 29jan13
-##	tumor types, eg: skcm
-##      [optional] firehose directory, eg: /titan/cancerregulome9/TCGA/firehose/awg_skcm__2013_10_13
-##      [optional] subset name, eg: "All_Samples"
+##      date, eg '12jul13' or 'test'
+##      snapshot name, either 'dcc-snapshot' or 'dcc-snapshot-28jun13'
+##      one tumor type, eg 'ucec'
+
+WRONGARGS=1
+if [ $# != 4 ]
+    then
+        echo " Usage   : `basename $0`  <curDate>  <tumorType>  <fhDir>  <fhSubset> "
+        echo " Example : `basename $0`  28oct13FH  skcm  $TCGAFMP_FIREHOSE_MIRROR/awg_skcm__2013_10_13  All_Samples "
+        exit $WRONGARGS
+fi
+
 curDate=$1
 tumor=$2
 fhDir=$3
 fhSubset=$4
-
-if [ -z "$curDate" ]
-    then
-	echo " this script must be called with a date string of some kind, eg 28feb13 "
-	exit
-fi
-if [ -z "$tumor" ]
-    then
-	echo " this script must be called with at least one tumor type "
-	exit
-fi
 
 echo " "
 echo " "
@@ -34,8 +31,7 @@ echo " *" $curDate
 echo " *******************"
 
 
-	## cd /titan/cancerregulome3/TCGA/outputs/$tumor
-	cd /titan/cancerregulome14/TCGAfmp_outputs/$tumor
+	cd $TCGAFMP_DATA_DIR/$tumor
 
 	echo " "
 	echo " "
@@ -48,6 +44,7 @@ echo " *******************"
 	fi
 
 	cd $curDate
+        echo `pwd`
 
 	## ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
         ## parse the FH stddata (clinical and level3 all at once)
@@ -59,7 +56,7 @@ echo " *******************"
         ## now we need to make the clinical output of the above look like the 'old' output
         ## of the parse_all_xml script ...
         rm -fr t?
-        ~/scripts/transpose $tumor.firehose__clin_merged.$curDate.tsv >& t1
+        $TCGAFMP_ROOT_DIR/shscript/tcga_fmp_transpose.sh $tumor.firehose__clin_merged.$curDate.tsv >& t1
         sed -e '1s/M:CLIN/bcr_patient_barcode/' t1 >& t2
         mv t2 $tumor.clinical.$curDate.tsv
         rm -fr t1
@@ -80,7 +77,7 @@ echo " *******************"
 	rm -fr parseFirehose.$curDate.log
 	rm -fr gdac.broadinstitute.org_*.tsv
         rm -fr gdac.broadinstitute.org_*.txt
-	python $TCGAFMP_ROOT_DIR/main/parseFirehose.py $tumor >& parseFirehose.$curDate.log
+	python $TCGAFMP_ROOT_DIR/main/parseFirehose.py $tumor private >& parseFirehose.$curDate.log
 
         ## the patients.counts_and_rates files do not differ across multiple subsets
         ## so we can concatenate all of these ...
@@ -186,10 +183,7 @@ echo " *******************"
 	## NEW as of 01 nov 2012 ... get the blacklist of patients and samples from the TCGA
 	## annotations manager
 	$TCGAFMP_ROOT_DIR/shscript/Item_Blacklist.sh $tumor $TCGAFMP_ROOT_DIR/shscript/blacklist.spec >& Item_Blacklist.$curDate.log
-	#### cd /users/sreynold/code/AnnotM/
 	#### ./Item_Blacklist.sh $tumor blacklist
-	#### mv $tumor.blacklist.samples.tsv /titan/cancerregulome3/TCGA/outputs/$tumor/$curDate/$tumor.blacklist.samples.$curDate.tsv
-	#### cd /titan/cancerregulome3/TCGA/outputs/$tumor/$curDate
 	rm -fr cTmp.tsv
 	cp finalClin.$tumor.$curDate.tsv cTmp.tsv
 	rm -fr filterSamp.clin.$curDate.log
@@ -205,7 +199,7 @@ echo " *******************"
         ## NOTE that this gets run in the background !!!
         nohup python $TCGAFMP_ROOT_DIR/main/run_pwRK3.py \
                 --pvalue 2. --all --forRE \
-                --tsvFile /titan/cancerregulome14/TCGAfmp_outputs/$tumor/$curDate/finalClin.$tumor.$curDate.tsv &
+                --tsvFile $TCGAFMP_DATA_DIR/$tumor/$curDate/finalClin.$tumor.$curDate.tsv &
 
 	## ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 	## here we are building a subset of the clinical data based on the 'finalClin' file

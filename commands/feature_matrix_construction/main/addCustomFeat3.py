@@ -17,10 +17,10 @@ armLabels.sort()
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 
 
-def getChrArmFromRowLabel(iRow, rowLabels):
+def getChrArmFromRowLabel ( oneRowLabel ):
 
     # example rowLabel : N:CNVR:PRDM16:chr1:3218000:3258999::
-    tokenList = rowLabels[iRow].split(':')
+    tokenList = oneRowLabel.split(':')
     chrName = tokenList[3][3:]
     segStart = int(tokenList[4])
     segStop = int(tokenList[5])
@@ -36,7 +36,7 @@ def getChrArmFromRowLabel(iRow, rowLabels):
     if (0):
         print " "
         print " "
-        print rowLabels[iRow]
+        print oneRowLabel
         print segStart, segStop, segLen, midSeg
         print chrP
         print chrQ
@@ -85,7 +85,7 @@ def getChrArmFromRowLabel(iRow, rowLabels):
 
     if (iA < 0):
         print " still nothing ??? "
-        print iRow, rowLabels[iRow]
+        print oneRowLabel
         print segStart, segStop, segLen, midSeg
         print chrP, chrQ
         print chrArms.arms_hg19[chrP]
@@ -149,6 +149,10 @@ def addCINfeature(dataD, fType):
         print " --> no additional features will be added "
         return (dataD)
 
+    ## the output below should look something like this ...
+    ##  A  ['N:CNVR:']
+    ##  B  [3636, 3637, 3638, 3639, 3640] [6517, 6518, 6519, 6520, 6521]
+    ##  C  [2886]
     print " "
     print " feature names and rows: "
     print " A ", exFNames
@@ -179,11 +183,12 @@ def addCINfeature(dataD, fType):
     print " --> looping over %d features " % (len(exFRows[0]))
     for iF in range(len(exFRows[0])):
 
+        ## figure out the chromosome arm and segment length
         iRow = exFRows[0][iF]
-        (iA, segLen) = getChrArmFromRowLabel(iRow, rowLabels)
+        (iA, segLen) = getChrArmFromRowLabel(rowLabels[iRow])
 
         if (iF % 100 == 0):
-            print iF, iRow, segLen, iA, armLabels[iA]
+            print iF, iRow, rowLabels[iRow], segLen, iA, armLabels[iA]
 
         # inner loop is over samples ...
         for iC in range(numCol):
@@ -191,27 +196,24 @@ def addCINfeature(dataD, fType):
                 continue
             # print " qqqq  %6d %6d %11.2f " % ( iRow, iC, dataMatrix[iRow][iC]
             # )
+            ## keep track of: a) copy-number value x segLen
+            ##                b) segLen
             s1Mat[iA][iC] += (dataMatrix[iRow][iC] * segLen)
             s2Mat[iA][iC] += (segLen)
-            if (iF % 100 == 0):
-                if (iC == 261):
-                    print iF, iRow, iC, dataMatrix[iRow][iC], s1Mat[iA][iC], s2Mat[iA][iC]
 
     print " "
     print " "
     print " "
 
-    # now we can compute a weighted average for each arm ...
+    # now we can compute a weighted average for each arm (for each sample) ...
     maxPos = [-1] * numArms
     maxNeg = [1] * numArms
     for iA in range(numArms):
         for iC in range(numCol):
             if (s2Mat[iA][iC] > 0):
                 s1Mat[iA][iC] /= s2Mat[iA][iC]
-                if (s1Mat[iA][iC] > maxPos[iA]):
-                    maxPos[iA] = s1Mat[iA][iC]
-                if (s1Mat[iA][iC] < maxNeg[iA]):
-                    maxNeg[iA] = s1Mat[iA][iC]
+                if (s1Mat[iA][iC] > maxPos[iA]): maxPos[iA] = s1Mat[iA][iC]
+                if (s1Mat[iA][iC] < maxNeg[iA]): maxNeg[iA] = s1Mat[iA][iC]
             else:
                 s1Mat[iA][iC] = NA_VALUE
         if (maxPos[iA] > maxNeg[iA]):
@@ -233,99 +235,82 @@ def addCINfeature(dataD, fType):
     newNames[4] = "N:SAMP:CIN_foc_amp:::::"
     newNames[5] = "N:SAMP:CIN_foc_tot:::::"
 
+    ## we are creating 6 new features, for each one allocate
+    ## a vector of NA's ...
     newVecs = [0] * numNewFeat
     for iNew in range(numNewFeat):
         newVecs[iNew] = [NA_VALUE] * numCol
 
+    # for the arm-level stuff, we are using a threshold of 
+    # essentially ZERO ...
     dThresh = 0.0001
 
     # outer loop is over samples ...
     for iC in range(numCol):
+
         # inner loop is over chromosome arms ...
+        # the overall value is going to be a summed metric over all 
+        # chromosome arms ...
         for iA in range(numArms):
-            if (s1Mat[iA][iC] == NA_VALUE):
-                continue
+            if (s1Mat[iA][iC] == NA_VALUE): continue
+
+            ## deletions ...
             if (s1Mat[iA][iC] < -dThresh):
-                if (newVecs[0][iC] == NA_VALUE):
-                    newVecs[0][iC] = 0
+                if (newVecs[0][iC] == NA_VALUE): newVecs[0][iC] = 0
                 newVecs[0][iC] += abs(s1Mat[iA][iC])
+
+            ## amplifications ...
             elif (s1Mat[iA][iC] > dThresh):
-                if (newVecs[1][iC] == NA_VALUE):
-                    newVecs[1][iC] = 0
+                if (newVecs[1][iC] == NA_VALUE): newVecs[1][iC] = 0
                 newVecs[1][iC] += abs(s1Mat[iA][iC])
 
-        if (newVecs[0][iC] != NA_VALUE):
+        ## now we are going to sum the aggregated amplification and the
+        ## aggregated deletion metrics ...
+        if (newVecs[0][iC] != NA_VALUE): 
             newVecs[2][iC] = newVecs[0][iC]
         if (newVecs[1][iC] != NA_VALUE):
-            if (newVecs[2][iC] == NA_VALUE):
+            if (newVecs[2][iC] == NA_VALUE): 
                 newVecs[2][iC] = newVecs[1][iC]
             else:
                 newVecs[2][iC] += newVecs[1][iC]
 
-    if (0):
-        print " "
-        print " newVecs values for two samples : "
-        print newVecs[0][261], newVecs[1][261], newVecs[2][261]
-        print newVecs[0][265], newVecs[1][265], newVecs[2][265]
-        print " "
 
+    ## now we are going to set a more significant threshold for
+    ## looking at focal amplifications and deletions ...
     tmpVec = [0] * numCol
     dThresh = 0.7
 
     # now we loop over all of the features and accumulate focal statistics
     print " now for focal stats ... "
+
     for iF in range(len(exFRows[0])):
         iRow = exFRows[0][iF]
-        (iA, segLen) = getChrArmFromRowLabel(iRow, rowLabels)
+        (iA, segLen) = getChrArmFromRowLabel(rowLabels[iRow])
 
         for iC in range(numCol):
             dVal = dataMatrix[iRow][iC]
-            if (dVal == NA_VALUE):
-                continue
+            if (dVal == NA_VALUE): continue
 
-            if (newVecs[3][iC] == NA_VALUE):
-                newVecs[3][iC] = 0
-            if (newVecs[4][iC] == NA_VALUE):
-                newVecs[4][iC] = 0
-            if (newVecs[5][iC] == NA_VALUE):
-                newVecs[5][iC] = 0
-
-            if (iC == 261):
-                print "     one feature for iC=261 : ", iF, iRow, iA, segLen, dVal
-            if (iC == 265):
-                print "     one feature for iC=265 : ", iF, iRow, iA, segLen, dVal
+            if (newVecs[3][iC] == NA_VALUE): newVecs[3][iC] = 0
+            if (newVecs[4][iC] == NA_VALUE): newVecs[4][iC] = 0
+            if (newVecs[5][iC] == NA_VALUE): newVecs[5][iC] = 0
 
             # subtract the arm-level average ...
             dVal -= s1Mat[iA][iC]
-            if (iC == 261):
-                print "         261 after subtracting arm average : ", dVal
-            if (iC == 265):
-                print "         265 after subtracting arm average : ", dVal
 
+            # if the segment copy-number exceeds the threshold,
+            # then add this segment length ...
             if (dVal <= -dThresh):
                 newVecs[3][iC] += (segLen)
                 newVecs[5][iC] += (segLen)
-                if (iC == 261):
-                    print "         261 exceeded neg threshold ... ", newVecs[3][iC]
-                if (iC == 265):
-                    print "         265 exceeded neg threshold ... ", newVecs[3][iC]
             elif (dVal >= dThresh):
                 newVecs[4][iC] += (segLen)
                 newVecs[5][iC] += (segLen)
-                if (iC == 261):
-                    print "         261 exceeded pos threshold ... ", newVecs[4][iC]
-                if (iC == 265):
-                    print "         265 exceeded pos threshold ... ", newVecs[4][iC]
             tmpVec[iC] += segLen
 
     print " "
     print " "
     print " "
-
-    if (0):
-        print " newVecs values 3-5 for two samples : "
-        print newVecs[3][261], newVecs[4][261], newVecs[5][261], tmpVec[261]
-        print newVecs[3][265], newVecs[4][265], newVecs[5][265], tmpVec[265]
 
     print " "
     print " normalize by total segment length : "
@@ -338,11 +323,6 @@ def addCINfeature(dataD, fType):
             newVecs[3][iC] /= float(tmpVec[iC])
             newVecs[4][iC] /= float(tmpVec[iC])
             newVecs[5][iC] /= float(tmpVec[iC])
-
-    if (0):
-        print " newVecs values 3-5 for two samples : "
-        print newVecs[3][261], newVecs[4][261], newVecs[5][261]
-        print newVecs[3][265], newVecs[4][265], newVecs[5][265]
 
     print " "
     print " "
@@ -384,6 +364,7 @@ if __name__ == "__main__":
             print " "
             print " Usage: %s <input TSV file> <output TSV file> "
             print " "
+            print " ERROR -- bad command line arguments "
             sys.exit(-1)
 
     print " "

@@ -36,6 +36,8 @@ if __name__ == "__main__":
             print " "
             print " New options: if the 3rd parameter is negative, and the method is NZC, then the "
             print " absolute value of the numeric parameter is assumed to be the minimun NZC threshold to use "
+            print " "
+            print " ERROR -- bad command line arguments "
             sys.exit(-1)
 
         inFile = sys.argv[1]
@@ -378,6 +380,13 @@ if __name__ == "__main__":
             if (rowLabels[iRow].startswith("B:")):
                 continue
 
+        # likewise, if the filter type is NZC, this will only apply to binary features
+        if (method == "NZC"):
+            ## actually, we are using this type of filtering on MIRN data ...
+            if (not rowLabels[iRow].startswith("N:MIRN:")):
+                if (not rowLabels[iRow].startswith("B:")):
+                    continue
+
         # now start grabbing the test statistic ...
         if (method == "MAD"):
             if (strictStat):
@@ -400,20 +409,8 @@ if __name__ == "__main__":
             else:
                 testVal = itrVec[iRow] + tweVec[iRow] / 1.
         elif (method == "NZC"):
-            # this is somewhat of a hack ... but if we are using the non-zero-count
-            # to do this "high-variability" filtering, then we should apply this
-            # ONLY to binary features and not to the newer numerical features that
-            # might also exist in GNAB feature matrices ...
+            testVal = nzcVec[iRow]
 
-            # BUT ... now I want to use this to remove zero's in RNAseq data ... so
-            # I'm removing this earlier "hack" ... (10sep12)
-            if (1):
-                testVal = nzcVec[iRow]
-            elif (0):
-                if (rowLabels[iRow].startswith("B:")):
-                    testVal = nzcVec[iRow]
-                else:
-                    testVal = threshVal + 1
         else:
             print " FATAL ERROR ??? invalid method ??? ", method
             sys.exit(-1)

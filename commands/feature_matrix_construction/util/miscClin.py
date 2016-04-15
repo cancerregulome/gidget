@@ -538,12 +538,12 @@ def check_barcodes(aDict):
     allKeys.sort()
     aKey = allKeys[0]
     numClin = len(aDict[aKey])
-    print numClin, len(allKeys)
-    print aKey
-    print allKeys
+    ## print numClin, len(allKeys)
+    ## print aKey
+    ## print allKeys
 
     for aKey in allKeys:
-        if (aKey.lower() == "bcr_patient_barcode"):
+        if (aKey.lower().find("bcr_patient_barcode")>=0):
             for ii in range(numClin):
                 barcode = aDict[aKey][ii]
                 if (len(barcode) == 12):
@@ -582,16 +582,6 @@ def lookAtClinDict(allClinDict):
                     allStr = 0
                 except:
                     allNum = 0
-                    oldStr = allClinDict[aKey][kk]
-                    try:
-                        newStr = oldStr.lower()
-                    except:
-                        print " ERROR ??? ", aKey, kk, oldStr
-                        sys.exit(-1)
-                    if (oldStr != newStr):
-                        # print " oldStr = <%s>  newStr = <%s> " % ( oldStr,
-                        # newStr )
-                        allClinDict[aKey][kk] = newStr
         print " Key <%s> %d %d " % (aKey, allStr, allNum)
 
     # continue ...
@@ -701,7 +691,7 @@ def filterClinDict(allClinDict,
         aKey = allKeys[ii]
         tossString = " "
 
-        if (aKey == "bcr_patient_barcode"):
+        if (aKey.lower().find("bcr_patient_barcode")>=0):
             keepFlags[ii] = 1
             continue
 
@@ -748,12 +738,12 @@ def filterClinDict(allClinDict,
         if (aKey.find("radiationtype") >= 0):
             print " HACK : tossing this key <%s> " % aKey
             continue
-        if (aKey.find("diagnosismethod") >= 0):
-            print " HACK : tossing this key <%s> " % aKey
-            continue
-        if (aKey.find("diagnosis_method") >= 0):
-            print " HACK : tossing this key <%s> " % aKey
-            continue
+        ## if (aKey.find("diagnosismethod") >= 0):
+        ##     print " HACK : tossing this key <%s> " % aKey
+        ##     continue
+        ## if (aKey.find("diagnosis_method") >= 0):
+        ##     print " HACK : tossing this key <%s> " % aKey
+        ##     continue
 
         tmpKey = aKey
         if (len(tmpKey) > 50):
@@ -836,7 +826,7 @@ def filterClinDict(allClinDict,
             if (not keepFlags[ii]):
                 continue
             aKey = allKeys[ii]
-            if (aKey == "bcr_patient_barcode"):
+            if (aKey.lower().find("bcr_patient_barcode")>=0):
                 continue
 
             print " "
@@ -848,7 +838,7 @@ def filterClinDict(allClinDict,
                 if (not keepFlags[jj]):
                     continue
                 bKey = allKeys[jj]
-                if (bKey == "bcr_patient_barcode"):
+                if (bKey.lower().find("bcr_patient_barcode")>=0):
                     continue
 
                 # print " (a) COMPARING : ", ii, numKeys, aKey, bKey
@@ -1122,7 +1112,7 @@ def pairwiseMI(allClinDict, outFilename=''):
     # first we just need some information about each key ...
     for ii in range(numKeys):
         aKey = allKeys[ii]
-        if (aKey == "bcr_patient_barcode"):
+        if (aKey.lower().find("bcr_patient_barcode")>=0):
             continue
         # keyType is either NUMERIC or NOMINAL (arff terms)
         # nCount is the total # of clinical samples in the dictionary
@@ -1159,7 +1149,7 @@ def pairwiseMI(allClinDict, outFilename=''):
 
     for ii in range(numKeys):
         aKey = allKeys[ii]
-        if (aKey == "bcr_patient_barcode"):
+        if (aKey.lower().find("bcr_patient_barcode")>=0):
             continue
 
         print " "
@@ -1179,7 +1169,7 @@ def pairwiseMI(allClinDict, outFilename=''):
 
         for jj in range(ii + 1, numKeys):
             bKey = allKeys[jj]
-            if (bKey == "bcr_patient_barcode"):
+            if (bKey.lower().find("bcr_patient_barcode")>=0):
                 continue
 
             print " "
@@ -1233,7 +1223,7 @@ def pairwiseMI(allClinDict, outFilename=''):
                 if (not aKey.lower().startswith("amp_")):
                     if (not aKey.lower().startswith("del_")):
                         if ((aKey.lower().find('_')) > 0):
-                            if ((bKey.lower().find('_')) > 0):
+                            if ((bKey.find('_')) > 0):
                                 ia = aKey.find('_')
                                 ib = bKey.find('_')
                                 if (aKey[:ia].lower() == bKey[:ib].lower()):
@@ -1249,25 +1239,17 @@ def pairwiseMI(allClinDict, outFilename=''):
 
             if (1):
                 if (aKey.lower().startswith("i(")):
-                    aTokens = aKey.lower().split('|')
+                    aTokens = aKey.split('|')
                     aPart = aTokens[1][:-1]
                 else:
-                    aPart = aKey.lower()
+                    aPart = aKey
                 if (bKey.lower().startswith("i(")):
-                    bTokens = bKey.lower().split('|')
+                    bTokens = bKey.split('|')
                     bPart = bTokens[1][:-1]
                 else:
-                    bPart = bKey.lower()
-                if (aPart == bPart):
+                    bPart = bKey
+                if (aPart.lower() == bPart.lower()):
                     skipComp = 1
-
-            if (0):
-                if ((aKey.lower().find('_')) > 0):
-                    if ((bKey.lower().find('_')) > 0):
-                        ia = aKey.find('_')
-                        ib = bKey.find('_')
-                        if (aKey[:ia].lower() == bKey[:ib].lower()):
-                            skipComp = 1
 
             if (skipComp):
                 print " skipping further analysis of this pair they seem to be too similar ... ", aKey, bKey
@@ -1341,7 +1323,7 @@ def pairwiseMI(allClinDict, outFilename=''):
             if (1):
                 if ((qFlag1 + qFlag2) > 0):
 
-                    if (aKey.startswith("I(") and bKey.startswith("I(")):
+                    if (aKey.lower().startswith("i(") and bKey.lower().startswith("i(")):
                         aTokens = aKey.split('|')
                         bTokens = bKey.split('|')
                         if (aTokens[1] == bTokens[1]):
@@ -1694,7 +1676,8 @@ def removeConstantKeys(allClinDict):
     magicStrings = [
         "disease_code", "gender", "days_to_initial", "days_to_death", "icd_",
         "sampleType", "tumor_type", "cnvr_lvl3_qc", "pretreatment_history",
-        "year_of_dcc_upload", "tumor_tissue_site", "histolog", "diagnosis", "country"]
+        "year_of_dcc_upload", "tumor_tissue_site", "histolog", "diagnosis", 
+        "country", "_data", "batch_number" ]
 
     print " "
     print " now looking for constant (single-value) keys : "
@@ -1720,7 +1703,7 @@ def removeConstantKeys(allClinDict):
             print "         removing key %s : only non-NA value is %s " % (aKey, otherValues[0])
             removeFlags[ii] = 1
         elif (len(otherValues) == 0):
-            print "         removing key %s : only NA values !!! "
+            print "         removing key %s : only NA values !!! " % aKey
             removeFlags[ii] = 1
 
     print " "
@@ -1750,17 +1733,19 @@ def removeConstantKeys(allClinDict):
 
 def removeUninformativeKeys(allClinDict):
 
-    magicStrings = [
+    # these strings should be removed no matter what ...
+    magicDeleteStrings = [
         "detection_method", "tissue_source_site", "lab_proc", "_dcc_",
-        "procedure_name", "handbook_edition", "batch_number", "_method",
-        "icd_o_3_site", "ospective_collection"]
+        "procedure_name", "ospective_collection",
+        "_involvement_site", "_reason", "_family_member_", "patient_id"]
 
-    # new list of 'magic' strings with handbook_edition and batch_number
-    # removed (09nov12)
-    magicStrings = [
-        "detection_method", "tissue_source_site", "lab_proc", "_dcc_",
-        "procedure_name", "_method", "ospective_collection",
-        "_involvement_site", "_reason", "_family_member_"]
+    # and these strings should NOT be removed ...
+    # (removed HPV_type_var on 9/29)
+    magicKeepStrings = [
+        "bcr_patient_barcode", "disease_code",
+        "iCluster_Adeno_k2", "nte_site", "batch_number",
+        "initial_pathologic_diagnosis_method",
+        "init_pathology_dx_method_other" ]
 
     print " in removeUninformativeKeys ... "
 
@@ -1776,19 +1761,15 @@ def removeUninformativeKeys(allClinDict):
     for ii in range(len(allKeys)):
         aKey = allKeys[ii]
 
-        # a few "magic" keys that we do NOT want to lose!
-        if (aKey == "bcr_patient_barcode"):
-            continue
-        if (aKey == "disease_code"):
-            continue
-
-        # 01feb13 : removing "batch_number" from the "magic key" status ...
-        # if ( aKey == "batch_number" ): continue
-
-        if (aKey == "patient_id"):
-            removeFlags[ii] = 1
-            continue
-
+        # if this is one of the magicKeepStrings, then we don't need to look 
+        # into more detail ...
+        doSkip = 0
+        for aString in magicKeepStrings:
+            if ( aKey.lower().find(aString.lower()) >= 0 ): 
+                print " skipping looking at this string : <%s> " % aKey
+                doSkip = 1
+        if ( doSkip ): continue
+        
         otherValues = []
         numNA = 0
         allNumbers = 1
@@ -1806,22 +1787,25 @@ def removeUninformativeKeys(allClinDict):
 
         print " looking at key %s ... allNumbers=%d ... |card|=%d " % (aKey, allNumbers, len(otherValues)), otherValues[:10]
         if (not allNumbers):
-            if ((len(otherValues) + numNA) > int(0.90 * numClin)):
+            ## if ((len(otherValues) + numNA) > int(0.90 * numClin)):
+            if ((len(otherValues) + (numNA-numClin/2)) > int(0.90 * (numClin/2))):
                 print "        (a) removing key %s : numNA=%d  len(otherValues)=%d  numClin=%d " % (aKey, numNA, len(otherValues), numClin)
                 print "                                    ", otherValues[:3], otherValues[-3:]
                 print otherValues
                 removeFlags[ii] = 1
-            # 01feb13 : if a categorical feature has more than 20 categories,
-            # drop it!
-            if (len(otherValues) > 20):
+            # 01feb13 : if a categorical feature has more than 20 categories, drop it!
+            # 03feb16 : increasing this to 30 categories
+            if (len(otherValues) > 30):
                 print "        (b) removing key %s : numNA=%d  len(otherValues)=%d  numClin=%d " % (aKey, numNA, len(otherValues), numClin)
                 print "                                    ", otherValues[:3], otherValues[-3:]
                 print otherValues
                 removeFlags[ii] = 1
 
-        for aString in magicStrings:
+        # make sure that any string that looks like one of the magicDeleteStrings
+        # gets removed ...
+        for aString in magicDeleteStrings:
             if (not removeFlags[ii]):
-                if (aKey.find(aString) >= 0):
+                if ( aKey.lower().find(aString.lower()) >= 0 ):
                     print "        removing key %s " % aKey
                     removeFlags[ii] = 1
 
@@ -1861,20 +1845,22 @@ def getBestKeyOrder(allClinDict, naCounts):
     # print " minNA=%d  maxNA=%d " % ( minNA, maxNA )
 
     # we want to start with 'bcr_patient_barcode'
-    bestKeyOrder += ['bcr_patient_barcode']
-
-    # but what if it is not in the clinical dictionary ??? !!!
-    if (bestKeyOrder[0] not in allKeys):
-        print " ERROR ??? <%s> is not one of the keys ??? " % bestKeyOrder[0]
+    if ( 'bcr_patient_barcode' in allKeys ):
+        bestKeyOrder += ['bcr_patient_barcode']
+    elif ( 'C:CLIN:bcr_patient_barcode:::::' in allKeys ):
+        bestKeyOrder += ['C:CLIN:bcr_patient_barcode:::::']
+    else:
+        # but what if it is not in the clinical dictionary ??? !!!
+        print " ERROR ??? bcr_patient_barcode is not one of the keys ??? " 
         for aKey in allKeys:
-            if (aKey.startswith("bcr_patient")):
+            if ( aKey.find("bcr_patient") >= 0 ):
                 print aKey
         sys.exit(-1)
 
     for n in range(minNA, maxNA + 1):
         for ii in range(len(allKeys)):
             aKey = allKeys[ii]
-            if (aKey == 'bcr_patient_barcode'):
+            if (aKey.lower().find("bcr_patient_barcode")>=0):
                 continue
             if (naCounts[ii] == n):
                 bestKeyOrder += [aKey]
@@ -1905,7 +1891,6 @@ def lookAtKey(clinVec):
         nCount += 1
 
         bVal = str(aVal)
-        bVal = bVal.upper()
 
         if (bVal == "NA"):
             nNA += 1
@@ -1920,11 +1905,15 @@ def lookAtKey(clinVec):
                 labelDict[xVal] += 1
             except:
                 allNumeric = 0
-                aVal = aVal.upper()
                 if (aVal not in labelList):
                     labelList += [aVal]
                     labelDict[aVal] = 0
                 labelDict[aVal] += 1
+
+    # check that there is something ???
+    if ( (nCount-nNA) == 0 ):
+        keyType = 'NA'
+        return (keyType, nCount, nNA, 0, [], [])
 
     nCard = len(labelList)
     # print allNumeric, nCount, nNA, nCard

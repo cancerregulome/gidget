@@ -1,9 +1,17 @@
 #!/bin/bash
 
-export LD_LIBRARY_PATH=/tools/lib/
-export TCGAFMP_ROOT_DIR=/users/sreynold/to_be_checked_in/TCGAfmp
-export PYTHONPATH=$TCGAFMP_ROOT_DIR/pyclass:$TCGAFMP_ROOT_DIR/util:$PYTHONPATH
-export VT_UTIL=/users/sreynold/git_home/vt_foo
+# every TCGA FMP script should start with these lines:
+: ${TCGAFMP_ROOT_DIR:?" environment variable must be set and non-empty; defines the path to the TCGA FMP scripts directory"}
+source ${TCGAFMP_ROOT_DIR}/../../gidget/util/env.sh
+
+WRONGARGS=1
+if [[ $# != 4 ]] 
+    then
+        echo " Usage   : `basename $0` <curDate> <tumorType> <tsvFile> <featFile>"
+        echo " Example : `basename $0` 05sep14  cesc  cesc.seq.05sep14.TP.tsv  survival.feat.txt"
+        echo " "
+        exit $WRONGARGS
+fi
 
 ## this script should be called with the following parameters:
 ##      date, eg '29jan13'
@@ -12,6 +20,7 @@ export VT_UTIL=/users/sreynold/git_home/vt_foo
 curDate=$1
 tumor=$2
 tsvFile=$3
+featFile=$4
 
 if [ -z "$curDate" ]
     then
@@ -28,6 +37,11 @@ if [ -z "$tsvFile" ]
         echo " this script must be called with TSV file specified "
         exit
 fi
+if [ -z "$featFile" ]
+    then
+        echo " this script must be called with feature file specified "
+        exit
+fi
 
 echo " "
 echo " "
@@ -37,6 +51,7 @@ echo " *" $curDate
 echo " *******************"
 
 
+curDir=`pwd`
 
         echo " "
         echo " *************************************************************** "
@@ -49,12 +64,13 @@ echo " *******************"
 	cd $TCGAFMP_DATA_DIR/$tumor/$curDate
         pwd
 
-        for st in XX
+        for st in TP
             do
 
                 ## ------------------------------------------------------------------- #
                 echo " "
         
+                echo " looking for " $tsvFile
                 if [ -f $tsvFile ]
                     then
         
@@ -68,7 +84,7 @@ echo " *******************"
 
                         g=${tsvFile/.tsv/.SurvivalPVal.tsv}
                 
-                        cd /users/sreynold/git_home/vt_cncreg/survival
+                        cd $VT_SURVIVAL
                         rm -fr $TCGAFMP_DATA_DIR/$tumor/$curDate/SurvivalPVal.$st.tmp
                         rm -fr $TCGAFMP_DATA_DIR/$tumor/scratch/SurvivalPVal.$st.log
 
@@ -76,12 +92,12 @@ echo " *******************"
                         echo " ready to invoke SurvivalPVal.sh ... "
                         echo $tsvFile
                         wc -l $TCGAFMP_DATA_DIR/$tumor/$curDate/Survival.CVars.txt
-                        cat $TCGAFMP_DATA_DIR/$tumor/aux/survival.feat.txt
+                        cat $TCGAFMP_DATA_DIR/$tumor/aux/$featFile
 
                         ./SurvivalPVal.sh \
                                 -f $TCGAFMP_DATA_DIR/$tumor/$curDate/$tsvFile \
                                 -c $TCGAFMP_DATA_DIR/$tumor/$curDate/Survival.CVars.txt \
-                                -m $TCGAFMP_DATA_DIR/$tumor/aux/survival.feat.txt \
+                                -m $TCGAFMP_DATA_DIR/$tumor/aux/$featFile \
                                 -o $TCGAFMP_DATA_DIR/$tumor/$curDate/SurvivalPVal.$st.tmp >& $TCGAFMP_DATA_DIR/$tumor/scratch/SurvivalPVal.$st.log
 
                         rm -fr $TCGAFMP_DATA_DIR/$tumor/$curDate/$g
@@ -95,6 +111,10 @@ echo " *******************"
         	        cd $TCGAFMP_DATA_DIR/$tumor/$curDate
                         rm -fr SurvivalPVal.$st.tmp
 
+                    else
+                        echo " "
+                        echo " FILE NOT FOUND ??? " $tsvFile
+                        echo " "
                     fi
 
             done ## loop over st (not really)
@@ -105,4 +125,6 @@ echo " "
 echo " just_survival script is FINISHED !!! "
 echo `date`
 echo " "
+
+cd $curDir
 

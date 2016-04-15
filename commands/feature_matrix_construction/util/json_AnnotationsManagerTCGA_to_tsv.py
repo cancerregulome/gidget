@@ -8,6 +8,9 @@ def load_json(filename):
 
 
 def process_notetext(notetext):
+    ## NEW ... problems with unicode characters on 12-oct-2014
+    notetext = notetext.encode('ascii', 'ignore')
+    ## print " in process_notetext ... <%s> " % notetext
     return notetext.replace('\r\n', ';').replace('\n', ';').strip()
 
 

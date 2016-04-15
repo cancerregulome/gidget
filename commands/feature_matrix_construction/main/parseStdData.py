@@ -1,5 +1,6 @@
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 
+from env import gidgetConfigVars
 import miscMath
 import miscTCGA
 
@@ -166,7 +167,7 @@ def cleanupSampleDict(sampleDict):
         if (len(aSample) == 12):
             if (aSample not in cleanPatientList):
                 cleanPatientList += [aSample]
-        elif (len(aSample) == 15):
+        elif (len(aSample) == 16):
             shortB = aSample[:12]
             if (shortB not in cleanPatientList):
                 cleanPatientList += [shortB]
@@ -273,13 +274,14 @@ if __name__ == "__main__":
 
     # list of cancer directory names
     cancerDirNames = [
-        'blca', 'brca', 'cesc', 'cntl', 'coad', 'dlbc', 'esca', 'gbm', 'hnsc', 'kirc',
-        'kirp', 'laml', 'lcll', 'lgg', 'lihc', 'lnnh', 'luad', 'lusc', 'ov',
-        'paad', 'prad', 'read', 'sarc', 'skcm', 'stad', 'thca', 'ucec', 'lcml', 'pcpg']
+        'acc', 'blca', 'brca', 'cesc', 'cntl', 'coad', 'dlbc', 'esca', 'gbm', 'hnsc', 'kirc',
+        'kirp', 'laml', 'lcll', 'lgg', 'lihc', 'lnnh', 'luad', 'lusc', 'ov', 'meso', 'tgct',
+        'paad', 'prad', 'read', 'sarc', 'skcm', 'stad', 'thca', 'ucec', 'lcml', 'pcpg', 'ucs' ]
 
     if (1):
         if (len(sys.argv) != 2):
             print " Usage: %s <tumorType> " % sys.argv[0]
+            print " ERROR -- bad command line arguments "
             sys.exit(-1)
         else:
             tumorType = sys.argv[1].lower()
@@ -295,7 +297,7 @@ if __name__ == "__main__":
                 print cancerDirNames
                 sys.exit(-1)
 
-    firehoseTopDir = "/titan/cancerregulome9/TCGA/firehose/"
+    firehoseTopDir = gidgetConfigVars['TCGAFMP_FIREHOSE_MIRROR']+ "/"
     outDir = "./"
 
     # first thing we have to do is find the most recent top-level directory

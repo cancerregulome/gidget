@@ -6,6 +6,7 @@ import os
 import sys
 
 # these are my local modules
+from env import gidgetConfigVars
 import miscIO
 import miscTCGA
 import path
@@ -48,22 +49,22 @@ platformStrings = [
 
 
 dataTypeDict = {}
-dataTypeDict["HT_HG-U133A"] = ["N", "GEXP"]
-dataTypeDict["AgilentG4502A_07_1"] = ["N", "GEXP"]
-dataTypeDict["AgilentG4502A_07_2"] = ["N", "GEXP"]
-dataTypeDict["AgilentG4502A_07_3"] = ["N", "GEXP"]
-dataTypeDict["H-miRNA_8x15K"] = ["N", "MIRN"]
-dataTypeDict["HumanMethylation27"] = ["N", "METH"]
-dataTypeDict["HumanMethylation450"] = ["N", "METH"]
-dataTypeDict["IlluminaGA_RNASeq"] = ["N", "GEXP"]
-dataTypeDict["IlluminaGA_RNASeqV2"] = ["N", "GEXP"]
-dataTypeDict["IlluminaHiSeq_RNASeq"] = ["N", "GEXP"]
-dataTypeDict["IlluminaHiSeq_RNASeqV2"] = ["N", "GEXP"]
-dataTypeDict["Genome_Wide_SNP_6"] = ["N", "CNVR"]
-dataTypeDict["IlluminaGA_miRNASeq"] = ["N", "MIRN"]
-dataTypeDict["IlluminaHiSeq_miRNASeq"] = ["N", "MIRN"]
-dataTypeDict["MDA_RPPA_Core"] = ["N", "RPPA"]
-dataTypeDict["microsat_i"] = ["C", "SAMP"]
+dataTypeDict["HT_HG-U133A"] = ["N", "GEXP", "array"]
+dataTypeDict["AgilentG4502A_07_1"] = ["N", "GEXP", "array"]
+dataTypeDict["AgilentG4502A_07_2"] = ["N", "GEXP", "array"]
+dataTypeDict["AgilentG4502A_07_3"] = ["N", "GEXP", "array"]
+dataTypeDict["H-miRNA_8x15K"] = ["N", "MIRN", "array"]
+dataTypeDict["HumanMethylation27"] = ["N", "METH", "beadchip"]
+dataTypeDict["HumanMethylation450"] = ["N", "METH", "beadchip"]
+dataTypeDict["IlluminaGA_RNASeq"] = ["N", "GEXP", "seq"]
+dataTypeDict["IlluminaGA_RNASeqV2"] = ["N", "GEXP", "seq"]
+dataTypeDict["IlluminaHiSeq_RNASeq"] = ["N", "GEXP", "seq"]
+dataTypeDict["IlluminaHiSeq_RNASeqV2"] = ["N", "GEXP", "seq"]
+dataTypeDict["Genome_Wide_SNP_6"] = ["N", "CNVR", "array"]
+dataTypeDict["IlluminaGA_miRNASeq"] = ["N", "MIRN", "seq"]
+dataTypeDict["IlluminaHiSeq_miRNASeq"] = ["N", "MIRN", "seq"]
+dataTypeDict["MDA_RPPA_Core"] = ["N", "RPPA", "array"]
+dataTypeDict["microsat_i"] = ["C", "SAMP", "pcr"]
 
 RPPAdict = {}
 
@@ -208,12 +209,20 @@ def getSDRFinfo(sdrfFilename):
             # numTokens=%d " % ( lineNum, zPlat, numTokens )
 
             if (zPlat == "HT_HG-U133A"):
-                iLevel3 = 30
-                iBarcode = 0
-                iFilename = 27
-                iArchive = 28
-                iYes = 31
-                iOther = 26
+                if (numTokens == 34):
+                    iLevel3 = 31
+                    iBarcode = 1
+                    iFilename = 28
+                    iArchive = 29
+                    iYes = 32
+                    iOther = 27
+                else:
+                    iLevel3 = 30
+                    iBarcode = 0
+                    iFilename = 27
+                    iArchive = 28
+                    iYes = 31
+                    iOther = 26
 
             elif (zPlat == "AgilentG4502A_07_1"):
                 if (numTokens == 44):
@@ -283,12 +292,20 @@ def getSDRFinfo(sdrfFilename):
                     sys.exit(-1)
 
             elif (zPlat == "H-miRNA_8x15K"):
-                iLevel3 = 28
-                iBarcode = 25
-                iFilename = 26
-                iArchive = 30
-                iYes = 29
-                iOther = 27
+                if (numTokens == 32):
+                    iLevel3 = 29
+                    iBarcode = 26
+                    iFilename = 27
+                    iArchive = 31
+                    iYes = 30
+                    iOther = 28
+                else:
+                    iLevel3 = 28
+                    iBarcode = 25
+                    iFilename = 26
+                    iArchive = 30
+                    iYes = 29
+                    iOther = 27
 
             elif (zPlat == "HumanMethylation27"):
                 # looks like the new data has 33 tokens, and the indices should be 30, 1, 27, 28, 31, 29
@@ -930,9 +947,7 @@ def makeFeatureName(dType, fType, fName, chr='', start=-1, stop=-1, strand='', x
     if (fType == "RPPA"):
         if (len(RPPAdict) == 0):
             print " reading in RPPA annotation file ... "
-            ## fh = file ( "/proj/ilyalab/sreynold/TCGA/MDA_RPPA_Core/MDA_antibody_annotation.txt" )
-            fh = file(
-                "/titan/cancerregulome11/TCGA/repositories/rppa/MDA_antibody_annotation.txt")
+            fh = file( gidgetConfigVars['TCGAFMP_BIOINFORMATICS_REFERENCES'] + "/tcga_platform_genelists/MDA_antibody_annotation_2014_03_04.txt" )
             for aLine in fh:
                 aLine = aLine.strip()
                 aLine = aLine.split('\t')
@@ -2343,11 +2358,7 @@ def loadPlatformMetaData(zString):
             zString == "jhu-usc.edu/humanmethylation27/methylation/"):
 
         if (1):
-            ## metaDataFilename = "/proj/ilyalab/sreynold/TCGA/HumanMethylation27/featNames.txt"
-            ## metaDataFilename = "/proj/ilyalab/sreynold/TCGA/HumanMethylation450/featNames.11apr12.txt"
-            ## metaDataFilename = "/proj/ilyalab/sreynold/TCGA/HumanMethylation450/featNames.09jul12.hg19.txt"
-            ## metaDataFilename = "/proj/ilyalab/sreynold/TCGA/HumanMethylation450/featNames.04oct13.hg19.txt"
-            metaDataFilename = "/proj/ilyalab/sreynold/TCGA/HumanMethylation450/featNames.15oct13.hg19.txt"
+            metaDataFilename = gidgetConfigVars['TCGAFMP_BIOINFORMATICS_REFERENCES'] + "/tcga_platform_genelists/featNames.15oct13.hg19.txt"
             fh = file(metaDataFilename)
             metaData = {}
             done = 0
@@ -2491,10 +2502,10 @@ if __name__ == "__main__":
 
     # list of cancer directory names
     cancerDirNames = [
-        'blca', 'brca', 'cesc', 'cntl', 'coad', 'dlbc', 'esca', 'gbm', 'hnsc', 'kich', 'kirc',
-        'kirp', 'laml', 'lcll', 'lgg', 'lihc', 'lnnh', 'luad', 'lusc', 'meso', 'ov',
-        'paad', 'prad', 'read', 'sarc', 'skcm', 'stad', 'thca', 'ucec', 'coadread',
-        'lcml', 'pcpg']
+        'acc',  'blca', 'brca', 'cesc', 'cntl', 'coad', 'dlbc', 'esca', 'gbm',
+        'hnsc', 'kich', 'kirc', 'kirp', 'laml', 'lcll', 'lgg',  'lihc', 'lnnh',
+        'luad', 'lusc', 'ov',   'paad', 'prad', 'read', 'sarc', 'skcm', 'stad',
+        'thca', 'ucec', 'lcml', 'pcpg', 'meso', 'tgct', 'ucs' ]
 
     if (1):
 
@@ -2502,6 +2513,7 @@ if __name__ == "__main__":
             print " Usage: %s <outSuffix> <platformID> <tumorType#1> [tumorType#2 ...] [snapshot-name]"
             print " currently supported platforms : ", platformStrings
             print " currently supported tumor types : ", cancerDirNames
+            print " ERROR -- bad command line arguments "
             sys.exit(-1)
 
         else:
@@ -2569,13 +2581,13 @@ if __name__ == "__main__":
         logFlag = 0
 
         # piece together the directory name ...
-        ## topDir = "/titan/cancerregulome11/TCGA/repositories/dcc-snapshot/public/tumor/" + zCancer + "/cgcc/" + platformID
-        topDir = "/titan/cancerregulome11/TCGA/repositories/" + \
+        ## topDir = gidgetConfigVars['TCGAFMP_DCC_REPOSITORIES'] + "/dcc-snapshot/public/tumor/" + zCancer + "/cgcc/" + platformID
+        topDir = gidgetConfigVars['TCGAFMP_DCC_REPOSITORIES'] + "/" + \
             snapshotName + "/public/tumor/" + zCancer + "/cgcc/" + platformID
 
         # HACK: the microsat_instability data is in the "secure" branch ...
         if (platformID.find("microsat_i") > 0):
-            topDir = "/titan/cancerregulome11/TCGA/repositories/" + \
+            topDir = gidgetConfigVars['TCGAFMP_DCC_REPOSITORIES'] + "/" + \
                 snapshotName + "/secure/tumor/" + \
                 zCancer + "/cgcc/" + platformID
 
@@ -2660,7 +2672,6 @@ if __name__ == "__main__":
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     # now we need to get set up for writing the output ...
     # NEW: 21dec12 ... assuming that we will write to current working directory
-    ## outDir = "/titan/cancerregulome3/TCGA/outputs/"
     outDir = "./"
     outFilename = makeOutputFilename(
         outDir, tumorList, platformID, outSuffix)
@@ -2683,13 +2694,13 @@ if __name__ == "__main__":
         print ' LOOP over %d CANCER TYPES ... %s ' % (len(tumorList), zCancer)
 
         # piece together the directory name ...
-        ## topDir = "/titan/cancerregulome11/TCGA/repositories/dcc-snapshot/public/tumor/" + zCancer + "/cgcc/" + platformID
-        topDir = "/titan/cancerregulome11/TCGA/repositories/" + \
+        ## topDir = gidgetConfigVars['TCGAFMP_DCC_REPOSITORIES'] + "/dcc-snapshot/public/tumor/" + zCancer + "/cgcc/" + platformID
+        topDir = gidgetConfigVars['TCGAFMP_DCC_REPOSITORIES'] + "/" + \
             snapshotName + "/public/tumor/" + zCancer + "/cgcc/" + platformID
 
         # HACK: the microsat_instability data is in the "secure" branch ...
         if (platformID.find("microsat_i") > 0):
-            topDir = "/titan/cancerregulome11/TCGA/repositories/" + \
+            topDir = gidgetConfigVars['TCGAFMP_DCC_REPOSITORIES'] + "/" + \
                 snapshotName + "/secure/tumor/" + \
                 zCancer + "/cgcc/" + platformID
 
@@ -2902,13 +2913,14 @@ if __name__ == "__main__":
             dataD['dataType'] = getDataType(segList[0])
 
             newFeatureName = "C:SAMP:" + \
-                dataTypeDict[zPlat][1].lower() + "Platform"
+                dataTypeDict[zPlat][1].lower() + "Platform" + ":::::" + \
+                dataTypeDict[zPlat][2]
             newFeatureValue = zPlat
             dataD = tsvIO.addConstFeature(
                 dataD, newFeatureName, newFeatureValue)
 
             sortRowFlag = 0
-            sortColFlag = 1
+            sortColFlag = 0
             tsvIO.writeTSV_dataMatrix(
                 dataD, sortRowFlag, sortColFlag, outFilename)
         except:
@@ -2923,12 +2935,13 @@ if __name__ == "__main__":
         print ' writing out data matrix to ', outFilename
 
         newFeatureName = "C:SAMP:" + \
-            dataTypeDict[zPlat][1].lower() + "Platform"
+            dataTypeDict[zPlat][1].lower() + "Platform" + ":::::" + \
+            dataTypeDict[zPlat][2]
         newFeatureValue = zPlat
         dataD = tsvIO.addConstFeature(dataD, newFeatureName, newFeatureValue)
 
-        sortRowFlag = 1
-        sortColFlag = 1
+        sortRowFlag = 0
+        sortColFlag = 0
         tsvIO.writeTSV_dataMatrix(
             dataD, sortRowFlag, sortColFlag, outFilename)
 

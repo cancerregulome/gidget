@@ -2,6 +2,7 @@
 
 import sys
 
+from env import gidgetConfigVars
 import miscTCGA
 import path
 import tsvIO
@@ -60,13 +61,18 @@ def getSampleList(fName):
 if __name__ == "__main__":
 
     if (1):
-        if (len(sys.argv) == 3):
+        if ( (len(sys.argv)==3) or (len(sys.argv)==4) ):
             tumorString = sys.argv[1]
             dateString = sys.argv[2]
+            if ( len(sys.argv) == 4 ):
+                auxName = sys.argv[3]
+            else:
+                auxName = "aux"
         else:
             print " "
-            print " Usage: %s <tumorString> <dateString> "
+            print " Usage: %s <tumorString> <dateString> [auxName] "
             print " "
+            print " ERROR -- bad command line arguments "
             sys.exit(-1)
 
     print " "
@@ -77,8 +83,7 @@ if __name__ == "__main__":
     listDict = {}
 
     # find all of the .ids.txt files and build up the various named lists ...
-    topDir = "/titan/cancerregulome14/TCGAfmp_outputs/%s/%s" % (tumorString,
-                                                                dateString)
+    topDir = "%s/%s/%s" % (gidgetConfigVars['TCGAFMP_DATA_DIR'], tumorString, dateString)
     d1 = path.path(topDir)
     for f1 in d1.files():
         if (f1.endswith(".ids.txt")):
@@ -104,8 +109,7 @@ if __name__ == "__main__":
     print len(uList)
 
     # ok and now we can write out the indicator features ...
-    outFile = "/titan/cancerregulome14/TCGAfmp_outputs/%s/aux/namedLists.forXmlMerge.tsv" % (
-        tumorString)
+    outFile = "%s/%s/$s/namedLists.forXmlMerge.tsv" % ( gidgetConfigVars['TCGAFMP_DATA_DIR'], tumorString, auxName )
     fh = file(outFile, 'w')
 
     outLine = "bcr_patient_barcode"

@@ -1,3 +1,9 @@
+#!/bin/bash
+
+# every TCGA FMP script should start with these lines:
+: ${TCGAFMP_ROOT_DIR:?" environment variable must be set and non-empty; defines the path to the TCGA FMP scripts directory"}
+source ${TCGAFMP_ROOT_DIR}/../../gidget/util/env.sh
+
 
 ## now we assume that in the input specified directory, we have
 ## one enormous file called post_proc_all.tsv and then all of 
@@ -12,14 +18,25 @@ echo " "
 echo " "
 echo " processing temp files in $1 "
 
+## uName=`whoami`
+## tDir='/tmp/'$uName'/pw_scratch'
+## if [ ! -d $tDir ]
+##     then
+##         mkdir -p $tDir
+##     fi
+tDir=$TCGAFMP_LOCAL_SCRATCH
+echo " using temp scratch directory " $tDir
+
 date
 
 echo " sorting the individual files ... "
 for t in $d/post_proc_all.*.*.tmp
    do
 	echo $t
-	sort -grk 5 --temporary-directory=/local/sreynold/scratch/ $t >& $t.sort
+        sort -grk 5,5 -k 1,2 --temporary-directory=$tDir $t | uniq >& $t.sort
    done
+
+date
 
 echo " concatenating at most 1 million pairs of each type ... "
 rm -fr $d/post_proc_all.short
@@ -30,9 +47,11 @@ for t in $d/post_proc_all.*.*.tmp.sort
 	head -1000000 $t >> $d/post_proc_all.short
     done
 
+date
+
 echo " now sorting the short concatenation ... "
 rm -fr $d/post_proc_all.short.sort
-sort -grk 5 --temporary-directory=/local/sreynold/scratch/ $d/post_proc_all.short >& $d/post_proc_all.short.sort
+sort -grk 5,5 -k1,2 --temporary-directory=$tDir $d/post_proc_all.short | uniq >& $d/post_proc_all.short.sort
 
 date
 

@@ -6,6 +6,7 @@ import os
 import sys
 
 # these are my local modules
+from env import gidgetConfigVars
 import miscIO
 import miscTCGA
 import path
@@ -930,9 +931,8 @@ def makeFeatureName(dType, fType, fName, chr='', start=-1, stop=-1, strand='', x
     if (fType == "RPPA"):
         if (len(RPPAdict) == 0):
             print " reading in RPPA annotation file ... "
-            ## fh = file ( "/proj/ilyalab/sreynold/TCGA/MDA_RPPA_Core/MDA_antibody_annotation.txt" )
             fh = file(
-                "/titan/cancerregulome11/TCGA/repositories/rppa/MDA_antibody_annotation.txt")
+                gidgetConfigVars['TCGAFMP_DCC_REPOSITORIES'] + "/rppa/MDA_antibody_annotation.txt")
             for aLine in fh:
                 aLine = aLine.strip()
                 aLine = aLine.split('\t')
@@ -2343,12 +2343,7 @@ def loadPlatformMetaData(zString):
             zString == "jhu-usc.edu/humanmethylation27/methylation/"):
 
         if (1):
-            ## metaDataFilename = "/proj/ilyalab/sreynold/TCGA/HumanMethylation27/featNames.txt"
-            ## metaDataFilename = "/proj/ilyalab/sreynold/TCGA/HumanMethylation450/featNames.11apr12.txt"
-            ## metaDataFilename = "/proj/ilyalab/sreynold/TCGA/HumanMethylation450/featNames.09jul12.hg19.txt"
-            ## metaDataFilename = "/proj/ilyalab/sreynold/TCGA/HumanMethylation450/featNames.04oct13.hg19.txt"
-            metaDataFilename = "/proj/ilyalab/sreynold/TCGA/HumanMethylation450/featNames.15oct13.hg19.txt"
-            metaDataFilename = "/proj/ilyalab/sreynold/TCGA/HumanMethylation450/featNames_all.16oct13.hg19.txt"
+            metaDataFilename = gidgetConfigVars['TCGAFMP_BIOINFORMATICS_REFERENCES'] + "/tcga_platform_genelists/featNames_all.16oct13.hg19.txt"
             fh = file(metaDataFilename)
             metaData = {}
             done = 0
@@ -2495,7 +2490,7 @@ if __name__ == "__main__":
         'blca', 'brca', 'cesc', 'cntl', 'coad', 'dlbc', 'esca', 'gbm', 'hnsc', 'kich', 'kirc',
         'kirp', 'laml', 'lcll', 'lgg', 'lihc', 'lnnh', 'luad', 'lusc', 'meso', 'ov',
         'paad', 'prad', 'read', 'sarc', 'skcm', 'stad', 'thca', 'ucec', 'coadread',
-        'lcml', 'pcpg']
+        'lcml', 'pcpg', 'tgct']
 
     if (1):
 
@@ -2503,6 +2498,7 @@ if __name__ == "__main__":
             print " Usage: %s <outSuffix> <platformID> <tumorType#1> [tumorType#2 ...] [snapshot-name]"
             print " currently supported platforms : ", platformStrings
             print " currently supported tumor types : ", cancerDirNames
+            print " ERROR -- bad command line arguments "
             sys.exit(-1)
 
         else:
@@ -2570,13 +2566,13 @@ if __name__ == "__main__":
         logFlag = 0
 
         # piece together the directory name ...
-        ## topDir = "/titan/cancerregulome11/TCGA/repositories/dcc-snapshot/public/tumor/" + zCancer + "/cgcc/" + platformID
-        topDir = "/titan/cancerregulome11/TCGA/repositories/" + \
+        ## topDir = gidgetConfigVars['TCGAFMP_DCC_REPOSITORIES'] + "/dcc-snapshot/public/tumor/" + zCancer + "/cgcc/" + platformID
+        topDir = gidgetConfigVars['TCGAFMP_DCC_REPOSITORIES'] + "/" + \
             snapshotName + "/public/tumor/" + zCancer + "/cgcc/" + platformID
 
         # HACK: the microsat_instability data is in the "secure" branch ...
         if (platformID.find("microsat_i") > 0):
-            topDir = "/titan/cancerregulome11/TCGA/repositories/" + \
+            topDir = gidgetConfigVars['TCGAFMP_DCC_REPOSITORIES'] + "/" + \
                 snapshotName + "/secure/tumor/" + \
                 zCancer + "/cgcc/" + platformID
 
@@ -2661,7 +2657,6 @@ if __name__ == "__main__":
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     # now we need to get set up for writing the output ...
     # NEW: 21dec12 ... assuming that we will write to current working directory
-    ## outDir = "/titan/cancerregulome3/TCGA/outputs/"
     outDir = "./"
     outFilename = makeOutputFilename(
         outDir, tumorList, platformID, outSuffix)
@@ -2684,13 +2679,13 @@ if __name__ == "__main__":
         print ' LOOP over %d CANCER TYPES ... %s ' % (len(tumorList), zCancer)
 
         # piece together the directory name ...
-        ## topDir = "/titan/cancerregulome11/TCGA/repositories/dcc-snapshot/public/tumor/" + zCancer + "/cgcc/" + platformID
-        topDir = "/titan/cancerregulome11/TCGA/repositories/" + \
+        ## topDir = gidgetConfigVars['TCGAFMP_DCC_REPOSITORIES'] + "/dcc-snapshot/public/tumor/" + zCancer + "/cgcc/" + platformID
+        topDir = gidgetConfigVars['TCGAFMP_DCC_REPOSITORIES'] + "/" + \
             snapshotName + "/public/tumor/" + zCancer + "/cgcc/" + platformID
 
         # HACK: the microsat_instability data is in the "secure" branch ...
         if (platformID.find("microsat_i") > 0):
-            topDir = "/titan/cancerregulome11/TCGA/repositories/" + \
+            topDir = gidgetConfigVars['TCGAFMP_DCC_REPOSITORIES'] + "/" + \
                 snapshotName + "/secure/tumor/" + \
                 zCancer + "/cgcc/" + platformID
 

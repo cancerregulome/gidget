@@ -1,0 +1,46 @@
+[build]
+source=TCGA
+## feature matrix file name
+afm=FULL_TSV_PATH_NAME_HERE
+## what is this for?
+annotations=na
+## ?
+datamining_method=pairwise
+quantile_features=CNVR
+## pwpv file name
+associations=FULL_PATH_TO_PWPV_FOR_RE_FILE_HERE
+afm_description=DESCRIPTION_TEXT_HERE
+interesting_scores=PATH_TO_SCORES_FILE_HERE
+## the 'comment' can be blank
+comment=COMMENT_TEXT_HERE
+dataset_label=DATA_SET_LABEL_HERE
+## this is the 2nd layer in the dataset 'tree' 
+## (does not have to be a date, can also be something like "Manuscript")
+dataset_date=DATA_SET_DATE_HERE
+contact=re@csacr.org
+## this is the top of the dataset 'tree'
+disease_code=TUMOR_TYPE_HERE
+#python bin must be 2.5+ and imported the MySQLDb package
+python_bin=/tools/bin/python2.7
+
+#the directory needs to exist and end in /
+[results]
+path=/hdfs1/tcga/re_dbetl/
+
+[dbetl]
+#only supports blank, absolute, negative, negative_log10
+pvalue_transform=blank
+
+#collapse_edge_directions=1 implies taking the rf-ace higher important (A->B, B->A) set 
+#n/a for pairwise
+collapse_edge_directions=1
+reverse_directions=1
+keep_unmapped_associations=1
+
+[postetl]
+process_genehub=1
+
+#ISB specific - requires smtp python module
+[pubcrawl]
+dopubcrawl=no
+notify=sreynold@systemsbiology.org

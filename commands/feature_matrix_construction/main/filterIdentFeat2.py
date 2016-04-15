@@ -76,7 +76,8 @@ def chooseMostSpecific(bestFeatureList):
                 if (minScore > featScores[ii]):
                     minScore = featScores[ii]
         if (fFlag == 0):
-            print " ERROR ??? never found the mutation string ??? ", aFeat
+            print " WARNING ??? never found the mutation string ??? ", aFeat
+            return ( bestFeatureList[0] )
             sys.exit(-1)
 
     print bestFeatureList
@@ -169,7 +170,7 @@ def constantVec(aVec):
 
 def removeIdenticalFeatures(inD, featType):
 
-    print " in removeIdenticalFeatures ... ", featType
+    print " in removeIdenticalFeatures ... <%s> " % featType
 
     rowLabels = inD['rowLabels']
     dataMatrix = inD['dataMatrix']
@@ -179,7 +180,6 @@ def removeIdenticalFeatures(inD, featType):
 
     rmRowList = []
 
-    curGene = "HAVE NO GENE"
     iRow = 0
     while (iRow < nRowIn):
 
@@ -187,7 +187,12 @@ def removeIdenticalFeatures(inD, featType):
         print " working on feature # %d " % iRow
 
         iFeatname = rowLabels[iRow]
-        if (iFeatname.find(featType) < 0):
+        if (featType != "ANY"):
+            if (iFeatname.find(featType) < 0):
+                iRow += 1
+                continue
+
+        if (iFeatname.find(":ja_") > 0 ):
             iRow += 1
             continue
 
@@ -214,23 +219,33 @@ def removeIdenticalFeatures(inD, featType):
                 continue
 
             jFeatname = rowLabels[jRow]
-            if (jFeatname.find(featType) < 0):
-                done = 1
+            if (featType != "ANY"):
+                if (jFeatname.find(featType) < 0):
+                    jRow += 1
+                    continue
+
+            if (jFeatname.find(":ja_") > 0):
+                jRow += 1
                 continue
 
             curTokens = jFeatname.split(':')
             jGeneName = curTokens[2]
-            if (jGeneName != iGeneName):
-                done = 1
-                continue
+
+            ## HERE this makes things MUCH faster, but may not uncover
+            ## all identical features ...
+            if ( 1 ):
+                if (jGeneName != iGeneName):
+                    done = 1
+                    continue
 
             identFeat = 1
-            print "     --> comparing %d and %d  ( %s and %s ) " % (iRow, jRow, iFeatname, jFeatname)
+            ## print "     --> comparing %d and %d  ( %s and %s ) " % (iRow, jRow, iFeatname, jFeatname)
             for iCol in range(nColIn):
                 if (dataMatrix[iRow][iCol] != dataMatrix[jRow][iCol]):
                     identFeat = 0
 
             if (identFeat):
+                print "     --> identical !!! %d and %d  ( %s and %s ) " % (iRow, jRow, iFeatname, jFeatname)
                 newName = chooseMostSpecific([iFeatname, jFeatname])
                 if (newName == iFeatname):
                     if (jRow not in rmRowList):
@@ -264,6 +279,8 @@ if __name__ == "__main__":
     if (1):
         if (len(sys.argv) != 4):
             print " Usage : %s <input feature matrix> <output feature matrix> <featType> " % sys.argv[0]
+            print "         to avoid filtering on featType, use ANY "
+            print " ERROR -- bad command line arguments "
             sys.exit(-1)
         inFile = sys.argv[1]
         outFile = sys.argv[2]

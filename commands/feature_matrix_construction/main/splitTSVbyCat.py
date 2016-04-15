@@ -39,11 +39,11 @@ def removeNonTumorSamples(dataD):
 
         # if the barcode is not even long enough to specify the sample type,
         # we will just assume that we keep it ...
-        if (len(aCode) < 15):
+        if (len(aCode) < 16):
             tumorCode = aCode
 
         else:
-            # if the barcode is at least 15 characters long, then we parse it
+            # if the barcode is at least 16 characters long, then we parse it
             # ...
             aCode = miscTCGA.fixTCGAbarcode(aCode)
             (site, patient, sample, vial, portion, analyte,
@@ -193,7 +193,6 @@ def makeDataTypeString(dTypeList, fTypeList):
 
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 
-
 def readSampleListFromFile(sampleFile):
 
     fh = file(sampleFile)
@@ -210,12 +209,61 @@ def readSampleListFromFile(sampleFile):
 
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 
+def createOutputFileName ( inFile, rowLabel, aCat ):
+
+    ## we want to decide whether or not to include part of the feature
+    ## name in to the output file name ... if the category label is
+    ## sufficiently generic that it might not be very unique/informative
+    nameFlag = 0
+    uCat = str(aCat).upper()
+    if ( uCat in [ "0", "1", "NO", "YES", "FALSE", "TRUE", "MUT", "WT", "ALIVE", "DEAD", "MALE", "FEMALE" ] ):
+        nameFlag = 1
+    if ( len(uCat) == 2 ):
+        if ( uCat[0] in [ "T", "N", "M", "C" ] ):
+            try:
+                iCat = int(uCat[1])
+                nameFlag = 1
+            except:
+                doNothing = 1
+    if ( uCat.find("PRIMARY") > 0 ): nameFlag = 1
+    if ( uCat.find("METASTA") > 0 ): nameFlag = 1
+
+    if ( nameFlag == 0 ):
+        nameStr = ''
+    else:
+        tokenList = rowLabel.split(':')
+        if ( tokenList[2].startswith("I(") ):
+            subName = tokenList[2][2:-1]
+            i1 = subName.find("|")
+            if ( i1 > 0 ): subName = subName[:i1]
+            i1 = subName.find(",")
+            if ( i1 > 0 ): subName = subName[:i1] + "_vs_" + subName[i1+1:]
+        else:
+            subName = tokenList[2]
+        nameStr = subName + "_"
+        try:
+            if ( len(tokenList[7]) > 0 ):
+                nameStr += tokenList[7] + "_"
+        except:
+            doNothing = 1
+        nameStr += "_"
+
+    if (inFile.endswith(".tsv")):
+        outFile = inFile[:-4] + "." + nameStr + str(aCat) + ".tsv"
+    else:
+        outFile = inFile + "." + nameStr + str(aCat) + ".tsv"
+
+    return ( outFile )
+
+# -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
+
 if __name__ == "__main__":
 
     if (1):
         # there must be exactly 3 arguments ...
         if (len(sys.argv) != 3):
             print " Usage : %s <input file> <categorical feature> " % sys.argv[0]
+            print " ERROR -- bad command line arguments "
             sys.exit(-1)
 
         inFile = sys.argv[1]
@@ -373,15 +421,15 @@ if __name__ == "__main__":
                 outD2 = tsvIO.filter_dataMatrix(outD, rmRowList, [])
                 outD = outD2
 
-            if (inFile.endswith(".tsv")):
-                outFile = inFile[:-4] + "." + str(aCat) + ".tsv"
-            else:
-                outFile = inFile + "." + str(aCat) + ".tsv"
+            ## 30apr14 ... changing the way the output file name is created
+            outFile = createOutputFileName ( inFile, rowLabels[iR], aCat )
 
             print " "
             print " calling writeTSV_dataMatrix ... ", outFile
             sortRowFlag = 0
+            ### sortRowFlag = 1 # just for TESTING 16aug14
             sortColFlag = 0
+            ### sortColFlag = 1 # just for TESTING 16aug14
             tsvIO.writeTSV_dataMatrix(
                 outD, sortRowFlag, sortColFlag, outFile)
 

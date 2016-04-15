@@ -10,6 +10,7 @@ import sys
 NA_VALUE = -999999
 
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
+# -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 # want to make sure that we don't add a feature like:
 # B:SAMP:I(A,B|C)
 # if   B:SAMP:I(B,A|C)
@@ -63,11 +64,11 @@ def similarFeatureExists(newLabel, rowLabels):
                 tstB = "none"
                 tstC = tstTokens[2][i2 + 1:i3]
 
-            if (givenC == tstC):
-                if (labelA == tstA and labelB == tstB):
+            if (givenC.lower() == tstC.lower()):
+                if (labelA.lower() == tstA.lower() and labelB.lower() == tstB.lower()):
                     print newLabel, tstLabel
                     return (1)
-                elif (labelA == tstB and labelB == tstA):
+                elif (labelA.lower() == tstB.lower() and labelB.lower() == tstA.lower()):
                     print newLabel, tstLabel
                     print " AHA !!! found one of these :-) "
                     # sys.exit(-1)
@@ -88,10 +89,13 @@ def checkColonCount(newLabel):
 
     if (numC == 7):
         return (newLabel)
-    else:
+    elif (numC < 7):
         for ii in range(numC, 7):
             newLabel += ':'
         return (newLabel)
+    elif (numC > 7):
+        print " WARNING !!! improper feature label ??? ", newLabel, numC
+        sys.exit(-1)
 
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 
@@ -131,8 +135,14 @@ def addIndicators4oneFeat(aKey, rowLabels, tmpMatrix):
         curVal = tmpVec[iCol]
         if (curVal != "NA" and curVal != NA_VALUE):
             strVal = str(curVal)
-            if (strVal not in uVec):
-                uVec += [str(curVal)]
+
+            if ( 0 ):
+                if (strVal not in uVec): uVec += [str(curVal)]
+            else:
+                uFound = 0
+                for uVal in uVec:
+                    if ( strVal.lower() == uVal.lower() ): uFound = 1
+                if ( not uFound ): uVec += [str(curVal)]
 
     curV = tmpVec
 
@@ -165,17 +175,23 @@ def addIndicators4oneFeat(aKey, rowLabels, tmpMatrix):
         print " --> building new label ... "
         try:
             if (aKey[1] == ":" and aKey[6] == ":"):
+                # if we get to here, then we must have a feature that starts 
+                # with something like C:GEXP:NOTCH2...
                 i1 = aKey[7:].find(':')
                 if (i1 < 0):
                     i1 = len(aKey)
                     i2 = len(aKey)
                 else:
+                    # if we get here, then a 3rd colon has been found
                     i1 = i1 + 7
                     i2 = aKey[(i1 + 1):].find(':')
                     if (i2 < 0):
                         i2 = len(aKey)
                     else:
-                        i2 = i2 + i1
+                        # and if we get here, then a 4th colon has been found
+                        # BUT I DON'T UNDERSTAND WHY THAT MATTERS ???
+                        #### i2 = i2 + i1
+                        i2 = i1 
                 print aKey, i1, i2, len(aKey)
                 print aKey[7:i1]
                 print aKey[i2:]
@@ -268,7 +284,8 @@ def addIndicators4oneFeat(aKey, rowLabels, tmpMatrix):
                         if (i2 < 0):
                             i2 = len(aKey)
                         else:
-                            i2 = i2 + i1
+                            #### i2 = i2 + i1
+                            i2 = i1 
                     print aKey, i1, i2
                     print aKey[7:i1]
                     print aKey[i2:]
@@ -396,6 +413,7 @@ if __name__ == "__main__":
 
     if (len(sys.argv) != 3):
         print " Usage : %s <input TSV> <output TSV> " % sys.argv[0]
+        print " ERROR -- bad command line arguments "
         sys.exit(-1)
 
     tsvNameIn = sys.argv[1]

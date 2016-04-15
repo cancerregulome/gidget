@@ -9,6 +9,7 @@ import os.path
 import sys
 import time
 
+from env import gidgetConfigVars
 import miscIO
 
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
@@ -161,7 +162,7 @@ def preProcessTSV(tsvFile):
         (status, output) = commands.getstatusoutput(cmdString)
 
         print " creating bin file "
-        cmdString = "/users/rkramer/bin/python3 /titan/cancerregulome8/TCGA/scripts/prep4pairwise.py %s" % tsvFile
+        cmdString = "%s %s/prep4pairwise.py %s" % (gidgetConfigVars['TCGAFMP_PYTHON3'], gidgetConfigVars['TCGAFMP_PAIRWISE_ROOT'], tsvFile)
         (status, output) = commands.getstatusoutput(cmdString)
         if (status != 0):
             print " ERROR ??? failed to execute command ??? "
@@ -361,7 +362,7 @@ if __name__ == "__main__":
     print " randomly generated job name : <%s> " % curJobName
     print " "
 
-    tmpDir = "/titan/cancerregulome9/TCGA/pw_scratch/%s" % curJobName
+    tmpDir = "%s/%s" % (gidgetConfigVars['TCGAFMP_CLUSTER_SCRATCH'], curJobName)
     cmdString = "mkdir %s" % tmpDir
     (status, output) = commands.getstatusoutput(cmdString)
     if (not os.path.exists(tmpDir)):
@@ -387,13 +388,20 @@ if __name__ == "__main__":
         print " failed to open output file <%s>, exiting ... " % runFile
         sys.exit(-1)
 
-    pythonbin = "/tools/bin/python2.7"
-    golempwd = "g0l3mm45t3r"
+    pythonbin = sys.executable
+
+    golempwd = "PASSWD_HERE"
+    fhC = file ( gidgetConfigVars['TCGAFMP_CLUSTER_SCRATCH'] + "/config", 'r' )
+    aLine = fhC.readline()
+    fhC.close()
+    aLine = aLine.strip()
+    golempwd = aLine
+    print " got this ... <%s> " % golempwd
 
     numJobs = 0
     for index in indexList:
         outName = tmpDir + "/" + str(index) + ".pw"
-        cmdString = "1 /titan/cancerregulome8/TCGA/scripts/pairwise-1.1.2"
+        cmdString = "1 " + gidgetConfigVars['TCGAFMP_PAIRWISE_ROOT'] + "/pairwise-1.1.2"
         cmdString += " --pvalue 1. --min-ct-cell %d --min-mx-cell %d --min-samples %d" \
             % (args.min_ct_cell, args.min_mx_cell, args.min_samples)
         cmdString += " --outer %d:%d:1 --inner 0::1  %s  %s " \
@@ -404,8 +412,8 @@ if __name__ == "__main__":
     fh.close()
 
     # ok, now we want to actually launch the jobs ...
-    cmdString = "python $TCGAFMP_ROOT_DIR/main/golem.py "
-    cmdString += "http://glados.systemsbiology.net:7083 -p g0l3mm45t3r "
+    cmdString = "python " + gidgetConfigVars['TCGAFMP_ROOT_DIR'] + "/main/golem.py "
+    cmdString += "http://glados.systemsbiology.net:7083 -p " + golempwd + " "
     cmdString += "-L scoreCatFeat -u "
     cmdString += getpass.getuser() + " "
     cmdString += "runlist " + runFile
@@ -418,16 +426,28 @@ if __name__ == "__main__":
     print " --------------- "
 
     done = 0
+    lastCheck = -1
+    noChange = 0
     while not done:
 
+        ## count up the number of output files ...
         numOutFiles = 0
         for aName in os.listdir(tmpDir):
             if (aName.endswith(".pw")):
                 numOutFiles += 1
         print numOutFiles
 
-        if (numOutFiles == numJobs):
-            done = 1
+        ## if the number of output files matches the
+        ## number of jobs, we're good to go
+        if (numOutFiles == numJobs): done = 1
+
+        ## if this count has not changed in a while,
+        ## they we probably want to bail ...
+        if ( lastCheck == numOutFiles ):
+            noChange += 1
+        if ( noChange > 5 ): done = 1
+        lastCheck = numOutFiles
+
         time.sleep(10)
 
     print " should be done !!! ", numOutFiles, numJobs
@@ -447,8 +467,7 @@ if __name__ == "__main__":
 
         outNames = []
 
-        (outNames, typeScores, typeRanks, pTmp) = getTypeRanks(
-            aType, tmpDir, indexList, featList)
+        (outNames, typeScores, typeRanks, pTmp) = getTypeRanks (aType, tmpDir, indexList, featList)
 
         # at this point we have:
         # names : vector of feature names

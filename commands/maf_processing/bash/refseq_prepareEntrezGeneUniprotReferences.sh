@@ -1,22 +1,27 @@
 #!/bin/bash
 
-if [ -z $MAF_REFERENCES_DIR ]; then      # -n tests to see if the argument is non empty
+# every TCGA MAF script should start with these lines:
+: ${TCGAMAF_ROOT_DIR:?" environment variable must be set and non-empty; defines the path to the TCGA MAF directory"}
+source ${TCGAMAF_ROOT_DIR}/../../gidget/util/env.sh
+
+
+if [ -z $TCGAMAF_REFERENCES_DIR ]; then      # -n tests to see if the argument is non empty
         echo "!! Reference directory not defined! Aborting."
         exit
 fi
 
-if [ -z $MAF_SCRIPTS_DIR ]; then      # -n tests to see if the argument is non empty
+if [ -z $TCGAMAF_SCRIPTS_DIR ]; then      # -n tests to see if the argument is non empty
         echo "!! Script folder not defined! Aborting."
         exit
 fi
 
-if [ -z $MAF_PYTHON_BINARY ]; then      # -n tests to see if the argument is non empty
+if [ -z $TCGAMAF_PYTHON_BINARY ]; then      # -n tests to see if the argument is non empty
         echo "!! Python binary not defined! Aborting."
         exit
 fi
 
-referenceFolder="$MAF_REFERENCES_DIR"
-python="$MAF_PYTHON_BINARY"
+referenceFolder="$TCGAMAF_REFERENCES_DIR"
+python="$TCGAMAF_PYTHON_BINARY"
 
 # NCBI reference data 
 gene2refseq=$referenceFolder"/gene2refseq"
@@ -33,7 +38,7 @@ uniprot_sprot_human=$referenceFolder"/uniprot_sprot_human.dat"
 uniprot_trembl_human=$referenceFolder"/uniprot_trembl_human.dat"
 
 #path
-scriptPath="$MAF_SCRIPTS_DIR"
+scriptPath="$TCGAMAF_SCRIPTS_DIR"
 
 echo
 date

@@ -1,5 +1,6 @@
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 
+from env import gidgetConfigVars
 import chrArms
 import miscMath
 import miscTCGA
@@ -15,53 +16,79 @@ import sys
 def getDate(dName):
 
     dateString = dName[-10:]
-    iDate = int(dateString[0:4]) * 10000 + \
-        int(dateString[5:7]) * 100 + int(dateString[8:10])
+    try:
+        iDate = int(dateString[0:4]) * 10000 + \
+                int(dateString[5:7]) * 100 + int(dateString[8:10])
+        print " extracting date from <%s> <%s> %d " % ( dName, dateString, iDate )
+    except:
+        print " WARNING ... failed to extract date from <%s> ??? " % dName, dateString
+        iDate = 0
     return (iDate)
 
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 
 
-def getMostRecentDir(topDir, cancerList):
+def getMostRecentDir(topDir, cancerList, awgFlag):
 
     print " in getMostRecentDir ... "
     print topDir
-    print cancerList
+    print cancerList, awgFlag
 
     d1 = path.path(topDir)
-    iDates = []
+    genDates = []
+    awgDates = []
+
     for d1Name in d1.dirs():
+
+        ## print "     looking at directory name <%s> " % d1Name
+        if ( d1Name.endswith("__bkp") ): continue
 
         if (d1Name.find("analyses") >= 0):
-            iDates += [getDate(d1Name)]
+            print "         --> adding gen date <%s> " % getDate(d1Name)
+            genDates += [getDate(d1Name)]
 
         if (len(cancerList) == 1):
-            if (d1Name.find("awg_") >= 0):
-                if (d1Name.find(cancerList[0]) >= 0):
-                    iDates += [getDate(d1Name)]
+            if ( awgFlag == "YES" ):
+                if (d1Name.find("awg_") >= 0):
+                    if (d1Name.find(cancerList[0]) >= 0):
+                        awgDates += [getDate(d1Name)]
+                        print "         --> adding awg date <%s> " % getDate(d1Name)
 
-    iDates.sort()
-    print iDates
+    genDates.sort()
+    awgDates.sort()
 
-    lastDate = str(iDates[-1])
-    lastDate = lastDate[0:4] + "_" + lastDate[4:6] + "_" + lastDate[6:8]
-    print lastDate
+    print genDates
+    print awgDates
 
     lastDir = "NA"
-    for d1Name in d1.dirs():
-        # give first priority to awg specific run ...
-        if (len(cancerList) == 1):
-            if (d1Name.find("awg_") >= 0):
-                if (d1Name.find(cancerList[0]) >= 0):
-                    if (d1Name.find(lastDate) >= 0):
-                        lastDir = d1Name
 
-    if (lastDir == "NA"):
+    ## give priority to an AWG run ...
+    if ( (awgFlag=="YES") and (len(awgDates)>0) ):
+
+        lastDate = str(awgDates[-1])
+        lastDate = lastDate[0:4] + "_" + lastDate[4:6] + "_" + lastDate[6:8]
+        print "     using this awg date : ", lastDate
+
         for d1Name in d1.dirs():
-            if (d1Name.find("analyses") >= 0):
-                if (d1Name.find(lastDate) >= 0):
-                    lastDir = d1Name
+            # give first priority to awg specific run ...
+            if (len(cancerList) == 1):
+                if (d1Name.find("awg_") >= 0):
+                    if (d1Name.find(cancerList[0]) >= 0):
+                        if (d1Name.endswith(lastDate)):
+                            lastDir = d1Name
+    
+    else:
 
+        lastDate = str(genDates[-1])
+        lastDate = lastDate[0:4] + "_" + lastDate[4:6] + "_" + lastDate[6:8]
+        print "     using this gen date : ", lastDate
+    
+        if (lastDir == "NA"):
+            for d1Name in d1.dirs():
+                if (d1Name.find("analyses") >= 0):
+                    if (d1Name.endswith(lastDate)):
+                        lastDir = d1Name
+    
     print " using firehose outputs from: ", lastDir
 
     return (lastDir)
@@ -104,7 +131,7 @@ def getNewClusterNumbers(cMetric):
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 
 
-def parseBestClusFiles(lastDir, outDir):
+def parseBestClusFiles(lastDir, outDir, zCancer):
 
     print " "
     print " "
@@ -121,6 +148,10 @@ def parseBestClusFiles(lastDir, outDir):
     for d2Name in d2.dirs():
 
         if (d2Name.find("Level_4") > 0):
+
+            ## careful never to grab those FFPE-specific runs
+            if ( d2Name.find("FFPE") > 0 ): continue
+
             d3 = path.path(d2Name)
             for fName in d3.files():
                 if (fName.endswith("bestclus.txt")):
@@ -161,13 +192,17 @@ def parseBestClusFiles(lastDir, outDir):
                         clusType = "RPPA_CC"
                     elif (fName.find("CopyNumber_Clustering_CNMF_arm") >= 0):
                         clusType = "cnvr_CNMF_arm"
-                    elif (fName.find("CopyNumber_Clustering_CNMF") >= 0):
+                    ## elif (fName.find("CopyNumber_Clustering_CNMF.Level_4") >= 0):
+                    elif (fName.find("CopyNumber_Clustering_CNMF_thresholded.Level_4") >= 0):
                         clusType = "cnvr_CNMF"
                     else:
-                        print " ERROR in parseBestClusFiles ... failed to find magic string ??? "
-                        print fName
-                        print d2Name
-                        sys.exit(-1)
+                        print " --> failed to find magic string ... skipping ... "
+                        continue
+                        if ( 0 ):
+                            print " ERROR in parseBestClusFiles ... failed to find magic string ??? "
+                            print fName
+                            print d2Name
+                            sys.exit(-1)
 
                     # 03may13 ... need to chop up the filename and use some information
                     # from the filename for the feature name ...
@@ -187,17 +222,23 @@ def parseBestClusFiles(lastDir, outDir):
                     done = 0
                     iMax = -999
                     iMin = 999
+
+                    print " reading input file ... "
+
                     while not done:
                         aLine = fhIn.readline()
                         aLine = aLine.strip()
                         tokenList = aLine.split('\t')
+
+                        print " tokenList : ", tokenList
                         if (len(tokenList) != 3):
                             done = 1
+
                         else:
                             # sanity checking that these tokens look correct
                             # ...
                             goodData = 1
-                            aBarcode = tokenList[0]
+                            aBarcode = miscTCGA.fixTCGAbarcode (tokenList[0], zCancer)
 
                             if (aBarcode.startswith("TCGA")):
                                 try:
@@ -219,28 +260,28 @@ def parseBestClusFiles(lastDir, outDir):
                             # 01234567890123456789012345678
                             # TCGA-A6-2678-01A-01D-1549-01
 
-                            if (len(aBarcode) < 15):
-                                if (len(aBarcode) == 12):
-                                    ## aBarcode += "-01"
-                                    aBarcode = miscTCGA.get_tumor_barcode(
-                                        aBarcode)
-                                else:
-                                    print " ERROR ??? barcode doesn't seem right ??? ", aBarcode
-                                    sys.exit(-1)
+                            if (len(aBarcode) < 16):
+                                print " trying to get a good barcode ... ", aBarcode
+                                aBarcode = miscTCGA.get_tumor_barcode(aBarcode)
+                                print " is this one good ??? ", aBarcode
                             else:
-                                if (len(aBarcode) > 15):
-                                    aBarcode = aBarcode[:15]
+                                if (len(aBarcode) > 16):
+                                    aBarcode = aBarcode[:16]
+                                    if ( aBarcode[15] == "-" ):
+                                        aBarcode = miscTCGA.get_tumor_barcode(aBarcode[:15])
+
+                            print " --> aBarcode : ", aBarcode
 
                             if (aBarcode in dataDict.keys()):
                                 if (sVal > dataDict[aBarcode][1]):
                                     dataDict[aBarcode] = (iClus, sVal)
                             else:
+                                print " adding to dataDict ... ", aBarcode, iClus, sVal
                                 dataDict[aBarcode] = (iClus, sVal)
 
-                            if (iMin > iClus):
-                                iMin = iClus
-                            if (iMax < iClus):
-                                iMax = iClus
+                            if (iMin > iClus): iMin = iClus
+                            if (iMax < iClus): iMax = iClus
+
                     fhIn.close()
 
                     # now let's look at all of the clusters and see how they
@@ -249,6 +290,8 @@ def parseBestClusFiles(lastDir, outDir):
                         print " ERROR ??? shouldn't there be a cluster #1 ??? ", iMin, iMax
                         sys.exit(-1)
                     numClus = iMax - iMin + 1
+                    print " cluster indices ... ", iMin, iMax, numClus
+                    print " dataDict length = ", len(dataDict)
 
                     sumSV = [0] * numClus
                     numTot = [0] * numClus
@@ -260,12 +303,14 @@ def parseBestClusFiles(lastDir, outDir):
 
                         iClus = dataDict[aKey][0]
                         sVal = dataDict[aKey][1]
+                        print " looping over dataDict ... ", aKey, iClus, sVal
                         sumSV[iClus - 1] += sVal
                         numTot[iClus - 1] += 1
                         if (sVal > 0):
                             numPos[iClus - 1] += 1
 
                     for iClus in range(numClus):
+                        print " cluster metrics ... ", iClus, sumSV[iClus], numTot[iClus], numPos[iClus]
                         metric1 = sumSV[iClus] / float(numTot[iClus])
                         metric2 = float(numPos[iClus]) / float(numTot[iClus])
                         cMetric[iClus] = metric1 + metric2 + metric2
@@ -316,7 +361,6 @@ def parseBestClusFiles(lastDir, outDir):
 
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 
-
 def parseMutSig_CountsRatesFile(inName, outName):
 
     print " "
@@ -332,7 +376,14 @@ def parseMutSig_CountsRatesFile(inName, outName):
     hdrTokens = hdrLine.split('\t')
     numTokens = len(hdrTokens)
 
-    if ((numTokens != 8) and (numTokens != 10) and (numTokens != 11) and (numTokens != 12) and (numTokens != 13)):
+    ## updating this nasty hack of a function on 09feb2015 ... because there is 
+    ## once again another version of MutSig ...
+    ##          to recap: MutSig1.5 has 10 columns \  and are
+    ##                    MutSig2.0 has 10 columns /  the same
+    ##                    MutSigCV  has 13 columns
+    ##                    MutSig2CV has 22 columns
+
+    if ((numTokens != 10) and (numTokens != 13) and (numTokens !=22) ):
         print " ERROR ??? unexpected number of hdrTokens ??? ", numTokens
         print hdrTokens
         sys.exit(-1)
@@ -341,14 +392,7 @@ def parseMutSig_CountsRatesFile(inName, outName):
 
     # check that the hdrTokens are as we expect ... "
     goodData = 1
-    if (numTokens == 8):
-        if (hdrTokens[1] != "name"):
-            goodData = 0
-        if (hdrTokens[6] != "rate_sil"):
-            goodData = 0
-        if (hdrTokens[7] != "rate_non"):
-            goodData = 0
-    elif (numTokens == 10):
+    if (numTokens == 10):
         if (hdrTokens[2] != "name"):
             goodData = 0
         if (hdrTokens[7] != "rate_dbsnp"):
@@ -357,24 +401,6 @@ def parseMutSig_CountsRatesFile(inName, outName):
             goodData = 0
         if (hdrTokens[9] != "rate_non"):
             goodData = 0
-    elif (numTokens == 11):
-        if (hdrTokens[2] != "name"):
-            goodData = 0
-        if (hdrTokens[8] != "rate_dbsnp"):
-            goodData = 0
-        if (hdrTokens[9] != "rate_sil"):
-            goodData = 0
-        if (hdrTokens[10] != "rate_non"):
-            goodData = 0
-    elif (numTokens == 12):
-        if (hdrTokens[2] != "name"):
-            goodData = 0
-        if (hdrTokens[9] != "rate_dbsnp"):
-            goodData = 0
-        if (hdrTokens[10] != "rate_sil"):
-            goodData = 0
-        if (hdrTokens[11] != "rate_non"):
-            goodData = 0
     elif (numTokens == 13):
         if (hdrTokens[0] != "name"):
             goodData = 0
@@ -382,6 +408,16 @@ def parseMutSig_CountsRatesFile(inName, outName):
             goodData = 0
         if (hdrTokens[12] != "rate_non"):
             goodData = 0
+    elif (numTokens == 22):
+        if (hdrTokens[0] != "name"):
+            goodData = 0
+        if (hdrTokens[13] != "rate_sil"):
+            goodData = 0
+        if (hdrTokens[14] != "rate_non"):
+            goodData = 0
+        if (hdrTokens[15] != "rate_tot"):
+            goodData = 0
+
 
     if (not goodData):
         print " ERROR ??? unexpected hdrTokens ??? ", numTokens
@@ -390,19 +426,13 @@ def parseMutSig_CountsRatesFile(inName, outName):
 
     fhOut = file(outName, 'w')
     print "     writing out <%s> " % outName
-    if (numTokens == 8):
-        fhOut.write(
-            "bcr_patient_barcode\tN:SAMP:MutSig_rateSil_perMb:::::\tN:SAMP:MutSig_rateNon_perMb:::::\tN:SAMP:MutSig_rateTot_perMb:::::\tB:SAMP:MutSig_HiMut_bit:::::\n")
-    elif (numTokens == 10):
-        fhOut.write(
-            "bcr_patient_barcode\tN:SAMP:MutSig_rateDbSnp_perMb:::::\tN:SAMP:MutSig_rateSil_perMb:::::\tN:SAMP:MutSig_rateNon_perMb:::::\tN:SAMP:MutSig_rateTot_perMb:::::\tB:SAMP:MutSig_HiMut_bit:::::\n")
-    elif (numTokens == 11):
-        fhOut.write(
-            "bcr_patient_barcode\tN:SAMP:MutSig_rateDbSnp_perMb:::::\tN:SAMP:MutSig_rateSil_perMb:::::\tN:SAMP:MutSig_rateNon_perMb:::::\tN:SAMP:MutSig_rateTot_perMb:::::\tB:SAMP:MutSig_HiMut_bit:::::\n")
-    elif (numTokens == 12):
+    if (numTokens == 10):
         fhOut.write(
             "bcr_patient_barcode\tN:SAMP:MutSig_rateDbSnp_perMb:::::\tN:SAMP:MutSig_rateSil_perMb:::::\tN:SAMP:MutSig_rateNon_perMb:::::\tN:SAMP:MutSig_rateTot_perMb:::::\tB:SAMP:MutSig_HiMut_bit:::::\n")
     elif (numTokens == 13):
+        fhOut.write(
+            "bcr_patient_barcode\tN:SAMP:MutSig_rateSil_perMb:::::\tN:SAMP:MutSig_rateNon_perMb:::::\tN:SAMP:MutSig_rateTot_perMb:::::\tB:SAMP:MutSig_HiMut_bit:::::\n")
+    elif (numTokens == 22):
         fhOut.write(
             "bcr_patient_barcode\tN:SAMP:MutSig_rateSil_perMb:::::\tN:SAMP:MutSig_rateNon_perMb:::::\tN:SAMP:MutSig_rateTot_perMb:::::\tB:SAMP:MutSig_HiMut_bit:::::\n")
     else:
@@ -418,25 +448,26 @@ def parseMutSig_CountsRatesFile(inName, outName):
             done = 1
 
         else:
+
             # they seem to like to change the patient ID here ...
-            if (numTokens == 8):
-                patientID = tokenList[1]
-            elif (numTokens == 10):
-                patientID = tokenList[2]
-            elif (numTokens == 11):
-                patientID = tokenList[2]
-            elif (numTokens == 12):
+            if (numTokens == 10):
                 patientID = tokenList[2]
             elif (numTokens == 13):
                 patientID = tokenList[0]
+            elif (numTokens == 22):
+                patientID = tokenList[0]
+
+            print " checking that patient ID looks ok ... ", patientID
 
             if (patientID.find("TCGA-") >= 0):
                 i1 = patientID.find("TCGA-")
                 patientID = patientID[i1:]
+                print "     --> (a) change to ", patientID
 
                 if (patientID.find("-Tumor") >= 0):
                     i1 = patientID.find("-Tumor")
                     patientID = patientID[:i1]
+                    print "     --> (b) change to ", patientID
 
             else:
                 i1 = patientID.find("-")
@@ -448,18 +479,12 @@ def parseMutSig_CountsRatesFile(inName, outName):
                     print " ERROR ??? bad patient ID ??? ", patientID
                     sys.exit(-1)
                 patientID = "TCGA" + patientID[i1:]
-
-            if (len(patientID) < 15):
-                if (len(patientID) == 12):
-                    ## patientID += "-01"
-                    patientID = miscTCGA.get_tumor_barcode(patientID)
-                else:
-                    print " ERROR ??? barcode doesn't seem right ??? ", patientID
-                    sys.exit(-1)
+                print "     --> (c) change to ", patientID
 
             # as of the 24oct12 analyses, the barcodes seem to look like this:
             # 012345678901234
             # BRCA-A1-A0SO-TP
+            print " now here in parseFirehose ... ", patientID
             if (len(patientID) > 12):
                 if (patientID[13:15] == "TP"):
                     patientID = patientID[:13] + "01" + patientID[15:]
@@ -479,29 +504,34 @@ def parseMutSig_CountsRatesFile(inName, outName):
                     except:
                         print " ERROR in parseFirehose !!! invalid patientID ??? ", patientID
 
+                print "     --> (e) change to ", patientID
+                if ( len(patientID) > 16 ):
+                    patientID = patientID[:16]
+                    print "     --> (f) change to ", patientID
+
+            if (len(patientID) < 16):
+                print "     --> looking for a longer barcode ... "
+                patientID = miscTCGA.get_tumor_barcode(patientID)
+                print "     --> (d) change to ", patientID
+
             try:
-                if (numTokens == 8):
-                    print " WARNING : no dbSNP rate column "
-                    rateDbSnp = 0.
-                    rateSil = float(tokenList[6])
-                    rateNon = float(tokenList[7])
-                elif (numTokens == 10):
+                if (numTokens == 10):
                     rateDbSnp = float(tokenList[7])
                     rateSil = float(tokenList[8])
                     rateNon = float(tokenList[9])
-                elif (numTokens == 11):
-                    rateDbSnp = float(tokenList[8])
-                    rateSil = float(tokenList[9])
-                    rateNon = float(tokenList[10])
-                elif (numTokens == 12):
-                    rateDbSnp = float(tokenList[9])
-                    rateSil = float(tokenList[10])
-                    rateNon = float(tokenList[11])
+                    rateTot = rateDbSnp + rateSil + rateNon
                 elif (numTokens == 13):
-                    print " WARNING : no dbSNP rate column "
+                    ## print " WARNING : no dbSNP rate column "
                     rateDbSnp = 0.
                     rateSil = float(tokenList[11])
                     rateNon = float(tokenList[12])
+                    rateTot = rateSil + rateNon
+                elif (numTokens == 22):
+                    ## print " WARNING : no dbSNP rate column "
+                    rateDbSnp = 0.
+                    rateSil = float(tokenList[13])
+                    rateNon = float(tokenList[14])
+                    rateTot = float(tokenList[15])
                 else:
                     print " wrong number of token ??? ", numTokens
                     print tokenList
@@ -514,36 +544,21 @@ def parseMutSig_CountsRatesFile(inName, outName):
             rateDbSnp_perMb = rateDbSnp * 1000000.
             rateSil_perMb = rateSil * 1000000.
             rateNon_perMb = rateNon * 1000000.
+            rateTot_perMb = rateTot * 1000000.
 
-            # 31oct13 : the "total" now includes the dbSNP rate as well (if it
-            # was available)
-            rateTot_perMb = rateSil_perMb + rateNon_perMb + rateDbSnp_perMb
-
-            # this threshold used to be at 10 ...
-            # resetting to 8 for COAD/READ on 07jun
-            rate_bit = int(rateNon_perMb >= 8.)
-
-            # for BRCA/OV analysis, setting it much lower ... 1 per Mb
-            # (should catch about 30% of OV, fewer of BRCA)
-            # --> changed from 2 to 1 on 13Feb2012
-            rate_bit = int(rateNon_perMb >= 1.)
-
+            # this threshold is set somewhat arbitrarily at 10 ...
             # setting it back to 10 ... 25apr13
             rate_bit = int(rateNon_perMb >= 10.)
 
-        if (numTokens == 8):
-            fhOut.write("%s\t%7.3f\t%7.3f\t%7.3f\t%d\n" %
-                        (patientID, rateSil_perMb, rateNon_perMb, rateTot_perMb, rate_bit))
-        elif (numTokens == 10):
-            fhOut.write("%s\t%7.3f\t%7.3f\t%7.3f\t%7.3f\t%d\n" %
-                        (patientID, rateDbSnp_perMb, rateSil_perMb, rateNon_perMb, rateTot_perMb, rate_bit))
-        elif (numTokens == 11):
-            fhOut.write("%s\t%7.3f\t%7.3f\t%7.3f\t%7.3f\t%d\n" %
-                        (patientID, rateDbSnp_perMb, rateSil_perMb, rateNon_perMb, rateTot_perMb, rate_bit))
-        elif (numTokens == 12):
+        print " and ready to write out now ... ", patientID
+
+        if (numTokens == 10):
             fhOut.write("%s\t%7.3f\t%7.3f\t%7.3f\t%7.3f\t%d\n" %
                         (patientID, rateDbSnp_perMb, rateSil_perMb, rateNon_perMb, rateTot_perMb, rate_bit))
         elif (numTokens == 13):
+            fhOut.write("%s\t%7.3f\t%7.3f\t%7.3f\t%d\n" %
+                        (patientID, rateSil_perMb, rateNon_perMb, rateTot_perMb, rate_bit))
+        elif (numTokens == 22):
             fhOut.write("%s\t%7.3f\t%7.3f\t%7.3f\t%d\n" %
                         (patientID, rateSil_perMb, rateNon_perMb, rateTot_perMb, rate_bit))
 
@@ -795,10 +810,10 @@ def parseMutSig_SigGenesFile(inName, outName):
 # this is the top-level driver for parsing the MutSig files -- it calls
 # other function to handle each individual file
 
-def parseMutSigFiles(lastDir, outDir):
+def parseMutSigFiles(lastDir, outDir, MSverString):
 
     print " "
-    print " START: parsing MutSig files from firehose outputs "
+    print " START: parsing MutSig files from firehose outputs ", MSverString
     print " "
     numGot = 0
 
@@ -809,17 +824,21 @@ def parseMutSigFiles(lastDir, outDir):
     d2 = path.path(lastDir)
     for d2Name in d2.dirs():
 
-        # if ( d2Name.find("Mutation_Significance.Level_4")>0  or  d2Name.find("MutSigNozzleReport2.0.Level_4")>0 ):
-        # if ( d2Name.find("Mutation_Significance.Level_4")>0  or
-        # d2Name.find("MutSigNozzleReportCV.Level_4")>0 ):
-        if (d2Name.find("Mutation_Significance.Level_4") > 0 or d2Name.find("MutSigNozzleReport1.5.Level_4") > 0):
+        print "     checking in <%s> " % d2Name
+
+        ## if (d2Name.find("Mutation_Significance.Level_4") > 0 or d2Name.find("MutSigNozzleReport1.5.Level_4") > 0):
+        if ( d2Name.find(MSverString) >= 0  and  d2Name.find("Level_4") >= 0 ):
+
+            ## careful never to grab those FFPE-specific runs
+            if ( d2Name.find("FFPE") > 0 ): continue
 
             d3 = path.path(d2Name)
             for fName in d3.files():
 
                 # the first file we are interested in is the
                 # patients.counts_and_rates file ...
-                if (fName.endswith("patients.counts_and_rates.txt")):
+                if ( fName.endswith("patients.counts_and_rates.txt") or
+                     fName.endswith("patient_counts_and_rates.txt") ):
                     inName = fName
                     print " >>> got one !!! ", fName
                     numGot += 1
@@ -848,7 +867,7 @@ def parseMutSigFiles(lastDir, outDir):
     print " "
     print " DONE: parsing MutSig files from firehose outputs (%d files) " % numGot
     if (numGot == 0):
-        print " ERROR ??? no bestclus.txt files found ??? "
+        print " ERROR ??? no MutSig files found ??? "
     print " "
 
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
@@ -1178,16 +1197,19 @@ def parseGistic_BroadArmValuesFile(inName, outName):
             # create two features per arm ... a 'continuous' feature and a
             # 'discrete' feature
 
-            # first the continuous or "_r" feature:
-            featName = "N:CNVR:" + armName + ":chr" + chrName + \
-                ":%d:%d::%s_GisticArm_r" % (startPos, stopPos, namePrefix)
-            armDict[featName] = numpy.zeros(numSamples)
-            armList += [featName]
-            for ii in range(numSamples):
-                armDict[featName][ii] = float(tokenList[1 + ii])
+            # 30jan14 : commenting this out (SMR)
+            if ( 0 ):
+                # first the continuous or "_r" feature:
+                featName = "N:CNVR:" + armName + ":chr" + chrName + \
+                    ":%d:%d::%s_GisticArm_r" % (startPos, stopPos, namePrefix)
+                armDict[featName] = numpy.zeros(numSamples)
+                armList += [featName]
+                for ii in range(numSamples):
+                    armDict[featName][ii] = float(tokenList[1 + ii])
 
             # then the discrete or "_d" feature:
-            featName = "C:CNVR:" + armName + ":chr" + chrName + \
+            # 30jan14 : and changing this to a Numerical feature (SMR)
+            featName = "N:CNVR:" + armName + ":chr" + chrName + \
                 ":%d:%d::%s_GisticArm_d" % (startPos, stopPos, namePrefix)
             armDict[featName] = numpy.zeros(numSamples)
             armList += [featName]
@@ -1249,6 +1271,7 @@ def parseGisticFiles(lastDir, outDir):
     d2 = path.path(lastDir)
     for d2Name in d2.dirs():
 
+        # careful not to grab the "CopyNumberLowPass_Gistic2" outputs
         if (d2Name.find("CopyNumber_Gistic2.Level_4") > 0):
 
             d3 = path.path(d2Name)
@@ -1287,7 +1310,7 @@ def parseGisticFiles(lastDir, outDir):
     print " "
     print " DONE: parsing Gistic files from firehose outputs (%d files) " % numGot
     if (numGot == 0):
-        print " ERROR ??? no bestclus.txt files found ??? "
+        print " ERROR ??? no Gistic files found ??? "
     print " "
 
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
@@ -1312,8 +1335,12 @@ def add2sampleList(fName, sampleList):
                     if (possibleBarcode not in sampleList):
                         print possibleBarcode
                         sampleList += [possibleBarcode]
-                elif (len(possibleBarcode) >= 15):
-                    shortBarcode = possibleBarcode[:15]
+                elif (len(possibleBarcode) >= 16):
+                    shortBarcode = possibleBarcode[:16]
+                    if ( shortBarcode[-1] == "-" ):
+                        print " WARNING ERROR ... bad barcode ??? ", shortBarcode
+                        shortBarcode = miscTCGA.get_tumor_barcode(shortBarcode[:15])
+                        print "      --> fixed ??? ", shortBarcode
                     if (shortBarcode not in sampleList):
                         print shortBarcode
                         sampleList += [shortBarcode]
@@ -1336,7 +1363,7 @@ def cleanupSampleList(sampleList):
         if (len(aSample) == 12):
             if (aSample not in cleanPatientList):
                 cleanPatientList += [aSample]
-        elif (len(aSample) == 15):
+        elif (len(aSample) == 16):
             shortB = aSample[:12]
             if (shortB not in cleanPatientList):
                 cleanPatientList += [shortB]
@@ -1393,6 +1420,9 @@ def buildSampleWhiteList(lastDir, outDir):
 
         if (d2Name.find("Level_4") > 0):
 
+            ## careful never to grab those FFPE-specific runs
+            if ( d2Name.find("FFPE") > 0 ): continue
+
             d3 = path.path(d2Name)
             for fName in d3.files():
 
@@ -1421,6 +1451,33 @@ def buildSampleWhiteList(lastDir, outDir):
 
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 
+def getMutSigVersionString ( zCancer, auxName ):
+
+    defaultString = "MutSigNozzleReport2CV"
+
+    try:
+        rootString = gidgetConfigVars['TCGAFMP_DATA_DIR']
+    except:
+        MSverString = defaultString
+        print "     --> defaulting to %s " % defaultString
+
+    fName = rootString + "/" + zCancer.lower() + "/" + auxName + "/MutSigversion.txt"
+    try:
+        fh = file ( fName, 'r' )
+        print "     checking file %s for MutSig version specification " % fName
+        for aLine in fh:
+            if ( aLine.startswith("#") ): continue
+            if ( aLine.find("MutSig") >= 0 ):
+                MSverString = aLine.strip()
+                print "     --> will look for %s outputs " % MSverString
+    except:
+        MSverString = defaultString
+        print "     --> defaulting to %s " % defaultString
+
+    return ( MSverString )
+
+# -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
+
 
 def getLastBit(aName):
 
@@ -1444,20 +1501,26 @@ if __name__ == "__main__":
 
     # list of cancer directory names
     cancerDirNames = [
-        'blca', 'brca', 'cesc', 'cntl', 'coad', 'dlbc', 'esca', 'gbm', 'hnsc', 'kirc',
-        'kirp', 'laml', 'lcll', 'lgg', 'lihc', 'lnnh', 'luad', 'lusc', 'ov',
-        'paad', 'prad', 'read', 'sarc', 'skcm', 'stad', 'thca', 'ucec', 'lcml', 'pcpg']
+        'acc',  'blca', 'brca', 'cesc', 'chol', 'cntl', 'coad', 'dlbc', 'esca', 'gbm',
+        'hnsc', 'kich', 'kirc', 'kirp', 'laml', 'lcll', 'lgg',  'lihc', 'lnnh',
+        'luad', 'lusc', 'ov',   'paad', 'prad', 'read', 'sarc', 'skcm', 'stad',
+        'thca', 'ucec', 'lcml', 'pcpg', 'meso', 'tgct', 'ucs', 'uvm', 'thym' ]
 
     if (1):
-        if (len(sys.argv) != 2):
-            print " Usage: %s <tumorType> " % sys.argv[0]
+        if ( (len(sys.argv)!=3) and (len(sys.argv)!=4) ):
+            print " Usage: %s <tumorType> <public/private> [auxName] " % sys.argv[0]
+            print " Notes: a single tumor type can be specified, eg brca "
+            print "        the public/private option indicates whether an awg-specific "
+            print "        firehose run should be used if available "
+            print " ERROR -- bad command line arguments "
             sys.exit(-1)
+
         else:
+
             tumorType = sys.argv[1].lower()
             if (tumorType == "all"):
-                print " this option is no longer allowed "
+                print " FATAL ERROR ... this option is no longer allowed "
                 sys.exit(-1)
-                print " --> processing all tumor types: ", cancerDirNames
             elif (tumorType in cancerDirNames):
                 print " --> processing a single tumor type: ", tumorType
                 cancerDirNames = [tumorType]
@@ -1466,16 +1529,31 @@ if __name__ == "__main__":
                 print cancerDirNames
                 sys.exit(-1)
 
+            ppString = sys.argv[2].lower()
+            if ( ppString.find("pub") >= 0 ):
+                awgFlag = "NO"
+                print " --> will NOT use awg-specific firehose analyses even if available "
+            elif ( ppString.find("priv") >= 0 ):
+                awgFlag = "YES"
+                print " --> WILL use awg-specific firehose anlaysese IF available "
+            else:
+                print " FATAL ERROR ... invalid public/private string ", ppString
+                sys.exit(-1)
+
+            if ( len(sys.argv) == 4 ):
+                auxName = sys.argv[3]
+            else:
+                auxName = "aux"
+
     # 22jun : switching to new firehose analyses that were downloaded using
     # firehose_get -b analyses latest
-    firehoseTopDir = "/titan/cancerregulome9/TCGA/firehose/"
-    ## outDir = "/titan/cancerregulome3/TCGA/outputs/"
+    firehoseTopDir = gidgetConfigVars['TCGAFMP_FIREHOSE_MIRROR']+ "/"
     outDir = "./"
 
     # first thing we have to do is find the most recent top-level directory
     # which should have a name of the form
     # analyses__2012_04_25
-    topDir = getMostRecentDir(firehoseTopDir, cancerDirNames)
+    topDir = getMostRecentDir(firehoseTopDir, cancerDirNames, awgFlag)
     print " here now : ", topDir
 
     # outer loop over tumor types
@@ -1486,13 +1564,15 @@ if __name__ == "__main__":
         lastDir = getCancerDir(topDir, zCancer)
 
         # now we handle the *.bestclus.txt files ...
-        parseBestClusFiles(lastDir, outDir)
+        parseBestClusFiles(lastDir, outDir, zCancer)
 
         # next we process files that come out of the MutSig module
-        parseMutSigFiles(lastDir, outDir)
+        # ( but first we ask which version of MutSig is supposed to be 
+        #   used for this tumor type )
+        MSverString = getMutSigVersionString ( zCancer, auxName )
+        parseMutSigFiles(lastDir, outDir, MSverString)
 
         # next we process the files that come out of Gistic
-        ## lastDir = "/users/sreynold/scratch/"
         parseGisticFiles(lastDir, outDir)
 
         # and finally grab the 'mature' miRNA matrix ...

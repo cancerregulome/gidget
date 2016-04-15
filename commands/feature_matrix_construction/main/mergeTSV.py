@@ -3,8 +3,10 @@
 import miscTCGA
 import tsvIO
 
+import numpy
 import os
 import sys
+import time
 
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 
@@ -40,11 +42,11 @@ def removeNonTumorSamples(dataD):
 
         # if the barcode is not even long enough to specify the sample type,
         # we will just assume that we keep it ...
-        elif (len(aCode) < 15):
+        elif (len(aCode) < 16):
             tumorCode = aCode
 
         else:
-            # if the barcode is at least 15 characters long, then we parse it
+            # if the barcode is at least 16 characters long, then we parse it
             # ...
             if (aCode.startswith("ITMI-")):
                 doNothing = 1
@@ -99,7 +101,6 @@ def removeNonTumorSamples(dataD):
 
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 
-
 def removeDuplicateSamples(dataD, barcodeLen, firstLast=0):
 
     ## miscTCGA.lookAtBarcodes ( dataD['colLabels'] )
@@ -115,9 +116,10 @@ def removeDuplicateSamples(dataD, barcodeLen, firstLast=0):
         if (aCode.startswith("ITMI-")):
             doNothing = 1
 
-        elif (len(aCode) > barcodeLen):
+        else:
             aCode = miscTCGA.fixTCGAbarcode(aCode)
-            aCode = aCode[:barcodeLen]
+            if (len(aCode) < barcodeLen):
+                aCode = miscTCGA.get_barcode16(aCode)
 
         if (aCode not in sampleDict.keys()):
             sampleDict[aCode] = 0
@@ -225,14 +227,15 @@ def dropDetailsFromBarcodes(dataD):
         if (aCode.startswith("ITMI-")):
             doNothing = 1
 
-        elif (len(aCode) > 15):
-            aCode = aCode[:15]
+        elif (len(aCode) > 16):
+            aCode = aCode[:16]
             dataD['colLabels'][jj] = aCode
 
         # TCGA-CJ-4635
         # new on 15-apr-13 ... add on the sampleType portion to the barcode
-        elif (len(aCode) == 12):
-            aCode = miscTCGA.get_tumor_barcode(aCode)
+        # modified on 14-feb-15
+        elif (len(aCode) < 16):
+            aCode = miscTCGA.get_barcode16(aCode)
             dataD['colLabels'][jj] = aCode
 
         if (aCode not in codeList):
@@ -337,12 +340,41 @@ def makeDataTypeString(dTypeList, fTypeList):
 
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 
+def getBarcodeLength ( inFileList ):
+
+    maxBlen = 12
+    minBlen = 28
+
+    for aFile in inFileList:
+        try:
+            fh = file ( aFile, 'r' )
+            aLine = fh.readline()
+            fh.close()
+            aLine = aLine.strip()
+            tokenList = aLine.split('\t')
+            numB = len(tokenList) - 1
+            bLen = len(tokenList[1])
+            for iB in range(numB):
+                bLen = max ( bLen, len(tokenList[iB+1]) )
+            if ( bLen > maxBlen ): maxBlen = bLen
+            if ( bLen < minBlen ): minBlen = bLen
+        except:
+            print " failed to read barcodes from ", aFile
+
+    print " "
+    print " FOUND range of barcode lengths : ", minBlen, maxBlen
+    print " "
+
+
+# -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
+
 if __name__ == "__main__":
 
     if (1):
 
         if (len(sys.argv) < 3):
-            print " Usage : %s <input files (at least 2)> <output file> [pruneOrder] [colMaxNAfrac] [rowMaxNAfrac] " % sys.argv[0]
+            print " Usage : %s <input files (at least 1)> <output file> [pruneOrder] [colMaxNAfrac] [rowMaxNAfrac] " % sys.argv[0]
+            print " NOTE  : either all 3 optional arguments must be specified, or none of them "
             print " ERROR in using mergeTSV.py "
             sys.exit(-1)
 
@@ -361,7 +393,8 @@ if __name__ == "__main__":
 
         if (doPrune):
             if (len(sys.argv) < 5):
-                print " Usage : %s <input files (at least 2)> <output file> [pruneOrder] [colMaxNAfrac] [rowMaxNAfrac] " % sys.argv[0]
+                print " Usage : %s <input files (at least 1)> <output file> [pruneOrder] [colMaxNAfrac] [rowMaxNAfrac] " % sys.argv[0]
+                print " NOTE  : either all 3 optional arguments must be specified, or none of them "
                 print " ERROR in using mergeTSV.py "
                 sys.exit(-1)
             inFileList = sys.argv[1:-4]
@@ -396,10 +429,15 @@ if __name__ == "__main__":
     print "  input file list : ", len(inFileList), inFileList
     print " output file name : ", outFile
     print " "
+    print ' (a) TIME ', time.asctime(time.localtime(time.time()))
 
     inputData = []
     dTypeList = []
     fTypeList = []
+
+    # NEW on 14-feb-2015 ... want to check all of the input file(s) 
+    # for the input barcode lengths ...
+    getBarcodeLength ( inFileList )
 
     # if trying to prune LOTS of rows and columns, then set the *MaxNAfrac
     # values to small values ... if trying not to prune ANYTHING, then set
@@ -415,57 +453,42 @@ if __name__ == "__main__":
         print " calling readTSV ... ", aFile
         testD = tsvIO.readTSV(aFile)
 
-        if (len(testD) == 0):
+        ## check to see if we actually have any data ...
+        skipFile = 0
+        try:
+            if (len(testD) == 0): skipFile = 1
+            if ( len(testD['rowLabels']) == 0 ): skipFile = 1
+            if ( len(testD['colLabels']) == 0 ): skipFile = 1
+        except:
+            print " ERROR in looking at data from <%s> ??? " % ( aFile )
+            skipFile = 1
+
+        if ( skipFile ):
             print " --> nothing found ??? continuing ... "
             continue
 
+        print " first look ... "
         tsvIO.lookAtDataD(testD)
 
         if (1):
 
             # TCGA-CJ-4635-01A-02R
             # the first 12 characters identify the patient
-            # the first 15 characters identify the sample
+            # the first 16 characters identify the sample
 
             # now we check for duplicates at the sample level ...
             print " "
             print " checking for duplicates ... "
-            testD = removeDuplicateSamples(testD, 15, 0)
+            testD = removeDuplicateSamples(testD, 16, 0)
+            print " second look ... "
+            tsvIO.lookAtDataD(testD)
 
-            if (0):
-                print " "
-                print " calling removeNonTumorSamples ... "
-                testD = removeNonTumorSamples(testD)
-                print " "
-                print " checking for duplicates ... "
-                testD = removeDuplicateSamples(testD, 12, 1)
-                print " "
-                print " dropping sample type at the end of the barcodes ... "
-                testD = dropSampleTypeFromBarcodes(testD)
-                tsvIO.lookAtDataD(testD)
-
-            else:
+            if (1):
                 print " "
                 print " dropping details (beyond sample type) at the end of the barcodes ... "
                 testD = dropDetailsFromBarcodes(testD)
+                print " third look ... "
                 tsvIO.lookAtDataD(testD)
-
-        if (0):
-
-            print " "
-            print " at the individual input file level, remove rows and then columns with too many missing values ... "
-            skipRowList = tsvIO.getSkipList(rowMaxNAfrac, testD, 'row')
-            if (skipRowList != []):
-                testD = tsvIO.filter_dataMatrix(testD, skipRowList, [])
-            tsvIO.lookAtDataD(testD)
-
-            skipColList = tsvIO.getSkipList(colMaxNAfrac, testD, 'col')
-            if (skipColList != []):
-                testD = tsvIO.filter_dataMatrix(testD, [], skipColList)
-            tsvIO.lookAtDataD(testD)
-
-        # finally, add this dictionary to our list of input data sets ...
-        inputData += [testD]
 
         tokenList = testD['dataType'].split(':')
         if (len(tokenList) != 2):
@@ -475,14 +498,28 @@ if __name__ == "__main__":
             print " ERROR in mergeTSV ... the dataType in the upper-left corner of <%s> does not appear to be correct ? " % aFile
             print testD['dataType']
             sys.exit(-1)
+
         dType = tokenList[0]
+        if (dType not in dTypeList): dTypeList += [dType]
+
         fType = tokenList[1]
-        if (dType not in dTypeList):
-            dTypeList += [dType]
-        if (fType not in fTypeList):
-            fTypeList += [fType]
+        if ( fType.find('+') > 0 ):
+            fSplit = fType.split('+')
+            for aF in fSplit:
+                if (aF not in fTypeList): fTypeList += [aF]
+        else:
+            if (fType not in fTypeList): fTypeList += [fType]
+
+        print " --> latest dType and fType lists: ", dTypeList, fTypeList
+
+        # finally, add this dictionary to our list of input data sets ...
+        print " --> adding this data set to input list ... ", len(inputData) + 1
+        inputData += [testD]
+
 
     print " "
+    print " "
+
     numD = len(inputData)
     print " DONE looping over input files ... have %d input data sets " % numD
     print " "
@@ -490,6 +527,8 @@ if __name__ == "__main__":
     if (numD == 0):
         print "     --> EXITING "
         sys.exit(-1)
+
+    print ' (b) TIME ', time.asctime(time.localtime(time.time()))
 
     # now we build up a union of the lists of features (row) and samples
     # (columns)
@@ -547,26 +586,37 @@ if __name__ == "__main__":
                     outMatrix[iu][ju] = inputData[iD]['dataMatrix'][ii][jj]
                     continue
 
-                print " SHOULD NOT GET HERE ANYMORE "
-                sys.exit(-1)
 
-                # OLD:
-                if (outMatrix[iu][ju] != NA_VALUE):
-                    if (inputData[iD]['dataMatrix'][ii][jj] != NA_VALUE and inputData[iD]['dataMatrix'][ii][jj] != "NA"):
-                        if (outMatrix[iu][ju] != inputData[iD]['dataMatrix'][ii][jj]):
-                            print " WARNING ??? different data already here ??? ", iu, ju, outMatrix[iu][ju], inputData[iD]['dataMatrix'][ii][jj], curRowLabels[ii], curColLabels[jj]
+        ## NEW SANITY CHECKING ...
+        badValue = 0
+        for ii in range(numRow):
+            iu = rowMap[ii]
+            for jj in range(numCol):
+                ju = colMap[jj]
+
+                if ( outMatrix[iu][ju] != "NA" ):
+                    if ( curRowLabels[ii][0] != "C" ):
+                        try:
+                            if ( numpy.isnan(outMatrix[iu][ju]) or numpy.isinf(outMatrix[iu][ju]) ):
+                                print " bad data value !!! ??? ", ii, iu, jj, ju, curRowLabels[ii], \
+                                        curColLabels[jj], outMatrix[iu][ju], inputData[iD]['dataMatrix'][ii][jj]
+                                badValue = 1
+                        except:
+                            print " EXCEPT: bad data value !!! ??? ", ii, iu, jj, ju, curRowLabels[ii], \
+                                    curColLabels[jj],  outMatrix[iu][ju], inputData[iD]['dataMatrix'][ii][jj]
                             sys.exit(-1)
-                            outMatrix[iu][ju] = inputData[
-                                iD]['dataMatrix'][ii][jj]
-                elif (outMatrix[iu][ju] != "NA"):
-                    if (inputData[iD]['dataMatrix'][ii][jj] != NA_VALUE and inputData[iD]['dataMatrix'][ii][jj] != "NA"):
-                        if (outMatrix[iu][ju] != inputData[iD]['dataMatrix'][ii][jj]):
-                            print " WARNING ??? different data already here ??? ", iu, ju, outMatrix[iu][ju], inputData[iD]['dataMatrix'][ii][jj], curRowLabels[ii], curColLabels[jj]
-                            sys.exit(-1)
-                            outMatrix[iu][ju] = inputData[
-                                iD]['dataMatrix'][ii][jj]
-                else:
-                    outMatrix[iu][ju] = inputData[iD]['dataMatrix'][ii][jj]
+
+        if ( badValue ):
+            print "     sanity-checking step FAILED "
+            sys.exit(-1)
+        else:
+            print '     --> new sanity-checking step succeeded ... '
+
+        print " "
+        print " "
+        ## go back up to: for iD in range(numD) ...
+
+    print ' (c) TIME ', time.asctime(time.localtime(time.time()))
 
     outD = {}
     outD['rowLabels'] = unionRowLabels
@@ -574,7 +624,7 @@ if __name__ == "__main__":
     outD['dataMatrix'] = outMatrix
 
     sortRowFlag = 0  # seems best not to sort the rows
-    sortColFlag = 1
+    sortColFlag = 0
 
     if (sortRowFlag):
         fTypeList.sort()
@@ -583,18 +633,19 @@ if __name__ == "__main__":
     if (pruneOrder != "NA"):
         print " "
         print " now calling pruneTSV_dataMatrix on the merged dataMatrix ... ", pruneOrder
-        outD = tsvIO.pruneTSV_dataMatrix(
-            outD, rowMaxNAfrac, colMaxNAfrac, pruneOrder)
+        outD = tsvIO.pruneTSV_dataMatrix(outD, rowMaxNAfrac, colMaxNAfrac, pruneOrder)
     else:
         print " "
         print " NOT doing any pruning of the merged dataMatrix "
 
     print " "
+    print ' (d) TIME ', time.asctime(time.localtime(time.time()))
     print " calling writeTSV_dataMatrix ... ", outFile
     tsvIO.writeTSV_dataMatrix(outD, sortRowFlag, sortColFlag, outFile)
 
     print " "
     print " DONE ", dTypeList, fTypeList
+    print ' (e) TIME ', time.asctime(time.localtime(time.time()))
     print " "
 
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#

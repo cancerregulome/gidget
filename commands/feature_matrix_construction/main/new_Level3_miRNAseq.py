@@ -7,6 +7,7 @@ import os
 import sys
 
 # these are my local modules
+from env import gidgetConfigVars
 import miscIO
 import miscTCGA
 import path
@@ -134,10 +135,10 @@ if __name__ == "__main__":
 
     # list of cancer directory names
     cancerDirNames = [
-        'blca', 'brca', 'cesc', 'cntl', 'coad', 'dlbc', 'esca', 'gbm', 'hnsc', 'kich', 'kirc',
-        'kirp', 'laml', 'lcll', 'lgg', 'lihc', 'lnnh', 'luad', 'lusc', 'meso', 'ov',
-        'paad', 'prad', 'read', 'sarc', 'skcm', 'stad', 'thca', 'ucec', 'coadread',
-        'lcml', 'pcpg']
+        'acc',  'blca', 'brca', 'cesc', 'cntl', 'coad', 'dlbc', 'esca', 'gbm',
+        'hnsc', 'kich', 'kirc', 'kirp', 'laml', 'lcll', 'lgg',  'lihc', 'lnnh',
+        'luad', 'lusc', 'ov',   'paad', 'prad', 'read', 'sarc', 'skcm', 'stad',
+        'thca', 'ucec', 'lcml', 'pcpg', 'meso', 'tgct', 'ucs' ]
 
     if (1):
 
@@ -145,6 +146,7 @@ if __name__ == "__main__":
             print " Usage: %s <outSuffix> <platformID> <tumorType#1> [tumorType#2 ...] [snapshot-name]"
             print " currently supported platforms : ", platformStrings
             print " currently supported tumor types : ", cancerDirNames
+            print " ERROR -- bad command line arguments "
             sys.exit(-1)
 
         else:
@@ -192,7 +194,6 @@ if __name__ == "__main__":
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     # now we need to get set up for writing the output ...
     # NEW: 21dec12 ... assuming that we will write to current working directory
-    ## outDir = "/titan/cancerregulome3/TCGA/outputs/"
     outDir = "./"
     outFilename = makeOutputFilename(
         outDir, tumorList, platformID, outSuffix)
@@ -213,8 +214,8 @@ if __name__ == "__main__":
         print ' LOOP over %d CANCER TYPES ... %s ' % (len(tumorList), zCancer)
 
         # piece together the directory name ...
-        ## topDir = "/titan/cancerregulome11/TCGA/repositories/dcc-snapshot/public/tumor/" + zCancer + "/cgcc/" + platformID
-        topDir = "/titan/cancerregulome11/TCGA/repositories/" + \
+        ## topDir = gidgetConfigVars['TCGAFMP_DCC_REPOSITORIES'] + "/dcc-snapshot/public/tumor/" + zCancer + "/cgcc/" + platformID
+        topDir = gidgetConfigVars['TCGAFMP_DCC_REPOSITORIES'] + "/" + \
             snapshotName + "/public/tumor/" + zCancer + "/cgcc/" + platformID
 
         print ' starting from top-level directory ', topDir
@@ -235,17 +236,27 @@ if __name__ == "__main__":
                 print '     found a <%s> directory : <%s> ' % (dMatch, dName)
                 archiveName = getLastBit(dName)
                 print '     archiveName : ', archiveName
+                if (dName.find("IlluminaHiSeq") > 0):
+                    zPlat = "IlluminaHiSeq_miRNASeq"
+                elif (dName.find("IlluminaGA") > 0):
+                    zPlat = "IlluminaGA_miRNASeq"
+                else:
+                    print " not a valid platform: %s ??? !!! " % (dName)
+                    sys.exit(-1)
 
-                cmdString = "/users/sreynold/to_be_checked_in/TCGAfmp/shscript/expression_matrix_mimat.pl "
-                cmdString += "-m /titan/cancerregulome11/TCGA/repositories/mirna_bcgsc/tcga_mirna_bcgsc_hg19.adf "
-                cmdString += "-p %s " % dName
+
+                cmdString = "%s/shscript/expression_matrix_mimat.pl " % gidgetConfigVars['TCGAFMP_ROOT_DIR']
+                cmdString += "-m " + gidgetConfigVars['TCGAFMP_DCC_REPOSITORIES'] + "/mirna_bcgsc/tcga_mirna_bcgsc_hg19.adf "
+                cmdString += "-o %s " % outDir
+                cmdString += "-p %s " % topDir
+                cmdString += "-n %s " % zPlat
 
                 print " "
                 print cmdString
                 print " "
                 (status, output) = commands.getstatusoutput(cmdString)
 
-                normMatFilename = dName + "/expn_matrix_mimat_norm.txt"
+                normMatFilename = outDir + "/expn_matrix_mimat_norm_%s.txt" % (zPlat)
                 print " normMatFilename = <%s> " % normMatFilename
 
                 # make sure that we can open this file ...
@@ -253,13 +264,6 @@ if __name__ == "__main__":
                     fh = file(normMatFilename, 'r')
                     gotFiles += [normMatFilename]
                     fh.close()
-                    if (normMatFilename.find("IlluminaHiSeq") > 0):
-                        zPlat = "IlluminaHiSeq_miRNASeq"
-                    elif (normMatFilename.find("IlluminaGA") > 0):
-                        zPlat = "IlluminaGA_miRNASeq"
-                    else:
-                        print " not a valid platform ??? !!! "
-                        sys.exit(-1)
                 except:
                     print " "
                     print " Not able to open expn_matrix_mimat_norm file ??? "
@@ -284,7 +288,7 @@ if __name__ == "__main__":
 
     # we also need to read in the mapping file ...
     metaData = loadNameMap(
-        "/titan/cancerregulome11/TCGA/repositories/mirna_bcgsc/mature.fa.flat.human.mirbase_v19.txt")
+        gidgetConfigVars['TCGAFMP_DCC_REPOSITORIES'] + "/mirna_bcgsc/mature.fa.flat.human.mirbase_v19.txt")
 
     if (1):
 
@@ -340,12 +344,12 @@ if __name__ == "__main__":
         dataD['dataType'] = "N:MIRN"
         print ' writing out data matrix to ', outFilename
 
-        newFeatureName = "C:SAMP:mirnPlatform"
+        newFeatureName = "C:SAMP:mirnPlatform:::::seq"
         newFeatureValue = zPlat
         dataD = tsvIO.addConstFeature(dataD, newFeatureName, newFeatureValue)
 
-        sortRowFlag = 1
-        sortColFlag = 1
+        sortRowFlag = 0
+        sortColFlag = 0
         tsvIO.writeTSV_dataMatrix(
             dataD, sortRowFlag, sortColFlag, outFilename)
 

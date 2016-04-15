@@ -1,5 +1,6 @@
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 
+from env import gidgetConfigVars
 import arffIO
 import miscClin
 import miscTCGA
@@ -28,14 +29,15 @@ iHugo = -1
 iBarcode = -1
 iVarClass = -1
 iVarType = -1
-iPChange = -1
+iPChangeA = -1
+iPChangeB = -1
 numC = 0
 cThresh = 0
 
 
 def getColumnIndices(mafFilename):
 
-    global iHugo, iBarcode, iVarClass, iVarType, iPChange
+    global iHugo, iBarcode, iVarClass, iVarType, iPChangeA, iPChangeB
 
     if (1):
         print " "
@@ -75,22 +77,27 @@ def getColumnIndices(mafFilename):
                     iVarType = ii
 
                 if (aTokens[ii] == "Protein_Change"):
-                    iPChange = ii
+                    iPChangeA = ii
                 if (aTokens[ii] == "amino_acid_change_WU"):
-                    iPChange = ii
+                    iPChangeA = ii
                 if (aTokens[ii] == "amino_acid_change"):
-                    iPChange = ii
+                    iPChangeA = ii
                 if (aTokens[ii] == "AAChange"):
-                    iPChange = ii
+                    iPChangeA = ii
+                if (aTokens[ii] == "Mutation Annotation (uniprot isoform1)"):
+                    iPChangeA = ii
+                if (aTokens[ii] == "Mutation Annotation (Others)"):
+                    iPChangeB = ii
+                
 
         print " "
         print " "
         fh.close()
 
-    if (iHugo < 0 or iBarcode < 0 or iVarClass < 0 or iVarType < 0 or iPChange < 0):
+    if (iHugo < 0 or iBarcode < 0 or iVarClass < 0 or iVarType < 0 or (iPChangeA+iPChangeB) < 0):
         print " ERROR in getColumnIndices ... failed to find one or more required columns "
         print mafFilename
-        print iHugo, iBarcode, iVarClass, iVarType, iPChange
+        print iHugo, iBarcode, iVarClass, iVarType, iPChangeA, iPChangeB
         print aTokens
         sys.exit(-1)
 
@@ -153,7 +160,7 @@ def fixBarcode(aBarcode):
 
 def firstPassList(mafFilename):
 
-    global iHugo, iBarcode, iVarClass, iVarType, iPChange
+    global iHugo, iBarcode, iVarClass, iVarType, iPChangeA, iPChangeB
 
     try:
         fh = file(mafFilename)
@@ -204,8 +211,8 @@ def firstPassList(mafFilename):
         if (mutDict[aKey] >= cThresh):
             geneList += [aKey]
 
-    print len(geneList)
-    print geneList
+    print " length of geneList : ", len(geneList)
+    ## print geneList
 
     return (geneList)
 
@@ -216,25 +223,148 @@ def getProteinChangefromAnnot(annotString):
 
     pChangeList = []
 
-    # print annotString
+    ## print " in getProteinChangefromAnnot ... <%s> " % annotString
+
     ii = annotString.find(":p.")
     while (ii >= 0):
         jj = annotString.find(",", ii)
-        oneChange = annotString[ii + 1:jj]
+        oneChange = annotString[ii+3:jj]
         # print annotString, ii, jj, oneChange
         if (oneChange not in pChangeList):
             pChangeList += [oneChange]
         ii = annotString.find(":p.", jj)
 
+    if ( len(pChangeList) == 0 ):
+        print " what to do now ??? NO protein changes ??? !!! ", pChangeList
+        sys.exit(-1)
+
+    if ( len(pChangeList) > 1 ):
+        ## print " WARNING !!! multiple protein changes ??? !!! ", pChangeList
+
+        if ( 0 ):
+            iMin = 999999
+            for aChange in pChangeList:
+                iPos = int ( aChange[1:-1] )
+                if ( iPos < iMin ):
+                    iMin = iPos
+                    keepChange = aChange
+            ## print " --> (A) choosing this one : ", keepChange
+            pChangeList = [ keepChange ]
+
+        if ( 1 ):
+            keepChange = pChangeList[0]
+            ## print " --> (B) choosing this one : ", keepChange
+            pChangeList = [ keepChange ]
+
     # print " returning ", pChangeList
-    return (pChangeList)
+    return (pChangeList[0])
 
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 
+def stripAfterComma ( aString ):
+
+    ii = aString.find(",")
+    if ( ii > 0 ): aString = aString[:ii]
+    ## print aString
+
+    return ( aString )
+
+# -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
+
+def getProteinChange ( pChangeString ):
+
+    if ( pChangeString == '' ): return ( '' )
+    if ( pChangeString == '---' ): return ( '' )
+
+    ## print " in getProteinChange ... ", pChangeString
+
+    ## first, let's see if it's simply something like V600E
+    iString = pChangeString[1:-1]
+    ## print "       a ", iString
+    try:
+        iPos = int ( iString )
+        ## print "         b returning ", pChangeString
+        return ( pChangeString )
+
+    except:
+        ## no, evidently it was not just V600E ...
+
+        ## next check to see if it starts with "p."
+        if ( pChangeString.startswith("p.") ):
+            ## print "         c ", pChangeString
+            pChangeString = pChangeString[2:]
+            ## print "         d ", pChangeString
+
+            ## strip after comma ... (if it looks like "p.R524K,stuff")
+            pChangeString = stripAfterComma ( pChangeString )
+
+            ## it might end with fs, eg p.K2293fs
+            if ( pChangeString.endswith("fs") ):
+                iString = pChangeString[1:-2]
+                ## print "            i   ", iString
+
+            ## or it might end with del, eg p.E921del
+            elif ( pChangeString.endswith("del") ):
+                iString = pChangeString[1:-3]
+                ## print "            iv  ", iString
+
+            ## or it might look like p.R524_splice instead ...
+            elif ( pChangeString.find("_") > 1 ):
+                ii = pChangeString.find("_")
+                iString = pChangeString[1:ii]
+                ## print "            ii  ", iString
+
+            ## otherwise, hopefully it's just p.R524
+            else:
+                iString = pChangeString[1:-1]
+                ## print "            iii ", iString
+
+            ## print "         f ", iString
+
+            ## did we get an integer position ???
+            try:
+                iPos = int ( iString )
+                ## print "         e returning ", pChangeString
+                return ( pChangeString )
+            except:
+                print " (a) TOTAL FAILURE after all that ??? ", pChangeString
+                return ( '' )
+                sys.exit(-1)
+
+        ## or if it looks like PLEKHG5:uc001ano.1:exon20:c.G2331A:p.E777E,p.E783E
+        elif ( pChangeString.find(":p.") >= 0 ):
+            pChange = getProteinChangefromAnnot ( pChangeString )
+            if ( pChange != '' ):
+                ## print "         d returning ", pChange
+                return ( pChange )
+            else:
+                print " (b) TOTAL FAILURE ??? after all that ", pChangeString
+                return ( '' )
+                sys.exit(-1)
+
+    print " got nothing ... bailing out of getProteinChange ... ", pChangeString
+    return ( '' )
+
+# -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
+
+def isTruePointMutation ( aKey ):
+
+    if ( aKey == '' ): return ( 0 )
+
+    bKey = aKey.lower()
+    if ( bKey.find("3utr") >= 0 ): return ( 0 )
+    if ( bKey.find("5utr") >= 0 ): return ( 0 )
+    if ( bKey.find("3'utr") >= 0 ): return ( 0 )
+    if ( bKey.find("5'utr") >= 0 ): return ( 0 )
+    if ( bKey.find("intron") >= 0 ): return ( 0 )
+
+    return ( 1 )
+
+# -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 
 def getMutDictFromMaf(mafFilename, geneList):
 
-    global iHugo, iBarcode, iVarClass, iVarType, iPChange
+    global iHugo, iBarcode, iVarClass, iVarType, iPChangeA, iPChangeB
 
     try:
         fh = file(mafFilename)
@@ -268,51 +398,48 @@ def getMutDictFromMaf(mafFilename, geneList):
         if (hugoSymbol not in geneList):
             continue
 
-        barcode = tokenList[iBarcode]
-        varClass = tokenList[iVarClass]
-        varType = tokenList[iVarType]
-        pChange1 = tokenList[iPChange]
-        pChange2 = ''
+        try:
+            barcode = tokenList[iBarcode]
+            varClass = tokenList[iVarClass]
+            varType = tokenList[iVarType]
+            pChangeA = tokenList[iPChangeA]
+            pChangeB = tokenList[iPChangeB]
+        except:
+            continue
 
-        if (pChange1.startswith("p.")):
-            pChange1 = pChange1[2:]
+        ## print " pChangeA : <%s> " % pChangeA
+        ## print " pChangeB : <%s> " % pChangeB
 
-        # print hugoSymbol, barcode, varClass, varType, pChange1
+        # parse out the protein change ...
+        zChangeA = getProteinChange ( pChangeA )
+        zChangeB = getProteinChange ( pChangeB )
+        ## print zChangeA, zChangeB
 
+        ## prioritize the "A" change over the "B" change ...
         zChange = ''
-        if (len(pChange2) > 0):
-            if (len(pChange2) > 1):
-                # print " note: multiple pChange2 ", len(pChange2), pChange2
-                # sys.exit(-1)
-                doNothing = 1
-            if (pChange1 == ''):
-                # print " --> getting protein change from pChange2 "
-                zChange = pChange2[0]
-            else:
-                if (pChange1 in pChange2):
-                    # print " --> pChange1 confirmed by pChange2 "
-                    zChange = pChange1
-                else:
-                    # print " --> using pChange1 instead of pChange2 "
-                    zChange = pChange1
-        else:
-            if (pChange1 != ''):
-                # print " -->  using pChange1 (no pChange2) "
-                zChange = pChange1
-            else:
-                # print " --> no pChange1 or pChange2 information ",
-                # hugoSymbol, varClass, varType
+        if ( zChangeB == '' ): 
+            zChange = zChangeA
+        elif ( zChangeA == '' ): 
+            zChange = zChangeB
+
+        if ( 0 ):
+            # print hugoSymbol, barcode, varClass, varType, pChangeA
+            if ( zChange == '' ):
+                # print " --> no pChangeA or pChangeB information ", hugoSymbol, varClass, varType
                 zChange = varClass + "_" + varType
                 # print "         --> using <%s> " % zChange
 
-        if (zChange != ''):
-            aKey = hugoSymbol + ":" + zChange
-        else:
-            aKey = hugoSymbol
+        ## print zChange
 
-        if (aKey not in mutDict.keys()):
-            mutDict[aKey] = []
-        mutDict[aKey] += [barcode]
+        ## but now we are going to toss out some types of mutations that 
+        ## are really not point mutations and therefore cannot correspond 
+        ## to a "hot point"
+        if ( isTruePointMutation ( zChange ) ):
+            aKey = hugoSymbol + ":" + zChange
+            ## print aKey
+            if (aKey not in mutDict.keys()):
+                mutDict[aKey] = []
+            mutDict[aKey] += [barcode]
 
         if (iLine % 5000 == 0):
             print iLine, len(mutDict), " ( third pass ) "
@@ -373,7 +500,6 @@ def getTumorBarcodes(mafFilename):
 #
 # this program loops over the tumor types in the cancerDirNames list and
 # looks for all available *clinical*.xml files in the current "dcc-snapshot"
-## on /titan/cancerregulome7
 #
 # all of the information is bundled into a dictionary called allClinDict
 #
@@ -381,14 +507,24 @@ def getTumorBarcodes(mafFilename):
 if __name__ == "__main__":
 
     if (len(sys.argv) != 3):
-        print " Usage: %s <maf-filename> <tumor-type> " % sys.argv[0]
+        print " "
+        print " Usage: %s <maf-filename> <output-filename> " % sys.argv[0]
+        print " "
+        print " Note: this should be able to work with raw MAF files, or with the " 
+        print "       *.maf.ncm and *.maf.ncm.with_uniprot outputs from the MAF pipeline "
+        print " "
+        print "       also, the output file is ready to be placed in the aux directory "
+        print "       as a *.forTSVmerge.tsv file, so you might want to include that "
+        print "       suffix in the output-filename on the command line "
+        print " "
+        print " ERROR -- bad command line arguments "
         sys.exit(-1)
 
     mafFilename = sys.argv[1]
-    tumorType = sys.argv[2]
+    outFilename = sys.argv[2]
 
     print " "
-    print " running parseMAF with <%s> <%s> " % (mafFilename, tumorType)
+    print " running %s with <%s> <%s> " % (sys.argv[0], mafFilename, outFilename)
 
     getColumnIndices(mafFilename)
 
@@ -400,6 +536,7 @@ if __name__ == "__main__":
     tumorList = getTumorBarcodes(mafFilename)
     print " --> %d tumor samples in MAF file " % (len(tumorList))
     tThresh = max(len(tumorList) / 25, 5)
+    tThresh = max(len(tumorList) / 50, 3)
     print " --> threshold will be %d " % (tThresh)
 
     mutDict = getMutDictFromMaf(mafFilename, geneList)
@@ -428,17 +565,53 @@ if __name__ == "__main__":
         print " "
         sys.exit(-1)
 
+    ## look through and see how many "hot" spots we have ... maybe we need
+    ## to set the threshold a bit higher if there are too many ...
+    print " walking through mutDict ... "
+    print len(mutDict)
+    tmpKeys = mutDict.keys()
+    print tmpKeys[:5], tmpKeys[-5:]
+    cumHist = [0] * (maxCount + 3)
     for aKey in mutDict.keys():
-        if (aKey.find(":") < 0):
-            continue
-        if (aKey.find("RNA_") >= 0):
-            continue
-        if (aKey.find("NULL") >= 0):
-            continue
+        if (aKey.find(":") < 0): continue
+        if (aKey.find("RNA_") >= 0): continue
+        if (aKey.find("NULL") >= 0): continue
+        if (len(mutDict[aKey]) >= tThresh):
+            nCount = len(mutDict[aKey])
+            for iCount in range(nCount+1):
+                cumHist[iCount] += 1
+
+    print " "
+    print " cumHist : "
+    for iCount in range(len(cumHist)):
+        print " %3d  %6d " % ( iCount, cumHist[iCount] )
+
+    ## now we walk along this cumulative histogram and keep track
+    ## of when we have more than maxN hot-points ...
+    maxN = 20
+    maxN = 50
+    for iCount in range(len(cumHist)):
+        jCount = len(cumHist) - 1 - iCount
+        if ( cumHist[jCount] < maxN ):
+            zThresh = jCount 
+
+    if ( zThresh > tThresh ):
+        print " --> resetting threshold from %d to %d " % ( tThresh, zThresh )
+        tThresh = zThresh
+    else:
+        print "     ( no need to reset threshold ) "
+
+    print " "
+    print " "
+
+    for aKey in mutDict.keys():
+        if (aKey.find(":") < 0): continue
+        if (aKey.find("RNA_") >= 0): continue
+        if (aKey.find("NULL") >= 0): continue
         if (len(mutDict[aKey]) >= tThresh):
             nCount = len(mutDict[aKey])
             xPct = 100. * (float(nCount) / float(len(tumorList)))
-            print "%s\t%s\t%d\t%.1f\tHotPoint" % (tumorType, aKey, nCount, xPct)
+            print "%s\t%d\t%.1f\tHotPoint" % (aKey, nCount, xPct)
     print " "
     print " "
 
@@ -446,8 +619,7 @@ if __name__ == "__main__":
     # B:GNAB:BRAF:chr7:140433813:140624564:-:y_n_somatic
 
     # now create an output feature for each of these frequent mutations ...
-    tmpFilename = "Hotpoint_mutations." + tumorType + ".forTSVmerge.tmp"
-    outFilename = tmpFilename[:-4] + ".tsv"
+    tmpFilename = outFilename + ".tmp"
     fh = file(tmpFilename, 'w')
 
     # the header row has all of the tumor barcodes ...
@@ -479,8 +651,8 @@ if __name__ == "__main__":
     fh.close()
 
     print " annotating output file ... "
-    cmdString = "python /users/sreynold/to_be_checked_in/TCGAfmp/main/annotateTSV.py %s hg19 %s" % (
-        tmpFilename, outFilename)
+    cmdString = "python %s/main/annotateTSV.py %s hg19 %s" % ( gidgetConfigVars['TCGAFMP_ROOT_DIR'], tmpFilename, outFilename )
+    print cmdString
     (status, output) = commands.getstatusoutput(cmdString)
 
     print " "

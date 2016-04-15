@@ -1,33 +1,26 @@
 #!/bin/bash
 
-export LD_LIBRARY_PATH=/tools/lib/
-export TCGAFMP_ROOT_DIR=/users/sreynold/to_be_checked_in/TCGAfmp
-export PYTHONPATH=$TCGAFMP_ROOT_DIR/pyclass:$TCGAFMP_ROOT_DIR/util:$PYTHONPATH
+# every TCGA FMP script should start with these lines:
+: ${TCGAFMP_ROOT_DIR:?" environment variable must be set and non-empty; defines the path to the TCGA FMP scripts directory"}
+source ${TCGAFMP_ROOT_DIR}/../../gidget/util/env.sh
 
 
 ## this script should be called with the following parameters:
 ##	date, eg '29jan13'
 ##	snapshot, either 'dcc-snapshot' (most recent) or, eg, 'dcc-snapshot-29jan13;
 ##	one or more tumor types, eg: 'prad thca skcm stad'
+
+WRONGARGS=1
+if [ $# != 3 ]
+    then
+        echo " Usage   : `basename $0` <curDate> <snapshotName> <tumorType> "
+        echo " Example : `basename $0` 28oct13 dcc-snapshot-28oct13 brca "
+        exit $WRONGARGS
+fi
+
 curDate=$1
 snapshotName=$2
 tumor=$3
-
-if [ -z "$curDate" ]
-    then
-	echo " this script must be called with a date string of some kind, eg 28feb13 "
-	exit
-fi
-if [ -z "$snapshotName" ]
-    then
-	echo " this script must be called with a specific snapshot-name, eg dcc-snapshot "
-	exit
-fi
-if [ -z "$tumor" ]
-    then
-	echo " this script must be called with at least one tumor type "
-	exit
-fi
 
 echo " "
 echo " "
@@ -42,8 +35,7 @@ for ((i=2; i<$#; i++))
     do
 	tumor=${args[$i]}
 
-	## cd /titan/cancerregulome3/TCGA/outputs/$tumor
-	cd /titan/cancerregulome14/TCGAfmp_outputs/$tumor
+	cd $TCGAFMP_DATA_DIR/$tumor
 
 	echo " "
 	echo " "
@@ -184,10 +176,7 @@ for ((i=2; i<$#; i++))
 	## NEW as of 01 nov 2012 ... get the blacklist of patients and samples from the TCGA
 	## annotations manager
 	$TCGAFMP_ROOT_DIR/shscript/Item_Blacklist.sh $tumor $TCGAFMP_ROOT_DIR/shscript/blacklist.spec >& Item_Blacklist.$curDate.log
-	#### cd /users/sreynold/code/AnnotM/
 	#### ./Item_Blacklist.sh $tumor blacklist
-	#### mv $tumor.blacklist.samples.tsv /titan/cancerregulome3/TCGA/outputs/$tumor/$curDate/$tumor.blacklist.samples.$curDate.tsv
-	#### cd /titan/cancerregulome3/TCGA/outputs/$tumor/$curDate
 	rm -fr cTmp.tsv
 	cp finalClin.$tumor.$curDate.tsv cTmp.tsv
 	rm -fr filterSamp.clin.$curDate.log
@@ -203,7 +192,7 @@ for ((i=2; i<$#; i++))
         ## NOTE that this gets run in the background !!!
         nohup python $TCGAFMP_ROOT_DIR/main/run_pwRK3.py \
                 --pvalue 2. --all --forRE \
-                --tsvFile /titan/cancerregulome14/TCGAfmp_outputs/$tumor/$curDate/finalClin.$tumor.$curDate.tsv &
+                --tsvFile $TCGAFMP_DATA_DIR/$tumor/$curDate/finalClin.$tumor.$curDate.tsv &
 
 	## ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 	## here we are building a subset of the clinical data based on the 'finalClin' file

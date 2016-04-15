@@ -1,5 +1,10 @@
 #!/bin/bash
-#
+
+# every TCGA FMP script should start with these lines:
+: ${TCGAFMP_ROOT_DIR:?" environment variable must be set and non-empty; defines the path to the TCGA FMP scripts directory"}
+source ${TCGAFMP_ROOT_DIR}/../../gidget/util/env.sh
+
+
 # Generate table of Items to exclude from analysis
 #
 # Items includes Patient, Sample, Aliquot, ..
@@ -42,3 +47,4 @@ python $TCGAFMP_ROOT_DIR/util/ExcludedItems.py ${tt}_Annotations.tsv  $2  > ${tt
 ## rm -f ${tt}_Annotations.json ${tt}_Annotations.tsv
 cut -f4 ${tt}_excluded_items.tsv | sort | uniq | sed -e '1,$s/"//g' | grep -v "Barcode" >& ${tt}.blacklist.samples.tsv
 echo "    --> number of blacklisted samples : " `wc -l ${tt}.blacklist.samples.tsv`
+

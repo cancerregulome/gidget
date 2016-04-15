@@ -16,9 +16,8 @@ def lookAtHeaderTokens(aTokens):
     typeDict = {}
 
     for a in aTokens:
-        a = a.lower()
-        if (a.startswith("tcga-")):
-            patientID = a[8:12]
+        if (a.upper().startswith("TCGA-")):
+            patientID = a[8:12].upper()
             if (patientID not in patientList):
                 patientList += [patientID]
             if (len(a) >= 15):
@@ -97,6 +96,7 @@ if __name__ == "__main__":
 
     if (len(sys.argv) != 2 and len(sys.argv) != 3):
         print ' Usage : %s <filename> [hist-file] ' % sys.argv[0]
+        print " ERROR -- bad command line arguments "
         sys.exit(-1)
 
     inFilename = sys.argv[1]
@@ -151,10 +151,10 @@ if __name__ == "__main__":
             sys.exit(-1)
         for ii in range(numA):
             if (bTokens[ii] == ''):
-                print "     blank token ??? ", ii
+                print "     WARNING ... blank token ", ii
                 print bTokens
                 print bLine
-                sys.exit(-1)
+                ## sys.exit(-1)
     fh.close()
     # sys.exit(-1)
 
@@ -202,6 +202,7 @@ if __name__ == "__main__":
         print numCol, hdrTokens
 
     # now we make a data matrix, the first dimension will be the column #
+    print " --> first dimension of dataMatrix is %d " % numCol
     dataMatrix = [0] * numCol
     for iCol in range(numCol):
         dataMatrix[iCol] = []
@@ -211,22 +212,33 @@ if __name__ == "__main__":
     numNotB = 0
     while not done:
         bLine = fh.readline()
-        bLine = bLine.strip()
+        try:
+            if ( bLine[-1] == '\n' ): bLine = bLine[:-1]
+        except:
+            doNothing = 1
+        ## bLine = bLine.strip()
         # each bTokens will have a feature name, followed by a list of feature
         # values
         bTokens = bLine.split('\t')
         if (len(bTokens) != numCol):
             done = 1
+            print " DONE ", numCol, len(bTokens)
+            print bTokens
+            print " "
         else:
             # dataMatrix[0]
             for iCol in range(numCol):
-                dataMatrix[iCol] += [bTokens[iCol]]
+                if ( bTokens[iCol] == "" ):
+                    dataMatrix[iCol] += ["NA"]
+                else:
+                    dataMatrix[iCol] += [bTokens[iCol]]
                 if (iCol > 0):
-                    if (bTokens[iCol] != "NA"):
+                    if (bTokens[iCol]!="NA" and bTokens[iCol]!=""):
                         if (bTokens[iCol] == "0" or bTokens[iCol] == "1"):
                             numBinary += 1
                         else:
                             numNotB += 1
+                ## print "         dataMatrix[%d] has %d values " % ( iCol, len(dataMatrix[iCol]) )
     # print numBinary, numNotB
     if (numBinary > numNotB * 1000):
         isBinary = 1
@@ -265,8 +277,8 @@ if __name__ == "__main__":
         maxCol = -1
         for iCol in range(1, numCol):
             numOn = 0
-            featName = hdrTokens[iCol].lower()
-            if (featName.find("unknown") >= 0):
+            featName = hdrTokens[iCol]
+            if (featName.lower().find("unknown") >= 0):
                 continue
             for iRow in range(numRow):
                 if (dataMatrix[iCol][iRow] == "1"):
@@ -343,12 +355,14 @@ if __name__ == "__main__":
         doNothing = 1
 
     # check some basic mutation counts ...
+    print " "
+    print " checking mutation counts for TP53 and TTN ... "
     aType = "B:GNAB"
     if (aType in keyList):
         for iRow in range(numRow):
             featName = dataMatrix[0][iRow]
             if (featName.startswith("B:GNAB:TP53:") or featName.startswith("B:GNAB:TTN:")):
-                if (featName.find("y_n") > 0):
+                if (featName.find("code_potential") > 0):
                     bitD = {}
                     print iRow, featName
                     print featName
@@ -362,7 +376,11 @@ if __name__ == "__main__":
                     print " "
 
     # check cardinality of categorical features ...
+    print " "
+    print " checking for high cardinality categorical features ... "
     highCard = 0
+    maxCard = 0
+    maxName = "NA"
     for iRow in range(numRow):
         featName = dataMatrix[0][iRow]
         if (featName.startswith("C:")):
@@ -375,18 +393,24 @@ if __name__ == "__main__":
                 else:
                     if (curVal not in uVec):
                         uVec += [curVal]
+            if ( maxCard < len(uVec) ): 
+                maxCard = len(uVec)
+                maxName = featName
             if (len(uVec) > 25):
-                print " WARNING ... high cardinality feature !!! ", featName, len(uVec), uVec
+                print " WARNING ... VERY high cardinality feature !!! ", featName, len(uVec), uVec
                 print " "
                 highCard = 1
+    print " --> highest cardinality feature found: ", maxCard, maxName
 
-    if (highCard):
-        print " "
-        print " "
-        sys.exit(-1)
+    if ( 0 ):
+        if (highCard):
+            print " "
+            print " "
+            sys.exit(-1)
 
     # sys.exit(-1)
     # get information about data values for each data type ...
+    print " "
     print " now trying to get some information about the actual data values ... "
 
     # nz_byDataType = {}	# number of zeros by data type
@@ -443,15 +467,15 @@ if __name__ == "__main__":
 
     if (not noHist):
         fh = file(histFilename, 'w')
-        fh.write("\n\n")
-        fh.write("Histogram of NA counts by feature: \n\n")
-        for ii in range(maxNA + 1):
-            if (numNAhist[ii] > 0):
-                fh.write(" %4d : %8d \n" % (ii, numNAhist[ii]))
-        fh.write("\n\n")
+        if ( 0 ):
+            fh.write("\n\n")
+            fh.write("Histogram of NA counts by feature: \n\n")
+            for ii in range(maxNA + 1):
+                if (numNAhist[ii] > 0): fh.write(" %4d : %8d \n" % (ii, numNAhist[ii]))
+            fh.write("\n\n")
         for iRow in range(numRow):
             fh.write("%4d  %s \n" % (numNAbyRow[iRow], dataMatrix[0][iRow]))
-        fh.write("\n\n")
+        ## fh.write("\n\n")
         fh.close()
 
     sys.exit(-1)

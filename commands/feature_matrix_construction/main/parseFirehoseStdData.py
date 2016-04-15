@@ -1,5 +1,6 @@
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 
+from env import gidgetConfigVars
 import miscMath
 import miscTCGA
 
@@ -157,13 +158,13 @@ def cleanString(aString):
                 bString += aString[ii]
 
     # somewhat of a hack ;-)
-    if (bString == "stage_0"):
+    if (bString.lower() == "stage_0"):
         # print " Transforming <STAGE 0> to <TIS> "
-        bString = "tis"
+        bString = "Tis"
 
-    if (bString.startswith("stage_")):
+    if (bString.lower().startswith("stage_")):
         bString = bString[6:]
-    if (bString.startswith("grade_")):
+    if (bString.lower().startswith("grade_")):
         bString = bString[6:]
 
     try:
@@ -226,7 +227,7 @@ def lookAtData(dataVec):
 
 def readNameMapDict():
 
-    fh = file("/titan/cancerregulome9/TCGA/firehose/metadata/name_map.tsv")
+    fh = file(gidgetConfigVars['TCGAFMP_FIREHOSE_MIRROR'] + "/metadata/name_map.tsv")
     for aLine in fh:
         aLine = aLine.strip()
         tokenList = aLine.split('\t')
@@ -506,10 +507,8 @@ def parseMethylationDataFiles(lastDir, outDir, zCancer, subsetName, suffixString
 
                             # --------------------------------------
                             # do we need some metadata?
-                            ## metaData = getMetaDataInfo ( "/titan/cancerregulome9/TCGA/firehose/metadata/meth.probes.11sep13.txt" )
-                            ## metaData = getMetaDataInfo ( "/titan/cancerregulome9/TCGA/firehose/metadata/meth.probes.04oct13.txt" )
                             metaData = getMetaDataInfo(
-                                "/titan/cancerregulome9/TCGA/firehose/metadata/meth.probes.15oct13.txt")
+                                gidgetConfigVars['TCGAFMP_FIREHOSE_MIRROR'] + "/metadata/meth.probes.15oct13.txt")
 
                             # --------------------------------------
                             # ok, time to parse the input file and write the
@@ -719,14 +718,14 @@ def parseMatureMicroRNADataFiles(lastDir, outDir, zCancer, subsetName, suffixStr
     d2 = path.path(lastDir)
     for d2Name in d2.dirs():
 
-        print d2Name
+        ## print d2Name
         if (d2Name.find("miRseq_Mature_Preprocess") > 0):
             if (d2Name.find(".Level_4.") > 0):
 
                 d3 = path.path(d2Name)
                 for fName in d3.files():
 
-                    print fName
+                    ## print fName
                     if (fName.find("miRseq_mature") >= 0):
                         if (fName.endswith("_log2.txt")):
 
@@ -831,8 +830,7 @@ def getGeneAntibodyMap():
 
     geneAntibodyMap = {}
 
-    fh = file(
-        "/titan/cancerregulome11/TCGA/repositories/rppa/MDA_antibody_annotation.txt")
+    fh = file( gidgetConfigVars['TCGAFMP_BIOINFORMATICS_REFERENCES'] + "/tcga_platform_genelists/MDA_antibody_annotation_2014_03_04.txt" )
     for aLine in fh:
         aLine = aLine.strip()
         tokenList = aLine.split('\t')
@@ -1228,7 +1226,7 @@ def parseSNP6dataFiles(lastDir, outDir, zCancer, subsetName, suffixString):
     d2 = path.path(lastDir)
     for d2Name in d2.dirs():
 
-        print "     d2Name : ", d2Name
+        ## print "     d2Name : ", d2Name
 
         if (d2Name.find("Merge_snp__") > 0):
             if (d2Name.find("segmented_scna_minus_germline_cnv_hg19__seg.Level_3.") > 0):
@@ -1236,7 +1234,7 @@ def parseSNP6dataFiles(lastDir, outDir, zCancer, subsetName, suffixString):
                 d3 = path.path(d2Name)
                 for fName in d3.files():
 
-                    print "         fName : ", fName
+                    ## print "         fName : ", fName
 
                     if (fName.endswith("hg19__seg.seg.txt")):
 
@@ -1249,8 +1247,7 @@ def parseSNP6dataFiles(lastDir, outDir, zCancer, subsetName, suffixString):
                         inputFile = fName
                         outputFile = zCancer + ".broad.mit.edu__genome_wide_snp_6__snp." + \
                             suffixString + ".tsv"
-                        ## cmdString = "python $TCGAFMP_ROOT_DIR/main/snp_firehose_Level3_matrix.py --include " + inputFile + " " + outputFile
-                        cmdString = "python $TCGAFMP_ROOT_DIR/main/snp_firehose_Level3_matrix.py " + \
+                        cmdString = "python " + gidgetConfigVars['TCGAFMP_ROOT_DIR'] + "/main/snp_firehose_Level3_matrix.py " + \
                             inputFile + " " + outputFile
                         print " running command : "
                         print cmdString
@@ -1277,13 +1274,15 @@ if __name__ == "__main__":
 
     # list of cancer directory names
     cancerDirNames = [
-        'blca', 'brca', 'cesc', 'cntl', 'coad', 'dlbc', 'esca', 'gbm', 'hnsc', 'kirc',
-        'kirp', 'laml', 'lcll', 'lgg', 'lihc', 'lnnh', 'luad', 'lusc', 'ov',
-        'paad', 'prad', 'read', 'sarc', 'skcm', 'stad', 'thca', 'ucec', 'lcml', 'pcpg']
+        'acc',  'blca', 'brca', 'cesc', 'cntl', 'coad', 'dlbc', 'esca', 'gbm',
+        'hnsc', 'kich', 'kirc', 'kirp', 'laml', 'lcll', 'lgg',  'lihc', 'lnnh',
+        'luad', 'lusc', 'ov',   'paad', 'prad', 'read', 'sarc', 'skcm', 'stad',
+        'thca', 'ucec', 'lcml', 'pcpg', 'meso', 'tgct', 'ucs' ]
 
     if (1):
         if (len(sys.argv) < 3):
             print " Usage: %s <tumorType> <suffix-string> [path-to-stddata] [subset-name] " % sys.argv[0]
+            print " ERROR -- bad command line arguments "
             sys.exit(-1)
         else:
             tumorType = sys.argv[1].lower()
@@ -1306,17 +1305,18 @@ if __name__ == "__main__":
             else:
                 # if we are not told where to get the stddata, then get the
                 # most recent ...
-                firehoseTopDir = "/titan/cancerregulome9/TCGA/firehose/"
+                firehoseTopDir = gidgetConfigVars['TCGAFMP_FIREHOSE_MIRROR'] + "/"
                 topDir = getMostRecentDir(firehoseTopDir, cancerDirNames)
 
             if (len(sys.argv) == 5):
                 subsetName = sys.argv[4]
-                if (not subsetName.endswith(".")):
+                if (subsetName == "NA"):
+                    subsetName = ""
+                elif (not subsetName.endswith(".")):
                     subsetName += "."
             else:
                 subsetName = ""
 
-    ## outDir = "/titan/cancerregulome3/TCGA/outputs/"
     outDir = "./"
 
     # outer loop over tumor types
