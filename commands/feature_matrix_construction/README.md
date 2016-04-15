@@ -47,10 +47,10 @@ The outputs of this process will be a series of files called ```$TCGAFMP_OUTPUTS
 ### Pairwise analysis run
 The code for this as well as these instructions should be moved out from this ```feature_matrix_construction``` subdirectory and put into a new ```pairwise_analysis``` subdirectory, but for the moment this is where it resides.
 
-The main driver program for running pairwise analysis on a FMx is ```$TCGAFMP_ROOT_DIR/main/run_pwRK3.py```.  If you invoke it without any command-line arguments, it will give you the following usage information (as well as details on the format of the 12-column output file):
+The main driver program for running pairwise analysis on a FMx is ```$TCGAFMP_ROOT_DIR/main/run-pairwise-v2.py```.  If you invoke it without any command-line arguments, it will give you the following usage information (as well as details on the format of the 12-column output file):
 
 ```
-bash-3.2$ python $TCGAFMP_ROOT_DIR/main/run_pwRK3.py
+bash-3.2$ python $TCGAFMP_ROOT_DIR/main/run-pairwise-v2.py
 
  Output of this script is a tab-delimited file with 12 columns, and
  one line for each significant pairwise association:
@@ -68,11 +68,12 @@ bash-3.2$ python $TCGAFMP_ROOT_DIR/main/run_pwRK3.py
      #11  (same as col #9 but for feature B)
      #12  genomic distance between features A and B (or 500000000)
 
-usage: run_pwRK3.py [-h] [--min-ct-cell MIN_CT_CELL]
-                    [--min-mx-cell MIN_MX_CELL] [--min-samples MIN_SAMPLES]
-                    [--pvalue PVALUE] [--adjP] [--all] [--one ONE] [--byType]
-                    [--type1 TYPE1] [--type2 TYPE2] [--verbosity VERBOSITY]
-                    --tsvFile TSVFILE [--forRE] [--forLisa] [--useBC USEBC]
+usage: run-pairwise-v2.py --tsvFile TSVFILE [-h] [--verbsity VERBOSITY]
+                          [--min-ct-cell MIN_CT_CELL] [--min-mx-cell MIN_MX_CELL] [--min-samples MIN_SAMPLES]
+                          [--pvalue PVALUE] [--adjP] 
+                          [--all] [--one ONE] 
+                          [--byType] [--type1 TYPE1] [--type2 TYPE2]
+                          [--forRE] [--forLisa] [--useBC USEBC] [--outFile OUTFILE]
 
 ```
 
@@ -86,8 +87,10 @@ All pairwise statistical tests will be compared to the specified ```--pvalue``` 
 
 The ```--forRE``` option should be specified to produce output that is further filtered and appropriate for loading into Regulome Explorer.  This post-processing step has not been optimized and can be very slow if a loose p-value threshold was specified, resulting in hundreds of millions of significant pairs which now must be sorted and filtered.
 
+If the ```--outFile``` option is used, then the final sorted pairwise output will be moved to a file named OUTFILE, but please note that this *only* applies if the ```--one``` option is being used.
+
 ### NEW Pairwise helper script
-Because different types of features tend to produce p-values with very different orders of magnitude, it has become obvious that it is useful to be able to specify a different p-value threshold for each type of comparison.  In order to facilitate this, the ```$TCGAFMP_ROOT_DIR/shscript/PairProcess-v2.sh``` script has been provided.  It has not been optimized, but it calls the ```run_pwRK3.py``` program described above once for every possible pair of feature types, using the p-value thresholds specified either in ```$TCGAFMP_OUTPUTS/<tumor>/aux/PairProcess_config.csv``` if it is available, or the defaults in ```$TCGAFMP_ROOT_DIR/shscript/PairProcess_config.csv```.  Being able to specify very stringent p-value thresholds for some type-pairs (*eg* GEXP,GEXP) while specifying much looser p-value thresholds for others (*eg* CLIN,CLIN) using this helper script will be significantly faster than simply running ```run_pwRK3.py``` using the ```--all``` option with a single very loose p-value threshold because of the significant time that will be spent in post-processing the outputs.
+Because different types of features tend to produce p-values with very different orders of magnitude, it has become obvious that it is useful to be able to specify a different p-value threshold for each type of comparison.  In order to facilitate this, the ```$TCGAFMP_ROOT_DIR/shscript/PairProcess-v2.sh``` script has been provided.  It has not been optimized, but it calls the ```run-pairwise-v2.py``` program described above once for every possible pair of feature types, using the p-value thresholds specified either in ```$TCGAFMP_OUTPUTS/<tumor>/aux/PairProcess_config.csv``` if it is available, or the defaults in ```$TCGAFMP_ROOT_DIR/shscript/PairProcess_config.csv```.  Being able to specify very stringent p-value thresholds for some type-pairs (*eg* GEXP,GEXP) while specifying much looser p-value thresholds for others (*eg* CLIN,CLIN) using this helper script will be significantly faster than simply running ```run-pairwise-v2.py``` using the ```--all``` option with a single very loose p-value threshold because of the significant time that will be spent in post-processing the outputs.
 
 The usage for this script looks like this:
 ```
