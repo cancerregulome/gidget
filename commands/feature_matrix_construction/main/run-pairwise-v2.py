@@ -630,13 +630,20 @@ def splitList ( listFile, numPairs, numJobs ):
     fh = file ( listFile, 'r' )
     for aLine in fh:
         if ( (numOut % numPairs_per_Job) == 0 ):
-            if ( numFiles > 0 ): fhO.close()
+            if ( numFiles > 0 ): 
+                try:
+                    fhO.close()
+                except:
+                    pass
             fhO = makePartialListFile ( numFiles, listFile )
             numFiles += 1
         fhO.write ( aLine )
         numOut += 1
 
-    fhO.close()
+    try:
+        fhO.close()
+    except:
+        pass
 
     print numOut, numFiles
     print "     --> finished with splitList ... (numOut=%d, numFiles=%d) " % ( numOut, numFiles )
