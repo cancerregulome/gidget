@@ -330,10 +330,11 @@ def addIndicators4oneFeat(aKey, rowLabels, tmpMatrix):
             print "     ... looping over %d values ... " % (numCol)
             for kk in range(numCol):
                 tmpV[kk] = "NA"
-                if (curV[kk].lower() == aLabel.lower()):
+                ## print kk, curV[kk]
+                if (str(curV[kk]).lower() == aLabel.lower()):
                     tmpV[kk] = 1
                     numON += 1
-                elif (curV[kk].lower() == bLabel.lower()):
+                elif (str(curV[kk]).lower() == bLabel.lower()):
                     tmpV[kk] = 0
 
             if (numON > (numCol / 300)):
