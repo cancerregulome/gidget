@@ -96,12 +96,12 @@ if __name__ == "__main__":
         tokenList = aLine.split('\t')
         print len(tokenList), tokenList
 
-        if (len(tokenList) != numTokens): 
-            print " unexpected number of tokens ??? ", len(tokenList), numTokens
-            continue
-
         if ( not aLine.startswith("TCGA-") ): 
             print " skipping this row because it doesn't start with TCGA barcode "
+            continue
+
+        if (len(tokenList) != numTokens): 
+            print " unexpected number of tokens ??? ", len(tokenList), numTokens
             continue
 
         barcode = tokenList[0]
